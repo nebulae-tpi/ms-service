@@ -11,24 +11,18 @@ type ServiceDriver {
   "User general info"
   generalInfo: ServiceDriverGeneralInfo
   "Driver state"
-  state: Boolean!
-  "Creation timestamp"
-  creationTimestamp: BigInt!
-  "Creator user"
-  creatorUser: String!
-  "Modification timestamp"
-  modificationTimestamp: BigInt!
-  "Modifier user"
-  modifierUser: String!
+  state: Boolean!  
+  "vehicles assigned quantity"
+  
   "Business ID"
   businessId: String!
 }
 
 type ServiceDriverGeneralInfo {
   "Driver name"
-  name: String!,
-  "Driver description"
-  description: String!
+  name: String!
+  "Driver lastname"
+  lastname: String
 }
 
 input FilterInput {
@@ -36,6 +30,10 @@ input FilterInput {
   businessId: String
   "Name"
   name: String
+  "lastname"
+  lastname: String
+  "person ID"
+  personId: String
   "State"
   state: Boolean
   "Creator user"

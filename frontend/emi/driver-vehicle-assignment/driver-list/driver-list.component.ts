@@ -252,11 +252,13 @@ export class DriverListComponent implements OnInit, OnDestroy {
       this.toolbarService.onSelectedBusiness$
     ).pipe(
       debounceTime(500),
-      filter(([filterValue, paginator, selectedBusiness]) => (filterValue != null && paginator != null)),
+      filter(([filterValue, paginator]) => (filterValue != null && paginator != null)),
       map(([filterValue, paginator, selectedBusiness]) => {
         const filterInput = {
           businessId: selectedBusiness ? selectedBusiness.id : null,
           name: filterValue.name,
+          lastname: filterValue.lastname,
+          personId: filterValue.personId,
           creatorUser: filterValue.creatorUser,
           creationTimestamp: filterValue.creationTimestamp ? filterValue.creationTimestamp.valueOf() : null
         };
@@ -276,6 +278,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
+      console.log('LISTADO ==> ', list);
       this.dataSource.data = list;
       this.tableSize = size;
     });
