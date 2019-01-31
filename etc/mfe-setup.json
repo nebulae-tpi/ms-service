@@ -4,29 +4,42 @@
         "src": "frontend/emi/driver",
         "groups": [
             {
-              "id": "GROUP_NAME",
+              "id": "BUSINESS_UNIT_MANAGER",
               "icon": "location_searching",
               "translate": {
-                "en": "Group Name",
-                "es": "Nombre de Grupo"
+                "en": "Business units",
+                "es": "Unidades de negocio"
               },
-              "priority": 1000
+              "priority": 200
             }
           ],
+        "subgroups": [
+            {
+                "groupId": "BUSINESS_UNIT_MANAGER",
+                "id": "management",
+                "icon": "settings",
+                "translate": {
+                    "en": "Management",
+                    "es": "Gestión"
+                },
+                "priority": 2000
+            }
+        ],
         "contents": [
             {
                 "groupId": "GROUP_NAME",
+                "subgroupId": "management",   
                 "id": "driver",
                 "icon": "dashboard",
                 "translate": {
-                    "en": "driver_en",
-                    "es": "driver_es"
+                    "en": "Vehicles assignment",
+                    "es": "Asignación de vehículos"
                 },
                 "navURL": "/driver",
                 "path": "driver",
                 "loadChildren": "./main/content/driver/driver.module#DriverModule",
                 "priority": 1000,
-                "roles" : ["PLATFORM-ADMIN"],
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"],
                 "default" : false
             }            
         ],
