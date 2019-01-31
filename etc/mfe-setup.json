@@ -1,7 +1,7 @@
 [
     {
-        "name": "driver",
-        "src": "frontend/emi/driver",
+        "name": "frontend/emi/driver-vehicle-assignment",
+        "src": "frontend/emi/driver-vehicle-assignment",
         "groups": [
             {
               "id": "BUSINESS_UNIT_MANAGER",
@@ -27,17 +27,52 @@
         ],
         "contents": [
             {
-                "groupId": "GROUP_NAME",
+                "groupId": "BUSINESS_UNIT_MANAGER",
                 "subgroupId": "management",   
-                "id": "driver",
-                "icon": "dashboard",
+                "id": "driver-vehicle-assignment",
+                "icon": "assignment",
                 "translate": {
                     "en": "Vehicles assignment",
                     "es": "Asignación de vehículos"
                 },
-                "navURL": "/driver",
-                "path": "driver",
-                "loadChildren": "./main/content/driver/driver.module#DriverModule",
+                "navURL": "/driver-vehicle-assignment",
+                "path": "driver-vehicle-assignment",
+                "loadChildren": "./main/content/driver-vehicle-assignment/driver-vehicle-assignment.module#DriverVehicleAssignmentModule",
+                "priority": 1000,
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"],
+                "default" : false
+            }            
+        ],
+        "preBuildCommands": [],
+        "environmentVars": {
+        }
+    },
+    {
+        "name": "satellite",
+        "src": "frontend/emi/satellite",
+        "groups": [
+            {
+              "id": "SATELLITE",
+              "icon": "location_searching",
+              "translate": {
+                "en": "Satellite",
+                "es": "Satélite"
+              },
+              "priority": 200
+            }
+          ],
+        "contents": [
+            {
+                "groupId": "SATELLITE",  
+                "id": "satellite",
+                "icon": "explore",
+                "translate": {
+                    "en": "Satellite",
+                    "es": "satélite"
+                },
+                "navURL": "/satellite",
+                "path": "satellite",
+                "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
                 "priority": 1000,
                 "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"],
                 "default" : false

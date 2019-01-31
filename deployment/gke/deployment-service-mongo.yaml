@@ -1,53 +1,61 @@
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: serv-mongo
+  name: dbserv
+  labels:
+    name: dbserv
 spec:
   ports:
   - port: 27017
-    name: serv-mongo
+    targetPort: 27017
+  clusterIP: None
   selector:
-    app: serv-mongo
+    role: dbserv
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
-  name: serv-mongo-pv-claim
+  name: dbserv
 spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 0.5Gi
----
-apiVersion: apps/v1beta2 # for versions before 1.9.0 use apps/v1beta2
-kind: Deployment
-metadata:
-  name: serv-mongo
-spec:
-  selector:
-    matchLabels:
-      app: serv-mongo
-  strategy:
-    type: Recreate      
+  serviceName: "dbserv"
+  replicas: 3
   template:
     metadata:
       labels:
-        app: serv-mongo
+        role: dbserv
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
-      - image: mongo:4
-        name: serv-mongo        
-        ports:
-        - containerPort: 27017
-          name: serv-mongo
-        volumeMounts:
-        - name: serv-mongo-persistent-storage
-          mountPath: /data/db
-        resources:
-          requests:
-            cpu: "50m"
-      volumes:
-      - name: serv-mongo-persistent-storage
-        persistentVolumeClaim:
-          claimName: serv-mongo-pv-claim      
+        - name: mongo
+          image: mongo:4.0-xenial
+          command:
+            - mongod
+            - "--bind_ip"
+            - "0.0.0.0"
+            - "--port"
+            - "27017" 
+            - "--replSet"
+            - rs0
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+          resources:
+            limits:
+              cpu: 200m
+              memory: 1000Mi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "fast"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 32Gi

@@ -7,15 +7,56 @@ services:
       - "9001:9001"
       - "1883:1883"
     volumes:
-      - broker-mqtt-data-service:/mosquitto/data            
-  store-mongo-service:
-    image: mongo:4
+      - tpi_broker_mqtt_data_service:/mosquitto/data
+  store-mongo1:
+    image: mongo:4.0-xenial
+    hostname: store-mongo1
+    container_name: store-mongo1
     ports:
-      - "27017:27017"
+      - 27017:27017
+    environment: 
+      - storageEngine=wiredTiger
+    volumes: 
+      - tpi_store_mongo_db1_service:/data/db
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip", "0.0.0.0", "--replSet", "rs0" ]
+
+  store-mongo2:
+    image: mongo:4.0-xenial
+    hostname: store-mongo2
+    container_name: store-mongo2
+    ports:
+      - 27018:27018
+    environment: 
+      - storageEngine=wiredTiger
+    volumes: 
+      - tpi_store_mongo_db2_service:/data/db
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip", "0.0.0.0", "--port", "27018", "--replSet", "rs0" ]
+    depends_on: 
+      - store-mongo1
+
+  store-mongo3:
+    image: mongo:4.0-xenial
+    hostname: store-mongo3
+    container_name: store-mongo3
+    ports:
+      - 27019:27019
     environment: 
         - storageEngine=wiredTiger
     volumes: 
-      - store-mongo-db-service:/data/db
+      - tpi_store_mongo_db3_service:/data/db
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip", "0.0.0.0", "--port", "27019", "--replSet", "rs0" ]
+    depends_on: 
+      - store-mongo2
+
+  setup-rs:
+    image: setup-rs 
+    build: ./scripts-rs
+    depends_on:
+      - "store-mongo3"
+
   keycloak-mysql-service:
      image: mysql:5.6
      ports:
@@ -26,7 +67,7 @@ services:
          - MYSQL_USER=keycloak
          - MYSQL_PASSWORD=keycloak
      volumes:
-       - keycloak-mysql-data-service:/var/lib/mysql
+       - tpi_keycloak_mysql_data_service:/var/lib/mysql
   keycloak-service:
        image: nebulaetpi/keycloak:latest
        environment:
@@ -44,11 +85,13 @@ services:
          - 8080:8080
          - 9990:9990
        volumes:
-         - keycloak-data-service:/opt/jboss/keycloak/standalone/data      
+         - tpi_keycloak_data_service:/opt/jboss/keycloak/standalone/data      
        depends_on: 
          - keycloak-mysql-service
 volumes: 
-  store-mongo-db-service:
-  broker-mqtt-data-service:
-  keycloak-mysql-data-service:
-  keycloak-data-service:
+  tpi_store_mongo_db1_service:
+  tpi_store_mongo_db2_service:
+  tpi_store_mongo_db3_service:
+  tpi_broker_mqtt_data_service:
+  tpi_keycloak_mysql_data_service:
+  tpi_keycloak_data_service:
