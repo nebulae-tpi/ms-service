@@ -1,12 +1,14 @@
 export const locale = {
   lang: 'es',
   data: {
-    'SERVICE': {
-      DETAIL_HEADER_NAME: 'ENTIDAD',
-      DETAIL_HEADER_NEW: 'Nueva entidad',
-      TITLE: 'Nombre entidad',
+    DRIVER: {
+      DETAIL_HEADER_NAME: 'CONDUCTOR',
+      DETAIL_HEADER_NEW: 'Nuevo conductor',
+      TITLE: 'Conductor',
       FILTER: 'Filtros',
       NAME: 'Nombre',
+      LASTNAME: 'Apellido',
+      PERSON_ID: 'Cédula',
       CREATION_DATE: 'Fecha creación',
       CREATOR_USER: 'Usuario creador',
       RESET_FILTER: 'Limpiar filtro',

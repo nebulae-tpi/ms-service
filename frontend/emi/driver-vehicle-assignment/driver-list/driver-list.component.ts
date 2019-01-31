@@ -62,12 +62,12 @@ import {
   MomentDateAdapter
 } from "@coachcare/datepicker";
 
-import * as moment from "moment";
+import * as moment from 'moment';
 
 //////////// Other Services ////////////
-import { KeycloakService } from "keycloak-angular";
+import { KeycloakService } from 'keycloak-angular';
 import { DriverListService } from './driver-list.service';
-import { ToolbarService } from "../../../toolbar/toolbar.service";
+import { ToolbarService } from '../../../toolbar/toolbar.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -76,7 +76,7 @@ import { ToolbarService } from "../../../toolbar/toolbar.service";
   styleUrls: ['./driver-list.component.scss'],
   animations: fuseAnimations,
   providers: [
-    { provide: MAT_DATE_LOCALE, useValue: "es" },
+    { provide: MAT_DATE_LOCALE, useValue: 'es' },
     {
       provide: DateAdapter,
       useClass: MomentDateAdapter,
@@ -86,12 +86,12 @@ import { ToolbarService } from "../../../toolbar/toolbar.service";
   ]
 })
 export class DriverListComponent implements OnInit, OnDestroy {
-  //Subject to unsubscribe 
+  //Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
   //////// FORMS //////////
   filterForm: FormGroup;
-  
+
 
   /////// TABLE /////////
 
@@ -105,19 +105,17 @@ export class DriverListComponent implements OnInit, OnDestroy {
 
   // Columns to show in the table
   displayedColumns = [
-    "name",
-    "state",
-    "creationTimestamp",
-    "creatorUser",
-    "modificationTimestamp",
-    "modifierUser"
+    'name',
+    'lastname',
+    'vehicleQty',
+    'active'
   ];
 
   /////// OTHERS ///////
 
   selectedDriver: any = null;
 
-  constructor(    
+  constructor(
     private formBuilder: FormBuilder,
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
@@ -129,14 +127,14 @@ export class DriverListComponent implements OnInit, OnDestroy {
     private DriverListservice: DriverListService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog
-  ) {    
+  ) {
       this.translationLoader.loadTranslations(english, spanish);
   }
-    
+
 
   ngOnInit() {
     this.onLangChange();
-    this.buildFilterForm();  
+    this.buildFilterForm();
     this.updateFilterDataSubscription();
     this.updatePaginatorDataSubscription();
     this.loadLastFilters();
@@ -170,7 +168,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Emits the paginator data when it changes   
+   * Emits the paginator data when it changes
    */
   listenPaginatorChanges$() {
     return this.paginator.page;
@@ -183,10 +181,8 @@ export class DriverListComponent implements OnInit, OnDestroy {
     // Reactive Filter Form
     this.filterForm = this.formBuilder.group({
       name: [null],
-      creationTimestamp: [null],
-      creatorUser: [null],      
-      //modificationDate: [null],
-      //modifierUser: [null],
+      lastname: [null],
+      personId: [null]
     });
 
     this.filterForm.disable({
@@ -242,12 +238,12 @@ export class DriverListComponent implements OnInit, OnDestroy {
             this.tablePage = paginator.pagination.page;
             this.tableCount = paginator.pagination.count;
           }
-        
+
 
         this.filterForm.enable({ emitEvent: true });
       });
   }
-  
+
   /**
    * If a change is detect in the filter or the paginator then the table will be refreshed according to the values emmited
    */
@@ -290,8 +286,8 @@ export class DriverListComponent implements OnInit, OnDestroy {
 
   /**
    * Gets the driver list
-   * @param filterInput 
-   * @param paginationInput 
+   * @param filterInput
+   * @param paginationInput
    */
   getdriverList$(filterInput, paginationInput){
     return this.DriverListservice.getdriverList$(filterInput, paginationInput)
@@ -303,7 +299,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
 
     /**
    * Gets the driver size
-   * @param filterInput 
+   * @param filterInput
    */
   getdriverSize$(filterInput){
     return this.DriverListservice.getdriverSize$(filterInput)
@@ -340,8 +336,8 @@ export class DriverListComponent implements OnInit, OnDestroy {
         this.showSnackBar('SERVICE.SELECT_BUSINESS');
       }else{
         this.router.navigate(['driver/new']);
-      }      
-    })    
+      }
+    })
   }
 
   showSnackBar(message) {
@@ -370,11 +366,11 @@ export class DriverListComponent implements OnInit, OnDestroy {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
             error.forEach(errorDetail => {
-              this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
+              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
             });
           } else {
             response.errors.forEach(errorData => {
-              this.showMessageSnackbar("ERRORS." + errorData.message.code);
+              this.showMessageSnackbar('ERRORS.' + errorData.message.code);
             });
           }
         });
@@ -399,15 +395,15 @@ export class DriverListComponent implements OnInit, OnDestroy {
 
     this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey] : "",
-        detailMessageKey ? data[detailMessageKey] : "",
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
         {
           duration: 2000
         }
       );
     });
   }
-  
+
   ngOnDestroy() {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
