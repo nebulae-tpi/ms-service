@@ -78,10 +78,6 @@
             <mat-icon>menu</mat-icon>
           </button>
         </div>
-
-        <button mat-raised-button class="mat-white-bg" (click)="goToDetail()">
-          <span>{{ "DRIVER.ADD_NEW" | translate }}</span>
-        </button>
       </div>
       <!-- / CONTENT HEADER -->
 
@@ -99,7 +95,7 @@
 
           <!-- Lastname Column -->
           <ng-container cdkColumnDef="lastname">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"DRIVER.ACTIVE" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"DRIVER.LASTNAME" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let driver" fxHide fxShow.gt-xs>
                 <p class="text-truncate"> {{ driver.lastname }} </p>
             </mat-cell>
@@ -107,7 +103,7 @@
 
           <!-- Vehicle quantity Column -->
           <ng-container cdkColumnDef="vehicleQty">
-            <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.CREATION_TIMESTAMP" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE_QTY" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let driver">
               <p class="text-truncate"> {{ driver.vehiclesQty }} </p>
             </mat-cell>
@@ -121,8 +117,6 @@
                 <mat-icon *ngIf="!driver.active" class="active-icon mat-red-500-bg s-16">close</mat-icon>
               </mat-cell>
             </ng-container>
-
-
 
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 

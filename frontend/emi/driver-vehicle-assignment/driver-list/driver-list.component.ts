@@ -5,16 +5,16 @@ import {
   OnDestroy,
   ViewChild,
   ElementRef
-} from "@angular/core";
+} from '@angular/core';
 
 import {
   FormBuilder,
   FormGroup,
   FormControl,
   Validators
-} from "@angular/forms";
+} from '@angular/forms';
 
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
 import {
@@ -29,9 +29,9 @@ import {
   debounceTime,
   distinctUntilChanged,
   take
-} from "rxjs/operators";
+} from 'rxjs/operators';
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from "rxjs";
+import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -40,27 +40,27 @@ import {
   MatTableDataSource,
   MatSnackBar,
   MatDialog
-} from "@angular/material";
-import { fuseAnimations } from "../../../../core/animations";
+} from '@angular/material';
+import { fuseAnimations } from '../../../../core/animations';
 
 //////////// i18n ////////////
 import {
   TranslateService,
   LangChangeEvent,
   TranslationChangeEvent
-} from "@ngx-translate/core";
-import { locale as english } from "../i18n/en";
-import { locale as spanish } from "../i18n/es";
-import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
+} from '@ngx-translate/core';
+import { locale as english } from '../i18n/en';
+import { locale as spanish } from '../i18n/es';
+import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
 
 ///////// DATEPICKER //////////
-import { MAT_MOMENT_DATE_FORMATS } from "./my-date-format";
+import { MAT_MOMENT_DATE_FORMATS } from './my-date-format';
 import {
   DateAdapter,
   MAT_DATE_FORMATS,
   MAT_DATE_LOCALE,
   MomentDateAdapter
-} from "@coachcare/datepicker";
+} from '@coachcare/datepicker';
 
 import * as moment from 'moment';
 
@@ -86,7 +86,7 @@ import { ToolbarService } from '../../../toolbar/toolbar.service';
   ]
 })
 export class DriverListComponent implements OnInit, OnDestroy {
-  //Subject to unsubscribe
+  // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
   //////// FORMS //////////
@@ -148,13 +148,11 @@ export class DriverListComponent implements OnInit, OnDestroy {
     this.translate.onLangChange
       .pipe(
         startWith({ lang: this.translate.currentLang }),
-        takeUntil(this.ngUnsubscribe)
+        takeUntil(this.ngUnsubscribe),
+        filter((event: any) => event),
+        tap((evt: any) => this.adapter.setLocale(evt.lang))
       )
-      .subscribe(event => {
-        if (event) {
-          this.adapter.setLocale(event.lang);
-        }
-      });
+      .subscribe();
   }
 
   /**
@@ -225,12 +223,12 @@ export class DriverListComponent implements OnInit, OnDestroy {
       this.DriverListservice.paginator$
     ).pipe(
       take(1)
-    ).subscribe(([filter, paginator]) => {
+    ).subscribe(([filterValue, paginator]) => {
           if (filter) {
             this.filterForm.patchValue({
-              name: filter.name,
-              creationTimestamp: filter.creationTimestamp,
-              creatorUser: filter.creatorUser
+              name: filterValue.name,
+              creationTimestamp: filterValue.creationTimestamp,
+              creatorUser: filterValue.creatorUser
             });
           }
 
@@ -254,34 +252,33 @@ export class DriverListComponent implements OnInit, OnDestroy {
       this.toolbarService.onSelectedBusiness$
     ).pipe(
       debounceTime(500),
-      filter(([filter, paginator, selectedBusiness]) => (filter != null && paginator != null)),
-      map(([filter, paginator,selectedBusiness]) => {
+      filter(([filterValue, paginator, selectedBusiness]) => (filterValue != null && paginator != null)),
+      map(([filterValue, paginator, selectedBusiness]) => {
         const filterInput = {
-          businessId: selectedBusiness ? selectedBusiness.id: null,
-          name: filter.name,
-          creatorUser: filter.creatorUser,
-          creationTimestamp: filter.creationTimestamp ? filter.creationTimestamp.valueOf() : null
+          businessId: selectedBusiness ? selectedBusiness.id : null,
+          name: filterValue.name,
+          creatorUser: filterValue.creatorUser,
+          creationTimestamp: filterValue.creationTimestamp ? filterValue.creationTimestamp.valueOf() : null
         };
         const paginationInput = {
           page: paginator.pagination.page,
           count: paginator.pagination.count,
           sort: paginator.pagination.sort,
         };
-
-        return [filterInput, paginationInput]
+        return [filterInput, paginationInput];
       }),
       mergeMap(([filterInput, paginationInput]) => {
         return forkJoin(
           this.getdriverList$(filterInput, paginationInput),
           this.getdriverSize$(filterInput),
-        )
+        );
       }),
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
       this.dataSource.data = list;
       this.tableSize = size;
-    })
+    });
   }
 
   /**
@@ -332,17 +329,17 @@ export class DriverListComponent implements OnInit, OnDestroy {
     .pipe(
       take(1)
     ).subscribe(selectedBusiness => {
-      if(selectedBusiness == null || selectedBusiness.id == null){
-        this.showSnackBar('SERVICE.SELECT_BUSINESS');
+      if (selectedBusiness == null || selectedBusiness.id == null){
+        this.showSnackBar('DRIVER.SELECT_BUSINESS');
       }else{
-        this.router.navigate(['driver/new']);
+        this.router.navigate(['driver-vehicle-assignment/new']);
       }
-    })
+    });
   }
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-      this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
+      this.translationLoader.getTranslate().instant('DRIVER.CLOSE'), {
         duration: 4000
       });
   }

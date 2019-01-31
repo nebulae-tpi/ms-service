@@ -2,7 +2,8 @@
 import {
   Component,
   OnInit,
-  OnDestroy
+  OnDestroy,
+  ViewChild
 } from '@angular/core';
 
 import {
@@ -49,9 +50,32 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
+  assignmentForm = new FormGroup({
+    licensePlate: new FormControl('')
+  });
+
   pageType: string;
 
   driver: any;
+
+  /////// TABLE /////////
+
+  dataSource = new MatTableDataSource();
+
+  @ViewChild(MatPaginator)
+  paginator: MatPaginator;
+  tableSize: number;
+  tablePage = 0;
+  tableCount = 10;
+
+  // Columns to show in the table
+  displayedColumns = [
+    'licensePlate',
+    'model',
+    'fuelType',
+    'brand',
+    'active'
+  ];
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -86,10 +110,10 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     )
     .subscribe((driver: any) => {
       this.driver = driver;
-      this.pageType = (driver && driver._id) ? 'edit' : 'new'
+      this.pageType = (driver && driver._id) ? 'edit' : 'new';
     }, e => console.log(e));
   }
-  
+
   subscribeDriverUpdated(){
     this.vehicleAssignmentService.subscribeServiceDriverUpdatedSubscription$()
     .pipe(
@@ -98,48 +122,56 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     )
     .subscribe((driver: any) => {
       this.checkIfEntityHasBeenUpdated(driver);
-    })
+    });
   }
 
   checkIfEntityHasBeenUpdated(newdriver){
-    if(this.vehicleAssignmentService.lastOperation === 'CREATE'){
+    if (this.vehicleAssignmentService.lastOperation === 'CREATE'){
 
-      //Fields that will be compared to check if the entity was created
-      if(newdriver.generalInfo.name === this.vehicleAssignmentService.driver.generalInfo.name 
+      // Fields that will be compared to check if the entity was created
+      if (newdriver.generalInfo.name === this.vehicleAssignmentService.driver.generalInfo.name
         && newdriver.generalInfo.description === this.vehicleAssignmentService.driver.generalInfo.description){
-        //Show message entity created and redirect to the main page
-        this.showSnackBar('SERVICE.ENTITY_CREATED');
+        // Show message entity created and redirect to the main page
+        this.showSnackBar('DRIVER.ENTITY_CREATED');
         this.router.navigate(['driver/']);
       }
 
-    }else if(this.vehicleAssignmentService.lastOperation == 'UPDATE'){
+    }else if (this.vehicleAssignmentService.lastOperation === 'UPDATE'){
       // Just comparing the ids is enough to recognise if it is the same entity
-      if(newdriver._id == this.driver._id){
-        //Show message entity updated and redirect to the main page
-        this.showSnackBar('SERVICE.ENTITY_UPDATED');
-        //this.router.navigate(['driver/']);
+      if (newdriver._id === this.driver._id){
+        // Show message entity updated and redirect to the main page
+        this.showSnackBar('DRIVER.ENTITY_UPDATED');
+        // this.router.navigate(['driver/']);
       }
 
     }else{
-      if(this.driver != null && newdriver._id == this.driver._id){
-        //Show message indicating that the entity has been updated
-        this.showSnackBar('SERVICE.ENTITY_UPDATED');
+      if (this.driver != null && newdriver._id === this.driver._id){
+        // Show message indicating that the entity has been updated
+        this.showSnackBar('DRIVER.ENTITY_UPDATED');
       }
     }
   }
 
+  addVehicleToDriver(){
+    console.log(this.assignmentForm.getRawValue());
+  }
+
+  selectDriverVehicle(rowData: any){
+    console.log(rowData);
+
+  }
   stopWaitingOperation(){
     this.ngUnsubscribe.pipe(
       take(1),
       mergeMap(() => this.vehicleAssignmentService.resetOperation$())
     ).subscribe(val => {
-      //console.log('Reset operation');
-    })
+      // console.log('Reset operation');
+    });
   }
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-      this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
+      this.translationLoader.getTranslate().instant('DRIVER.CLOSE'), {
         duration: 2000
       });
   }

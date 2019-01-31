@@ -24,11 +24,11 @@
             </div>
 
             <div class="h2" *ngIf="!driver || (driver && !driver._id)">
-              {{'SERVICE.DETAIL_HEADER_NEW' | translate}}
+              {{'DRIVER.DETAIL_HEADER_NEW' | translate}}
             </div>
 
             <div class="subtitle secondary-text">
-              <span>{{'SERVICE.DETAIL_HEADER_NAME' | translate}}</span>
+              <span>{{'DRIVER.DETAIL_HEADER_NAME' | translate}}</span>
             </div>
           </div>
         </div>
@@ -38,18 +38,76 @@
 
       <!-- CONTENT CARD -->
       <div class="content-card mat-white-bg">
-        <!-- <mat-tab-group>
 
-          <mat-tab label="{{'SERVICE.DETAILS.TABS.GENERAL_INFO' | translate}}">
-            <vehicle-assignment [pageType]="pageType" [driver]="driver" *ngIf="pageType">
-            </vehicle-assignment>
-          </mat-tab>
+        <form class="bt-8" fxLayout="row wrap" fxLayoutAlign="center center" name="form" [formGroup]="assignmentForm">
+          <mat-form-field class="br-8 bl-8" >
+            <input maxlength="6" matInput placeholder="{{'DRIVER.LICENSE_PLATE' | translate}}" formControlName="licensePlate" />
+          </mat-form-field>
+          <button class="br-8 bl-8"  mat-raised-button class="mat-white-bg" (click)="addVehicleToDriver()">
+              <span>{{ "DRIVER.ADD_NEW" | translate }}</span>
+            </button>
+        </form>
 
-        </mat-tab-group> -->
+        <mat-table id="entity-table" class="item-table" #table [dataSource]="dataSource" fusePerfectScrollbar>
 
-        <!-- / CONTENT -->
+          <!-- license plate Column -->
+          <ng-container cdkColumnDef="licensePlate">
+            <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE.LICENSE_PLATE" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let vehicle">
+              <p class="text-truncate"> {{ vehicle.licensePlate }} </p>
+            </mat-cell>
+          </ng-container>
 
+          <!-- model Column -->
+          <ng-container cdkColumnDef="model">
+            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"DRIVER.VEHICLE.MODEL" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
+              <p class="text-truncate"> {{ vehicle.model }} </p>
+            </mat-cell>
+          </ng-container>
+
+          <!-- FUEL TYPE COLUMN -->
+          <ng-container cdkColumnDef="fuelType">
+            <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE.FUEL_TYPE" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let vehicle">
+
+            </mat-cell>
+          </ng-container>
+
+          <!-- BRAND Column -->
+          <ng-container cdkColumnDef="brand">
+            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{ "DRIVER.VEHICLE.BRAND" | translate }}</mat-header-cell>
+            <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
+                <p class="text-truncate"> {{ vehicle.brand }} </p>
+            </mat-cell>
+          </ng-container>
+
+          <!-- ACTIVE Column -->
+          <ng-container cdkColumnDef="active">
+              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{ "DRIVER.VEHICLE.ACTIVE" | translate }}</mat-header-cell>
+              <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
+                <mat-icon *ngIf="vehicle.active" class="active-icon mat-green-600-bg s-16">check</mat-icon>
+                <mat-icon *ngIf="!vehicle.active" class="active-icon mat-red-500-bg s-16">close</mat-icon>
+              </mat-cell>
+            </ng-container>
+
+
+
+          <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
+
+          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="selectedElement" (click)="selectDriverVehicle(row)"
+            [ngClass]="{
+                          highlight:
+                          selectedDriver &&
+                          selectedDriver._id == row._id
+                        }"
+            [routerLink]="row._id" matRipple>
+          </mat-row>
+        </mat-table>
+        <mat-paginator #paginator [length]="tableSize" [pageIndex]="tablePage" [pageSize]="tableCount" [pageSizeOptions]="[5, 10, 25, 100]">
+        </mat-paginator>
       </div>
+
       <!-- / CONTENT CARD -->
 
     </div>

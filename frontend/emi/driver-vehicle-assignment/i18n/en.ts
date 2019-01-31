@@ -8,6 +8,7 @@ export const locale = {
       FILTER: 'Filter',
       NAME: 'Name',
       LASTNAME: 'Lastname',
+      VEHICLE_QTY: 'Vehicle quantity',
       PERSON_ID: 'Person ID',
       CREATION_DATE: 'Creation date',
       CREATOR_USER: 'Creator user',
