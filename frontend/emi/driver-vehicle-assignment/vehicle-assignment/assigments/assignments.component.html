@@ -1,0 +1,47 @@
+<div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
+
+    <form name="driverGeneralInfoForm" [formGroup]="driverGeneralInfoForm" class="w-100-p"
+      fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
+
+      <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutAlign="space-between  start">
+        <div class="h2">{{'SERVICE.DETAILS.GENERAL_INFO' | translate}}</div>
+        <form *ngIf="driverStateForm" name="driverStateForm" [formGroup]="driverStateForm" fxLayout="column">
+          <mat-slide-toggle formControlName="state" color="accent" (change)="onDriverStateChange($event)">
+            <label *ngIf="driverStateForm.controls['state'].value">{{'SERVICE.DETAILS.ENABLED' | translate}}</label>
+            <label *ngIf="!driverStateForm.controls['state'].value">{{'SERVICE.DETAILS.DISABLED' | translate}}</label>
+          </mat-slide-toggle>
+        </form>
+      </div>
+
+      <mat-form-field class="w-100-p">
+        <input matInput name="name" formControlName="name" maxlength="15" placeholder="{{'SERVICE.DETAILS.NAME' | translate}}">
+        <mat-error *ngIf="driverGeneralInfoForm.hasError('required', ['name'])">
+          {{'SERVICE.NAME_REQUIRED' | translate}}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="w-100-p" fxLAyout="column">
+        <textarea matInput matTextareaAutosize name="description" formControlName="description"
+          maxlength="350" placeholder="{{'SERVICE.DETAILS.DESCRIPTION' | translate}}"
+          matAutosizeMinRows="1" matAutosizeMaxRows="5" >
+        </textarea>
+        <mat-error *ngIf="driverGeneralInfoForm.hasError('required', ['description'])">
+          {{'SERVICE.DESCRIPTION_REQUIRED' | translate}}
+        </mat-error>
+      </mat-form-field>
+
+
+      <div class="mt-16">
+        <button mat-raised-button *ngIf="pageType === 'new'" (click)="createDriver()"
+          [disabled]="driverGeneralInfoForm.invalid || driverGeneralInfoForm.pristine">
+          {{'SERVICE.CREATE' | translate}}
+        </button>
+        <button mat-raised-button *ngIf="pageType === 'edit'" (click)="updateDriverGeneralInfo()"
+          [disabled]="driverGeneralInfoForm.invalid || driverGeneralInfoForm.pristine">
+          {{'SERVICE.UPDATE' | translate}}
+        </button>
+      </div>
+
+    </form>
+
+</div>
