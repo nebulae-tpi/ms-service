@@ -1,0 +1,95 @@
+type CommandResponse {
+  "Response code"
+  code: Int
+  "Response message"
+  message: String
+}
+
+type ServiceDriver {
+  "Driver ID"
+  _id: ID!
+  "User general info"
+  generalInfo: ServiceDriverGeneralInfo
+  "Driver state"
+  state: Boolean!
+  "Creation timestamp"
+  creationTimestamp: BigInt!
+  "Creator user"
+  creatorUser: String!
+  "Modification timestamp"
+  modificationTimestamp: BigInt!
+  "Modifier user"
+  modifierUser: String!
+  "Business ID"
+  businessId: String!
+}
+
+type ServiceDriverGeneralInfo {
+  "Driver name"
+  name: String!,
+  "Driver description"
+  description: String!
+}
+
+input FilterInput {
+  "ID of the business"
+  businessId: String
+  "Name"
+  name: String
+  "State"
+  state: Boolean
+  "Creator user"
+  creatorUser: String
+  "modifier user"
+  modifierUser: String
+  "get data created after indicated timestamp"
+  creationTimestamp: BigInt
+}
+
+input PaginationInput {
+  "Page"
+  page: Int!
+  "Count"
+  count: Int!
+  "Sort, default: ASC"
+  sort: Int
+}
+
+input ServiceDriverInput {
+  "Driver general info"
+  generalInfo: ServiceDriverGeneralInfoInput!
+  "Driver status"
+  state: Boolean!
+  "Business ID"
+  businessId: String!
+}
+
+input ServiceDriverGeneralInfoInput {
+  "Driver name"
+  name: String!,
+  "Driver description"
+  description: String!
+}
+
+type Query {
+  "Get Drivers filtered "
+  ServiceDrivers(filterInput: FilterInput!, paginationInput: PaginationInput!): [ServiceDriver]
+  "Get the amount of Drivers filtered "
+  ServiceDriversSize(filterInput: FilterInput!): Int!
+  "Get Driver by its id"
+  ServiceDriver(id: String!): ServiceDriver
+}
+
+type Mutation {
+  "Create a new Driver"
+  ServiceCreateDriver(input: ServiceDriverInput!): CommandResponse
+  "Update the Driver generalInfo"
+  ServiceUpdateDriverGeneralInfo(id:ID!, input: ServiceDriverGeneralInfoInput!): CommandResponse
+  "Update the Driver state"
+  ServiceUpdateDriverState(id: ID!, newState: Boolean!): CommandResponse
+}
+
+type Subscription {
+  "This events is triggered when a Driver is created or updated"
+  ServiceDriverUpdatedSubscription: ServiceDriver  
+}

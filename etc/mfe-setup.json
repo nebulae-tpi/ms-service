@@ -1,7 +1,7 @@
 [
     {
-        "name": "msentityname",
-        "src": "frontend/frontendid/msentityname",
+        "name": "driver",
+        "src": "frontend/emi/driver",
         "groups": [
             {
               "id": "GROUP_NAME",
@@ -16,15 +16,15 @@
         "contents": [
             {
                 "groupId": "GROUP_NAME",
-                "id": "msentityname",
+                "id": "driver",
                 "icon": "dashboard",
                 "translate": {
-                    "en": "msentityname_en",
-                    "es": "msentityname_es"
+                    "en": "driver_en",
+                    "es": "driver_es"
                 },
-                "navURL": "/msentityname",
-                "path": "msentityname",
-                "loadChildren": "./main/content/msentityname/msentityname.module#msentitypascalModule",
+                "navURL": "/driver",
+                "path": "driver",
+                "loadChildren": "./main/content/driver/driver.module#DriverModule",
                 "priority": 1000,
                 "roles" : ["PLATFORM-ADMIN"],
                 "default" : false
