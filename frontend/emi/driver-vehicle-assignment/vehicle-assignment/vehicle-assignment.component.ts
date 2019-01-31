@@ -16,8 +16,8 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
-import { map, mergeMap, tap, takeUntil, take } from 'rxjs/operators';
-import { Subject, of} from 'rxjs';
+import { map, mergeMap, tap, takeUntil, take, combineLatest } from 'rxjs/operators';
+import { Subject, of, forkJoin} from 'rxjs';
 
 //////////// ANGULAR MATERIAL ///////////
 import {
@@ -93,6 +93,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loaddriver();
+    this.listenPaginatorChanges();
     this.subscribeDriverUpdated();
     this.stopWaitingOperation();
   }
@@ -102,9 +103,14 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     .pipe(
       map(params => params['id']),
       mergeMap(entityId => entityId !== 'new' ?
-        this.vehicleAssignmentService.getServiceDriver$(entityId).pipe(
-          map(res => res.data.ServiceDriver)
-        ) : of(null)
+        forkJoin(
+          this.vehicleAssignmentService.getServiceDriver$(entityId),
+          // this.vehicleAssignmentService.getDriverVehiclesAssigned$(entityId)
+        )
+          .pipe(
+            map(([res]) => res.data.ServiceDriver)
+          )
+        : of(null)
       ),
       takeUntil(this.ngUnsubscribe)
     )
@@ -161,13 +167,17 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     console.log(rowData);
 
   }
+
+  listenPaginatorChanges(){
+
+  }
+
+
   stopWaitingOperation(){
     this.ngUnsubscribe.pipe(
       take(1),
       mergeMap(() => this.vehicleAssignmentService.resetOperation$())
-    ).subscribe(val => {
-      // console.log('Reset operation');
-    });
+    ).subscribe(val => {});
   }
 
   showSnackBar(message) {

@@ -18,6 +18,9 @@ export const locale = {
       LAST_MODIFICATION_TIMESTAMP: 'Modified',
       MODIFIER_USER: 'User who modified',
       ADD_NEW: 'Add new',
+      VEHICLE: {
+
+      },
       DETAILS: {
         TABS: {
           GENERAL_INFO: 'General Info'
