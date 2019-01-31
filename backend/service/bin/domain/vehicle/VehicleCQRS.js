@@ -1,7 +1,7 @@
 "use strict";
 
 const uuidv4 = require("uuid/v4");
-const { of, interval, from } = require("rxjs");
+const { of, interval } = require("rxjs");
 const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
 const DriverDA = require("../../data/DriverDA");
@@ -24,7 +24,7 @@ const {
  */
 let instance;
 
-class DriverCQRS {
+class VehicleCQRS {
   constructor() {
   }
 
@@ -63,7 +63,7 @@ class DriverCQRS {
       "Driver",
       "getDriverList",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
+      ["PLATFORM-ADMIN"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -75,34 +75,6 @@ class DriverCQRS {
         return DriverDA.getDriverList$(filterInput, args.paginationInput);
       }),
       toArray(),
-      map(() => ([{
-        _id: 'e3r4-t5y6-u7i8',
-        generalInfo: {
-          name: 'nombre__-',
-          lastname: "Santa",
-          description: "descripcion___"
-        },
-        state: true,
-        creationTimestamp: Date.now(),
-        creatorUser: 'usuario.creador',
-        modificationTimestamp: Date.now(),
-        modifierUser: 'USUARIO.MIDIEFER',
-        businessId: 'BUSINESS_ID',
-        vehicles: ["TKM909", "FRT589"]
-      }])),
-      mergeMap(driverlist => from(driverlist)
-        .pipe(
-          map(driver => ({ 
-            _id: driver._id,
-            businessId: driver.businessId,
-            name: driver.generalInfo,
-            lastname: driver.generalInfo.lastname,
-            vehiclesQty: driver.vehicles.length,
-            state: driver.state
-          })),
-          toArray()
-        )
-      ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );
@@ -247,11 +219,11 @@ class DriverCQRS {
 }
 
 /**
- * @returns {DriverCQRS}
+ * @returns {VehicleCQRS}
  */
 module.exports = () => {
   if (!instance) {
-    instance = new DriverCQRS();
+    instance = new VehicleCQRS();
     console.log(`${instance.constructor.name} Singleton created`);
   }
   return instance;

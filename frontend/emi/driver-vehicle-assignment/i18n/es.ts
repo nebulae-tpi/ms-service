@@ -8,6 +8,7 @@ export const locale = {
       FILTER: 'Filtros',
       NAME: 'Nombre',
       LASTNAME: 'Apellido',
+      VEHICLE_QTY: 'Cantidad de vehículos',
       PERSON_ID: 'Cédula',
       CREATION_DATE: 'Fecha creación',
       CREATOR_USER: 'Usuario creador',

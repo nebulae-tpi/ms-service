@@ -2,6 +2,7 @@
 const { of, from, concat } = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const { DriverES } = require("../../domain/driver");
+const { VehicleES } = require("../../domain/vehicle");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -133,7 +134,22 @@ class EventStoreService {
         fn: DriverES.handleDriverStateUpdated$,
         obj: DriverES
       },
-
+      VehicleCreated: {
+        fn: VehicleES.handleVehicleCreated$,
+        obj: VehicleES
+      },
+      VehicleGeneralInfoUpdated: {
+        fn: VehicleES.handleVehicleGeneralInfoUpdated$,
+        obj: VehicleES
+      },
+      VehicleStateUpdated: {
+        fn: VehicleES.handleVehicleStateUpdated$,
+        obj: VehicleES
+      },
+      VehicleFeaturesUpdated: {
+        fn: VehicleES.handleVehicleFeaturesUpdated$,
+        obj: VehicleES
+      },
     };
   }
 
@@ -154,6 +170,22 @@ class EventStoreService {
         aggregateType: "Driver",
         eventType: "DriverStateUpdated"
       },
+      {
+        aggregateType: "Vehicle",
+        eventType: "VehicleCreated"
+      },
+      {
+        aggregateType: "Vehicle",
+        eventType: "VehicleGeneralInfoUpdated"
+      },
+      {
+        aggregateType: "Vehicle",
+        eventType: "VehicleStateUpdated"
+      },
+      {
+        aggregateType: "Vehicle",
+        eventType: "VehicleFeaturesUpdated"
+      }
     ]
   }
 }

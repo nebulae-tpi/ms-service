@@ -2,12 +2,12 @@
 
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
-const CollectionName = "Driver";
+const CollectionName = "Vehicle";
 const { CustomError } = require("../tools/customError");
 const { map } = require("rxjs/operators");
 const { of, Observable, defer } = require("rxjs");
 
-class DriverDA {
+class VehicleDA {
   static start$(mongoDbInstance) {
     return Observable.create(observer => {
       if (mongoDbInstance) {
@@ -24,7 +24,7 @@ class DriverDA {
   /**
    * Gets an user by its username
    */
-  static getDriver$(id, businessId) {
+  static getVehicle$(id, businessId) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
@@ -37,7 +37,7 @@ class DriverDA {
     return defer(() => collection.findOne(query));
   }
 
-  static getDriverList$(filter, pagination) {
+  static getVehicleList$(filter, pagination) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
@@ -72,7 +72,7 @@ class DriverDA {
     return mongoDB.extractAllFromMongoCursor$(cursor);
   }
 
-  static getDriverSize$(filter) {
+  static getVehicleSize$(filter) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
@@ -102,27 +102,27 @@ class DriverDA {
   }
 
   /**
-   * Creates a new Driver
+   * Creates a new Vehicle
    * @param {*} driver driver to create
    */
-  static createDriver$(driver) {
+  static createVehicle$(driver) {
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.insertOne(driver));
   }
 
       /**
-   * modifies the general info of the indicated Driver 
-   * @param {*} id  Driver ID
-   * @param {*} DriverGeneralInfo  New general information of the Driver
+   * modifies the general info of the indicated Vehicle 
+   * @param {*} id  Vehicle ID
+   * @param {*} VehicleGeneralInfo  New general information of the Vehicle
    */
-  static updateDriverGeneralInfo$(id, DriverGeneralInfo) {
+  static updateVehicleGeneralInfo$(id, VehicleGeneralInfo) {
     const collection = mongoDB.db.collection(CollectionName);
 
     return defer(()=>
         collection.findOneAndUpdate(
           { _id: id },
           {
-            $set: {generalInfo: DriverGeneralInfo.generalInfo}
+            $set: {generalInfo: VehicleGeneralInfo.generalInfo}
           },{
             returnOriginal: false
           }
@@ -133,18 +133,18 @@ class DriverDA {
   }
 
   /**
-   * Updates the Driver state 
-   * @param {string} id Driver ID
-   * @param {boolean} newDriverState boolean that indicates the new Driver state
+   * Updates the Vehicle state 
+   * @param {string} id Vehicle ID
+   * @param {boolean} newVehicleState boolean that indicates the new Vehicle state
    */
-  static updateDriverState$(id, newDriverState) {
+  static updateVehicleState$(id, newVehicleState) {
     const collection = mongoDB.db.collection(CollectionName);
     
     return defer(()=>
         collection.findOneAndUpdate(
           { _id: id},
           {
-            $set: {state: newDriverState.state}
+            $set: {state: newVehicleState.state}
           },{
             returnOriginal: false
           }
@@ -154,8 +154,26 @@ class DriverDA {
     );
   }
 
+  static updateVehicleFeatures$(id, newData) {
+    console.log(id, newData);
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: { features: newData.features }
+      },
+      {
+        returnOriginal: false
+      }
+    )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
+    );
+
+  }
+
 }
 /**
- * @returns {DriverDA}
+ * @returns {VehicleDA}
  */
-module.exports = DriverDA;
+module.exports = VehicleDA;
