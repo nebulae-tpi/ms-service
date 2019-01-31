@@ -11,9 +11,9 @@ type ServiceDriver {
   "User general info"
   generalInfo: ServiceDriverGeneralInfo
   "Driver state"
-  state: Boolean!  
-  "vehicles assigned quantity"
-  
+  state: Boolean!
+  "Driver vehicles assigned quantity"
+  vehiclesAssignedQty: Int  
   "Business ID"
   businessId: String!
 }

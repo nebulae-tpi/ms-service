@@ -7,13 +7,10 @@ export const ServiceDriver = gql`
       _id
       generalInfo {
         name
-        description
+        lastname
       }
       state
-      creationTimestamp
-      creatorUser
-      modificationTimestamp
-      modifierUser
+      vehiclesAssignedQty
     }
   }
 `;
@@ -24,13 +21,10 @@ export const ServiceDrivers = gql`
       _id
       generalInfo {
         name
-        description
+        lastname
       }
       state
-      creationTimestamp
-      creatorUser
-      modificationTimestamp
-      modifierUser
+      vehiclesAssignedQty
     }
   }
 `;
@@ -75,13 +69,10 @@ export const ServiceDriverUpdatedSubscription = gql`
       _id
       generalInfo {
         name
-        description
+        lastname
       }
       state
-      creationTimestamp
-      creatorUser
-      modificationTimestamp
-      modifierUser
+      vehiclesAssignedQty
     }
   }
 `;

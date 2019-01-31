@@ -95,9 +95,8 @@ class DriverCQRS {
           map(driver => ({ 
             _id: driver._id,
             businessId: driver.businessId,
-            name: driver.generalInfo,
-            lastname: driver.generalInfo.lastname,
-            vehiclesQty: driver.vehicles.length,
+            generalInfo: driver.generalInfo,
+            vehiclesAssignedQty: driver.vehicles.length,
             state: driver.state
           })),
           toArray()
