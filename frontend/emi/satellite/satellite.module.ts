@@ -23,5 +23,4 @@ const routes: Routes = [
   entryComponents: [DialogComponent],
   providers: [ SatelliteService, DatePipe]
 })
-
 export class SatelliteModule {}

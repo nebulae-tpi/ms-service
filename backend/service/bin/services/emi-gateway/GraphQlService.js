@@ -1,6 +1,7 @@
 "use strict";
 
 const { DriverCQRS } = require("../../domain/driver");
+const { ServiceCQRS } = require("../../domain/service");
 const broker = require("../../tools/broker/BrokerFactory")();
 const { of, from } = require("rxjs");
 const jsonwebtoken = require("jsonwebtoken");
@@ -169,6 +170,19 @@ class GraphQlService {
         aggregateType: "Driver",
         messageType: "emigateway.graphql.mutation.ServiceUpdateDriverState"
       },
+      // SERVICES
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.query.ServiceServices"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.query.ServiceServicesSize"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.query.ServiceService"
+      }
     ];
   }
 
@@ -176,7 +190,8 @@ class GraphQlService {
   /**
    * returns a map that assocs GraphQL request with its processor
    */
-  generateFunctionMap() {    
+  generateFunctionMap() {
+    //DRIVERS VEHICLE ASSIGNMENT
     return {
       "emigateway.graphql.query.ServiceDrivers": {
         fn: DriverCQRS.getDriverList$,
@@ -201,6 +216,19 @@ class GraphQlService {
       "emigateway.graphql.mutation.ServiceUpdateDriverState": {
         fn: DriverCQRS.updateDriverState$,
         obj: DriverCQRS
+      },
+      // SERVICES
+      "emigateway.graphql.query.ServiceServices": {
+        fn: ServiceCQRS.getServiceList$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.query.ServiceServicesSize": {
+        fn: ServiceCQRS.getServiceListSize$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.query.ServiceService": {
+        fn: ServiceCQRS.getService$,
+        obj: ServiceCQRS
       }
     };
   }

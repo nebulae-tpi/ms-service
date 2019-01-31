@@ -81,5 +81,40 @@
         "preBuildCommands": [],
         "environmentVars": {
         }
+    }, 
+    {
+        "name": "operation",
+        "src": "frontend/emi/service",
+        "groups": [
+            {
+              "id": "OPERATION",
+              "icon": "location_searching",
+              "translate": {
+                "en": "Operation",
+                "es": "Operación"
+              },
+              "priority": 200
+            }
+          ],
+        "contents": [
+            {
+                "groupId": "OPERATION",  
+                "id": "operation",
+                "icon": "explore",
+                "translate": {
+                    "en": "Services",
+                    "es": "Servicios"
+                },
+                "navURL": "/service",
+                "path": "service",
+                "loadChildren": "./main/content/service/service.module#ServiceModule",
+                "priority": 1000,
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"],
+                "default" : false
+            }            
+        ],
+        "preBuildCommands": [],
+        "environmentVars": {
+        }
     }
 ]
