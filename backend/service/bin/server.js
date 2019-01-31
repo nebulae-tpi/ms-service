@@ -9,6 +9,7 @@ const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
 const DriverDA = require('./data/DriverDA');
+const VehicleDA = require('./data/VehicleDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
@@ -18,6 +19,7 @@ const start = () => {
         eventStoreService.start$(),
         mongoDB.start$(),
         DriverDA.start$(),
+        VehicleDA.start$(),
         graphQlService.start$()
     ).subscribe(
         (evt) => {
