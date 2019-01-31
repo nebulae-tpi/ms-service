@@ -1,0 +1,86 @@
+type CommandResponse {
+  "Response code"
+  code: Int
+  "Response message"
+  message: String
+}
+
+type ServiceService {
+  "Service ID"
+  _id: ID!
+  "User general info"
+  generalInfo: ServiceServiceGeneralInfo
+  "Service state"
+  state: Boolean!
+  "Creation timestamp"
+  creationTimestamp: BigInt!
+  "Creator user"
+  creatorUser: String!
+  "Modification timestamp"
+  modificationTimestamp: BigInt!
+  "Modifier user"
+  modifierUser: String!
+  "Business ID"
+  businessId: String!
+}
+
+type ServiceServiceGeneralInfo {
+  "Service name"
+  name: String!,
+  "Service description"
+  description: String!
+}
+
+input FilterInput {
+  "ID of the business"
+  businessId: String
+  "Name"
+  name: String
+  "State"
+  state: Boolean
+  "Creator user"
+  creatorUser: String
+  "modifier user"
+  modifierUser: String
+  "get data created after indicated timestamp"
+  creationTimestamp: BigInt
+}
+
+input PaginationInput {
+  "Page"
+  page: Int!
+  "Count"
+  count: Int!
+  "Sort, default: ASC"
+  sort: Int
+}
+
+input ServiceServiceInput {
+  "Service general info"
+  generalInfo: ServiceServiceGeneralInfoInput!
+  "Service status"
+  state: Boolean!
+  "Business ID"
+  businessId: String!
+}
+
+input ServiceServiceGeneralInfoInput {
+  "Service name"
+  name: String!,
+  "Service description"
+  description: String!
+}
+
+type Query {
+  "Get Services filtered "
+  ServiceServices(filterInput: FilterInput!, paginationInput: PaginationInput!): [ServiceService]
+  "Get the amount of Services filtered "
+  ServiceServicesSize(filterInput: FilterInput!): Int!
+  "Get Service by its id"
+  ServiceService(id: String!): ServiceService
+}
+
+type Subscription {
+  "This events is triggered when a Service is created or updated"
+  ServiceServiceUpdatedSubscription: ServiceService  
+}
