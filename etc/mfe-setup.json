@@ -1,0 +1,37 @@
+[
+    {
+        "name": "msentityname",
+        "src": "frontend/frontendid/msentityname",
+        "groups": [
+            {
+              "id": "GROUP_NAME",
+              "icon": "location_searching",
+              "translate": {
+                "en": "Group Name",
+                "es": "Nombre de Grupo"
+              },
+              "priority": 1000
+            }
+          ],
+        "contents": [
+            {
+                "groupId": "GROUP_NAME",
+                "id": "msentityname",
+                "icon": "dashboard",
+                "translate": {
+                    "en": "msentityname_en",
+                    "es": "msentityname_es"
+                },
+                "navURL": "/msentityname",
+                "path": "msentityname",
+                "loadChildren": "./main/content/msentityname/msentityname.module#msentitypascalModule",
+                "priority": 1000,
+                "roles" : ["PLATFORM-ADMIN"],
+                "default" : false
+            }            
+        ],
+        "preBuildCommands": [],
+        "environmentVars": {
+        }
+    }
+]
