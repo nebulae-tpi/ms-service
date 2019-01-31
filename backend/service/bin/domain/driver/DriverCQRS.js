@@ -46,6 +46,30 @@ class DriverCQRS {
         //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
         const businessId = !isPlatformAdmin? (authToken.businessId || ''): null;
         return DriverDA.getDriver$(args.id, businessId)
+        .pipe(
+          map(() => ({
+            _id: 'e3r4-t5y6-u7i8',
+            generalInfo: {
+              name: 'nombre__-',
+              lastname: "Santa",
+              personId: "1045050369"
+            },
+            state: true,
+            creationTimestamp: Date.now(),
+            creatorUser: 'usuario.creador',
+            modificationTimestamp: Date.now(),
+            modifierUser: 'USUARIO.MIDIEFER',
+            businessId: 'BUSINESS_ID',
+            vehicles: ["TKM909", "FRT589"]
+          })),
+          map(driver => ({ 
+            _id: driver._id,
+            businessId: driver.businessId,
+            generalInfo: driver.generalInfo,
+            vehiclesAssignedQty: driver.vehicles.length,
+            state: driver.state
+          }))
+        )
       }),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(error))
@@ -80,7 +104,7 @@ class DriverCQRS {
         generalInfo: {
           name: 'nombre__-',
           lastname: "Santa",
-          description: "descripcion___"
+          personId: "1045050369"
         },
         state: true,
         creationTimestamp: Date.now(),

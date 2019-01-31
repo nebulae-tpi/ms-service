@@ -23,6 +23,8 @@ type ServiceDriverGeneralInfo {
   name: String!
   "Driver lastname"
   lastname: String
+  "Person ID"
+  personId: String
 }
 
 input FilterInput {

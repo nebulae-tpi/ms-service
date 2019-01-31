@@ -111,6 +111,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     .subscribe((driver: any) => {
       this.driver = driver;
       this.pageType = (driver && driver._id) ? 'edit' : 'new';
+      console.log(this.driver, this.pageType);
     }, e => console.log(e));
   }
 

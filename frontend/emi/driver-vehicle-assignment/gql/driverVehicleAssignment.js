@@ -8,6 +8,7 @@ export const ServiceDriver = gql`
       generalInfo {
         name
         lastname
+        personId
       }
       state
       vehiclesAssignedQty
@@ -22,6 +23,7 @@ export const ServiceDrivers = gql`
       generalInfo {
         name
         lastname
+        personId
       }
       state
       vehiclesAssignedQty
@@ -70,6 +72,7 @@ export const ServiceDriverUpdatedSubscription = gql`
       generalInfo {
         name
         lastname
+        personId
       }
       state
       vehiclesAssignedQty
