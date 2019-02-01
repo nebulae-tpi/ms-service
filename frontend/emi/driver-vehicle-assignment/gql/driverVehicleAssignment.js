@@ -21,7 +21,7 @@ export const ServiceDriver = gql`
 
 export const ServiceDrivers = gql`
   query ServiceDrivers($filterInput: FilterInput!, $paginationInput: PaginationInput!) {
-    ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {      
+    ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {
       _id
       businessId
       name
@@ -48,11 +48,16 @@ export const ServiceDriversSize = gql`
 export const ServiceDriverVehicleList = gql`
   query ServiceDriverVehicleList($driverId: String!, $paginationInput: PaginationInput!) {
     ServiceDriverVehicleList(driverId: $driverId, paginationInput: $paginationInput ){
+      _id
+      businessId
       licensePlate
+      active
+      blocks
+      brand
+      line
       model
       fuelType
-      brand
-      active
+      features
     }
   }
 `;
@@ -75,9 +80,9 @@ export const ServiceUpdateDriverGeneralInfo = gql `
   }
 `;
 
-export const ServiceUpdateDriverState = gql `
-  mutation ServiceUpdateDriverState($id: ID!, $newState: Boolean!){
-    ServiceUpdateDriverState(id: $id, newState: $newState){
+export const ServiceAssignVehicleToDriver = gql `
+  mutation ServiceAssignVehicleToDriver($driverId: String!, $vehiclePlate: String!){
+    ServiceAssignVehicleToDriver(driverId: $driverId, vehiclePlate: $vehiclePlate){
       code
       message
     }

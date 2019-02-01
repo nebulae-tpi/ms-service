@@ -43,17 +43,27 @@ type ServiceDriverGeneralInfo {
   personId: String
 }
 
-type ServiceVehicleList {
+type ServiceDriverVehicle {
+  "Vehicle ID"
+  _id: ID
+  "Vehicle business ID"
+  businessId: String
   "Vehicle license plate"
-  licensePlate: String
-  "Vehicle model"
-  model: Int
-  "Vehicle fuel type"
-  fuelType: String
-  "Vehicle brand"
-  brand: String
+  licensePlate: String  
   "Vehicle state"
   active: Boolean
+  "vehicle blocks"
+  blocks: [String]
+  "Vehicle brand"
+  brand: String
+  "Vehicle line"
+  line: String  
+  "Vehicle model"
+  model: String
+  "Vehicle fuel type"
+  fuelType: String
+  "Vehicle features"
+  features: [String]
 }
 
 input FilterInput {
@@ -93,7 +103,11 @@ type Query {
   "Get Driver by its id"
   ServiceDriver(id: String!): ServiceDriver
   "get the vehicles assigned to the related driver"
-  ServiceDriverVehicleList(driverId: String!, paginationInput: PaginationInput!): [ServiceVehicleList]
+  ServiceDriverVehicleList(driverId: String!, paginationInput: PaginationInput!): [ServiceDriverVehicle]
+}
+
+type Mutation {
+  ServiceAssignVehicleToDriver(driverId: String!, vehiclePlate: String!): CommandResponse
 }
 
 type Subscription {

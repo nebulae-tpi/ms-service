@@ -5,10 +5,10 @@ import { GatewayService } from '../../../../api/gateway.service';
 import {
   ServiceCreateDriver,
   ServiceUpdateDriverGeneralInfo,
-  ServiceUpdateDriverState,
   ServiceDriver,
   ServiceDriverUpdatedSubscription,
-  ServiceDriverVehicleList
+  ServiceDriverVehicleList,
+  ServiceAssignVehicleToDriver
 } from '../gql/driverVehicleAssignment.js';
 
 @Injectable()
@@ -91,13 +91,14 @@ export class VehicleAssignmentService {
     );
   }
 
-  updateServiceDriverState$(id: String, newState: boolean) {
+  assignVehicleToDriver$(driverId: string, vehicleLicensePlate: string) {
+    console.log('assignVehicleToDriver ==> ', driverId, vehicleLicensePlate);
     return this.gateway.apollo
       .mutate<any>({
-        mutation: ServiceUpdateDriverState,
+        mutation: ServiceAssignVehicleToDriver,
         variables: {
-          id: id,
-          newState: newState
+          driverId: driverId,
+          vehiclePlate: vehicleLicensePlate
         },
         errorPolicy: 'all'
       });

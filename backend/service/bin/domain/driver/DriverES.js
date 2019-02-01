@@ -1,6 +1,6 @@
 'use strict'
 
-const {} = require("rxjs");
+const {of} = require("rxjs");
 const { tap, mergeMap, catchError, map, mapTo } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const DriverDA = require('../../data/DriverDA');
@@ -74,6 +74,15 @@ class DriverES {
         .pipe(
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result))
         );
+    }
+    
+    handleVehicleAssigned$(VehicleAssignedEvent){
+        return of(VehicleAssignedEvent.data.vehicleLicensePlate)
+        .pipe(
+            tap(licensePlate => console.log("PLACA ==> ", licensePlate)),
+            mergeMap(newVehicle => DriverDA.assignVehicle$(VehicleAssignedEvent.aid, newVehicle) ),
+            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `VehicleVehicleUpdatedSubscription`, result))
+        )
     }
 
 }

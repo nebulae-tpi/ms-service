@@ -20,15 +20,15 @@
           <div fxLayout="column" fxLayoutAlign="start start" *fuseIfOnDom>
 
             <div class="h2" *ngIf="driver && driver._id">
-              {{driver.generalInfo.name}}
+              {{driver.name}}
             </div>
 
             <div class="h2" *ngIf="!driver || (driver && !driver._id)">
               {{'DRIVER.DETAIL_HEADER_NEW' | translate}}
             </div>
 
-            <div class="subtitle secondary-text">
-              <span>{{'DRIVER.PERSON_ID' | translate}} {{driver.generalInfo.personId}} </span>
+            <div *ngIf="driver" class="subtitle secondary-text">
+              <span>{{'DRIVER.PERSON_ID' | translate}} {{driver.documentId}} </span>
             </div>
           </div>
         </div>

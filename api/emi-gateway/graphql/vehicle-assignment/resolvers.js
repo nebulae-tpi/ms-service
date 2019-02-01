@@ -67,7 +67,12 @@ module.exports = {
             ).toPromise();
         },
         ServiceDriver(root, args, context) {
-            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceDriver', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN"])
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-'+'Service', 'ServiceDriver',
+                PERMISSION_DENIED_ERROR_CODE,
+                'Permission denied', ["PLATFORM-ADMIN"]
+                )
             .pipe(
                 mergeMap(() =>
                     broker
@@ -105,6 +110,30 @@ module.exports = {
     },
 
     //// MUTATIONS ///////
+    Mutation: {
+        ServiceAssignVehicleToDriver(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'assignVehicleToDriver',
+                PERMISSION_DENIED_ERROR_CODE,
+                'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN" ]
+                )
+              .pipe(
+                mergeMap(() =>
+                  context.broker.forwardAndGetReply$(
+                    "Driver",
+                    "emigateway.graphql.mutation.assignVehicleToDriver",
+                    { root, args, jwt: context.encodedToken },
+                    2000
+                  )
+                ),
+                catchError(err => handleError$(err, "persistBusiness")),
+                mergeMap(response => getResponseFromBackEnd$(response))
+              )
+              .toPromise();
+          },
+
+    },
     //// SUBSCRIPTIONS ///////
     Subscription: {
         ServiceDriverUpdatedSubscription: {

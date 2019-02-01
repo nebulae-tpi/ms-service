@@ -123,7 +123,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
       this.driver = driver;
       this.pageType = (driver && driver._id) ? 'edit' : 'new';
       console.log(this.driver, this.pageType);
-      this.tableSize = this.driver.vehiclesAssignedQty;
+      this.tableSize = this.driver.assignedVehicles.length;
 
       this.dataSource.data = vehicleList;
 
@@ -170,10 +170,17 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
 
   addVehicleToDriver(){
     console.log(this.assignmentForm.getRawValue());
+    this.vehicleAssignmentService.assignVehicleToDriver$( this.driver._id, this.assignmentForm.getRawValue().licensePlate)
+    .pipe(
+      tap(r => console.log('RESPONSE ==> ', r)),
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe();
   }
 
   selectDriverVehicle(rowData: any){
     console.log(rowData);
+
 
   }
 

@@ -9,7 +9,7 @@ const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
 const GraphqlResponseTools = require('../../tools/GraphqlResponseTools');
 const RoleValidator = require("../../tools/RoleValidator");
-const { take, mergeMap, catchError, map, toArray } = require('rxjs/operators');
+const { take, mergeMap, catchError, map, toArray, tap } = require('rxjs/operators');
 const {
   CustomError,
   DefaultError,
@@ -49,26 +49,19 @@ class DriverCQRS {
         .pipe(
           map(() => ({
             _id: 'e3r4-t5y6-u7i8',
-            generalInfo: {
-              name: 'nombre__-',
-              lastname: "Santa",
-              personId: "1045050369"
-            },
-            state: true,
-            creationTimestamp: Date.now(),
-            creatorUser: 'usuario.creador',
-            modificationTimestamp: Date.now(),
-            modifierUser: 'USUARIO.MIDIEFER',
-            businessId: 'BUSINESS_ID',
-            vehicles: ["TKM909", "FRT589"]
+            businessId: 'e3r4-t5y6-u7i8-o9p0',
+            name: 'Juan Felipe',
+            lastname: "Santa Ospina",
+            username: 'juan.santa',
+            active: true,
+            blocks: ['PYP', 'PAY'],
+            documenType: 'CC',
+            documentId: '1045069852',
+            pmr: false,
+            languages: ['EN', 'AR'],
+            phone: "3125986658",
+            assignedVehicles: ['TKM909', 'EFT567']
           })),
-          map(driver => ({ 
-            _id: driver._id,
-            businessId: driver.businessId,
-            generalInfo: driver.generalInfo,
-            vehiclesAssignedQty: driver.vehicles.length,
-            state: driver.state
-          }))
         )
       }),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -247,6 +240,31 @@ class DriverCQRS {
       ),
       map(() => ({ code: 200, message: `Driver with id: ${driver._id} has been updated` })),
       mergeMap(r => GraphqlResponseTools.buildSuccessResponse$(r)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
+  assignVehicleToDriver$({ args }, authToken) {
+    console.log(" CQRS assignVehicleToDriver$", args);
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Service",
+      "getDriverVehicles",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
+    ).pipe(
+      mergeMap(() => eventSourcing.eventStore.emitEvent$(
+        new Event({
+          eventType: "VehicleAssigned",
+          eventTypeVersion: 1,
+          aggregateType: "Driver",
+          aggregateId: args.driverId,
+          data: { vehicleLicensePlate: args.vehiclePlate },
+          user: authToken.preferred_username
+        }))
+      ),
+      map(() => ({ code: 200, message: `${args.vehiclePlate} has been added to the driver with ID ${args.driverId}` })),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );
   }
