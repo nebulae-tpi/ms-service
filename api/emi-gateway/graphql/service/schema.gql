@@ -5,45 +5,140 @@ type CommandResponse {
   message: String
 }
 
+"Coordinates"
+type ServiceCoordinate {
+   "Latitude"
+   lat: Float
+   "Longitude"
+   lng: Float
+   "Timestamp of the coordinate"
+   timestamp: BigInt
+}
+
+"Service Location info"
+type ServiceServiceLocation {
+  "Accurate location, Exact marker point: Lat,Lng"
+  marker: ServiceCoordinate
+  "Non-Accurate location, describes an area"
+  polygon: [ServiceCoordinate]
+  "City name"
+  city: String
+  "Zone name"
+  zone: String
+  "Neighborhood name"
+  neighborhood: String
+  "Street address 1"
+  addressLine1: String
+  "Street address 2"
+  addressLine2: String
+  "location notes"
+  notes: String
+}
+
+"Client info"
+type ServiceServiceClient {
+  "Client id"
+  id: String!
+  "Business id where the client belongs"
+  businessId: String!
+  "Username of the client"
+  username: String
+  "Full name"
+  fullname: String
+  "Tip for the client"
+  tip: Int
+  "Tip type"
+  tipType: String
+}
+
+"Driver info"
+type ServiceServiceDriver {
+  "Full name"
+  fullname: String!
+  "Document ID"
+  docId: String!
+}
+
+"Vehicle info"
+type ServiceServiceVehicle {
+  "License plate of the vehicle"
+  licensePlate: String!
+}
+
+"Service state"
+type ServiceServiceState {
+  "State"
+  state: String!
+  "Timestamp state"
+  timestamp: BigInt!
+  location: ServiceCoordinate
+  notes: String
+}
+
 type ServiceService {
   "Service ID"
   _id: ID!
-  "User general info"
-  generalInfo: ServiceServiceGeneralInfo
-  "Service state"
-  state: Boolean!
-  "Creation timestamp"
-  creationTimestamp: BigInt!
-  "Creator user"
-  creatorUser: String!
-  "Modification timestamp"
-  modificationTimestamp: BigInt!
-  "Modifier user"
-  modifierUser: String!
   "Business ID"
   businessId: String!
-}
-
-type ServiceServiceGeneralInfo {
-  "Service name"
-  name: String!,
-  "Service description"
-  description: String!
+  "Shift ID"
+  shiftId: String!
+  "Timestamp service"
+  timestamp: BigInt!
+  "Requested features keys"
+  requestedFeatures: [String]
+  "Passenger pick up location"
+  pickUp: ServiceServiceLocation
+  "Passenger drop off location"
+  dropOff: ServiceServiceLocation
+  "Pick up time"
+  pickUpETA: BigInt
+  "Drop off time"
+  dropOffETA: BigInt
+  "Service verification code"
+  verificationCode: String
+  "Payment type key"
+  paymentType: String
+  "Applicable fare discount"
+  fareDiscount: Float
+  "pre calculated fare"
+  fare: BigInt
+  "current service state"
+  state: String
+  "State changes of the services"
+  stateChanges: [ServiceServiceState]
+  location: ServiceCoordinate!
+  "Vehicle info"
+  vehicle: ServiceServiceVehicle
+  "Driver info"
+  driver: ServiceServiceDriver
+  "Client info"
+  client: ServiceServiceClient
+  "Service tip"
+  tip: Int
+  "Exact route taken by the driver"
+  route: [ServiceCoordinate]
+  lastModificationTimestamp: BigInt  
 }
 
 input FilterInput {
   "ID of the business"
   businessId: String
-  "Name"
-  name: String
+  "Init date"
+  initTimestamp: BigInt
+  "End date"
+  endTimestamp: BigInt    
+  "Driver document id"
+  driverDocumentId: String
+  "Driver fullname"
+  driverFullname: String
+  "Vehicle license plate"
+  vehicleLicensePlate: String
+  "Client username "
+  clientUsername: String
+  "Client fullname"
+  clientFullname: String
   "State"
-  state: Boolean
-  "Creator user"
-  creatorUser: String
-  "modifier user"
-  modifierUser: String
-  "get data created after indicated timestamp"
-  creationTimestamp: BigInt
+  state: String
 }
 
 input PaginationInput {
@@ -53,22 +148,6 @@ input PaginationInput {
   count: Int!
   "Sort, default: ASC"
   sort: Int
-}
-
-input ServiceServiceInput {
-  "Service general info"
-  generalInfo: ServiceServiceGeneralInfoInput!
-  "Service status"
-  state: Boolean!
-  "Business ID"
-  businessId: String!
-}
-
-input ServiceServiceGeneralInfoInput {
-  "Service name"
-  name: String!,
-  "Service description"
-  description: String!
 }
 
 type Query {
