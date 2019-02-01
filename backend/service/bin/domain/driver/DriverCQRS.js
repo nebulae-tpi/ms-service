@@ -101,31 +101,19 @@ class DriverCQRS {
       toArray(),
       map(() => ([{
         _id: 'e3r4-t5y6-u7i8',
-        generalInfo: {
-          name: 'nombre__-',
-          lastname: "Santa",
-          personId: "1045050369"
-        },
-        state: true,
-        creationTimestamp: Date.now(),
-        creatorUser: 'usuario.creador',
-        modificationTimestamp: Date.now(),
-        modifierUser: 'USUARIO.MIDIEFER',
-        businessId: 'BUSINESS_ID',
-        vehicles: ["TKM909", "FRT589"]
+        businessId: 'e3r4-t5y6-u7i8-o9p0',
+        name: 'Juan Felipe',
+        lastname: "Santa Ospina",
+        username: 'juan.santa',
+        active: true,
+        blocks: ['PYP', 'PAY'],
+        documenType: 'CC',
+        documentId: '1045069852',
+        pmr: false,
+        languages: ['EN', 'AR'],
+        phone: "3125986658",
+        assignedVehicles: ['TKM909', 'EFT567']
       }])),
-      mergeMap(driverlist => from(driverlist)
-        .pipe(
-          map(driver => ({ 
-            _id: driver._id,
-            businessId: driver.businessId,
-            generalInfo: driver.generalInfo,
-            vehiclesAssignedQty: driver.vehicles.length,
-            state: driver.state
-          })),
-          toArray()
-        )
-      ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );

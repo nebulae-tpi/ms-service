@@ -89,7 +89,7 @@
           <ng-container cdkColumnDef="name">
             <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.NAME" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let driver">
-              <p class="text-truncate"> {{ driver.generalInfo.name }} </p>
+              <p class="text-truncate"> {{ driver.name }} </p>
             </mat-cell>
           </ng-container>
 
@@ -97,7 +97,7 @@
           <ng-container cdkColumnDef="lastname">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"DRIVER.LASTNAME" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let driver" fxHide fxShow.gt-xs>
-                <p class="text-truncate"> {{ driver.generalInfo.lastname }} </p>
+                <p class="text-truncate"> {{ driver.lastname }} </p>
             </mat-cell>
           </ng-container>
 
@@ -105,7 +105,7 @@
           <ng-container cdkColumnDef="vehicleQty">
             <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE_QTY" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let driver">
-              <p class="text-truncate"> {{ driver.vehiclesAssignedQty }} </p>
+              <p class="text-truncate"> {{ driver.assignedVehicles.length  }} </p>
             </mat-cell>
           </ng-container>
 

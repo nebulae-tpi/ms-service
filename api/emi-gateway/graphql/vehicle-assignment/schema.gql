@@ -8,14 +8,30 @@ type CommandResponse {
 type ServiceDriver {
   "Driver ID"
   _id: ID!
-  "User general info"
-  generalInfo: ServiceDriverGeneralInfo
-  "Driver state"
-  state: Boolean!
-  "Driver vehicles assigned quantity"
-  vehiclesAssignedQty: Int  
   "Business ID"
   businessId: String!
+  "Driver name"
+  name: String
+  "Driver lastname"
+  lastname: String
+  "Driver username"
+  username: String
+  "Driver active state"
+  active: Boolean!
+  "Driver blocks"
+  blocks: [String]
+  "Driver document type"
+  documentType: String
+  "Driver document ID"
+  documentId: String
+  "Driver pmr state"
+  pmr: Boolean
+  "Driver languages"
+  languages: [String]
+  "Driver phone"
+  phone: String
+  "Vehicle assignedVehicles"
+  assignedVehicles: [String]  
 }
 
 type ServiceDriverGeneralInfo {
@@ -68,21 +84,6 @@ input PaginationInput {
   sort: Int
 }
 
-input ServiceDriverInput {
-  "Driver general info"
-  generalInfo: ServiceDriverGeneralInfoInput!
-  "Driver status"
-  state: Boolean!
-  "Business ID"
-  businessId: String!
-}
-
-input ServiceDriverGeneralInfoInput {
-  "Driver name"
-  name: String!,
-  "Driver description"
-  description: String!
-}
 
 type Query {
   "Get Drivers filtered "
@@ -93,15 +94,6 @@ type Query {
   ServiceDriver(id: String!): ServiceDriver
   "get the vehicles assigned to the related driver"
   ServiceDriverVehicleList(driverId: String!, paginationInput: PaginationInput!): [ServiceVehicleList]
-}
-
-type Mutation {
-  "Create a new Driver"
-  ServiceCreateDriver(input: ServiceDriverInput!): CommandResponse
-  "Update the Driver generalInfo"
-  ServiceUpdateDriverGeneralInfo(id:ID!, input: ServiceDriverGeneralInfoInput!): CommandResponse
-  "Update the Driver state"
-  ServiceUpdateDriverState(id: ID!, newState: Boolean!): CommandResponse
 }
 
 type Subscription {

@@ -1,32 +1,40 @@
 import gql from "graphql-tag";
-
-// We use the gql tag to parse our query string into a query document
 export const ServiceDriver = gql`
   query ServiceDriver($id: String!) {
     ServiceDriver(id: $id) {
       _id
-      generalInfo {
-        name
-        lastname
-        personId
-      }
-      state
-      vehiclesAssignedQty
+      businessId
+      name
+      lastname
+      username
+      active
+      blocks
+      documentType
+      documentId
+      pmr
+      languages
+      phone
+      assignedVehicles
     }
   }
 `;
 
 export const ServiceDrivers = gql`
   query ServiceDrivers($filterInput: FilterInput!, $paginationInput: PaginationInput!) {
-    ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {
+    ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {      
       _id
-      generalInfo {
-        name
-        lastname
-        personId
-      }
-      state
-      vehiclesAssignedQty
+      businessId
+      name
+      lastname
+      username
+      active
+      blocks
+      documentType
+      documentId
+      pmr
+      languages
+      phone
+      assignedVehicles
     }
   }
 `;
@@ -81,13 +89,18 @@ export const ServiceDriverUpdatedSubscription = gql`
   subscription{
     ServiceDriverUpdatedSubscription{
       _id
-      generalInfo {
-        name
-        lastname
-        personId
-      }
-      state
-      vehiclesAssignedQty
+      businessId
+      name
+      lastname
+      username
+      active
+      blocks
+      documentType
+      documentId
+      pmr
+      languages
+      phone
+      assignedVehicles
     }
   }
 `;
