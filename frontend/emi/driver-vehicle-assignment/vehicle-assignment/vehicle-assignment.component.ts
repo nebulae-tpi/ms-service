@@ -105,19 +105,28 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
       mergeMap(entityId => entityId !== 'new' ?
         forkJoin(
           this.vehicleAssignmentService.getServiceDriver$(entityId),
-          // this.vehicleAssignmentService.getDriverVehiclesAssigned$(entityId)
+          this.vehicleAssignmentService.getDriverVehiclesAssigned$(entityId, { page: 0, count: 10, sort: 1 } )
         )
           .pipe(
-            map(([res]) => res.data.ServiceDriver)
+            map(([res, vehicleList]) => ({
+              driver: res.data.ServiceDriver,
+              vehicleList: vehicleList.data.ServiceDriverVehicleList
+            }))
           )
         : of(null)
       ),
       takeUntil(this.ngUnsubscribe)
     )
-    .subscribe((driver: any) => {
+    .subscribe( ({ driver, vehicleList }) => {
+      console.log('DRIVER ==> ', driver);
+      console.log('VEHICLE_LIST ==> ', vehicleList);
       this.driver = driver;
       this.pageType = (driver && driver._id) ? 'edit' : 'new';
       console.log(this.driver, this.pageType);
+      this.tableSize = this.driver.vehiclesAssignedQty;
+
+      this.dataSource.data = vehicleList;
+
     }, e => console.log(e));
   }
 

@@ -37,6 +37,18 @@ export const ServiceDriversSize = gql`
   }
 `;
 
+export const ServiceDriverVehicleList = gql`
+  query ServiceDriverVehicleList($driverId: String!, $paginationInput: PaginationInput!) {
+    ServiceDriverVehicleList(driverId: $driverId, paginationInput: $paginationInput ){
+      licensePlate
+      model
+      fuelType
+      brand
+      active
+    }
+  }
+`;
+
 export const ServiceCreateDriver = gql `
   mutation ServiceCreateDriver($input: ServiceDriverInput!){
     ServiceCreateDriver(input: $input){
@@ -79,3 +91,4 @@ export const ServiceDriverUpdatedSubscription = gql`
     }
   }
 `;
+

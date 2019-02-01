@@ -19,8 +19,13 @@ export const locale = {
       MODIFIER_USER: 'Usuario que modificó',
       ADD_NEW: 'Agregar nuevo',
       VEHICLE: {
-
+        LICENSE_PLATE: 'Placa',
+        MODEL: 'Modelo',
+        FUEL_TYPE: 'Combustible',
+        BRAND: 'Marca',
+        ACTIVE: 'Activo'
       },
+      LICENSE_PLATE: 'Placa',
       DETAILS: {
         TABS: {
           GENERAL_INFO: 'Información general'

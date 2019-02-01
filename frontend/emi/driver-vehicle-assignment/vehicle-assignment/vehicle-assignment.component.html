@@ -39,16 +39,16 @@
       <!-- CONTENT CARD -->
       <div class="content-card mat-white-bg">
 
-        <form class="bt-8" fxLayout="row wrap" fxLayoutAlign="center center" name="form" [formGroup]="assignmentForm">
-          <mat-form-field class="br-8 bl-8" >
+        <form class="mt-12" fxLayout="row wrap" fxLayoutAlign="space-around center" name="form" [formGroup]="assignmentForm">
+          <mat-form-field class="mr-8 ml-8" >
             <input maxlength="6" matInput placeholder="{{'DRIVER.LICENSE_PLATE' | translate}}" formControlName="licensePlate" />
           </mat-form-field>
-          <button class="br-8 bl-8"  mat-raised-button class="mat-white-bg" (click)="addVehicleToDriver()">
+          <button class="mr-8 ml-8"  mat-raised-button class="mat-white-bg" (click)="addVehicleToDriver()">
               <span>{{ "DRIVER.ADD_NEW" | translate }}</span>
             </button>
         </form>
 
-        <mat-table id="entity-table" class="item-table" #table [dataSource]="dataSource" fusePerfectScrollbar>
+        <mat-table id="vehicle-table" class="item-table" #table [dataSource]="dataSource" fusePerfectScrollbar>
 
           <!-- license plate Column -->
           <ng-container cdkColumnDef="licensePlate">
@@ -70,7 +70,7 @@
           <ng-container cdkColumnDef="fuelType">
             <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE.FUEL_TYPE" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let vehicle">
-
+              <p class="text-truncate"> {{ 'DRIVER.VEHICLE.FUEL_TYPES_' + vehicle.fuelType | translate  }} </p>
             </mat-cell>
           </ng-container>
 

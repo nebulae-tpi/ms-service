@@ -84,8 +84,8 @@ module.exports = {
     },
 
     //// MUTATIONS ///////
-    Mutation: {
-    },
+    // Mutation: {
+    // },
 
     //// SUBSCRIPTIONS ///////
     Subscription: {

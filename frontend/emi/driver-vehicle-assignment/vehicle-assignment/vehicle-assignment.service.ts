@@ -7,7 +7,8 @@ import {
   ServiceUpdateDriverGeneralInfo,
   ServiceUpdateDriverState,
   ServiceDriver,
-  ServiceDriverUpdatedSubscription
+  ServiceDriverUpdatedSubscription,
+  ServiceDriverVehicleList
 } from '../gql/driverVehicleAssignment.js';
 
 @Injectable()
@@ -70,7 +71,7 @@ export class VehicleAssignmentService {
           errorPolicy: 'all'
         });
       })
-    )
+    );
   }
 
   updateServiceDriverGeneralInfo$(id: String, driverGeneralInfo: any) {
@@ -87,7 +88,7 @@ export class VehicleAssignmentService {
           errorPolicy: 'all'
         });
       })
-    )
+    );
   }
 
   updateServiceDriverState$(id: String, newState: boolean) {
@@ -108,8 +109,8 @@ export class VehicleAssignmentService {
       variables: {
         id: entityId
       },
-      fetchPolicy: "network-only",
-      errorPolicy: "all"
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
     });
   }
 
@@ -122,5 +123,18 @@ subscribeServiceDriverUpdatedSubscription$(): Observable<any> {
     query: ServiceDriverUpdatedSubscription
   });
 }
+
+  getDriverVehiclesAssigned$(driverId, paginatorInput) {
+    return this.gateway.apollo.query<any>({
+      query: ServiceDriverVehicleList,
+      variables: {
+        driverId: driverId,
+        paginationInput: paginatorInput
+      },
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
+    });
+
+  }
 
 }

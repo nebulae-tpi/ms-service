@@ -1,6 +1,6 @@
 'use strict'
 
-const {} = require("rxjs");
+const {of} = require("rxjs");
 const { tap, mergeMap, catchError, map, mapTo } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const VehicleDA = require('../../data/VehicleDA');
@@ -21,10 +21,22 @@ class VehicleES {
      * Persists the driver on the materialized view according to the received data from the event store.
      * @param {*} businessCreatedEvent business created event
      */
-    handleVehicleCreated$(driverCreatedEvent) {  
-        const driver = driverCreatedEvent.data;
-        return VehicleDA.createVehicle$(driver)
+    handleVehicleCreated$(vehicleCreatedEvent) {  
+        return of(vehicleCreatedEvent.data)
         .pipe(
+            map(vehicle => ({
+                _id: vehicle._id,
+                businessId: vehicle.businessId,
+                licensePlate: vehicle.generalInfo.licensePlate,
+                active: vehicle.state,
+                blocks: [],
+                brand: vehicle.generalInfo.brand,
+                line: vehicle.generalInfo.line,
+                model: vehicle.generalInfo.model,
+                fuelType: vehicle.features.fuel,
+                features: vehicle.features.others.filter(f => f.active).map(e => e.name)
+            })),
+            mergeMap(vehicle => VehicleDA.createVehicle$(vehicle)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result.ops[0]))
         );
     }
@@ -34,9 +46,15 @@ class VehicleES {
      * @param {*} driverGeneralInfoUpdatedEvent driver created event
      */
     handleVehicleGeneralInfoUpdated$(driverGeneralInfoUpdatedEvent) {  
-        const driverGeneralInfo = driverGeneralInfoUpdatedEvent.data;
-        return VehicleDA.updateVehicleGeneralInfo$(driverGeneralInfoUpdatedEvent.aid, driverGeneralInfo)
+        return of(driverGeneralInfoUpdatedEvent.data)
         .pipe(
+            map(newGeneralInfo => ({
+                licensePlate: newGeneralInfo.licensePlate,
+                brand: newGeneralInfo.brand,
+                line: newGeneralInfo.line,
+                model: newGeneralInfo.model,
+            })),
+            mergemap(update => VehicleDA.updateVehicleInfo$(driverGeneralInfoUpdatedEvent.aid, update) ),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result))
         );
     }
@@ -46,15 +64,22 @@ class VehicleES {
      * @param {*} VehicleStateUpdatedEvent events that indicates the new state of the driver
      */
     handleVehicleStateUpdated$(VehicleStateUpdatedEvent) {          
-        return VehicleDA.updateVehicleState$(VehicleStateUpdatedEvent.aid, VehicleStateUpdatedEvent.data)
+        return of(VehicleStateUpdatedEvent.data)
         .pipe(
+            map(newState => ({ active: newState })),
+            mergeMap(update => VehicleDA.updateVehicleInfo$( VehicleStateUpdatedEvent.aid, update)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result))
         );
     }
 
     handleVehicleFeaturesUpdated$(VehicleVehicleFeaturesUpdatedEvent){
-        return VehicleDA.updateVehicleFeatures$(VehicleVehicleFeaturesUpdatedEvent.aid, VehicleVehicleFeaturesUpdatedEvent.data)
+        return of(VehicleVehicleFeaturesUpdatedEvent.data)
         .pipe(
+            map(newFeatures => ({
+                fuelType: newFeatures.fuel,
+                features: newFeatures.others.filter(f => f.active).map(e => e.name)
+            })),
+            mergeMap(update => VehicleDA.updateVehicleInfo$(VehicleVehicleFeaturesUpdatedEvent.aid, update) ),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `VehicleVehicleUpdatedSubscription`, result))
         )
 

@@ -21,10 +21,25 @@ class DriverES {
      * Persists the driver on the materialized view according to the received data from the event store.
      * @param {*} businessCreatedEvent business created event
      */
-    handleDriverCreated$(driverCreatedEvent) {  
-        const driver = driverCreatedEvent.data;
-        return DriverDA.createDriver$(driver)
+    handleDriverCreated$(driverCreatedEvent) { 
+        return offscreenBuffering(driverCreatedEvent.data)
         .pipe(
+            map(driver => ({
+                _id: driver._id,
+                businessId: driver.businessId,
+                name: driver.generalInfo.name,
+                lastname: driver.generalInfo.lastname,
+                username: '---',
+                active: driver.state,
+                blocks: [],
+                documentType: driver.generalInfo.documentType,
+                documentId: driver.generalInfo.document,
+                pmr: driver.generalInfo.pmr,
+                languages: driver.generalInfo.languages || [],
+                phone: driver.generalInfo.phone,
+                assignedVehicles: []
+            })),
+            mergeMap( driver => DriverDA.createDriver$(driver) ),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result.ops[0]))
         );
     }
@@ -33,10 +48,19 @@ class DriverES {
      * Update the general info on the materialized view according to the received data from the event store.
      * @param {*} driverGeneralInfoUpdatedEvent driver created event
      */
-    handleDriverGeneralInfoUpdated$(driverGeneralInfoUpdatedEvent) {  
-        const driverGeneralInfo = driverGeneralInfoUpdatedEvent.data;
-        return DriverDA.updateDriverGeneralInfo$(driverGeneralInfoUpdatedEvent.aid, driverGeneralInfo)
+    handleDriverGeneralInfoUpdated$(driverGeneralInfoUpdatedEvent) {
+        return of(driverGeneralInfoUpdatedEvent.data)
         .pipe(
+            map(newGeneralInfo => ({
+                name: newGeneralInfo.name,
+                lastname: newGeneralInfo.lastname,
+                documentType: newGeneralInfo.documentType,
+                documentId: newGeneralInfo.document,
+                pmr: newGeneralInfo.pmr,
+                languages: newGeneralInfo.languages,
+                phone: newGeneralInfo.phone
+            })),
+            mergeMap(newInfo => DriverDA.updateDriverGeneralInfo$(driverGeneralInfoUpdatedEvent.aid, newInfo)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result))
         );
     }

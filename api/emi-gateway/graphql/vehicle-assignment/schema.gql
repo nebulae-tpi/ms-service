@@ -27,6 +27,19 @@ type ServiceDriverGeneralInfo {
   personId: String
 }
 
+type ServiceVehicleList {
+  "Vehicle license plate"
+  licensePlate: String
+  "Vehicle model"
+  model: Int
+  "Vehicle fuel type"
+  fuelType: String
+  "Vehicle brand"
+  brand: String
+  "Vehicle state"
+  active: Boolean
+}
+
 input FilterInput {
   "ID of the business"
   businessId: String
@@ -78,6 +91,8 @@ type Query {
   ServiceDriversSize(filterInput: FilterInput!): Int!
   "Get Driver by its id"
   ServiceDriver(id: String!): ServiceDriver
+  "get the vehicles assigned to the related driver"
+  ServiceDriverVehicleList(driverId: String!, paginationInput: PaginationInput!): [ServiceVehicleList]
 }
 
 type Mutation {

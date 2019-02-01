@@ -81,7 +81,27 @@ module.exports = {
                 catchError(err => handleError$(err, "ServiceDriver")),
                 mergeMap(response => getResponseFromBackEnd$(response))
             ).toPromise();
-        }
+        },
+        ServiceDriverVehicleList(root, args, context) {
+            console.log("ServiceDriverVehicleList", args);
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles, 'ms-Service', 'ServiceDriverVehicleList',
+                PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN"]
+            )
+            .pipe(
+                mergeMap(() =>
+                    broker
+                    .forwardAndGetReply$(
+                        "Driver",
+                        "emigateway.graphql.query.serviceDriverVehicleList",
+                        { root, args, jwt: context.encodedToken },
+                        2000
+                    )
+                ),
+                catchError(err => handleError$(err, "ServiceDriverVehicleList")),
+                mergeMap(response => getResponseFromBackEnd$(response))
+            ).toPromise();
+        },
     },
 
     //// MUTATIONS ///////

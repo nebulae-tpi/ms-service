@@ -115,14 +115,14 @@ class DriverDA {
    * @param {*} id  Driver ID
    * @param {*} DriverGeneralInfo  New general information of the Driver
    */
-  static updateDriverGeneralInfo$(id, DriverGeneralInfo) {
+  static updateDriverGeneralInfo$(id, newGeneralInfo) {
     const collection = mongoDB.db.collection(CollectionName);
 
     return defer(()=>
         collection.findOneAndUpdate(
           { _id: id },
           {
-            $set: {generalInfo: DriverGeneralInfo.generalInfo}
+            $set: { ...newGeneralInfo }
           },{
             returnOriginal: false
           }

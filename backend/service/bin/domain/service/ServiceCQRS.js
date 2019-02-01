@@ -107,6 +107,37 @@ class ServiceCQRS {
     );
   }
 
+  getDriverVehicles$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Service",
+      "getDriverVehicles",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]
+    ).pipe(
+      mergeMap(roles => {
+        // const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        //If an user does not have the role to get the Service from other business, the query must be filtered with the businessId of the user
+        // const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        // const filterInput = args.filterInput;
+        // filterInput.businessId = businessId;
+
+        // return ServiceDA.getServiceSize$(filterInput);
+        return of([
+          {
+            licensePlate: 'TKM909',
+            model: 2018,
+            fuelType: 'GASOLINE',
+            brand: 'Mazda',
+            active: true
+          }
+        ])
+      }),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
   //#endregion
 
 

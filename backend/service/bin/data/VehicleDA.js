@@ -115,14 +115,14 @@ class VehicleDA {
    * @param {*} id  Vehicle ID
    * @param {*} VehicleGeneralInfo  New general information of the Vehicle
    */
-  static updateVehicleGeneralInfo$(id, VehicleGeneralInfo) {
+  static updateVehicleInfo$(id, update) {
     const collection = mongoDB.db.collection(CollectionName);
 
     return defer(()=>
         collection.findOneAndUpdate(
           { _id: id },
           {
-            $set: {generalInfo: VehicleGeneralInfo.generalInfo}
+            $set: { ...update }
           },{
             returnOriginal: false
           }
@@ -130,46 +130,6 @@ class VehicleDA {
     ).pipe(
       map(result => result && result.value ? result.value : undefined)
     );
-  }
-
-  /**
-   * Updates the Vehicle state 
-   * @param {string} id Vehicle ID
-   * @param {boolean} newVehicleState boolean that indicates the new Vehicle state
-   */
-  static updateVehicleState$(id, newVehicleState) {
-    const collection = mongoDB.db.collection(CollectionName);
-    
-    return defer(()=>
-        collection.findOneAndUpdate(
-          { _id: id},
-          {
-            $set: {state: newVehicleState.state}
-          },{
-            returnOriginal: false
-          }
-        )
-    ).pipe(
-      map(result => result && result.value ? result.value : undefined)
-    );
-  }
-
-  static updateVehicleFeatures$(id, newData) {
-    console.log(id, newData);
-    const collection = mongoDB.db.collection(CollectionName);
-    return defer(() => collection.findOneAndUpdate(
-      { _id: id },
-      {
-        $set: { features: newData.features }
-      },
-      {
-        returnOriginal: false
-      }
-    )
-    ).pipe(
-      map(result => result && result.value ? result.value : undefined)
-    );
-
   }
 
 }
