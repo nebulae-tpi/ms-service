@@ -66,7 +66,7 @@ type ServiceDriverVehicle {
   features: [String]
 }
 
-input FilterInput {
+input ServiceFilterInput {
   "ID of the business"
   businessId: String
   "Name"
@@ -75,7 +75,7 @@ input FilterInput {
   lastname: String
   "person ID"
   personId: String
-  "State"
+  "Driver state"
   state: Boolean
   "Creator user"
   creatorUser: String
@@ -94,12 +94,11 @@ input PaginationInput {
   sort: Int
 }
 
-
 type Query {
   "Get Drivers filtered "
-  ServiceDrivers(filterInput: FilterInput!, paginationInput: PaginationInput!): [ServiceDriver]
+  ServiceDrivers(filterInput: ServiceFilterInput!, paginationInput: PaginationInput!): [ServiceDriver]
   "Get the amount of Drivers filtered "
-  ServiceDriversSize(filterInput: FilterInput!): Int!
+  ServiceDriversSize(filterInput: ServiceFilterInput!): Int!
   "Get Driver by its id"
   ServiceDriver(id: String!): ServiceDriver
   "get the vehicles assigned to the related driver"
