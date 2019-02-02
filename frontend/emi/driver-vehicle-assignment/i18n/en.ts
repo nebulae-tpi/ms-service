@@ -24,6 +24,7 @@ export const locale = {
         FUEL_TYPE: 'Fuel type',
         BRAND: 'Brand',
         ACTIVE: 'Active',
+        ACTIONS: 'Actions',
         FUEL_TYPES: {
           GASOLINE: 'Gasoline',
           GAS: 'Gas',

@@ -80,10 +80,20 @@ class DriverES {
     handleVehicleAssigned$(VehicleAssignedEvent){
         return of(VehicleAssignedEvent.data.vehicleLicensePlate)
         .pipe(
-            tap(licensePlate => console.log("PLACA ==> ", licensePlate)),
             mergeMap(newVehicle => DriverDA.assignVehicle$(VehicleAssignedEvent.aid, newVehicle) ),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `VehicleVehicleUpdatedSubscription`, result))
         )
+    }
+
+    handleVehicleUnassigned$(VehicleUnassignedEvent){
+        console.log("#############   handleVehicleUnassigned   ##############", VehicleUnassignedEvent.aid,
+         VehicleUnassignedEvent.data.vehicleLicensePlate  );
+        
+        return of(VehicleUnassignedEvent.data.vehicleLicensePlate)
+        .pipe(
+            mergeMap(plate => DriverDA.unassignVehicle$(VehicleUnassignedEvent.aid, plate)),
+        );
+
     }
 
 }

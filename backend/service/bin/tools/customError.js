@@ -2,7 +2,8 @@
 // please use the prefix assigned to this micorservice
 const INTERNAL_SERVER_ERROR_CODE = 00001;
 const PERMISSION_DENIED = 00002;
-const LICENSE_PLATE_NOT_ALLOWED_TO_USE = {code: 23010, description: 'Vehicle license plate not allowed to use'};
+const LICENSE_PLATE_ALREADY_ASSIGNED = { code: 23011, description: 'Vehicle license ALREADY ASSIGNED'};
+const LICENSE_PLATE_NO_EXIST = { code: 23012, description: "Vehicle license plate don't exist"};
 
 /**
  * class to emcapsulute diferent errors.
@@ -49,5 +50,6 @@ class CustomError extends Error {
     DefaultError,
     INTERNAL_SERVER_ERROR_CODE,
     PERMISSION_DENIED,
-    LICENSE_PLATE_NOT_ALLOWED_TO_USE
+    LICENSE_PLATE_ALREADY_ASSIGNED,
+    LICENSE_PLATE_NO_EXIST
   } 

@@ -89,6 +89,15 @@ export const ServiceAssignVehicleToDriver = gql `
   }
 `;
 
+export const ServiceUnassignVehicleToDriver = gql `
+  mutation ServiceUnassignVehicleToDriver($driverId: String!, $vehiclePlate: String!){
+    ServiceUnassignVehicleToDriver(driverId: $driverId, vehiclePlate: $vehiclePlate){
+      code
+      message
+    }
+  }
+`;
+
 // SUBSCRIPTION
 export const ServiceDriverUpdatedSubscription = gql`
   subscription{

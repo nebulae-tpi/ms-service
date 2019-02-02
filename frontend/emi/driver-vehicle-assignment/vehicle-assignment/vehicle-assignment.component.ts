@@ -74,7 +74,8 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     'model',
     'fuelType',
     'brand',
-    'active'
+    'active',
+    'actions'
   ];
 
   constructor(
@@ -93,7 +94,6 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loaddriver();
-    this.listenPaginatorChanges();
     this.subscribeDriverUpdated();
     this.stopWaitingOperation();
   }
@@ -170,7 +170,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
 
   addVehicleToDriver(){
     console.log(this.assignmentForm.getRawValue());
-    this.vehicleAssignmentService.assignVehicleToDriver$( this.driver._id, this.assignmentForm.getRawValue().licensePlate)
+    this.vehicleAssignmentService.assignVehicleToDriver$( this.driver._id, this.assignmentForm.getRawValue().licensePlate.toUpperCase())
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter(r => !r.errors),
@@ -180,15 +180,19 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     .subscribe();
   }
 
-  selectDriverVehicle(rowData: any){
-    console.log(rowData);
-
-
+  removeVehicleFromDriver(vehicleRow: any){
+    console.log(vehicleRow);
+    this.vehicleAssignmentService.unassignVehicleToDriver$(this.driver._id, vehicleRow.licensePlate )
+    .pipe(
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter(r => !r.errors),
+      takeUntil(this.ngUnsubscribe),
+      tap(() => this.showMessageSnackbar(this.translationLoader.getTranslate().instant('DRIVER.VEHICLE_UNASSIGNED')))
+    )
+    .subscribe();
   }
 
-  listenPaginatorChanges(){
 
-  }
 
   graphQlAlarmsErrorHandler$(response) {
     return of(JSON.parse(JSON.stringify(response)))

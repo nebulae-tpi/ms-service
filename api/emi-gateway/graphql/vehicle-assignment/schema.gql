@@ -107,6 +107,7 @@ type Query {
 
 type Mutation {
   ServiceAssignVehicleToDriver(driverId: String!, vehiclePlate: String!): CommandResponse
+  ServiceUnassignVehicleToDriver(driverId: String!, vehiclePlate: String!): CommandResponse
 }
 
 type Subscription {

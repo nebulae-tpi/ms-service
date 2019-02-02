@@ -133,6 +133,28 @@ module.exports = {
               .toPromise();
           },
 
+          ServiceUnassignVehicleToDriver(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'unassignVehicleFromDriver',
+                PERMISSION_DENIED_ERROR_CODE,
+                'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN" ]
+                )
+              .pipe(
+                mergeMap(() =>
+                  context.broker.forwardAndGetReply$(
+                    "Driver",
+                    "emigateway.graphql.mutation.unassignVehicleFromDriver",
+                    { root, args, jwt: context.encodedToken },
+                    2000
+                  )
+                ),
+                catchError(err => handleError$(err, "persistBusiness")),
+                mergeMap(response => getResponseFromBackEnd$(response))
+              )
+              .toPromise();
+          },
+
     },
     //// SUBSCRIPTIONS ///////
     Subscription: {

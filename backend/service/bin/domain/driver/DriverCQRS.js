@@ -121,10 +121,37 @@ class DriverCQRS {
     )
       .pipe(
         mergeMap(() => DriverHelper.validateVehicleAsignment$(args.driverId, args.vehiclePlate)),
+        mergeMap( () => eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: "VehicleAssigned",
+            eventTypeVersion: 1,
+            aggregateType: "Driver",
+            aggregateId: args.driverId,
+            data: { vehicleLicensePlate: args.vehiclePlate },
+            user: authToken.preferred_username
+          }))          
+        ),
+        map(() => ({ code: 200, message: `${args.vehiclePlate} has been added to the driver with ID ${args.driverId}` })),
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err))
+      );
+  }
+
+  unassignVehicleFromDriver$({ args }, authToken) {
+    console.log(" CQRS assignVehicleToDriver$", args);
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Service",
+      "getDriverVehicles",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
+    )
+      .pipe(
+        mergeMap(() => DriverHelper.validateVehicleUnassignment$(args.driverId, args.vehiclePlate)),
         mergeMap(allowed => allowed
           ? eventSourcing.eventStore.emitEvent$(
             new Event({
-              eventType: "VehicleAssigned",
+              eventType: "VehicleUnassigned",
               eventTypeVersion: 1,
               aggregateType: "Driver",
               aggregateId: args.driverId,

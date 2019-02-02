@@ -8,7 +8,8 @@ import {
   ServiceDriver,
   ServiceDriverUpdatedSubscription,
   ServiceDriverVehicleList,
-  ServiceAssignVehicleToDriver
+  ServiceAssignVehicleToDriver,
+  ServiceUnassignVehicleToDriver
 } from '../gql/driverVehicleAssignment.js';
 
 @Injectable()
@@ -96,6 +97,19 @@ export class VehicleAssignmentService {
     return this.gateway.apollo
       .mutate<any>({
         mutation: ServiceAssignVehicleToDriver,
+        variables: {
+          driverId: driverId,
+          vehiclePlate: vehicleLicensePlate
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+  unassignVehicleToDriver$(driverId: string, vehicleLicensePlate: string) {
+    console.log('assignVehicleToDriver ==> ', driverId, vehicleLicensePlate);
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: ServiceUnassignVehicleToDriver,
         variables: {
           driverId: driverId,
           vehiclePlate: vehicleLicensePlate

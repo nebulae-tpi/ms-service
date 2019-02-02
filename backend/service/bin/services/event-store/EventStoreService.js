@@ -153,6 +153,10 @@ class EventStoreService {
       VehicleAssigned: {
         fn: DriverES.handleVehicleAssigned$,
         obj: DriverES
+      },
+      VehicleUnassigned: {
+        fn: DriverES.handleVehicleUnassigned$,
+        obj: DriverES
       }
     };
   }
@@ -193,6 +197,10 @@ class EventStoreService {
       {
         aggregateType: "Driver",
         eventType: "VehicleAssigned"
+      },
+      {
+        aggregateType: "Driver",
+        eventType: "VehicleUnassigned"
       },
     ]
   }

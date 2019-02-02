@@ -91,6 +91,16 @@
               </mat-cell>
             </ng-container>
 
+            <!-- ACTION Column -->
+          <ng-container cdkColumnDef="actions">
+            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{ "DRIVER.VEHICLE.ACTIONS" | translate }}</mat-header-cell>
+            <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
+                <button class="mr-8 ml-8"  mat-icon-button (click)="removeVehicleFromDriver(vehicle)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </mat-cell>
+          </ng-container>
+
 
 
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
