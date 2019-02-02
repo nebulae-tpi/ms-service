@@ -4,7 +4,7 @@ let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
 const CollectionName = "Vehicle";
 const { CustomError } = require("../tools/customError");
-const { map } = require("rxjs/operators");
+const { map, tap } = require("rxjs/operators");
 const { of, Observable, defer } = require("rxjs");
 
 class VehicleDA {
@@ -130,6 +130,21 @@ class VehicleDA {
     ).pipe(
       map(result => result && result.value ? result.value : undefined)
     );
+  }
+
+  static getDriverVehicles$(vehicleList){
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => 
+      collection.find(
+        { "licensePlate": { $in: vehicleList } }
+      )
+      .toArray()
+    )
+  }
+
+  static  getVehicleByPlate$(licensePlate){
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.findOne({licensePlate : licensePlate }))
   }
 
 }

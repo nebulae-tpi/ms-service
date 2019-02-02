@@ -22,6 +22,7 @@ class VehicleES {
      * @param {*} businessCreatedEvent business created event
      */
     handleVehicleCreated$(vehicleCreatedEvent) {  
+        console.log("#######################handleVehicleCreated$#############################");
         return of(vehicleCreatedEvent.data)
         .pipe(
             map(vehicle => ({
@@ -34,7 +35,7 @@ class VehicleES {
                 line: vehicle.generalInfo.line,
                 model: vehicle.generalInfo.model,
                 fuelType: vehicle.features.fuel,
-                features: vehicle.features.others.filter(f => f.active).map(e => e.name)
+                features: vehicle.features.others ? vehicle.features.others.filter(f => f.active).map(e => e.name) : []
             })),
             mergeMap(vehicle => VehicleDA.createVehicle$(vehicle)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result.ops[0]))

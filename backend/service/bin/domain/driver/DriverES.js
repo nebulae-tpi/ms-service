@@ -22,20 +22,21 @@ class DriverES {
      * @param {*} businessCreatedEvent business created event
      */
     handleDriverCreated$(driverCreatedEvent) { 
-        return offscreenBuffering(driverCreatedEvent.data)
+        console.log("########################## handleDriverCreated$ #################################");
+        return of(driverCreatedEvent.data)
         .pipe(
             map(driver => ({
                 _id: driver._id,
                 businessId: driver.businessId,
                 name: driver.generalInfo.name,
                 lastname: driver.generalInfo.lastname,
-                username: '---',
+                username: '',
                 active: driver.state,
                 blocks: [],
                 documentType: driver.generalInfo.documentType,
                 documentId: driver.generalInfo.document,
                 pmr: driver.generalInfo.pmr,
-                languages: driver.generalInfo.languages || [],
+                languages: driver.generalInfo.languages ? driver.generalInfo.languages.filter(l => l.active).map(i => i.name) : [],
                 phone: driver.generalInfo.phone,
                 assignedVehicles: []
             })),

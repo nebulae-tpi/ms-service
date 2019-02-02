@@ -40,7 +40,7 @@ type ServiceDriverGeneralInfo {
   "Driver lastname"
   lastname: String
   "Person ID"
-  personId: String
+  documentId: String
 }
 
 type ServiceDriverVehicle {
@@ -74,7 +74,7 @@ input ServiceFilterInput {
   "lastname"
   lastname: String
   "person ID"
-  personId: String
+  documentId: String
   "Driver state"
   state: Boolean
   "Creator user"

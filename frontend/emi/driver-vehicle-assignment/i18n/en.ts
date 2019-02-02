@@ -55,6 +55,7 @@ export const locale = {
     ERRORS: {
       1: 'Internal server error',
       2: 'Permission denied',
+      23010: 'License plate is not allowed'
     },
   }
 };

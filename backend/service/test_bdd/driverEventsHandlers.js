@@ -19,8 +19,8 @@ let VehicleDA = undefined;
 let mongoDB = undefined;
 let broker = undefined;
 
-// const dbName = `test-${uuidv4().toString().slice(0, 5)}-report`;
-const dbName = `reports`;
+// const dbName = `test-${uuidv4().toString().slice(0, 5)}-service`;
+const dbName = `service`;
 
 
 const environment = {
@@ -59,7 +59,7 @@ describe("BDD - MAIN TEST", function() {
   * PREAPARE
   */
     describe("Prepare test DB and backends", function () {
-        it("start reports bacend- and its Database", function (done) {
+        it("start service backend and its Database", function (done) {
             this.timeout(60000);
             Object.keys(environment).forEach(envKey => {
                 process.env[envKey] = environment[envKey];
@@ -109,38 +109,63 @@ describe("BDD - MAIN TEST", function() {
     });
 
   /*
-  * CREATE BUSINESS UNITS
+  * CREATE THE DRIVERS
   */
-  describe("Create the business units", function() {
+  describe("Create and update the drivers", function() {
+    this.timeout(7200000);
     // busines list demo
-    const businessList = [ 
-        { _id: "123_Metro_med", name: "Metro de Medellin" },
-        { _id: "123_Gana_Bog", name: "Gana de Bogota" },
-        { _id: "123_Gana_Cal", name: "Gana de Cali" },
-        { _id: "123_Gana_buc", name: "Gana de Bucaramanga" },
-        { _id: "123_gana_Bel", name: "Gana de Bello" },
-        { _id: "123_gana_Ita", name: "Gana de Itagui" }        
+    const driverList = [ 
+        { _id: uuidv4(), name: "juan", lastname: 'Santa' },     
+        { _id: uuidv4(), name: "camilo", lastname: 'toro' },     
+        { _id: uuidv4(), name: "sebas", lastname: 'zuluaga' },     
+        { _id: uuidv4(), name: "leon", lastname: 'duran' },     
+        { _id: uuidv4(), name: "daniel", lastname: 'stan' },     
+        { _id: uuidv4(), name: "fernando", lastname: 'torres' },     
+        { _id: uuidv4(), name: "esteban", lastname: 'soto' },     
+        { _id: uuidv4(), name: "andres", lastname: 'ramirez' },     
      ]; 
 
-    it("Create the busines units", function(done) {
-      from(businessList)
+    it("Create the 10 drivers", function(done) {
+      from(driverList)
         .pipe(
-          delay(20),
-          // send the command to create the business
-          mergeMap(bu =>
+          // send the command to create the drivers
+          tap(d => console.log("ejecutando al usuario con ID ==> ", d._id)),          
+          concatMap(driver =>
             broker.send$("Events", "", {
-              et: "BusinessCreated",
+              et: "DriverCreated",
               etv: 1,
-              at: "Business",
-              aid: bu._id,
-              data: { generalInfo: bu, _id: bu._id },
+              at: "Driver",
+              aid: driver._id,
+              data: {
+                _id: uuidv4(),
+                creatorUser: "juan.santa",
+                creationTimestamp: new Date().getTime(),
+                modifierUser: "juan.santa",
+                modificationTimestamp: new Date().getTime(),
+                generalInfo: {
+                  documentType: 'CC',
+                  document: '1045098765',
+                  name: driver.name,
+                  lastname: driver.lastname,
+                  email: `${driver.name}.${driver.lastname}@email.com`,
+                  phone: 3125248898,
+                  languages: [{ name: "EN", active: true }, { name: "FR", active: false },],
+                  gender: 'M',
+                  pmr: false
+                },
+                state: true,
+                businessId: 'q1w2-e3-r4t5-y6u7-u7i8'
+              },
               user: "juan.santa",
               timestamp: Date.now(),
               av: 164
             })
-          ),
+              .pipe(
+                delay(200)
+              )
+          ), 
           toArray(),
-          delay(1000)
+          tap(r => console.log(r)),
         )
         .subscribe(
           evt => {},
@@ -154,135 +179,212 @@ describe("BDD - MAIN TEST", function() {
 
   });
 
+
+
   /**
-   * generate the 100 walletSpendingCommits
+   * CREATE THE VEHICLES
    */
-  describe("process 50 CivicaCardReload events and check results", function() {
-    const businessList = [ 
-        { _id: "123_Metro_med", name: "Metro de Medellin" },
-        { _id: "123_Gana_Bog", name: "Gana de Bogota" },
-        { _id: "123_Gana_Cal", name: "Gana de Cali" },
-        { _id: "123_Gana_buc", name: "Gana de Bucaramanga" },
-        { _id: "123_gana_Bel", name: "Gana de Bello" },
-        { _id: "123_gana_Ita", name: "Gana de Itagui" }        
-     ];
-    let valuesInTest = [1250,24300,10850,15100,49300,46800,18750,21350,26600,8450,11850,45300,5400,44550,40200,44100,18500,2000,250,16650,21800,
-      26200,47600,8750,37050,43050,34650,11500,44950,10150,3150,28100,13200,41200,1150,4500,46300,20650,37950,26350,36850,48300,8750,37250,16250,
-      14950,36600,20150,41000,34150,34850,35750,6550,4650,39800,38300,49950,1700,24450,49750,19100,40850,35650,46400,48350,1450,17950,33500,33650,
-      15450,49450,11900,27050,39950,37150,36450,20050,44150,3050,16350,46400,30500,45300,6450,28700,30350,26850,27450,40100,24250,1950,11700,41800,
-      25100,32700,44300,44550,48900,45600,9300];
+  describe("Create the vehicles", function() {
+    // busines list demo
+    const vehicleList = [ 
+      { _id: uuidv4(), plate: "RGT345" },
+      { _id: uuidv4(), plate: "JGI259" },
+      { _id: uuidv4(), plate: "KIJ765" },
+      { _id: uuidv4(), plate: "DFR346" },
+      { _id: uuidv4(), plate: "DCF456" },
+      { _id: uuidv4(), plate: "AXD230" },
+      { _id: uuidv4(), plate: "SED347" },
+      { _id: uuidv4(), plate: "CFU572" }        
+     ]; 
 
-      /**
-       * 
-       * @param {coordinates} center 
-       * @param {number} radius 
-       */
-      const GenerateRandomLocation = function(center, rMin, rMax){
-        return [
-            center[0] + Math.pow(-1, Math.floor( Math.random() * 2 )) * ( Math.random()*(rMax-rMin)+rMin),
-            center[1] + Math.pow(-1, Math.floor( Math.random() * 2 )) * ( Math.random()*(rMax-rMin)+rMin)
-        ];
-      };
-
-      const center = [6.2219034, -75.5804876];
-      const radiusMin = 0.005;
-      const radiusMax = 0.07;
-
-      /**
-       * 
-       * @param {number} index 
-       * @param {number} qty 
-       * @param {string} businessId 
-       * @param {number} delayTime 
-       */
-      const civicaCardReloadEventsEmitter = function(index, qty, delayTime = 0) {
-        return range(index, qty).pipe(
-          concatMap(i =>
-            of(businessList[Math.floor(Math.random() * businessList.length)]._id).pipe(
-              mergeMap((businessId) =>
-                broker.send$("Events", "", {
-                  et: "CivicaCardReload",
-                  etv: 1,
-                  at: "CivicaCard",
-                  aid: uuidv4(),
-                  data: {
-                    businessId: businessId,
-                    value: valuesInTest[0],
-                    receipt : {
-                        id: uuidv4(),
-                        timestamp: Date.now(),
-                        reloadValue: valuesInTest[0],
-                        cardInitialValue: 0,
-                        cardFinalValue: valuesInTest[0],
-                        businesId: businessId,
-                        posId: uuidv4(),
-                        posUserName: 'Felipe',
-                        posUserId: '123_felipe',
-                        posTerminal: null
-                    },
-                    initialCard: {},
-                    finalCard: {},
-                    location: { type: "Point", coordinates: GenerateRandomLocation(center, radiusMin, radiusMax) }
-                  },
-                  user: "juan.santa",
-                  timestamp: Date.now(),
-                  av: 164
-                })
-              ),
-              delay(delayTime)
-            )
-          )
-        );
-      };
-
-      const logger = function(qty, delayTime) {
-        return range(0, qty).pipe(
-          concatMap(i =>
-            of(i).pipe(
-              tap(() => console.log(`${i} of ${qty}`)),
-              delay(delayTime)
-            )
-          )
-        );
-      };
-
-    it("process 50 CivicaCardReload", function(done) {
+    it("Create the 10 vehicles", function(done) {
       this.timeout(7200000);
-
-      const timesToSendEvent = 50;
-      const delayToSendEachPackage = 200;
-      // const valuesInTest_ = [...Array(100)].map(e => {
-      //   const randomNumner = Math.floor(Math.random() * 50000);
-      //   return randomNumner - (randomNumner % 50);
-      // });
-      // console.log(JSON.stringify(valuesInTest_));
-
-      of({})
+      from(vehicleList)
         .pipe(
-          mergeMap(() =>
-            concat(
-              // commitsEmitter(0, 1, businessList[0]._id, delayToSendEachPackage),
-              forkJoin(
-                civicaCardReloadEventsEmitter(0, 
-                    timesToSendEvent,
-                    delayToSendEachPackage
-                ),
-                logger(timesToSendEvent, delayToSendEachPackage)
-              )
+          delay(20),
+          // send the command to create the drivers
+          tap(v => console.log("ejecutando al vehiculo con ID ==> ", v._id)),
+          concatMap(vehicle =>
+            broker.send$("Events", "", {
+              et: "VehicleCreated",
+              etv: 1,
+              at: "Vehicle",
+              aid: vehicle._id,
+              data: {
+                _id: uuidv4(),
+                creatorUser: "juan.santa",
+                creationTimestamp: new Date().getTime(),
+                modifierUser: "juan.santa",
+                modificationTimestamp: new Date().getTime(),
+                generalInfo: {
+                  licensePlate: vehicle.plate,
+                  model: 2014,
+                  brand: "MAZDA",
+                  line: 'SPORT'
+                },
+                features: {
+                  fuel: 'GASOLINE',
+                  capacity: 4,
+                  oters: [{name: "AC", active: true}, { name: "PETS", active: false }]
+                },
+                blockings: [],
+                state: true,
+                businessId: 'q1w2-e3-r4t5-y6u7-u7i8'
+              },
+              user: "juan.santa",
+              timestamp: Date.now(),
+              av: 164
+            })
+            .pipe(
+              delay(200)
             )
-          ),
-          toArray()          
+          ), 
+          delay(500),
+          toArray(),
+          tap(r => console.log(r)),
         )
         .subscribe(
-          () => console.log( "##### 50 CIVICA_CARD_RELOAD EVENTS SENT" ),
+          evt => {},
           error => {
-            console.log(error);
+            console.error(`sent message failded ${error}`);
             return done(error);
           },
           () => done()
         );
     });
+
   });
+
+
+  /**
+   * generate the 100 walletSpendingCommits
+   */
+  // describe("process 50 CivicaCardReload events and check results", function() {
+  //   const businessList = [ 
+  //       { _id: "123_Metro_med", name: "Metro de Medellin" },
+  //       { _id: "123_Gana_Bog", name: "Gana de Bogota" },
+  //       { _id: "123_Gana_Cal", name: "Gana de Cali" },
+  //       { _id: "123_Gana_buc", name: "Gana de Bucaramanga" },
+  //       { _id: "123_gana_Bel", name: "Gana de Bello" },
+  //       { _id: "123_gana_Ita", name: "Gana de Itagui" }        
+  //    ];
+  //   let valuesInTest = [1250,24300,10850,15100,49300,46800,18750,21350,26600,8450,11850,45300,5400,44550,40200,44100,18500,2000,250,16650,21800,
+  //     26200,47600,8750,37050,43050,34650,11500,44950,10150,3150,28100,13200,41200,1150,4500,46300,20650,37950,26350,36850,48300,8750,37250,16250,
+  //     14950,36600,20150,41000,34150,34850,35750,6550,4650,39800,38300,49950,1700,24450,49750,19100,40850,35650,46400,48350,1450,17950,33500,33650,
+  //     15450,49450,11900,27050,39950,37150,36450,20050,44150,3050,16350,46400,30500,45300,6450,28700,30350,26850,27450,40100,24250,1950,11700,41800,
+  //     25100,32700,44300,44550,48900,45600,9300];
+
+  //     /**
+  //      * 
+  //      * @param {coordinates} center 
+  //      * @param {number} radius 
+  //      */
+  //     const GenerateRandomLocation = function(center, rMin, rMax){
+  //       return [
+  //           center[0] + Math.pow(-1, Math.floor( Math.random() * 2 )) * ( Math.random()*(rMax-rMin)+rMin),
+  //           center[1] + Math.pow(-1, Math.floor( Math.random() * 2 )) * ( Math.random()*(rMax-rMin)+rMin)
+  //       ];
+  //     };
+
+  //     const center = [6.2219034, -75.5804876];
+  //     const radiusMin = 0.005;
+  //     const radiusMax = 0.07;
+
+  //     /**
+  //      * 
+  //      * @param {number} index 
+  //      * @param {number} qty 
+  //      * @param {string} businessId 
+  //      * @param {number} delayTime 
+  //      */
+  //     const civicaCardReloadEventsEmitter = function(index, qty, delayTime = 0) {
+  //       return range(index, qty).pipe(
+  //         concatMap(i =>
+  //           of(businessList[Math.floor(Math.random() * businessList.length)]._id).pipe(
+  //             mergeMap((businessId) =>
+  //               broker.send$("Events", "", {
+  //                 et: "CivicaCardReload",
+  //                 etv: 1,
+  //                 at: "CivicaCard",
+  //                 aid: uuidv4(),
+  //                 data: {
+  //                   businessId: businessId,
+  //                   value: valuesInTest[0],
+  //                   receipt : {
+  //                       id: uuidv4(),
+  //                       timestamp: Date.now(),
+  //                       reloadValue: valuesInTest[0],
+  //                       cardInitialValue: 0,
+  //                       cardFinalValue: valuesInTest[0],
+  //                       businesId: businessId,
+  //                       posId: uuidv4(),
+  //                       posUserName: 'Felipe',
+  //                       posUserId: '123_felipe',
+  //                       posTerminal: null
+  //                   },
+  //                   initialCard: {},
+  //                   finalCard: {},
+  //                   location: { type: "Point", coordinates: GenerateRandomLocation(center, radiusMin, radiusMax) }
+  //                 },
+  //                 user: "juan.santa",
+  //                 timestamp: Date.now(),
+  //                 av: 164
+  //               })
+  //             ),
+  //             delay(delayTime)
+  //           )
+  //         )
+  //       );
+  //     };
+
+  //     const logger = function(qty, delayTime) {
+  //       return range(0, qty).pipe(
+  //         concatMap(i =>
+  //           of(i).pipe(
+  //             tap(() => console.log(`${i} of ${qty}`)),
+  //             delay(delayTime)
+  //           )
+  //         )
+  //       );
+  //     };
+
+  //   it("process 50 CivicaCardReload", function(done) {
+  //     this.timeout(7200000);
+
+  //     const timesToSendEvent = 50;
+  //     const delayToSendEachPackage = 200;
+  //     // const valuesInTest_ = [...Array(100)].map(e => {
+  //     //   const randomNumner = Math.floor(Math.random() * 50000);
+  //     //   return randomNumner - (randomNumner % 50);
+  //     // });
+  //     // console.log(JSON.stringify(valuesInTest_));
+
+  //     of({})
+  //       .pipe(
+  //         mergeMap(() =>
+  //           concat(
+  //             // commitsEmitter(0, 1, businessList[0]._id, delayToSendEachPackage),
+  //             forkJoin(
+  //               civicaCardReloadEventsEmitter(0, 
+  //                   timesToSendEvent,
+  //                   delayToSendEachPackage
+  //               ),
+  //               logger(timesToSendEvent, delayToSendEachPackage)
+  //             )
+  //           )
+  //         ),
+  //         toArray()          
+  //       )
+  //       .subscribe(
+  //         () => console.log( "##### 50 CIVICA_CARD_RELOAD EVENTS SENT" ),
+  //         error => {
+  //           console.log(error);
+  //           return done(error);
+  //         },
+  //         () => done()
+  //       );
+  //   });
+  // });
 
   /**
    * wait for all transactions

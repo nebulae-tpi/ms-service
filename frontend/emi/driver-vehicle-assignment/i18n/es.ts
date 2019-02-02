@@ -54,6 +54,7 @@ export const locale = {
     ERRORS: {
       1: 'Error interno de servidor',
       2: 'Permiso denegado.',
+      23010: 'Vehículo no permitido'
     }
   }
 };

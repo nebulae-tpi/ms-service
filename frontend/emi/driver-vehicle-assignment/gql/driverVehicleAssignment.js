@@ -20,7 +20,7 @@ export const ServiceDriver = gql`
 `;
 
 export const ServiceDrivers = gql`
-  query ServiceDrivers($filterInput: FilterInput!, $paginationInput: PaginationInput!) {
+  query ServiceDrivers($filterInput: ServiceFilterInput!, $paginationInput: PaginationInput!) {
     ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {
       _id
       businessId
@@ -40,7 +40,7 @@ export const ServiceDrivers = gql`
 `;
 
 export const ServiceDriversSize = gql`
-  query ServiceDriversSize($filterInput: FilterInput!) {
+  query ServiceDriversSize($filterInput: ServiceFilterInput!) {
     ServiceDriversSize(filterInput: $filterInput)
   }
 `;

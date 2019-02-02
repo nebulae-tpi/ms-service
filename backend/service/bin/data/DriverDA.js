@@ -48,20 +48,16 @@ class DriverDA {
     }
 
     if (filter.name) {
-      query["generalInfo.name"] = { $regex: filter.name, $options: "i" };
+      query["name"] = { $regex: filter.name, $options: "i" };
+    }
+    if (filter.lastname) {
+      query["lastname"] = { $regex: filter.lastname, $options: "i" };
+    }
+    if (filter.documentId) {
+      query["documentId"] = { $regex: filter.documentId, $options: "i" };
     }
 
-    if (filter.creationTimestamp) {
-      query.creationTimestamp = filter.creationTimestamp;
-    }
-
-    if (filter.creatorUser) {
-      query.creatorUser = { $regex: filter.creatorUser, $options: "i" };
-    }
-
-    if (filter.modifierUser) {
-      query.modifierUser = { $regex: filter.modifierUser, $options: "i" };
-    }
+  
 
     const cursor = collection
       .find(query)

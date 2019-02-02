@@ -180,7 +180,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
     this.filterForm = this.formBuilder.group({
       name: [null],
       lastname: [null],
-      personId: [null]
+      documentId: [null]
     });
 
     this.filterForm.disable({
@@ -258,7 +258,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
           businessId: selectedBusiness ? selectedBusiness.id : null,
           name: filterValue.name,
           lastname: filterValue.lastname,
-          personId: filterValue.personId,
+          documentId: filterValue.documentId,
           creatorUser: filterValue.creatorUser,
           creationTimestamp: filterValue.creationTimestamp ? filterValue.creationTimestamp.valueOf() : null
         };

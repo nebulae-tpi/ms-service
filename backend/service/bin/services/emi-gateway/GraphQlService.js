@@ -160,18 +160,6 @@ class GraphQlService {
       },
       {
         aggregateType: "Driver",
-        messageType: "emigateway.graphql.mutation.ServiceCreateDriver"
-      },
-      {
-        aggregateType: "Driver",
-        messageType: "emigateway.graphql.mutation.ServiceUpdateDriverGeneralInfo"
-      },
-      {
-        aggregateType: "Driver",
-        messageType: "emigateway.graphql.mutation.ServiceUpdateDriverState"
-      },
-      {
-        aggregateType: "Driver",
         messageType: "emigateway.graphql.query.serviceDriverVehicleList"
       },
       {
@@ -213,21 +201,9 @@ class GraphQlService {
         fn: DriverCQRS.getDriver$,
         obj: DriverCQRS
       },
-      "emigateway.graphql.mutation.ServiceCreateDriver": {
-        fn: DriverCQRS.createDriver$,
-        obj: DriverCQRS
-      }, 
-      "emigateway.graphql.mutation.ServiceUpdateDriverGeneralInfo": {
-        fn: DriverCQRS.updateDriverGeneralInfo$,
-        obj: DriverCQRS
-      },
-      "emigateway.graphql.mutation.ServiceUpdateDriverState": {
-        fn: DriverCQRS.updateDriverState$,
-        obj: DriverCQRS
-      },
       "emigateway.graphql.query.serviceDriverVehicleList": {
-        fn: ServiceCQRS.getDriverVehicles$,
-        obj: ServiceCQRS
+        fn: DriverCQRS.getDriverVehicles$,
+        obj: DriverCQRS
       },
       "emigateway.graphql.mutation.assignVehicleToDriver": {
         fn: DriverCQRS.assignVehicleToDriver$,

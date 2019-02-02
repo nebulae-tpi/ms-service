@@ -16,7 +16,7 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
-import { map, mergeMap, tap, takeUntil, take, combineLatest } from 'rxjs/operators';
+import { map, mergeMap, tap, takeUntil, take, combineLatest, filter } from 'rxjs/operators';
 import { Subject, of, forkJoin} from 'rxjs';
 
 //////////// ANGULAR MATERIAL ///////////
@@ -172,8 +172,11 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     console.log(this.assignmentForm.getRawValue());
     this.vehicleAssignmentService.assignVehicleToDriver$( this.driver._id, this.assignmentForm.getRawValue().licensePlate)
     .pipe(
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter(r => !r.errors),
       tap(r => console.log('RESPONSE ==> ', r)),
-      takeUntil(this.ngUnsubscribe)
+      takeUntil(this.ngUnsubscribe),
+      tap(() => this.showMessageSnackbar('Vehiculo asignado') )
     )
     .subscribe();
   }
@@ -188,6 +191,66 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
 
   }
 
+  graphQlAlarmsErrorHandler$(response) {
+    return of(JSON.parse(JSON.stringify(response)))
+      .pipe(
+        tap((resp: any) => {
+          this.showSnackBarError(resp);
+          return resp;
+        })
+      );
+  }
+
+  /**
+   * Shows an error snackbar
+   * @param response
+   */
+  showSnackBarError(response) {
+    if (response.errors) {
+      if (Array.isArray(response.errors)) {
+        response.errors.forEach(error => {
+          if (Array.isArray(error)) {
+            error.forEach(errorDetail => {
+              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
+            });
+          } else {
+            response.errors.forEach( err => {
+              this.showMessageSnackbar('ERRORS.' + err.message.code);
+            });
+          }
+        });
+      }
+    }
+  }
+
+
+  /**
+   * Shows a message snackbar on the bottom of the page
+   * @param messageKey Key of the message to i18n
+   * @param detailMessageKey Key of the detail message to i18n
+   */
+  showMessageSnackbar(messageKey, detailMessageKey?) {
+    const translationData = [];
+    if (messageKey) {
+      translationData.push(messageKey);
+    }
+
+    if (detailMessageKey) {
+      translationData.push(detailMessageKey);
+    }
+
+    this.translate.get(translationData)
+      .subscribe(data => {
+        this.snackBar.open(
+          messageKey ? data[messageKey] : '',
+          detailMessageKey ? data[detailMessageKey] : '',
+          {
+            duration: 4000
+          }
+        );
+      });
+  }
+
 
   stopWaitingOperation(){
     this.ngUnsubscribe.pipe(
@@ -199,7 +262,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
       this.translationLoader.getTranslate().instant('DRIVER.CLOSE'), {
-        duration: 2000
+        duration: 4000
       });
   }
 
