@@ -174,9 +174,8 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter(r => !r.errors),
-      tap(r => console.log('RESPONSE ==> ', r)),
       takeUntil(this.ngUnsubscribe),
-      tap(() => this.showMessageSnackbar('Vehiculo asignado') )
+      tap(() => this.showMessageSnackbar(this.translationLoader.getTranslate().instant('DRIVER.VEHICLE_ASSIGNED')))
     )
     .subscribe();
   }

@@ -23,7 +23,14 @@ export const locale = {
         MODEL: 'Model',
         FUEL_TYPE: 'Fuel type',
         BRAND: 'Brand',
-        ACTIVE: 'Active'
+        ACTIVE: 'Active',
+        FUEL_TYPES: {
+          GASOLINE: 'Gasoline',
+          GAS: 'Gas',
+          GASOLINE_AND_GAS: 'Gasoline and Gas',
+          DIESEL: 'Diesel',
+          ELECTRIC: 'Electricity'
+        }
       },
       LICENSE_PLATE: 'License plate',
       DETAILS: {
@@ -50,7 +57,8 @@ export const locale = {
       CLOSE: 'Close',
       WAIT_OPERATION: 'Operation in process, in case of not receiving an answer, verify if the changes made were applied successfully.',
       SELECT_BUSINESS: 'You must select a business unit before performing the creation.',
-      ERROR_OPERATION: 'Error performing operation'
+      ERROR_OPERATION: 'Error performing operation',
+      VEHICLE_ASSIGNED: 'Vehicle assigned'
     },
     ERRORS: {
       1: 'Internal server error',

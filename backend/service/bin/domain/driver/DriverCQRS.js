@@ -1,7 +1,8 @@
 "use strict";
 
 const uuidv4 = require("uuid/v4");
-const { of, interval, from, throwError } = require("rxjs");
+const { of, interval, from, throwError, forkJoin } = require("rxjs");
+const { take, mergeMap, catchError, map, toArray, tap } = require('rxjs/operators');
 const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
 const DriverDA = require("../../data/DriverDA");
@@ -10,7 +11,7 @@ const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
 const GraphqlResponseTools = require('../../tools/GraphqlResponseTools');
 const RoleValidator = require("../../tools/RoleValidator");
-const { take, mergeMap, catchError, map, toArray, tap } = require('rxjs/operators');
+const DriverHelper = require('./DriverHelper');
 const {
   CustomError,
   DefaultError,
@@ -117,29 +118,29 @@ class DriverCQRS {
       "getDriverVehicles",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
-    ).pipe(
-      mergeMap(() => VehicleDA.getVehicleByPlate$(args.vehiclePlate)),
-      
-      mergeMap((vehicleFound) => vehicleFound != null
-        ? eventSourcing.eventStore.emitEvent$(
-          new Event({
-            eventType: "VehicleAssigned",
-            eventTypeVersion: 1,
-            aggregateType: "Driver",
-            aggregateId: args.driverId,
-            data: { vehicleLicensePlate: args.vehiclePlate },
-            user: authToken.preferred_username
-          }))
-        : throwError(new CustomError(
-          'License Plate not allowed',
-          'assignVehicleToDriver',
-          LICENSE_PLATE_NOT_ALLOWED_TO_USE.code,
-          LICENSE_PLATE_NOT_ALLOWED_TO_USE.description))
-      ),
-      map(() => ({ code: 200, message: `${args.vehiclePlate} has been added to the driver with ID ${args.driverId}` })),
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-      catchError(err => GraphqlResponseTools.handleError$(err))
-    );
+    )
+      .pipe(
+        mergeMap(() => DriverHelper.validateVehicleAsignment$(args.driverId, args.vehiclePlate)),
+        mergeMap(allowed => allowed
+          ? eventSourcing.eventStore.emitEvent$(
+            new Event({
+              eventType: "VehicleAssigned",
+              eventTypeVersion: 1,
+              aggregateType: "Driver",
+              aggregateId: args.driverId,
+              data: { vehicleLicensePlate: args.vehiclePlate },
+              user: authToken.preferred_username
+            }))
+          : throwError(new CustomError(
+            'License Plate not allowed',
+            'assignVehicleToDriver',
+            LICENSE_PLATE_NOT_ALLOWED_TO_USE.code,
+            LICENSE_PLATE_NOT_ALLOWED_TO_USE.description))
+        ),
+        map(() => ({ code: 200, message: `${args.vehiclePlate} has been added to the driver with ID ${args.driverId}` })),
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err))
+      );
   }
 
   getDriverVehicles$({ args }, authToken) {
