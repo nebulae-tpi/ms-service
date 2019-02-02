@@ -70,7 +70,7 @@
           <ng-container cdkColumnDef="fuelType">
             <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE.FUEL_TYPE" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let vehicle">
-              <p class="text-truncate"> {{ 'DRIVER.VEHICLE.FUEL_TYPES' + vehicle.fuelType | translate  }} </p>
+              <p class="text-truncate"> {{ 'DRIVER.VEHICLE.FUEL_TYPES.' + vehicle.fuelType | translate  }} </p>
             </mat-cell>
           </ng-container>
 
