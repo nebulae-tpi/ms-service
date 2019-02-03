@@ -195,7 +195,6 @@ eventDescriptors.forEach(descriptor => {
         .getMaterializedViewsUpdates$([descriptor.backendEventName])
         .subscribe(
             evt => {
-                console.log("##### ===> ", evt);
                 if (descriptor.onEvent) {
                     descriptor.onEvent(evt, descriptor);
                 }
