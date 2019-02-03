@@ -3,6 +3,7 @@
 const { tap, mergeMap, catchError, map, mapTo, delay, toArray, groupBy, filter } = require('rxjs/operators');
 const { Subject, of, from, forkJoin, interval, defer, concat } = require('rxjs');
 const fs = require('fs');
+const CsvReadableStream = require('csv-reader');     
 const es = require('event-stream');
 const broker = require("../bin/tools/broker/BrokerFactory")();
 const FILE_PATH = './test_bdd/driverVsVehicles.csv';
@@ -20,14 +21,13 @@ class DriverMapperHelper {
         //   });
 
         return new Promise((resolve, reject) => {
-            let lines = [];
-            // console.log('LAs lineas totales son ', totalLines);
-            var s = fs.createReadStream(`${FILE_PATH}`)
+            const inputStream = fs.createReadStream(`${FILE_PATH}`, 'utf8')
                 .pipe(es.split())
                 .pipe(es.mapSync(function (line) {
-                    s.pause();
-                    const lineSplited = line.split(',');
-                    lineSplited.forEach((v, i) => lineSplited[i] = v.trim());
+                    inputStream.pause();
+                    var regex = /(\s*'[^']+'|\s*[^,]+)(?=,|$)/g;
+                    var lineSplited = line.replace( /"/g, "'" ).match(regex);
+                    lineSplited.forEach((v, i) => lineSplited[i] = v.trim())
 
                     of(lineSplited)
                         .pipe(
@@ -35,10 +35,20 @@ class DriverMapperHelper {
                             tap(t => console.log(t)),
                             // tap(t => console.log(t.vehicle.fuelType + "---" + t.vehicle.features))
                             
-                        ).subscribe(() => s.resume(), err => reject(err), () => { })
+                        ).subscribe(() => inputStream.resume(), err => reject(err), () => { })
 
-
-
+                        // var inputStream = fs.createReadStream(FILE_PATH, 'utf8');            
+                        // inputStream
+                        //     .pipe(CsvReadableStream({ parseNumbers: true, parseBooleans: true, trim: true }))
+                        //     .on('data', function (row) {
+                        //         inputStream.pause();
+                        //         console.log('A row arrived: ', row);
+                        //     })
+                        //     .on('end', function (data) {
+                        //         console.log('No more rows!');
+                        //         console.log("TERMINA ACA");
+                        //         resolve({});
+                        //     });
                 })
                     .on('error', function (err) { reject(err); })
                     .on('end', function () {
@@ -46,6 +56,9 @@ class DriverMapperHelper {
                         resolve({});
                     })
                 )
+                   
+        
+ 
 
 
         });
@@ -70,6 +83,9 @@ class DriverMapperHelper {
                 features: lineAsArray[12]
             }
         })
+        .pipe(
+            delay(1000)
+        )
     }
 }
 /**

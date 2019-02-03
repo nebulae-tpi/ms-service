@@ -111,7 +111,7 @@ describe("BDD - MAIN TEST", function() {
 
     describe("Prepare test DB and backends", function () {
       it("start service backend and its Database", function (done) {
-        this.timeout(60000);
+        this.timeout(600000);
 
         return defer(() => DriverMapperHelper.processFile$() )
           .subscribe(evt => console.log(evt),
