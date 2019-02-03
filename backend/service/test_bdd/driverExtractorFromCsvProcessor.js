@@ -2,10 +2,31 @@
 const assert = require("assert");
 const uuidv4 = require("uuid/v4");
 const expect = require("chai").expect;
-const DriverMapperHelper = require("./driverMapperHelper");
 
-const { take, mergeMap, map, tap,delay, toArray, reduce, concatMap, filter } = require("rxjs/operators");
-const {forkJoin, of, interval, concat, from, observable, bindNodeCallback, defer, range } = require("rxjs");
+const fs = require('fs');   
+const es = require('event-stream');
+
+const FILE_PATH = './test_bdd/driverVsVehicles.csv';
+
+const KeyCloak = require('./Keycloak');
+const GraphQL = require('./GraphQl');
+const graphQL = new GraphQL();
+const keyCloak = new KeyCloak();
+
+const DriverGraphQlHelper = require("./driverGraphQlHelper");
+const VehicleGraphQlHelper = require("./vehicleGraphQlHelper");
+
+const getRxDefaultSubscription = (evtText, done) => {
+    return [
+        (evt) => console.log(`${evtText}: ${JSON.stringify(evt)}`),
+        (error) => { logError(error); done(error); },
+        () => done()
+    ];
+};
+
+
+const { take, mergeMap, map, tap,delay, toArray, reduce, concatMap, filter, catchError } = require("rxjs/operators");
+const {forkJoin, of, interval, concat, from, observable, bindNodeCallback, defer, range, merge, throwError } = require("rxjs");
 
 //LIBS FOR TESTING
 const MqttBroker = require("../bin/tools/broker/MqttBroker");
@@ -60,6 +81,29 @@ describe("BDD - MAIN TEST", function() {
   * PREAPARE
   */
     describe("Prepare test DB and backends", function () {
+
+        it("start MQTT broker", function (done) {
+            broker = new MqttBroker({
+                mqttServerUrl: process.env.MQTT_SERVER_URL,
+                replyTimeout: process.env.REPLY_TIMEOUT || 2000
+            });
+            done();
+        });
+
+        it('connect hardware and servers', function (done) {
+            this.timeout(5000);
+            merge(
+                keyCloak.logIn$().pipe(
+                    tap(() => graphQL.jwt = keyCloak.jwt),
+                    mergeMap(() => graphQL.connect$()),
+                    mergeMap(() => graphQL.testConnection$()),
+                    tap(r => console.log("TEST conection respons => ", r))
+                ),
+                // broker.start$()
+
+            ).subscribe(...getRxDefaultSubscription('Prepare:connect hardware and servers', done));
+        });
+
         it("start service backend and its Database", function (done) {
             this.timeout(60000);
             Object.keys(environment).forEach(envKey => {
@@ -83,8 +127,7 @@ describe("BDD - MAIN TEST", function() {
                             mongoDB.start$(),
                             DriverDA.start$(),
                             ServiceDA.start$(),
-                            VehicleDA.start$(),
-
+                            VehicleDA.start$()
                         )
                     )
                 )
@@ -99,184 +142,98 @@ describe("BDD - MAIN TEST", function() {
                         return done();
                     }
                 );
-        }),
-        it("start MQTT broker", function (done) {
-            broker = new MqttBroker({
-                mqttServerUrl: process.env.MQTT_SERVER_URL,
-                replyTimeout: process.env.REPLY_TIMEOUT || 2000
-            });
-            done();
         });
+
+      
     });
 
     describe("Prepare test DB and backends", function () {
-      it("start service backend and its Database", function (done) {
-        this.timeout(600000);
+        it("start service backend and its Database", function (done) {
+            this.timeout(600000);
+            const DriverMapperHelper = require("./driverMapperHelper");
 
-        return defer(() => DriverMapperHelper.processFile$() )
-          .subscribe(evt => console.log(evt),
-            error => {
-              console.error("Failed to start", error);
-              //process.exit(1);
-              return done(error);
-            },
-            () => {
-              console.log("reports server started");
-              return done();
-            }
-          );
-      });
-  });
+            return defer(() => {
+                const that = this;
+                return new Promise((resolve, reject) => {
+                    const documentIds = [];
+                    const inputStream = fs.createReadStream(`${FILE_PATH}`, 'utf8')
+                        .pipe(es.split())
+                        .pipe(es.mapSync(function (line) {
+                            inputStream.pause();
+                            const lineSplited = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/);
+                            lineSplited.map(i => i.trim());
+                            of(lineSplited)
+                                .pipe(
+                                    map(lineSplited => {
+                                        if (!documentIds.includes(lineSplited[3])) {
+                                            documentIds.push(lineSplited[3]);
+                                            return lineSplited;
+                                        } else {
+                                            console.log(`${lineSplited[3]} already processed`)
+                                            return null;
+                                        }
+                                    }),
+                                    mergeMap(driverVehicleInfo => driverVehicleInfo === null
+                                        ? of({})
+                                        : DriverMapperHelper.mapToDriverVehicleObj$(driverVehicleInfo)
+                                            .pipe(
+                                                mergeMap(({driver, vehicle}) => forkJoin(
+                                                    DriverGraphQlHelper.createDriver$(graphQL, driver)
+                                                        .pipe(
+                                                            catchError(error => {
+                                                                if(error.message.code == 22010){
+                                                                    console.log(error.message.msg)
+                                                                    return of(null);
+                                                                }else{
+                                                                    return throwError(error)
+                                                                }
+                                                               
+                                                            })
+                                                        ),
+                                                    VehicleGraphQlHelper.createVehicle$(graphQL, vehicle)
+                                                        .pipe(
+                                                            catchError(error => {
+                                                                if(error.message.code == 22010){
+                                                                    console.log(error.message.msg)
+                                                                    return of(null);
+                                                                }else{
+                                                                    return throwError(error)
+                                                                }
+                                                            })
+                                                        ),
+                                                    of({vehicle, driver})
+                                                )),
+                                                delay(100),
+                                                // mergeMap( ([a,b, { vehicle, driver }]) => forkJoin(
+                                                //     DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
+                                                //     DriverGraphQlHelper.createCredentials$(graphQL, driver)
+                                                // ))
 
+                                            )
+                                    ),
 
-
-  // /*
-  // * CREATE THE DRIVERS
-  // */
-  // describe("Create and update the drivers", function() {
-  //   this.timeout(7200000);
-  //   // busines list demo
-  //   const driverList = [ 
-  //       { _id: uuidv4(), name: "juan", lastname: 'Santa' },     
-  //       { _id: uuidv4(), name: "camilo", lastname: 'toro' },     
-  //       { _id: uuidv4(), name: "sebas", lastname: 'zuluaga' },     
-  //       { _id: uuidv4(), name: "leon", lastname: 'duran' },     
-  //       { _id: uuidv4(), name: "daniel", lastname: 'stan' },     
-  //       { _id: uuidv4(), name: "fernando", lastname: 'torres' },     
-  //       { _id: uuidv4(), name: "esteban", lastname: 'soto' },     
-  //       { _id: uuidv4(), name: "andres", lastname: 'ramirez' },     
-  //    ]; 
-
-  //   it("Create the 10 drivers", function(done) {
-  //     from(driverList)
-  //       .pipe(
-  //         // send the command to create the drivers
-  //         tap(d => console.log("ejecutando al usuario con ID ==> ", d._id)),          
-  //         concatMap(driver =>
-  //           broker.send$("Events", "", {
-  //             et: "DriverCreated",
-  //             etv: 1,
-  //             at: "Driver",
-  //             aid: driver._id,
-  //             data: {
-  //               _id: uuidv4(),
-  //               creatorUser: "juan.santa",
-  //               creationTimestamp: new Date().getTime(),
-  //               modifierUser: "juan.santa",
-  //               modificationTimestamp: new Date().getTime(),
-  //               generalInfo: {
-  //                 documentType: 'CC',
-  //                 document: '1045098765',
-  //                 name: driver.name,
-  //                 lastname: driver.lastname,
-  //                 email: `${driver.name}.${driver.lastname}@email.com`,
-  //                 phone: 3125248898,
-  //                 languages: [{ name: "EN", active: true }, { name: "FR", active: false },],
-  //                 gender: 'M',
-  //                 pmr: false
-  //               },
-  //               state: true,
-  //               businessId: 'q1w2-e3-r4t5-y6u7-u7i8'
-  //             },
-  //             user: "juan.santa",
-  //             timestamp: Date.now(),
-  //             av: 164
-  //           })
-  //             .pipe(
-  //               delay(200)
-  //             )
-  //         ), 
-  //         toArray(),
-  //         tap(r => console.log(r)),
-  //       )
-  //       .subscribe(
-  //         evt => {},
-  //         error => {
-  //           console.error(`sent message failded ${error}`);
-  //           return done(error);
-  //         },
-  //         () => done()
-  //       );
-  //   });
-
-  // });
-
-
-
-  // /**
-  //  * CREATE THE VEHICLES
-  //  */
-  // describe("Create the vehicles", function() {
-  //   // busines list demo
-  //   const vehicleList = [ 
-  //     { _id: uuidv4(), plate: "RGT345" },
-  //     { _id: uuidv4(), plate: "JGI259" },
-  //     { _id: uuidv4(), plate: "KIJ765" },
-  //     { _id: uuidv4(), plate: "DFR346" },
-  //     { _id: uuidv4(), plate: "DCF456" },
-  //     { _id: uuidv4(), plate: "AXD230" },
-  //     { _id: uuidv4(), plate: "SED347" },
-  //     { _id: uuidv4(), plate: "CFU572" }        
-  //    ]; 
-
-  //   it("Create the 10 vehicles", function(done) {
-  //     this.timeout(7200000);
-  //     from(vehicleList)
-  //       .pipe(
-  //         delay(20),
-  //         // send the command to create the drivers
-  //         tap(v => console.log("ejecutando al vehiculo con ID ==> ", v._id)),
-  //         concatMap(vehicle =>
-  //           broker.send$("Events", "", {
-  //             et: "VehicleCreated",
-  //             etv: 1,
-  //             at: "Vehicle",
-  //             aid: vehicle._id,
-  //             data: {
-  //               _id: uuidv4(),
-  //               creatorUser: "juan.santa",
-  //               creationTimestamp: new Date().getTime(),
-  //               modifierUser: "juan.santa",
-  //               modificationTimestamp: new Date().getTime(),
-  //               generalInfo: {
-  //                 licensePlate: vehicle.plate,
-  //                 model: 2014,
-  //                 brand: "MAZDA",
-  //                 line: 'SPORT'
-  //               },
-  //               features: {
-  //                 fuel: 'GASOLINE',
-  //                 capacity: 4,
-  //                 oters: [{name: "AC", active: true}, { name: "PETS", active: false }]
-  //               },
-  //               blockings: [],
-  //               state: true,
-  //               businessId: 'q1w2-e3-r4t5-y6u7-u7i8'
-  //             },
-  //             user: "juan.santa",
-  //             timestamp: Date.now(),
-  //             av: 164
-  //           })
-  //           .pipe(
-  //             delay(200)
-  //           )
-  //         ), 
-  //         delay(500),
-  //         toArray(),
-  //         tap(r => console.log(r)),
-  //       )
-  //       .subscribe(
-  //         evt => {},
-  //         error => {
-  //           console.error(`sent message failded ${error}`);
-  //           return done(error);
-  //         },
-  //         () => done()
-  //       );
-  //   });
-
-  // });
-
-
+                                ).subscribe(() => inputStream.resume(), err => reject(err), () => { })
+                        })
+                            .on('error', function (err) { reject(err); })
+                            .on('end', function () {
+                                console.log("TERMINA ACA");
+                                resolve({});
+                            })
+                        )
+                });
+            })
+                .subscribe(evt => console.log(evt),
+                    error => {
+                        console.error("Failed to start", error);
+                        //process.exit(1);
+                        return done(error);
+                    },
+                    () => {
+                        console.log("reports server started");
+                        return done();
+                    }
+                );
+        });
+    });
 
 });

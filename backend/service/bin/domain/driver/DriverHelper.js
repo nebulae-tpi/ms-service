@@ -25,7 +25,6 @@ class DriverHelperTool {
             VehicleDA.getVehicleByPlate$(vehiclePlate)
         )
             .pipe(
-                tap(r => console.log(r) ),
                 mergeMap(([assignedVehicles, vehicleFound]) => {
                     if (assignedVehicles.includes(vehiclePlate)) {
                         return throwError(new CustomError('License plate already Assigned', 'AssignVehicle',
@@ -53,7 +52,6 @@ class DriverHelperTool {
             VehicleDA.getVehicleByPlate$(vehiclePlate)
         )
             .pipe(
-                tap(r => console.log(r) ),
                 map(([assignedVehicles, vehicleFound]) => assignedVehicles.includes(vehiclePlate) || vehicleFound !== null)
             )
     }

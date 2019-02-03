@@ -2,90 +2,173 @@
 
 const { tap, mergeMap, catchError, map, mapTo, delay, toArray, groupBy, filter } = require('rxjs/operators');
 const { Subject, of, from, forkJoin, interval, defer, concat } = require('rxjs');
-const fs = require('fs');
-const CsvReadableStream = require('csv-reader');     
-const es = require('event-stream');
+const uuidv4 = require("uuid/v4");
+
 const broker = require("../bin/tools/broker/BrokerFactory")();
-const FILE_PATH = './test_bdd/driverVsVehicles.csv';
+
 
 
 class DriverMapperHelper {
 
-    static processFile$() {
-        const that = this;
+     static executeQueries$(line) {
+        return this.mapToDriverVehicleObj$(line)
+            .pipe(
+                mergeMap(driverVehicleInfo => forkJoin(
+                    this.createDriver$(driverVehicleInfo.driver),
+                    this.createVehicle$(driverVehicleInfo.vehicle),
+                    of(driverVehicleInfo)
+                )),
+                mergeMap(([a, b, c]) => forkJoin(
+                    this.assignVehicleToDriver$(c.driver._id, c.vehicle.licensePlate),
+                    this.createDriverCredentials$(c.driver)
+                )),
+                delay(100)
+            )
+    }
 
-        // fs.readdir(FILE_PATH, (err, files) => {
-        //     files.forEach(file => {
-        //       console.log(file);
-        //     });
-        //   });
+    static createDriverCredentials$(driverInfo){
+        return of(driverInfo)
 
-        return new Promise((resolve, reject) => {
-            const inputStream = fs.createReadStream(`${FILE_PATH}`, 'utf8')
-                .pipe(es.split())
-                .pipe(es.mapSync(function (line) {
-                    inputStream.pause();
-                    var regex = /(\s*'[^']+'|\s*[^,]+)(?=,|$)/g;
-                    var lineSplited = line.replace( /"/g, "'" ).match(regex);
-                    lineSplited.forEach((v, i) => lineSplited[i] = v.trim())
+    }
 
-                    of(lineSplited)
-                        .pipe(
-                            mergeMap((line) => that.mapToDriverVehicleObj$(line) ),
-                            tap(t => console.log(t)),
-                            // tap(t => console.log(t.vehicle.fuelType + "---" + t.vehicle.features))
-                            
-                        ).subscribe(() => inputStream.resume(), err => reject(err), () => { })
+    static createDriver$(driver){
+        return broker.send$("Events", "", {
+            et: "DriverCreated",
+            etv: 1,
+            at: "Driver",
+            aid: driver._id,
+            data: {
+              _id: driver._id,
+              creatorUser: "SYSTEM",
+              creationTimestamp: new Date().getTime(),
+              modifierUser: "SYSTEM",
+              modificationTimestamp: new Date().getTime(),
+              generalInfo: {
+                documentType: driver.documentType,
+                document: driver.documentId,
+                name: driver.name,
+                lastname: driver.lastname,
+                email: driver.email,
+                phone: driver.phone,
+                languages: driver.languages.map(i => ({ name: i, active: true })),
+                gender: driver.gender,
+                pmr: driver.pmr
+              },
+              state: driver.active,
+              businessId: driver.businessId
+            },
+            user: "SYSTEM",
+            timestamp: Date.now(),
+            av: 1
+          });
 
-                        // var inputStream = fs.createReadStream(FILE_PATH, 'utf8');            
-                        // inputStream
-                        //     .pipe(CsvReadableStream({ parseNumbers: true, parseBooleans: true, trim: true }))
-                        //     .on('data', function (row) {
-                        //         inputStream.pause();
-                        //         console.log('A row arrived: ', row);
-                        //     })
-                        //     .on('end', function (data) {
-                        //         console.log('No more rows!');
-                        //         console.log("TERMINA ACA");
-                        //         resolve({});
-                        //     });
-                })
-                    .on('error', function (err) { reject(err); })
-                    .on('end', function () {
-                        console.log("TERMINA ACA");
-                        resolve({});
-                    })
-                )
-                   
-        
- 
+    }
 
+    static createVehicle$(vehicle) {
+        return broker.send$("Events", "", {
+            et: "VehicleCreated",
+            etv: 1,
+            at: "Vehicle",
+            aid: vehicle._id,
+            data: {
+                _id: vehicle._id,
+                creatorUser: "SYSTEM",
+                creationTimestamp: new Date().getTime(),
+                modifierUser: "SYSTEM",
+                modificationTimestamp: new Date().getTime(),
+                generalInfo: {
+                    licensePlate: vehicle.licensePlate,
+                    model: vehicle.model,
+                    brand: vehicle.brand,
+                    line: vehicle.line
+                },
+                features: {
+                    fuel: vehicle.fuelType,
+                    capacity: vehicle.capacity,
+                    oters:vehicle.features.map(i => ({ name: i, active: true }))
+                },
+                blockings: [],
+                state: vehicle.active,
+                businessId: vehicle.businessId
+            },
+            user: "SYSTEM",
+            timestamp: Date.now(),
+            av: 1
+        });
+    }
 
+    static assignVehicleToDriver$(driverId, vehiclePlate){
+        return broker.send$("Events", "", {
+            et: "VehicleAssigned",
+            etv: 1,
+            at: "Driver",
+            aid: driverId,
+            data: {
+                vehicleLicensePlate: vehiclePlate
+            },
+            user: "SYSTEM",
+            timestamp: Date.now(),
+            av: 1
         });
     }
 
     static mapToDriverVehicleObj$(lineAsArray){
         return of({
             driver: {
+                _id: uuidv4(),
+                active:true,
+                pmr: false,
+                businessId: '----------',
                 name: lineAsArray[1],
                 lastname: lineAsArray[2],
+                documentType: "CC",
                 documentId: lineAsArray[3],
-                email: lineAsArray[4],
+                email: lineAsArray[4] !== "no@hotmail.com" ? lineAsArray[4] : `${lineAsArray[3]}@autogen.com`,
                 phone: lineAsArray[5],
-                languages: lineAsArray[6] !== '' ? ['EN'] : []
+                languages: lineAsArray[6] !== '' ? [{ name: "EN", active: true }] : []
             },
             vehicle: {
+                _id: uuidv4(),
+                active: true,
+                businessId: '---------------',
                 licensePlate: lineAsArray[7].toUpperCase(),
                 brand: lineAsArray[8],
                 line: lineAsArray[9],
                 model: lineAsArray[10],
-                fuelType: lineAsArray[11],
+                capacity: 4,
+                fuelType:  this.fueltypeMapper(lineAsArray[11].replace(/"/g, "")),
                 features: lineAsArray[12]
+                    .split(',')
+                    .map(feature => this.featuresMapper(feature.replace(/"/g, "")))
+                    .filter(r => r != null )
+                    .map(f => ({ name: f, active: true }))
+                    
             }
         })
-        .pipe(
-            delay(1000)
-        )
+    }
+
+    static fueltypeMapper(fueltType) {
+        switch (fueltType.toUpperCase().trim()) {
+            case "GAS": return "GAS";
+            case "GASOLINA": return "GASOLINE";
+            case "GAS Y GASOLINA": return "GAS_AND_GASOLINE"
+            default: {
+                console.log(`=============== FUEL NOT ALLOWED =========== {${fueltType}}`);                
+            }
+        }
+    }
+
+    static featuresMapper(feature) {
+        switch (feature.toUpperCase().trim()) {
+            case "AIRE ACONDICIONADO": return "AC";
+            case "BAÚL": return "TRUNK";
+            case "PERMITE MASCOTAS": return "PETS";
+            case "PARILLA": return "ROOF_RACK";
+
+            default: {
+                console.log( `=============== FEATURE NOT ALLOWED =========== {${feature}}`);
+            }
+        }
     }
 }
 /**

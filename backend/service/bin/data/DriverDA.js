@@ -151,7 +151,6 @@ class DriverDA {
   }
 
   static assignVehicle$(driverId, vehiclePlate){
-    console.log("static assignVehicle$(driverId, vehiclePlate)", driverId, vehiclePlate);
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.updateOne(
       {_id: driverId },
@@ -160,7 +159,6 @@ class DriverDA {
   }
 
   static unassignVehicle$(driverId, vehiclePlate){
-    console.log("static unassignVehicle$(driverId, vehiclePlate)", driverId, vehiclePlate);
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.updateOne(
       {_id: driverId },

@@ -23,7 +23,6 @@ class DriverES {
      * @param {*} businessCreatedEvent business created event
      */
     handleDriverCreated$(driverCreatedEvent) { 
-        console.log("########################## handleDriverCreated$ #################################");
         return of(driverCreatedEvent.data)
         .pipe(
             map(driver => ({
@@ -88,9 +87,6 @@ class DriverES {
     }
 
     handleVehicleUnassigned$(VehicleUnassignedEvent){
-        console.log("#############   handleVehicleUnassigned   ##############", VehicleUnassignedEvent.aid,
-         VehicleUnassignedEvent.data.vehicleLicensePlate  );
-        
         return of(VehicleUnassignedEvent.data.vehicleLicensePlate)
         .pipe(
             mergeMap(plate => DriverDA.unassignVehicle$(VehicleUnassignedEvent.aid, plate)),
