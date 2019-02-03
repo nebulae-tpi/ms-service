@@ -19,7 +19,7 @@ export const ServiceDriver = gql`
 `;
 
 export const ServiceDrivers = gql`
-  query ServiceDrivers($filterInput: FilterInput!, $paginationInput: PaginationInput!) {
+  query ServiceDrivers($filterInput: ServiceSatelliteFilterInput!, $paginationInput: PaginationInput!) {
     ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {
       _id
       generalInfo {
@@ -36,7 +36,7 @@ export const ServiceDrivers = gql`
 `;
 
 export const ServiceDriversSize = gql`
-  query ServiceDriversSize($filterInput: FilterInput!) {
+  query ServiceDriversSize($filterInput: ServiceSatelliteFilterInput!) {
     ServiceDriversSize(filterInput: $filterInput)
   }
 `;

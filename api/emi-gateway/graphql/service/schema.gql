@@ -120,7 +120,7 @@ type ServiceService {
   lastModificationTimestamp: BigInt  
 }
 
-input FilterInput {
+input ServiceServiceFilterInput {
   "ID of the business"
   businessId: String
   "Init date"
@@ -152,9 +152,9 @@ input PaginationInput {
 
 type Query {
   "Get Services filtered "
-  ServiceServices(filterInput: FilterInput!, paginationInput: PaginationInput!): [ServiceService]
+  ServiceServices(filterInput: ServiceServiceFilterInput!, paginationInput: PaginationInput!): [ServiceService]
   "Get the amount of Services filtered "
-  ServiceServicesSize(filterInput: FilterInput!): Int!
+  ServiceServicesSize(filterInput: ServiceServiceFilterInput!): Int!
   "Get Service by its id"
   ServiceService(id: String!): ServiceService
 }

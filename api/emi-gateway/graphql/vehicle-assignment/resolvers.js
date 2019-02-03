@@ -158,10 +158,10 @@ module.exports = {
     },
     //// SUBSCRIPTIONS ///////
     Subscription: {
-        ServiceDriverUpdatedSubscription: {
+        ServiceDriverVehicleAssignedSubscription: {
             subscribe: withFilter(
                 (payload, variables, context, info) => {
-                    return pubsub.asyncIterator("ServiceDriverUpdatedSubscription");
+                    return pubsub.asyncIterator("ServiceDriverVehicleAssignedSubscription");
                 },
                 (payload, variables, context, info) => {
                     return true;
@@ -178,8 +178,8 @@ module.exports = {
 
 const eventDescriptors = [
     {
-        backendEventName: 'ServiceDriverUpdatedSubscription',
-        gqlSubscriptionName: 'ServiceDriverUpdatedSubscription',
+        backendEventName: 'ServiceDriverVehicleAssigned',
+        gqlSubscriptionName: 'ServiceDriverVehicleAssignedSubscription',
         dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
         onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
         onEvent: (evt, descriptor) => console.log(`Event of type  ${descriptor.backendEventName} arraived`),// OPTIONAL, only use if needed
@@ -195,6 +195,7 @@ eventDescriptors.forEach(descriptor => {
         .getMaterializedViewsUpdates$([descriptor.backendEventName])
         .subscribe(
             evt => {
+                console.log("##### ===> ", evt);
                 if (descriptor.onEvent) {
                     descriptor.onEvent(evt, descriptor);
                 }

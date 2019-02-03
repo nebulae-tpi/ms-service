@@ -66,7 +66,7 @@ type ServiceDriverVehicle {
   features: [String]
 }
 
-input ServiceFilterInput {
+input ServiceVehicleAssignmentFilterInput {
   "ID of the business"
   businessId: String
   "Name"
@@ -96,9 +96,9 @@ input PaginationInput {
 
 type Query {
   "Get Drivers filtered "
-  ServiceDrivers(filterInput: ServiceFilterInput!, paginationInput: PaginationInput!): [ServiceDriver]
+  ServiceDrivers(filterInput: ServiceVehicleAssignmentFilterInput!, paginationInput: PaginationInput!): [ServiceDriver]
   "Get the amount of Drivers filtered "
-  ServiceDriversSize(filterInput: ServiceFilterInput!): Int!
+  ServiceDriversSize(filterInput: ServiceVehicleAssignmentFilterInput!): Int!
   "Get Driver by its id"
   ServiceDriver(id: String!): ServiceDriver
   "get the vehicles assigned to the related driver"
@@ -112,5 +112,5 @@ type Mutation {
 
 type Subscription {
   "This events is triggered when a Driver is created or updated"
-  ServiceDriverUpdatedSubscription: ServiceDriver  
+  ServiceDriverVehicleAssignedSubscription: ServiceDriverVehicle  
 }

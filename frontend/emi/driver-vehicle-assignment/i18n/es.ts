@@ -58,12 +58,15 @@ export const locale = {
       WAIT_OPERATION: 'Operación en proceso, en caso de no recibir respuesta, verificar si los cambios realizados fueron aplicados exitosamente.',
       SELECT_BUSINESS: 'Debe seleccionar una unidad de negocio antes de realizar la creación.',
       ERROR_OPERATION: 'Error realizando operación',
-      VEHICLE_ASSIGNED: 'Vehículo asignado'
+      VEHICLE_ASSIGNED: 'Vehículo asignado',
+      VEHICLE_UNASSIGNED: 'Vehículo desasignado',
+
     },
     ERRORS: {
       1: 'Error interno de servidor',
       2: 'Permiso denegado.',
-      23010: 'Vehículo no permitido'
+      23011: 'Este vehículo ya pertenece al usuario',
+      23012: 'Esta placa no existe en el sistema',
     }
   }
 };

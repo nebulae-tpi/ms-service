@@ -94,7 +94,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loaddriver();
-    this.subscribeDriverUpdated();
+    this.subscribeDriverVehicleAssigments();
     this.stopWaitingOperation();
   }
 
@@ -130,14 +130,15 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     }, e => console.log(e));
   }
 
-  subscribeDriverUpdated(){
-    this.vehicleAssignmentService.subscribeServiceDriverUpdatedSubscription$()
+  subscribeDriverVehicleAssigments(){
+    this.vehicleAssignmentService.listenServiceDriverVehicleAssignedEvts$()
     .pipe(
-      map(subscription => subscription.data.ServiceDriverUpdatedSubscription),
-      takeUntil(this.ngUnsubscribe)
+      map(subscription => subscription.data.ServiceDriverVehicleAssignedSubscription),
+      takeUntil(this.ngUnsubscribe),
+      tap(newVehicle => this.dataSource.data = [newVehicle, ...this.dataSource.data])
     )
-    .subscribe((driver: any) => {
-      this.checkIfEntityHasBeenUpdated(driver);
+    .subscribe((vehicle: any) => {
+      console.log(vehicle);
     });
   }
 
@@ -187,6 +188,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter(r => !r.errors),
       takeUntil(this.ngUnsubscribe),
+      tap(() => this.dataSource.data = this.dataSource.data.filter((e: any) => e.licensePlate !== vehicleRow.licensePlate) ),
       tap(() => this.showMessageSnackbar(this.translationLoader.getTranslate().instant('DRIVER.VEHICLE_UNASSIGNED')))
     )
     .subscribe();

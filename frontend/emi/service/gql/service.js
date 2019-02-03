@@ -79,7 +79,7 @@ export const ServiceService = gql`
 `;
 
 export const ServiceServices = gql`
-  query ServiceServices($filterInput: FilterInput!, $paginationInput: PaginationInput!) {
+  query ServiceServices($filterInput: ServiceServiceFilterInput!, $paginationInput: PaginationInput!) {
     ServiceServices(filterInput: $filterInput, paginationInput: $paginationInput) {
       ...${ServiceServiceFieldsFragment}
     }
@@ -88,7 +88,7 @@ export const ServiceServices = gql`
 `;
 
 export const ServiceServicesSize = gql`
-  query ServiceServicesSize($filterInput: FilterInput!) {
+  query ServiceServicesSize($filterInput: ServiceServiceFilterInput!) {
     ServiceServicesSize(filterInput: $filterInput)
   }
 `;

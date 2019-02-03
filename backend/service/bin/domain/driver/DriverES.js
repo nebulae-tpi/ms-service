@@ -4,6 +4,7 @@ const {of} = require("rxjs");
 const { tap, mergeMap, catchError, map, mapTo } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const DriverDA = require('../../data/DriverDA');
+const VehicleDA = require('../../data/VehicleDA');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 
 /**
@@ -81,7 +82,8 @@ class DriverES {
         return of(VehicleAssignedEvent.data.vehicleLicensePlate)
         .pipe(
             mergeMap(newVehicle => DriverDA.assignVehicle$(VehicleAssignedEvent.aid, newVehicle) ),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `VehicleVehicleUpdatedSubscription`, result))
+            mergeMap(() => VehicleDA.getVehicleByPlate$(VehicleAssignedEvent.data.vehicleLicensePlate)),
+            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverVehicleAssigned`, result))
         )
     }
 
