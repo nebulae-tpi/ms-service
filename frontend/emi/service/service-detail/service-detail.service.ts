@@ -10,55 +10,17 @@ import {
 @Injectable()
 export class ServiceDetailService {
 
-  lastOperation = null;
-
-  service = null;
 
   constructor(private gateway: GatewayService) {
 
   }
 
-  /**
-   * Registers an operation, this is useful to indicate that we are waiting for the response of the CREATE operation
-   */
-  createOperation$(service: any) {
-    return of('CREATE').pipe(
-      tap(operation => {
-        this.lastOperation = operation;
-        this.service = service;
-      })
-    );
-  }
-
-  /**
-   * Registers an operation, this is useful to indicate that we are waiting for the response of the UPDATE operation
-   */
-  updateOperation$(service: any) {
-    return of('UPDATE').pipe(
-      tap(operation => {
-        this.lastOperation = operation;
-        this.service = service;
-      })
-    );
-  }
-
-  /**
-   * Unregisters an operation, this is useful to indicate that we are not longer waiting for the response of the last operation
-   */
-  resetOperation$(){
-    return of('').pipe(
-      tap(() => {
-        this.lastOperation = null;
-        this.service = null;
-      })
-    );
-  }
-
-  getServiceService$(entityId: string) {
+  getServiceService$(id: string) {
+    console.log('getServiceService => ', id);
     return this.gateway.apollo.query<any>({
       query: ServiceService,
       variables: {
-        id: entityId
+        id: id
       },
       fetchPolicy: "network-only",
       errorPolicy: "all"

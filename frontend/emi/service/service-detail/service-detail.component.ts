@@ -70,7 +70,6 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadservice();
     this.subscribeServiceUpdated();
-    this.stopWaitingOperation();
   }
 
   loadservice(){
@@ -97,43 +96,7 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe((service: any) => {
-      this.checkIfEntityHasBeenUpdated(service);
-    })
-  }
-
-  checkIfEntityHasBeenUpdated(newservice){
-    if(this.ServiceDetailservice.lastOperation == 'CREATE'){
-
-      //Fields that will be compared to check if the entity was created
-      if(newservice.generalInfo.name == this.ServiceDetailservice.service.generalInfo.name 
-        && newservice.generalInfo.description == this.ServiceDetailservice.service.generalInfo.description){
-        //Show message entity created and redirect to the main page
-        this.showSnackBar('SERVICE.ENTITY_CREATED');
-        this.router.navigate(['service/']);
-      }
-
-    }else if(this.ServiceDetailservice.lastOperation == 'UPDATE'){
-      // Just comparing the ids is enough to recognise if it is the same entity
-      if(newservice._id == this.service._id){
-        //Show message entity updated and redirect to the main page
-        this.showSnackBar('SERVICE.ENTITY_UPDATED');
-        //this.router.navigate(['service/']);
-      }
-
-    }else{
-      if(this.service != null && newservice._id == this.service._id){
-        //Show message indicating that the entity has been updated
-        this.showSnackBar('SERVICE.ENTITY_UPDATED');
-      }
-    }
-  }
-
-  stopWaitingOperation(){
-    this.ngUnsubscribe.pipe(
-      take(1),
-      mergeMap(() => this.ServiceDetailservice.resetOperation$())
-    ).subscribe(val => {
-      //console.log('Reset operation');
+      this.service = service;
     })
   }
 

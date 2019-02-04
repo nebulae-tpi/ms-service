@@ -53,10 +53,10 @@ type ServiceServiceClient {
 
 "Driver info"
 type ServiceServiceDriver {
-  "Full name"
-  fullname: String!
   "Document ID"
-  docId: String!
+  documentId: String!
+  "Full name"
+  fullname: String!  
 }
 
 "Vehicle info"
@@ -71,7 +71,9 @@ type ServiceServiceState {
   state: String!
   "Timestamp state"
   timestamp: BigInt!
+  "Coordinate"
   location: ServiceCoordinate
+  "Notes"
   notes: String
 }
 
@@ -81,7 +83,7 @@ type ServiceService {
   "Business ID"
   businessId: String!
   "Shift ID"
-  shiftId: String!
+  shiftId: String
   "Timestamp service"
   timestamp: BigInt!
   "Requested features keys"
@@ -106,7 +108,8 @@ type ServiceService {
   state: String
   "State changes of the services"
   stateChanges: [ServiceServiceState]
-  location: ServiceCoordinate!
+  "Service location"
+  location: ServiceCoordinate
   "Vehicle info"
   vehicle: ServiceServiceVehicle
   "Driver info"
@@ -120,13 +123,13 @@ type ServiceService {
   lastModificationTimestamp: BigInt  
 }
 
-input FilterInput {
+input ServiceServiceFilterInput {
   "ID of the business"
   businessId: String
   "Init date"
-  initTimestamp: BigInt
+  initTimestamp: BigInt!
   "End date"
-  endTimestamp: BigInt    
+  endTimestamp: BigInt!
   "Driver document id"
   driverDocumentId: String
   "Driver fullname"
@@ -141,7 +144,7 @@ input FilterInput {
   state: String
 }
 
-input PaginationInput {
+input ServiceServicePaginationInput {
   "Page"
   page: Int!
   "Count"
@@ -151,10 +154,10 @@ input PaginationInput {
 }
 
 type Query {
-  "Get Services filtered "
-  ServiceServices(filterInput: FilterInput!, paginationInput: PaginationInput!): [ServiceService]
+  "Get Services filtered"
+  ServiceServices(filterInput: ServiceServiceFilterInput!, paginationInput: ServiceServicePaginationInput!): [ServiceService]
   "Get the amount of Services filtered "
-  ServiceServicesSize(filterInput: FilterInput!): Int!
+  ServiceServicesSize(filterInput: ServiceServiceFilterInput!): Int!
   "Get Service by its id"
   ServiceService(id: String!): ServiceService
 }

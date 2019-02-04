@@ -174,7 +174,7 @@ class GraphQlService {
       {
         aggregateType: "Service",
         messageType: "emigateway.graphql.query.ServiceServices"
-      },
+      },              
       {
         aggregateType: "Service",
         messageType: "emigateway.graphql.query.ServiceServicesSize"

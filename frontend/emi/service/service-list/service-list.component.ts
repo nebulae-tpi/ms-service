@@ -189,17 +189,21 @@ export class ServiceListComponent implements OnInit, OnDestroy {
    * Builds filter form
    */
   buildFilterForm() {
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("day");
     // Reactive Filter Form
     this.filterForm = this.formBuilder.group({
-      initTimestamp: [null],
-      endTimestamp: [null],
-      clientName: [null],
-      driverName: [null],
+      initTimestamp: [startOfMonth, [Validators.required]],
+      endTimestamp: [endOfMonth, [Validators.required]],
       driverDocumentId: [null],
-      licensePlate: [null],
+      driverFullname: [null],
+      vehicleLicensePlate: [null],
+      clientUsername: [null],
+      clientFullname: [null],
       state: [null]
     });
 
+    console.log('raw => ', this.filterForm.getRawValue());
     this.filterForm.disable({
       onlySelf: true,
       emitEvent: false
@@ -242,10 +246,16 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(([filter, paginator]) => {
           if (filter) {
+            console.log('loadLastFilters => ', filter);
             this.filterForm.patchValue({
-              name: filter.name,
-              creationTimestamp: filter.creationTimestamp,
-              creatorUser: filter.creatorUser
+              initTimestamp: filter.initTimestamp,
+              endTimestamp: filter.endTimestamp,
+              driverDocumentId: filter.driverDocumentId,
+              driverFullname: filter.driverFullname,
+              vehicleLicensePlate: filter.vehicleLicensePlate,
+              clientUsername: filter.clientUsername,
+              clientFullname: filter.clientFullname,
+              state: filter.state,
             });
           }
 
@@ -271,12 +281,20 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       debounceTime(500),
       filter(([filter, paginator, selectedBusiness]) => (filter != null && paginator != null)),
       map(([filter, paginator,selectedBusiness]) => {
+        console.log('filterForm --> ', this.filterForm.getRawValue());
+
         const filterInput = {
-          businessId: selectedBusiness ? selectedBusiness.id: null,
-          name: filter.name,
-          creatorUser: filter.creatorUser,
-          creationTimestamp: filter.creationTimestamp ? filter.creationTimestamp.valueOf() : null
+          businessId: selectedBusiness ? selectedBusiness.id: null,          
+          initTimestamp: filter.initTimestamp ? filter.initTimestamp.valueOf() : null,
+          endTimestamp: filter.endTimestamp ? filter.endTimestamp.valueOf() : null,
+          driverDocumentId: filter.driverDocumentId,
+          driverFullname: filter.driverFullname,
+          vehicleLicensePlate: filter.vehicleLicensePlate,
+          clientUsername: filter.clientUsername,
+          clientFullname: filter.clientFullname,
+          state: filter.state,
         };
+
         const paginationInput = {
           page: paginator.pagination.page,
           count: paginator.pagination.count,
