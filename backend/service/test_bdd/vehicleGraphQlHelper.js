@@ -1,7 +1,7 @@
 'use strict'
 
 const { tap, mergeMap, catchError, map, mapTo, delay, toArray, groupBy, filter } = require('rxjs/operators');
-const { Subject, of, from, forkJoin, interval, defer, concat } = require('rxjs');
+const { Subject, of, from, forkJoin, interval, defer, concat, throwError } = require('rxjs');
 const uuidv4 = require("uuid/v4");
 
 
@@ -38,6 +38,18 @@ class VehicleGraphQlHelper {
 
                     )
                 ),
+                catchError(error => {
+                    // lICENSE PLATE ALREADY USED
+                    if(error.message.code == 22010){  
+                        console.log("##############  lICENSE PLATE ALREADY USED  ######################");
+                        console.log(JSON.stringify(error));
+                        console.log("##################################################################");
+                        return of(null);
+                    }else{
+                        return throwError(error)
+                    }
+                }),
+                // tap(() => console.log("VEHICLE CREATED"))
             );
 
 

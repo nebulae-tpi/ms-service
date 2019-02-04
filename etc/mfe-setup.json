@@ -113,7 +113,6 @@
                 "default" : false
             }            
         ],
-        "preBuildCommands": [],
         "preBuildCommands": [
             "npm install @types/googlemaps --save"
         ],

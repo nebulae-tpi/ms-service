@@ -114,6 +114,7 @@ module.exports = {
     //// MUTATIONS ///////
     Mutation: {
         ServiceAssignVehicleToDriver(root, args, context) {
+            console.log("ServiceAssignVehicleToDriver", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'assignVehicleToDriver',

@@ -112,25 +112,25 @@ class DriverMapperHelper {
         });
     }
 
-    static mapToDriverVehicleObj$(lineAsArray){
+    static mapToDriverVehicleObj$(lineAsArray, businessId){
         return of({
             driver: {
-                _id: uuidv4(),
                 active:true,
                 pmr: false,
-                businessId: '----------',
+                businessId: businessId,
                 name: lineAsArray[1],
                 lastname: lineAsArray[2],
+                username: this.generateUserName(lineAsArray),
                 documentType: "CC",
                 documentId: lineAsArray[3],
-                email: lineAsArray[4] !== "no@hotmail.com" ? lineAsArray[4] : `${lineAsArray[3]}@autogen.com`,
+                email: this.generateEmail(lineAsArray),
                 phone: lineAsArray[5],
+                gender: "M",
                 languages: lineAsArray[6] !== '' ? [{ name: "EN", active: true }] : []
             },
             vehicle: {
-                _id: uuidv4(),
                 active: true,
-                businessId: '---------------',
+                businessId: businessId,
                 licensePlate: lineAsArray[7].toUpperCase(),
                 brand: lineAsArray[8],
                 line: lineAsArray[9],
@@ -145,6 +145,29 @@ class DriverMapperHelper {
                     
             }
         })
+    }
+
+    static generateUserName(lineAsArray){
+        const firstname = lineAsArray[1].replace(/\./g,'').trim().split(" ")[0];
+        const lastname = lineAsArray[2].replace(/\./g,'').trim().split(" ")[0];
+
+        const username = `${firstname}.${lastname}`
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, "") // remove accents
+            .toLowerCase();
+
+        return username;
+    }
+
+    static generateEmail(lineAsArray){
+        const forbidennEmails = [
+            "jhon@hotmail.com", "no@hotmail.com",
+            "jorge@hotmail.com", "rtellovivas@gmail.com",
+            "luis@hotmail.com"];
+        const email = lineAsArray[4].trim();
+        return forbidennEmails.includes(email) 
+            ? `${lineAsArray[3]}@autogen.com`
+            : lineAsArray[4];
+        
     }
 
     static fueltypeMapper(fueltType) {
