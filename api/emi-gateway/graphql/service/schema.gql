@@ -77,6 +77,10 @@ type ServiceServiceState {
   notes: String
 }
 
+type ServiceClientSatellite {
+  name: String!
+}
+
 type ServiceService {
   "Service ID"
   _id: ID!
@@ -141,7 +145,9 @@ input ServiceServiceFilterInput {
   "Client fullname"
   clientFullname: String
   "State"
-  state: String
+  states: [String]
+  "Show closed services"
+  showClosedServices: Boolean
 }
 
 input ServiceServicePaginationInput {
@@ -154,6 +160,10 @@ input ServiceServicePaginationInput {
 }
 
 type Query {
+  "Get Services with state REQUESTED, ASSIGNED AND ARRIVED that belongs to the client satellite logged"
+  ServiceServicesSatellite: [ServiceService]
+  "Get client satellite data of the client satellite logged"
+  ServiceClientSatellite: ServiceClientSatellite
   "Get Services filtered"
   ServiceServices(filterInput: ServiceServiceFilterInput!, paginationInput: ServiceServicePaginationInput!): [ServiceService]
   "Get the amount of Services filtered "

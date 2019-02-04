@@ -2,6 +2,7 @@
 
 const { DriverCQRS } = require("../../domain/driver");
 const { ServiceCQRS } = require("../../domain/service");
+const { ClientCQRS } = require("../../domain/client");
 const broker = require("../../tools/broker/BrokerFactory")();
 const { of, from } = require("rxjs");
 const jsonwebtoken = require("jsonwebtoken");
@@ -229,7 +230,15 @@ class GraphQlService {
       "emigateway.graphql.query.ServiceService": {
         fn: ServiceCQRS.getService$,
         obj: ServiceCQRS
-      }               
+      },
+      "emigateway.graphql.query.ServiceServicesSatellite": {
+        fn: ServiceCQRS.getServiceSatelliteList$,
+        obj: ServiceCQRS
+      }, 
+      "emigateway.graphql.query.ServiceClientSatellite": {
+        fn: ClientCQRS.getClientSatellite$,
+        obj: ClientCQRS
+      },              
     };
   }
 }

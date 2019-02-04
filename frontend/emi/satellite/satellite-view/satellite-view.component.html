@@ -1,0 +1,189 @@
+<div id="service" class="page-layout carded left-sidenav" fusePerfectScrollbar>
+  <!-- TOP BACKGROUND -->
+  <div class="mat-accent-bg"></div>
+  <!-- / TOP BACKGROUND -->
+
+  <mat-sidenav-container>
+    <!-- SIDENAV -->
+    <mat-sidenav
+      class="sidenav"
+      align="start"
+      mode="side"
+      opened="true"
+      fuseMatSidenavHelper="carded-left-sidenav"
+    >
+      <!-- SIDENAV HEADER -->
+      <div *ngIf="false"
+        fxLayout="column"
+        fxLayoutAlign="space-between start"
+        class="header p-24 pb-4"
+        ngClass="mat-accent-bg"
+        ngClass.gt-md="white-fg">
+
+        <div class="logo" fxFlex fxLayout="row" fxLayoutAlign="start center">
+          <mat-icon
+            class="logo-icon s-32"
+            *fuseIfOnDom
+            [@animate]="{ value: '*', params: { delay: '50ms', scale: '0.2' } }"
+            >local_taxi</mat-icon
+          >
+          <span
+            class="logo-text"
+            *fuseIfOnDom
+            [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }"
+            >{{ "SATELLITE.HEADER_TITLE" | translate }}</span>
+        </div>
+
+        <div
+          class="account"
+          fxFlex
+          fxFill
+          fxLayout="row"
+          fxLayoutAlign="space-between end"
+        >
+          <span
+            class="mat-title"
+            *fuseIfOnDom
+            [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }"
+            >{{ "SATELLITE.SERVICE_FILTERS.FILTER_TITLE" | translate }}
+          </span>
+        </div>
+
+        
+      </div>
+      <!-- / SIDENAV HEADER -->
+
+      <!-- SIDENAV CONTENT -->
+      <div
+        class="content"
+        fusePerfectScrollbar
+        *fuseIfOnDom
+        [@animate]="{ value: '*', params: { y: '50px' } }">
+
+
+
+
+        <div class="nav mt-20" fxLayout="column">
+            <form
+              fxLayout="column"
+              fxLayoutAlign="start"
+              fxFlex="100"
+              name="form"
+              *ngIf="requestForm"
+              [formGroup]="requestForm"
+            >
+
+            <div
+              fxLayout="column"
+              fxLayoutAlign="space-between center"
+              fxFlex="100">
+
+              <div
+              fxLayout="row wrap"
+              fxLayoutAlign="space-between center"
+              fxFlex="100">
+            <div fxFlex="100" class="h1 secondary-text">{{'SATELLITE.REQUEST_VEHICLE_TITLE' | translate}}</div>
+
+            <div fxFlex="100">                    
+                <div fxLayout="column" fxLayoutAlign="space-between center" >                      
+                    <mat-slider
+                      max="5"
+                      min="1"
+                      step="1"
+                      thumbLabel="true"
+                      tickInterval="1"
+                      formControlName="taxisNumber">
+                    </mat-slider>
+                    <div class="h4 secondary-text">{{'SATELLITE.VEHICLES_NUMBER' | translate}}</div>
+                    <div class="h2 secondary-text" fxLayoutAlign="center center">
+                        <mat-icon class="icon s-40 mr-16">local_taxi</mat-icon>
+                        <span>{{requestForm.controls['taxisNumber'].value}}</span>
+                    </div>
+                </div>                  
+              
+            </div>               
+          </div>
+          <mat-divider></mat-divider>
+
+
+
+
+          <div fxFlex="100" class="h3 secondary-text">{{'SATELLITE.FEATURES' | translate}}</div>
+          
+          <div fxFlex="100"  style="background: yellow"  formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
+            <div fxFlex="100" [formGroupName]="i">
+                <mat-checkbox fxFlex="100" class="example-margin"  [formControlName]="'active'">
+                    {{ 'SATELLITE.FEATURES_LIST.' + feature.get('name').value | translate }}
+                </mat-checkbox>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+          <mat-form-field>
+              <input
+                matInput
+                placeholder="{{'SATELLITE.REFERENCE' | translate}}"
+                formControlName="notes"
+                id="notes"
+                maxlength="20"/>
+          </mat-form-field>
+
+              
+          </div>
+
+            </form>
+  
+            <div class="p-24">
+              <button
+                fxFlex
+                mat-raised-button
+                mat-button
+                class="mat-accent compose-dialog-button"
+                aria-label="Request taxi"
+                (click)="reuqestTaxi()"
+              >
+                {{ "SATELLITE.REQUEST_TAXI" | translate }}
+              </button>
+            </div>
+          </div>
+
+
+
+      </div>
+      <!-- / SIDENAV CONTENT -->
+    </mat-sidenav>
+    <!-- / SIDENAV -->
+
+    <!-- CENTER -->
+    <div class="center">
+        
+      <!-- CONTENT HEADER -->
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <div
+          fxLayout="row"
+          fxLayoutAlign="start center">
+          <button
+            mat-button
+            class="mat-icon-button sidenav-toggle"
+            fuseMatSidenavToggler="carded-left-sidenav"
+            
+            aria-label="Toggle Sidenav">
+            <mat-icon>menu</mat-icon>
+          </button>
+
+        </div>
+      </div>
+      <!-- / CONTENT HEADER -->
+
+      <!-- CONTENT CARD -->
+      <div class="content-card mat-white-bg">
+          <div style="background: rgb(187, 159, 130); width: 100%; height: 100%;">
+              <div #gmap style="width:100%; height:100%; margin: 0; padding: 0"></div>
+          </div>
+      </div>
+
+    </div>
+    <!-- / CENTER -->
+  </mat-sidenav-container>
+</div>
+<satellite-service-list></satellite-service-list>

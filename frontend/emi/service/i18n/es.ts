@@ -22,14 +22,16 @@ export const locale = {
         'DRIVER_FULLNAME': 'Nombre conductor',
         'LICENSE_PLATE': 'Placa vehículo',
         'PAYMENT_TYPE': 'Tipo pago',
-        'STATE': 'Estado',
+        'STATES': 'Estados',
+        'SHOW_CLOSED': 'Mostrar cerrados',
         'FILTER_TITLE': 'Filtros',
         'RESET_FILTER': 'Limpiar filtros'
       },
       SERVICE_STATES: {
+        'REQUEST': 'Solicitado',
         'REQUESTED': 'Solicitado',
         'ASSIGNED': 'Asignado',        
-        'ARRIVED': 'LLegó',
+        'ARRIVED': 'Ha llegado',
         'ON_BOARD': 'A bordo',
         'DONE': 'Finalizado',
         'CANCELLED_DRIVER': 'Cancelado por conductor',
@@ -73,6 +75,10 @@ export const locale = {
         'NOTES':  'Notas',
         'FEATURES': {
           'AC': 'Aire acondicionado',
+          'TRUNK': 'Baúl',
+          'ROOF_RACK': 'Parrilla de techo',
+          'PETS': 'Permite mascotas',
+          'BIKE_RACK': 'Portabicicletas'
         },
         'TIP_TYPES': {
           'ON_SITE': 'Propina en sitio'

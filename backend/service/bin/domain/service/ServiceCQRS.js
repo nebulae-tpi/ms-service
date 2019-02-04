@@ -56,6 +56,29 @@ class ServiceCQRS {
     );
   }
 
+
+    /**  
+   * Gets the Service list
+   *
+   * @param {*} args args
+   */
+  getServiceSatelliteList$({ args }, authToken) {
+    console.log('getServiceSatelliteList$ --*** ');
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Service",
+      "getServiceSatelliteList",
+      PERMISSION_DENIED,
+      ["SATELLITE"]
+    ).pipe(
+      mergeMap(roles => ServiceDA.getServiceSatelliteList$(filterInput, args.paginationInput)),
+      toArray(),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
+  
   /**  
    * Gets the Service list
    *
@@ -72,11 +95,13 @@ class ServiceCQRS {
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        const isSatellite = roles["SATELLITE"];
         //If an user does not have the role to get the Service from other business, the query must be filtered with the businessId of the user
-        const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        const businessId = !isPlatformAdmin? (authToken.businessId || '-1'): args.filterInput.businessId;
+        const clientId = !isPlatformAdmin && isSatellite ? (authToken.clientId || '-1'): null;
         const filterInput = args.filterInput;
         filterInput.businessId = businessId;
-
+        filterInput.clientId = clientId;
         return ServiceDA.getServiceList$(filterInput, args.paginationInput);
       }),
       toArray(),
@@ -100,10 +125,14 @@ class ServiceCQRS {
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        const isSatellite = roles["SATELLITE"];
         //If an user does not have the role to get the Service from other business, the query must be filtered with the businessId of the user
         const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        const clientId = !isPlatformAdmin && isSatellite ? (authToken.clientId || '-1'): null;
+
         const filterInput = args.filterInput;
         filterInput.businessId = businessId;
+        filterInput.clientId = clientId;
 
         return ServiceDA.getServiceSize$(filterInput);
       }),

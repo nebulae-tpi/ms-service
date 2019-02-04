@@ -8,81 +8,90 @@
           <div fxLayout="row wrap" fxLayoutAlign="space-between center">
 
               <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                  <span class="h2 title secondary-text">{{'SERVICE.DETAILS.DATE' | translate}}:</span>
+                  <span class="title secondary-text">{{'SERVICE.DETAILS.DATE' | translate}}:</span>
                   <span>&nbsp;&nbsp;</span>
                   <span class="value">{{service.timestamp | date: "dd/MM/y HH:mm:ss"}}</span>
               </div>
 
               <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                  <span class="h2 title secondary-text">{{'SERVICE.DETAILS.STATE' | translate}}: </span>
+                  <span class="title secondary-text">{{'SERVICE.DETAILS.STATE' | translate}}: </span>
                   <span>&nbsp;&nbsp;</span>
                   <span class="value">{{"SERVICE.SERVICE_STATES." +service.state | translate}}</span>
               </div>
 
               <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                  <span class="h2 title secondary-text">{{'SERVICE.DETAILS.PAYMENT_TYPE' | translate}}: </span>
+                  <span class="title secondary-text">{{'SERVICE.DETAILS.PAYMENT_TYPE' | translate}}: </span>
                   <span>&nbsp;&nbsp;</span>
                   <span class="value">{{"SERVICE.SERVICE_PAYMENT_TYPE." +service.paymentType | translate}}</span>
               </div>
 
               <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                  <span class="h2 title secondary-text">{{'SERVICE.DETAILS.FARE' | translate}}: </span>
+                  <span class="title secondary-text">{{'SERVICE.DETAILS.FARE' | translate}}: </span>
                   <span>&nbsp;&nbsp;</span>
                   <span class="value">{{service.fare | currency}}</span>
               </div>
 
               <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                  <span class="h2 title secondary-text">{{'SERVICE.DETAILS.FARE_DISCOUNT' | translate}}: </span>
+                  <span class="title secondary-text">{{'SERVICE.DETAILS.FARE_DISCOUNT' | translate}}: </span>
                   <span>&nbsp;&nbsp;</span>
                   <span class="value">{{service.fareDiscount | percent}}</span>
               </div>
           </div>          
       </div>
 
-      <div class="section pb-8 pt-20">
+
+      <div fxLayout="row wrap">
+
+        <div fxFlex="48" class="section pb-8 pt-20 mr-8">
 
             <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
                 <mat-icon class="m-0 mr-16">place</mat-icon>
                 <div class="h2 secondary-text">{{'SERVICE.DETAILS.PICKED_UP' | translate}}</div>
             </div>
     
-            <div class="pickup pb-12" fxLayout="column">
+            <div class="pickup pl-12 pt-8 pb-12 mat-elevation-z1" fxLayout="column">
 
-                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="space-between start">
+                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="start">
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.CITY' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.CITY' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.city}}</span>
                     </div>
 
-                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.ZONE' | translate}}: </span>
-                        <span>&nbsp;&nbsp;</span>
-                        <span class="value">{{service.pickUp.zone}}</span>
-                    </div>
 
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.NEIGHBORHOOD' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.NEIGHBORHOOD' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.neighborhood}}</span>
                     </div>
-                </div> 
+                </div>
+
+                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="space-between start">
+                        <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                            <span class="title secondary-text">{{'SERVICE.DETAILS.ZONE' | translate}}: </span>
+                            <span>&nbsp;&nbsp;</span>
+                            <span class="value">{{service.pickUp.zone}}</span>
+                        </div>
+                </div>
                 
-                <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between start">
+                <div fxFlex="100" fxLayout="row">
+
+                    
+
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE1' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE1' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.addressLine1}}</span>
                     </div>
     
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.pickUp.addressLine2">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE2' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE2' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.addressLine2}}</span>
                     </div>               
     
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.pickUp.notes">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.NOTES' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.NOTES' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.notes}}</span>
                     </div>                 
@@ -92,50 +101,52 @@
             </div>
       </div>
 
-      <div class="section pb-8 pt-20" *ngIf="service.dropOff">
+      <div fxFlex="48" class="section pb-8 pt-20" *ngIf="service.dropOff">
 
             <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
                 <mat-icon class="m-0 mr-16">place</mat-icon>
                 <div class="h2 secondary-text">{{'SERVICE.DETAILS.DROP_OFF' | translate}}</div>
             </div>
     
-            <div class="pickup pb-12" fxLayout="column">
+            <div class="dropOff pl-12 pt-8 pb-12 mat-elevation-z1" fxLayout="column">
 
-                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="space-between start">
+                <div fxFlex="100" fxLayout="row" fxLayoutAlign="start center">
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.CITY' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.CITY' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.dropOff.city}}</span>
                     </div>
 
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.ZONE' | translate}}: </span>
-                        <span>&nbsp;&nbsp;</span>
-                        <span class="value">{{service.dropOff.zone}}</span>
-                    </div>
-
-                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.NEIGHBORHOOD' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.NEIGHBORHOOD' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.dropOff.neighborhood}}</span>
                     </div>
                 </div> 
+
+                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="space-between start">
+                        <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                            <span class="title secondary-text">{{'SERVICE.DETAILS.ZONE' | translate}}: </span>
+                            <span>&nbsp;&nbsp;</span>
+                            <span class="value">{{service.dropOff.zone}}</span>
+                        </div>
+                </div>
                 
                 <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between start">
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.dropOff.addressLine1">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE1' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE1' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.dropOff.addressLine1}}</span>
                     </div>
     
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.dropOff.addressLine2">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE2' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE2' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.dropOff.addressLine2}}</span>
                     </div>               
     
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.dropOff.notes">
-                        <span class="h2 title secondary-text">{{'SERVICE.DETAILS.NOTES' | translate}}: </span>
+                        <span class="title secondary-text">{{'SERVICE.DETAILS.NOTES' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.dropOff.notes}}</span>
                     </div>                 
@@ -144,6 +155,9 @@
 
             </div>
       </div>
+
+      </div>
+      
 
 
       <div class="section pb-8 pt-20">

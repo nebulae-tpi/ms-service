@@ -89,6 +89,9 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   //Subject to unsubscribe 
   private ngUnsubscribe = new Subject();
 
+  stateList: string[] = ['REQUEST', 'ASSIGNED', 'ARRIVED', 'ON_BOARD', 'DONE', 'CANCELLED_CLIENT', 'CANCELLED_DRIVER',];
+  
+
   //////// FORMS //////////
   filterForm: FormGroup;
   
@@ -200,7 +203,8 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       vehicleLicensePlate: [null],
       clientUsername: [null],
       clientFullname: [null],
-      state: [null]
+      states: [null],
+      showClosedServices: [false]
     });
 
     console.log('raw => ', this.filterForm.getRawValue());
@@ -255,7 +259,8 @@ export class ServiceListComponent implements OnInit, OnDestroy {
               vehicleLicensePlate: filter.vehicleLicensePlate,
               clientUsername: filter.clientUsername,
               clientFullname: filter.clientFullname,
-              state: filter.state,
+              states: filter.states,
+              showClosedServices: filter.showClosedServices
             });
           }
 
@@ -292,7 +297,8 @@ export class ServiceListComponent implements OnInit, OnDestroy {
           vehicleLicensePlate: filter.vehicleLicensePlate,
           clientUsername: filter.clientUsername,
           clientFullname: filter.clientFullname,
-          state: filter.state,
+          states: filter.states,
+          showClosedServices: filter.showClosedServices
         };
 
         const paginationInput = {

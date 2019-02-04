@@ -153,14 +153,25 @@
                   maxlength="20"/>
             </mat-form-field>
 
-            <mat-form-field>
+            <!-- <mat-form-field>
                 <input
                   matInput
                   placeholder="{{'SERVICE.SERVICE_FILTERS.STATE' | translate}}"
                   formControlName="state"
                   id="state"
                   maxlength="20"/>
+            </mat-form-field> -->
+
+            <mat-form-field>
+              <mat-select placeholder="{{'SERVICE.SERVICE_FILTERS.STATES' | translate}}"
+               formControlName="states" multiple>
+                <mat-option *ngFor="let state of stateList" [value]="state">
+                  {{ "SERVICE.SERVICE_STATES."+state | translate}}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
+
+            <mat-checkbox formControlName="showClosedServices">{{'SERVICE.SERVICE_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>
 
             
               <button

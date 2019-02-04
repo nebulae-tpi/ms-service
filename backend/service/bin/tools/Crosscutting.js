@@ -1,5 +1,6 @@
 'use strict'
 
+const datejs = require('datejs')
 const uuidv4 = require("uuid/v4");
 const GMT_OFFSET = ((parseInt(process.env.GMT_TO_SERVE.replace('GMT', '') * 60)) + new Date().getTimezoneOffset()) * 60000;
 
@@ -20,37 +21,36 @@ class Crosscutting{
     }
 
     /**
-     * Generates a suffix (MMyy) according to the date.
-     * Format: MMyy
+     * Generates a suffix (yyMM) according to the date.
+     * Format: yyMM
      * 
      * @example
      * month: 06
      * year: 2018
-     * // returns 0618
+     * // returns 1806
      * 
      * @param {*} date 
      */
-    static getMonthYear(date){
+    static getYearMonth(date){
         let month = ""+(date.getMonth()+1);
         let year = date.getFullYear() + '';
         month = (month.length == 1 ? '0': '') + month;
         year = year.substr(year.length - 2)
 
-        return `${month}${year}`;
+        return `${year}${month}`;
     }
 
     /**
-     * Returns an array of monthyear according to the initDate and the endDate
+     * Returns an array of yearmonth according to the initDate and the endDate
      * @param {*} date1 
      * @param {*} date2 
      */
-   static getMonthYearArray(date1, date2) {
-       console.log('date1 => ', date1.toString());
-       console.log('date2 => ', date2.toString());
-        const startDate = new Date(date1.getTime() + GMT_OFFSET);
-        const stopDate = new Date(date2.getTime() + GMT_OFFSET);
-        console.log('startDate => ', startDate.toString());
-       console.log('stopDate => ', stopDate.toString());
+   static getYearMonthArray(date1, date2) {
+        const startDate = new Date(date1.toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+        const stopDate = new Date(date2.toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+
+        // const startDate = new Date(date1.getTime() + GMT_OFFSET);
+        // const stopDate = new Date(date2.getTime() + GMT_OFFSET);
         startDate.setHours(0,0,0,0);
         startDate.setDate(1);
 
@@ -62,14 +62,15 @@ class Crosscutting{
         let currentDate = startDate;
         while (currentDate <= stopDate) {
             dateArray.push(currentDate);
-            currentDate = this.addMonth(currentDate);
+            currentDate = this.addMonth(currentDate, 1);
         }
+        console.log('dateArray => ', dateArray);
         return dateArray;
     }
 
-    static addMonth(date){
+    static addMonth(date, amountOfMonths){
         const newDate = new Date(date);
-        newDate.setMonth(newDate.getMonth() + 1);
+        newDate.add(amountOfMonths).month();
         return newDate;
     }
 
