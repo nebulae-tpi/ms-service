@@ -8,12 +8,14 @@ import {
   ServiceServices,
   ServiceServicesSize
 } from '../gql/service';
+import * as moment from "moment";
 
 @Injectable()
 export class ServiceListService {
 
   private _filterSubject$ = new BehaviorSubject({
-    filter: {}
+      initTimestamp: moment().startOf('month'),
+      endTimestamp: moment().endOf('day')
   });
 
   private _paginatorSubject$ = new BehaviorSubject({
@@ -80,6 +82,7 @@ export class ServiceListService {
   }
 
   updateFilterData(filterData){
+    console.log('filterData -->> ', filterData);
     this._filterSubject$.next(filterData);
   }
 

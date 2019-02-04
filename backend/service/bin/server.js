@@ -10,7 +10,7 @@ const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
 const DriverDA = require('./data/DriverDA');
 const VehicleDA = require('./data/VehicleDA');
-const ServiceDA = require('./data/VehicleDA');
+const ServiceDA = require('./domain/service/data-access/ServiceDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
