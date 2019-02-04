@@ -61,6 +61,7 @@ class DriverCQRS {
    * @param {*} args args
    */
   getDriverList$({ args }, authToken) {
+    console.log("getDriverList$", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",
@@ -88,6 +89,7 @@ class DriverCQRS {
    * @param {*} args args
    */
   getDriverListSize$({ args }, authToken) {
+    console.log("getDriverListSize$", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",

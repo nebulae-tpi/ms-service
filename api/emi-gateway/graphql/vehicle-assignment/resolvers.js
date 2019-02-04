@@ -35,6 +35,7 @@ module.exports = {
 
     Query: {
         ServiceDrivers(root, args, context) {
+            console.log("Query.ServiceDrivers", args);
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceDrivers', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN"])
             .pipe(
                 mergeMap(() =>
@@ -51,6 +52,7 @@ module.exports = {
             ).toPromise();
         },
         ServiceDriversSize(root, args, context) {
+            console.log("Query.ServiceDriversSize", args);
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceDriversSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN"])
             .pipe(
                 mergeMap(() =>
@@ -67,6 +69,7 @@ module.exports = {
             ).toPromise();
         },
         ServiceDriver(root, args, context) {
+            console.log("Query.ServiceDriversSize", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-'+'Service', 'ServiceDriver',
