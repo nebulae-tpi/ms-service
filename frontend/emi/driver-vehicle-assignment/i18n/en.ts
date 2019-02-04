@@ -59,12 +59,14 @@ export const locale = {
       WAIT_OPERATION: 'Operation in process, in case of not receiving an answer, verify if the changes made were applied successfully.',
       SELECT_BUSINESS: 'You must select a business unit before performing the creation.',
       ERROR_OPERATION: 'Error performing operation',
-      VEHICLE_ASSIGNED: 'Vehicle assigned'
+      VEHICLE_ASSIGNED: 'Vehicle assigned',
+      VEHICLE_UNASSIGNED: 'Vehicle unassigned',
     },
     ERRORS: {
       1: 'Internal server error',
       2: 'Permission denied',
-      23010: 'License plate is not allowed'
+      23011: 'License plate already belongs to this driver',
+      23012: 'License plate do not exist in the system'
     },
   }
 };

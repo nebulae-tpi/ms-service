@@ -6,7 +6,7 @@ import {
   ServiceCreateDriver,
   ServiceUpdateDriverGeneralInfo,
   ServiceDriver,
-  ServiceDriverUpdatedSubscription,
+  ServiceDriverVehicleAssignedSubscription,
   ServiceDriverVehicleList,
   ServiceAssignVehicleToDriver,
   ServiceUnassignVehicleToDriver
@@ -132,10 +132,10 @@ export class VehicleAssignmentService {
 /**
  * Event triggered when a business is created, updated or deleted.
  */
-subscribeServiceDriverUpdatedSubscription$(): Observable<any> {
+listenServiceDriverVehicleAssignedEvts$(): Observable<any> {
   return this.gateway.apollo
   .subscribe({
-    query: ServiceDriverUpdatedSubscription
+    query: ServiceDriverVehicleAssignedSubscription
   });
 }
 

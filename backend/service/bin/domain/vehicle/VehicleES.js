@@ -22,7 +22,6 @@ class VehicleES {
      * @param {*} businessCreatedEvent business created event
      */
     handleVehicleCreated$(vehicleCreatedEvent) {  
-        console.log("#######################handleVehicleCreated$#############################");
         return of(vehicleCreatedEvent.data)
         .pipe(
             map(vehicle => ({

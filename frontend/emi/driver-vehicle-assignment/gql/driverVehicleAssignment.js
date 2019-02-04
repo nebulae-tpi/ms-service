@@ -20,7 +20,7 @@ export const ServiceDriver = gql`
 `;
 
 export const ServiceDrivers = gql`
-  query ServiceDrivers($filterInput: ServiceFilterInput!, $paginationInput: PaginationInput!) {
+  query ServiceDrivers($filterInput: ServiceVehicleAssignmentFilterInput!, $paginationInput: PaginationInput!) {
     ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {
       _id
       businessId
@@ -40,7 +40,7 @@ export const ServiceDrivers = gql`
 `;
 
 export const ServiceDriversSize = gql`
-  query ServiceDriversSize($filterInput: ServiceFilterInput!) {
+  query ServiceDriversSize($filterInput: ServiceVehicleAssignmentFilterInput!) {
     ServiceDriversSize(filterInput: $filterInput)
   }
 `;
@@ -99,22 +99,19 @@ export const ServiceUnassignVehicleToDriver = gql `
 `;
 
 // SUBSCRIPTION
-export const ServiceDriverUpdatedSubscription = gql`
+export const ServiceDriverVehicleAssignedSubscription = gql`
   subscription{
-    ServiceDriverUpdatedSubscription{
+    ServiceDriverVehicleAssignedSubscription{    
       _id
       businessId
-      name
-      lastname
-      username
+      licensePlate
       active
       blocks
-      documentType
-      documentId
-      pmr
-      languages
-      phone
-      assignedVehicles
+      brand
+      line
+      model
+      fuelType
+      features
     }
   }
 `;
