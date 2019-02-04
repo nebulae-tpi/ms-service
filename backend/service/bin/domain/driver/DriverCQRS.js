@@ -109,7 +109,7 @@ class DriverCQRS {
     );
   }
 
-  assignVehicleToDriver$({ args }, authToken) {
+  assignVehicleToDriver$({ args }, authToken) {    
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",

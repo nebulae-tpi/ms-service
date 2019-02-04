@@ -23,7 +23,7 @@ class GraphQL {
         console.log("---------------------", jwt);
         this.jwt = jwt;
         this.url = 'http://localhost:3000/api/emi-gateway/graphql/http';
-        //this.url = 'https://pyxis.nebulae.com.co/api/sales-gateway/graphql/http';        
+        // this.url = 'https://tpi-dev.nebulae.com.co/api/emi-gateway/graphql/http';        
     }
 
     connect$() {
@@ -94,7 +94,6 @@ class GraphQL {
             } else if (typeof val === 'number' || val instanceof Number) {
                 return ` ${key}: ${val}`;
             }else if (typeof val === 'boolean' || val instanceof Boolean) {
-                console.log(` ${key}: ${val}`);
                 return ` ${key}: ${val}`;
             } else if (val instanceof Object) {
                 return ` ${key}: { ${this.convertObjectToInputArgs(val)} }`;

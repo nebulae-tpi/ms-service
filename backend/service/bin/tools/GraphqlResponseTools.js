@@ -31,6 +31,7 @@ const buildErrorResponse$ = (errCode, rawRespponse) => {
 };
 
 const handleError$ = (err) => {
+    console.log(JSON.stringify(err));
     return of(err).pipe(
         map(err => {
             const exception = { data: null, result: {} };

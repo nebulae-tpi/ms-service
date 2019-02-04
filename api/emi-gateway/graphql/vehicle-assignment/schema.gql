@@ -94,6 +94,7 @@ input PaginationInput {
   sort: Int
 }
 
+
 type Query {
   "Get Drivers filtered "
   ServiceDrivers(filterInput: ServiceVehicleAssignmentFilterInput!, paginationInput: PaginationInput!): [ServiceDriver]
