@@ -6,7 +6,7 @@
         "preBuildCommands": []
     },
     {
-        "name": "vehicle assignment",
+        "name": "vehicle-assignment",
         "type": "graphql",        
         "src": "api/emi-gateway/graphql/vehicle-assignment",
         "preBuildCommands": []

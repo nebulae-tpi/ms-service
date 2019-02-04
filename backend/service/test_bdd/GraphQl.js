@@ -94,7 +94,6 @@ class GraphQL {
             } else if (typeof val === 'number' || val instanceof Number) {
                 return ` ${key}: ${val}`;
             }else if (typeof val === 'boolean' || val instanceof Boolean) {
-                console.log(` ${key}: ${val}`);
                 return ` ${key}: ${val}`;
             } else if (val instanceof Object) {
                 return ` ${key}: { ${this.convertObjectToInputArgs(val)} }`;

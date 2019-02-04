@@ -19,7 +19,7 @@ const VehicleGraphQlHelper = require("./vehicleGraphQlHelper");
 const getRxDefaultSubscription = (evtText, done) => {
     return [
         (evt) => console.log(`${evtText}: ${JSON.stringify(evt)}`),
-        (error) => { logError(error); done(error); },
+        (error) => { console.error(error); done(error); },
         () => done()
     ];
 };
@@ -33,7 +33,6 @@ const MqttBroker = require("../bin/tools/broker/MqttBroker");
 const MongoDB = require("../bin/data/MongoDB").MongoDB;
 
 let DriverDA = undefined;
-let ServiceDA = undefined;
 let VehicleDA = undefined;
 
 
@@ -90,14 +89,13 @@ describe("BDD - MAIN TEST", function() {
             done();
         });
 
-        it('connect hardware and servers', function (done) {
+        it('Logging to Keycloak, conect GraphQl client ', function (done) {
             this.timeout(5000);
             merge(
                 keyCloak.logIn$().pipe(
                     tap(() => graphQL.jwt = keyCloak.jwt),
                     mergeMap(() => graphQL.connect$()),
                     mergeMap(() => graphQL.testConnection$()),
-                    tap(r => console.log("TEST conection respons => ", r))
                 ),
                 // broker.start$()
 
@@ -114,7 +112,6 @@ describe("BDD - MAIN TEST", function() {
             const eventSourcing = require("../bin/tools/EventSourcing")();
             const eventStoreService = require("../bin/services/event-store/EventStoreService")();
             DriverDA = require("../bin/data/DriverDA");
-            ServiceDA = require("../bin/data/ServiceDA");
             VehicleDA = require("../bin/data/VehicleDA");
             mongoDB = require("../bin/data/MongoDB").singleton();
 
@@ -126,7 +123,6 @@ describe("BDD - MAIN TEST", function() {
                             eventStoreService.start$(),
                             mongoDB.start$(),
                             DriverDA.start$(),
-                            ServiceDA.start$(),
                             VehicleDA.start$()
                         )
                     )
@@ -147,7 +143,8 @@ describe("BDD - MAIN TEST", function() {
       
     });
 
-    describe("Prepare test DB and backends", function () {
+    describe("Read CSV file and process it", function () {
+
         it("start service backend and its Database", function (done) {
             this.timeout(600000);
             const DriverMapperHelper = require("./driverMapperHelper");
@@ -204,10 +201,11 @@ describe("BDD - MAIN TEST", function() {
                                                     of({vehicle, driver})
                                                 )),
                                                 delay(100),
-                                                // mergeMap( ([a,b, { vehicle, driver }]) => forkJoin(
-                                                //     DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
-                                                //     DriverGraphQlHelper.createCredentials$(graphQL, driver)
-                                                // ))
+                                                mergeMap( ([a,b, { vehicle, driver }]) => forkJoin(
+                                                    DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
+                                                    DriverGraphQlHelper.createCredentials$(graphQL, driver)
+                                                )),
+                                                delay(100)
 
                                             )
                                     ),
@@ -234,6 +232,7 @@ describe("BDD - MAIN TEST", function() {
                     }
                 );
         });
+
     });
 
 });
