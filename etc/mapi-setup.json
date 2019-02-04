@@ -4,5 +4,11 @@
         "type": "graphql",        
         "src": "api/emi-gateway/graphql/service",
         "preBuildCommands": []
+    },
+    {
+        "name": "vehicle assignment",
+        "type": "graphql",        
+        "src": "api/emi-gateway/graphql/vehicle-assignment",
+        "preBuildCommands": []
     }
 ]
