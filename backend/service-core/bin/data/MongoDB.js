@@ -58,25 +58,12 @@ class MongoDB {
     return Observable.create(async observer => {
 
       observer.next('Creating index for master.Vehicle => ({ licensePlate: 1 })  ');
-      await this.db.collection('Vehicle').createIndex({ licensePlate: 1 });
+      await this.db.collection('Vehicle').createIndex({ licensePlate: 1 }).catch((err) => console.log(`Failed to create index: ${err}`));;
 
       //observer.next('Creating index for master.Driver => ({ "assignedVehicles": 1 })  ');
       //await this.db.collection('Driver').createIndex({ "assignedVehicles": 1 });
 
-      const historicalDb = this.getHistoricalDb();
-
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "state": 1, "driver.id": 1 }  `);
-      await historicalDb.collection('Shift').createIndex({ "state": 1, "driver.id": 1 });
-
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "state": 1, "vehicle.licensePlate": 1 }  `);
-      await historicalDb.collection('Shift').createIndex({ "state": 1, "vehicle.licensePlate": 1 });
-
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "vehicle.licensePlate": 1 }  `);
-      await historicalDb.collection('Shift').createIndex({ "vehicle.licensePlate": 1 });
-
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "location":  "2dsphere" }  `);
-      await historicalDb.collection('Shift').createIndex({ "location": "2dsphere" });
-
+          
       observer.next("All indexes created");
       observer.complete();
     });
