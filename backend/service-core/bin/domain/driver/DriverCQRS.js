@@ -34,11 +34,12 @@ class DriverCQRS {
   /**  
    * Gets Driver's Assigned Vehicles
    */
-  queryDriverAssignedVehicles$({ root, args, jwt }, authToken) {    
+  queryDriverAssignedVehicles$({ root, args, jwt }, authToken) {
     const { driverId } = authToken;
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(            
-      mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),      
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(
+      mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),
       filter(driver => driver),
+      map(({ assignedVehicles }) => { (!assignedVehicles || assignedVehicles.length <= 0) ? [] : assignedVehicles }),
       first(),
       mergeMap(({ assignedVehicles }) => from(assignedVehicles)),
       mergeMap(licensePlate => VehicleDA.findByLicensePlate$(licensePlate).pipe(filter(v => v))),
