@@ -2,6 +2,7 @@
 const { of, from, concat } = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const { DriverES } = require("../../domain/driver");
+const { ClientES } = require("../../domain/client");
 const { VehicleES } = require("../../domain/vehicle");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
@@ -122,6 +123,7 @@ class EventStoreService {
 
   generateFunctionMap() {
     return {
+      //DRIVER
       DriverCreated: {
         fn: DriverES.handleDriverCreated$,
         obj: DriverES
@@ -142,6 +144,7 @@ class EventStoreService {
         fn: DriverES.handleDriverAuthDeleted$,
         obj: DriverES 
       },
+      //VEHICLE
       VehicleCreated: {
         fn: VehicleES.handleVehicleCreated$,
         obj: VehicleES
@@ -165,6 +168,11 @@ class EventStoreService {
       VehicleUnassigned: {
         fn: DriverES.handleVehicleUnassigned$,
         obj: DriverES
+      },
+      //CLIENT
+      ClientSatelliteEnabled: {
+        fn: ClientES.handleClientSatelliteEnabled$,
+        obj: ClientES
       }
     };
   }

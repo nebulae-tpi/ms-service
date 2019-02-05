@@ -84,9 +84,10 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   bounds: google.maps.LatLngBounds;
   markers: MarkerRef[] = [];
   selectedMarker: MarkerRef;
-
-
   features = ['AC', 'TRUNK', 'ROOF_RACK', 'PETS', 'BIKE_RACK' ];
+
+  serviceList = [];
+
 
     //////// FORMS //////////
   requestForm: FormGroup;
@@ -109,7 +110,8 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.initMap(); // initialize the map element
-    this.buildFilterForm(); 
+    this.buildRequestTaxiForm(); 
+    this.loadServiceSatelliteList();
   }
 
   initMap() {
@@ -120,10 +122,10 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     });
   }
 
-    /**
-   * Builds filter form
+  /**
+   * Builds request taxi form
    */
-  buildFilterForm() {
+  buildRequestTaxiForm() {
     // Reactive Filter Form
     this.requestForm = new FormGroup({
       taxisNumber: new FormControl(1),
@@ -143,13 +145,51 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+/**
+   * Loads the client satellite data
+   */
+  loadServiceClientSatellite(){
+    this.getServiceList$()
+    .pipe(
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe(services => {
+      this.serviceList = services
+      console.log('loadServiceSatelliteList => ', this.serviceList);
+    });
+  }
+
+  /**
+   * Loads the services request by the Satellite client
+   */
+  loadServiceSatelliteList(){
+    this.getServiceList$()
+    .pipe(
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe(services => {
+      this.serviceList = services
+      console.log('loadServiceSatelliteList => ', this.serviceList);
+    });
+  }
+
+  /**
+   * Gets the service list
+   */
+  getServiceList$(){
+    return this.satelliteViewService.getServiceList$()
+    .pipe(
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      map(resp => resp.data.ServiceServicesSatellite)
+    );
+  }
   
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-      this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
-        duration: 4000
-      });
+      this.translationLoader.getTranslate().instant('SATELLITE.CLOSE'), {duration: 4000}
+    );
   }
 
   graphQlAlarmsErrorHandler$(response) {

@@ -6,7 +6,7 @@ const CollectionName = "Service";
 const DatabaseName = "historical_";
 const { CustomError } = require("../../../tools/customError");
 const { map, mergeMap, reduce } = require("rxjs/operators");
-const { of, Observable, defer, from } = require("rxjs");
+const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
 
 class ServiceDA {
@@ -43,41 +43,30 @@ class ServiceDA {
     return defer(() => collection.findOne(query));
   }
 
-  static getServiceSatelliteList$(filter, pagination) {
-    console.log('getServiceSatelliteList ', filter);
-
+  /**
+   * get services from the satellite
+   */
+  static getServiceSatelliteList$() {
     const projection = {dropOff: 0, route: 0};
 
     const states = ['REQUEST', 'ASSIGNED', 'ARRIVED'];    
     const query = {};
-    query["state"] = { $in: states};
-    
-    const currentDate = new Date();
-    const endDate = new Date(currentDate);
-    let initDate = null;
-    if(currentDate.getDate() > 3){
-      initDate = Crosscutting.addMonth(currentDate, -1);
-    }else{
-      initDate = new Date(currentDate);;
-    }
-    
-    return from(Crosscutting.getYearMonthArray(initDate, endDate))
+    query["state"] = { $in: states};    
+
+    const explorePastMonth = Date.today().getDate() <= 2;
+
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1)
     .pipe(
-      map(date => {        
-        const yearMonth = Crosscutting.getYearMonth(date);
-        const collection = mongoDB.client.db(`${DatabaseName}${yearMonth}`).collection(CollectionName);
-        return collection;
-      }),
+      map(date => mongoDB.getHistoricalDb(date)),
+      map(db => db.collection(CollectionName)),
       mergeMap(collection => {
         const cursor = collection
         .find(query, {projection})
-        .skip(pagination.count * pagination.page)
-        .limit(pagination.count)
-        .sort({ creationTimestamp: pagination.sort });
+        .sort({ timestamp: -1 });
 
         return mongoDB.extractAllFromMongoCursor$(cursor);
       })
-    );
+    )
   }
 
 
@@ -129,14 +118,11 @@ class ServiceDA {
 
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
-    
+        
     return from(Crosscutting.getYearMonthArray(initDate, endDate))
     .pipe(
-      map(date => {        
-        const yearMonth = Crosscutting.getYearMonth(date);
-        const collection = mongoDB.client.db(`${DatabaseName}${yearMonth}`).collection(CollectionName);
-        return collection;
-      }),
+      map(date => mongoDB.getHistoricalDb(date)),
+      map(db => db.collection(CollectionName)),
       mergeMap(collection => {
         const cursor = collection
         .find(query, {projection})
@@ -197,11 +183,8 @@ class ServiceDA {
 
     return from(Crosscutting.getYearMonthArray(initDate, endDate))
     .pipe(
-      map(date => {
-        const yearMonth = Crosscutting.getYearMonth(date);
-        const collection = mongoDB.client.db(`${DatabaseName}${yearMonth}`).collection(CollectionName);
-        return collection;
-      }),
+      map(date => mongoDB.getHistoricalDb(date)),
+      map(db => db.collection(CollectionName)),
       mergeMap(collection => collection.count(query)),
       reduce((acc, val) => acc + val)
     );

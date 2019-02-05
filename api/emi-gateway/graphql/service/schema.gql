@@ -78,7 +78,30 @@ type ServiceServiceState {
 }
 
 type ServiceClientSatellite {
+  "General info of the client"
+  generalInfo: ServiceClientSatelliteGeneralInfo
+  "Location of the client"
+  location: ServiceClientSatelliteLocation
+}
+
+type ServiceClientSatelliteGeneralInfo {
+  "Client name"
   name: String!
+  "Client phone"
+  phone: BigInt
+  "Client address"
+  address: String
+  "Client city"
+  city: String
+  "Client neighborhood"
+  neighborhood: String
+  "Referrer driver document id"
+  referrerDriverDocumentId: String
+}
+
+type ServiceClientSatelliteLocation {
+  lat: Float
+  lng: Float
 }
 
 type ServiceService {

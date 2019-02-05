@@ -42,7 +42,7 @@ class Crosscutting{
 
         // return `${year}${month}`;
 
-        return dateFormat(date, "yymm")
+        return dateFormat(date, "yymm");
     }
 
     /**

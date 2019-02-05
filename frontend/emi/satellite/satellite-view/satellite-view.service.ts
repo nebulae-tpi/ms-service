@@ -1,55 +1,70 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from "rxjs";
+import { Observable, Subject, of } from "rxjs";
 import {
-  startWith
+  startWith, mergeMap, map, filter, tap
 } from "rxjs/operators";
 import { GatewayService } from '../../../../api/gateway.service';
 import {
+  ServiceServicesSatellite,
+  ServiceClientSatellite
 } from '../gql/satellite';
 import * as moment from "moment";
-
 @Injectable()
 export class SatelliteViewService {
 
-  private _filterSubject$ = new BehaviorSubject({
-      initTimestamp: moment().startOf('month'),
-      endTimestamp: moment().endOf('day')
-  });
+  // This is your data.
+  private data = [];
 
-  private _paginatorSubject$ = new BehaviorSubject({
-    pagination: {
-      page: 0, count: 10, sort: -1
-    },
-  });
+  // This subject will be used to update the observable
+  private _serviceList = new Subject();
+
+  // This observable is public so that your components can subscribe
+  serviceList$ = this._serviceList.asObservable();
 
   constructor(private gateway: GatewayService) {
 
   }
 
+    /**
+   * Load services of the satellite client
+   */
+  loadServicesSatellite$(){
+    return of('Loading services')
+    .pipe(
+      mergeMap(() => this.getServiceList$()),
+      map((data: any) => data.ServiceServicesSatellite),
+      filter(services => services && services-length > 0),
+      tap(services => {
+        this.data = services;
+      })
+    )
+  }
+
 
   /**
-   * Emits an event when the filter is modified
-   * @returns {Observable<any>}
+   * Gets the service list of a client satellite
+   * @returns {Observable} Observable with the service list
    */
-  get filter$(): Observable<any> {
-    return this._filterSubject$.asObservable()
+  getServiceList$() {
+    return this.gateway.apollo.query<any>({
+      query: ServiceServicesSatellite,
+      variables: {},
+      fetchPolicy: "network-only",
+      errorPolicy: "all"
+    });
   }
 
-  /**
-   * Emits an event when the paginator is modified
-   * @returns {Observable<any>}
+    /**
+   * Gets the service list of a client satellite
+   * @returns {Observable} Observable with the service list
    */
-  get paginator$(): Observable<any> {
-    return this._paginatorSubject$.asObservable()
-  }
-
-  updateFilterData(filterData){
-    console.log('filterData -->> ', filterData);
-    this._filterSubject$.next(filterData);
-  }
-
-  updatePaginatorData(paginatorData){
-    this._paginatorSubject$.next(paginatorData);
+  getServiceClientSatellite$() {
+    return this.gateway.apollo.query<any>({
+      query: ServiceClientSatellite,
+      variables: {},
+      fetchPolicy: "network-only",
+      errorPolicy: "all"
+    });
   }
 
 }
