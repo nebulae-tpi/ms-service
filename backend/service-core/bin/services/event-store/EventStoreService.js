@@ -12,7 +12,7 @@ let instance;
 /**
  * Micro-BackEnd key
  */
-const mbeKey = "ms-service_mbe_service-core";
+const mbeKey = "ms-service_mbe_service-core_190205";
 
 class EventStoreService {
   constructor() {
