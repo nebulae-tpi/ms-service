@@ -16,7 +16,27 @@ export const locale = {
       },
       'SERVICES': {
         'LICENSE_PLATE': 'Placa',
-        'DRIVER': 'Conductor'
+        'DRIVER': 'Conductor',
+        'SERVICE_PARAMS': 'Parámetros',
+        'STATE': 'Estado',
+        'REFERENCE': 'Referencia',
+        'FEATURES': {
+          'AC': 'Aire acondicionado',
+          'TRUNK': 'Baúl',
+          'ROOF_RACK': 'Parrilla de techo',
+          'PETS': 'Permite mascotas',
+          'BIKE_RACK': 'Portabicicletas'
+        },
+        'STATES': {
+          'REQUEST': 'Solicitado',
+          'REQUESTED': 'Solicitado',
+          'ASSIGNED': 'Asignado',        
+          'ARRIVED': 'Ha llegado',
+          'ON_BOARD': 'A bordo',
+          'DONE': 'Finalizado',
+          'CANCELLED_DRIVER': 'Cancelado por conductor',
+          'CANCELLED_CLIENT': 'Cancelado por cliente',
+        }
       }
     },
     ERRORS: {

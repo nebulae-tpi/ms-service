@@ -34,6 +34,7 @@
   "dependencies": {
     "@nebulae/event-store": "^1.0.0",
     "async-mqtt": "^1.0.1",
+    "dateformat": "^3.0.3",
     "datejs": "^1.0.0-rc3",
     "dotenv": "^5.0.1",
     "event-stream": "^4.0.1",

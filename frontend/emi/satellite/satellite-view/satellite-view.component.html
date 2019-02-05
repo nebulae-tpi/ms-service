@@ -103,14 +103,14 @@
               
             </div>               
           </div>
-          <mat-divider></mat-divider>
-
-
-
-
-          <div fxFlex="100" class="h3 secondary-text">{{'SATELLITE.FEATURES' | translate}}</div>
           
-          <div fxFlex="100"  style="background: yellow"  formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
+
+
+
+          <mat-divider fxFlex="100"></mat-divider>
+          <div fxFlex="100" class="mt-12 h3 secondary-text">{{'SATELLITE.FEATURES' | translate}}</div>
+          
+          <div fxFlex="100" formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
             <div fxFlex="100" [formGroupName]="i">
                 <mat-checkbox fxFlex="100" class="example-margin"  [formControlName]="'active'">
                     {{ 'SATELLITE.FEATURES_LIST.' + feature.get('name').value | translate }}
@@ -186,4 +186,4 @@
     <!-- / CENTER -->
   </mat-sidenav-container>
 </div>
-<satellite-service-list></satellite-service-list>
+<satellite-service-list [serviceList]="serviceList"></satellite-service-list>

@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, interval, Observable, empty } = require("rxjs");
+const { of, interval, Observable, empty, throwError } = require("rxjs");
 const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
@@ -31,27 +31,32 @@ class ShiftDAL {
     start$() {
         return Observable.create(obs => {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
-                mergeMap(evt => this.handlers[evt.t](evt)),
-                catchError(_ => { this.logError(_); return of(_); }),
+                mergeMap(evt => Observable.create(evtObs => {
+                    this.handlers[evt.t](evt).subscribe(
+                        (handlerEvt) => { },
+                        (handlerErr) => console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${ShiftDAL.logError(handlerErr)}`),
+                        () => console.log(`ShiftDAL.handlerErr[${evt.t}]: Completed`),
+                    );
+                    evtObs.complete();
+                }))
             ).subscribe(
                 (evt) => console.log(`ShiftDAL.subscription: ${evt}`),
-                (err) => { console.log(`ShiftDAL.subscription ERROR: ${err}`); process.exit(1); },
-                () => { console.log(`ShiftDAL.subscription STOPPED`); process.exit(1); },
+                (err) => { console.log(`ShiftDAL.subscription ERROR: ${err}`); },
+                () => { console.log(`ShiftDAL.subscription STOPPED`); },
             );
             obs.next('ShiftDAL.subscription engine started');
             obs.complete();
         });
-
     }
+
+
 
     /**
      * process event and forwards the right data to the drivers
      * @param {Event} shiftStartedEvt
      */
     handleShiftLocationReported$({ data }) {
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)).pipe(
-
-        ); //Build and send ShiftLocationReported event (event-sourcing)
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)); //Build and send ShiftLocationReported event (event-sourcing)
     }
 
 
@@ -80,7 +85,7 @@ class ShiftDAL {
      * Logs an error at the console.error printing only the message and the stack related to the project source code
      * @param {Error} error 
      */
-    logError(error) {
+    static logError(error) {
         if (!error.stack) {
             console.error(error);
             return;

@@ -3,7 +3,6 @@
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
 const CollectionName = "Client";
-const DatabaseName = "master";
 const { CustomError } = require("../../../tools/customError");
 const { map, mergeMap, reduce } = require("rxjs/operators");
 const { of, Observable, defer, from } = require("rxjs");
@@ -32,9 +31,31 @@ class ClientDA {
     const query = {
       _id: clientId      
     };
-
-
     return defer(() => collection.findOne(query));
+  }
+
+    /**
+   * modifies the general info of the indicated Client 
+   * @param {*} id  Client ID
+   * @param {*} clientSatellite  Client info
+   */
+  static updateClientSatellite$(id, clientSatellite) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    return defer(()=>
+        collection.findOneAndUpdate(
+          { _id: id },
+          {
+            $set: {generalInfo: clientSatellite.generalInfo, location: clientSatellite.location}
+          },
+          {
+            upsert: true,
+            returnOriginal: false
+          }
+        )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
+    );
   }
 
 

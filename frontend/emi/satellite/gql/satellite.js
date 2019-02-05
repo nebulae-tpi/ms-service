@@ -1,72 +1,120 @@
 import gql from "graphql-tag";
 
 // We use the gql tag to parse our query string into a query document
-export const ServiceDriver = gql`
-  query ServiceDriver($id: String!) {
-    ServiceDriver(id: $id) {
+export const ServiceServicesSatellite = gql`
+  query ServiceServicesSatellite {
+    ServiceServicesSatellite {
+      _id
+      businessId
+      shiftId
+      timestamp
+      requestedFeatures 
+      pickUp {
+        marker {
+          lat
+          lng
+          timestamp
+        }
+        polygon {
+          lat
+          lng
+          timestamp
+        }
+        city
+        zone
+        neighborhood
+        addressLine1
+        addressLine2
+        notes
+      }
+      dropOff {
+        marker {
+          lat
+          lng
+          timestamp
+        }
+        polygon {
+          lat
+          lng
+          timestamp
+        }
+        city
+        zone
+        neighborhood
+        addressLine1
+        addressLine2
+        notes
+      }
+      pickUpETA
+      dropOffETA
+      verificationCode
+      paymentType
+      fareDiscount
+      fare
+      state
+      stateChanges {
+        state
+        timestamp
+        location {
+          lat
+          lng
+          timestamp
+        }
+        notes
+      }
+      location {
+        lat
+        lng
+        timestamp
+      }      
+      vehicle {
+        licensePlate
+      }
+      driver {
+        documentId
+        fullname
+      }
+      client {
+        id
+        businessId
+        username
+        fullname
+        tip
+        tipType
+      }
+      tip      
+      route {
+        lat
+        lng
+        timestamp
+      }
+      lastModificationTimestamp 
+    }
+  }
+`;
+
+
+export const ServiceClientSatellite = gql`
+  query ServiceClientSatellite {
+    ServiceClientSatellite {
       _id
       generalInfo {
         name
-        description
+        phone
+        address
+        city
+        neighborhood
+        email
+        referrerDriverDocumentId
       }
-      state
-      creationTimestamp
-      creatorUser
-      modificationTimestamp
-      modifierUser
-    }
-  }
-`;
-
-export const ServiceDrivers = gql`
-  query ServiceDrivers($filterInput: ServiceSatelliteFilterInput!, $paginationInput: PaginationInput!) {
-    ServiceDrivers(filterInput: $filterInput, paginationInput: $paginationInput) {
-      _id
-      generalInfo {
-        name
-        description
+      location{
+        lat
+        lng
       }
-      state
-      creationTimestamp
-      creatorUser
-      modificationTimestamp
-      modifierUser
     }
   }
 `;
 
-export const ServiceDriversSize = gql`
-  query ServiceDriversSize($filterInput: ServiceSatelliteFilterInput!) {
-    ServiceDriversSize(filterInput: $filterInput)
-  }
-`;
-
-export const ServiceCreateDriver = gql `
-  mutation ServiceCreateDriver($input: ServiceDriverInput!){
-    ServiceCreateDriver(input: $input){
-      code
-      message
-    }
-  }
-`;
-
-export const ServiceUpdateDriverGeneralInfo = gql `
-  mutation ServiceUpdateDriverGeneralInfo($id: ID!, $input: ServiceDriverGeneralInfoInput!){
-    ServiceUpdateDriverGeneralInfo(id: $id, input: $input){
-      code
-      message
-    }
-  }
-`;
-
-export const ServiceUpdateDriverState = gql `
-  mutation ServiceUpdateDriverState($id: ID!, $newState: Boolean!){
-    ServiceUpdateDriverState(id: $id, newState: $newState){
-      code
-      message
-    }
-  }
-`;
 
 // SUBSCRIPTION
 export const ServiceDriverUpdatedSubscription = gql`

@@ -183,7 +183,16 @@ class GraphQlService {
       {
         aggregateType: "Service",
         messageType: "emigateway.graphql.query.ServiceService"
-      }        
+      },
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.query.ServiceServicesSatellite"
+      },
+      // CLIENT
+      {
+        aggregateType: "Client",
+        messageType: "emigateway.graphql.query.ServiceClientSatellite"
+      }
     ];
   }
 
@@ -235,6 +244,7 @@ class GraphQlService {
         fn: ServiceCQRS.getServiceSatelliteList$,
         obj: ServiceCQRS
       }, 
+      // CLIENT
       "emigateway.graphql.query.ServiceClientSatellite": {
         fn: ClientCQRS.getClientSatellite$,
         obj: ClientCQRS

@@ -1,7 +1,7 @@
 "use strict";
 
 const uuidv4 = require("uuid/v4");
-const { of, interval } = require("rxjs");
+const { of, interval, from } = require("rxjs");
 const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
 const ServiceDA = require('./data-access/ServiceDA');
@@ -71,8 +71,15 @@ class ServiceCQRS {
       PERMISSION_DENIED,
       ["SATELLITE"]
     ).pipe(
-      mergeMap(roles => ServiceDA.getServiceSatelliteList$(filterInput, args.paginationInput)),
+      mergeMap(roles => ServiceDA.getServiceSatelliteList$()),
       toArray(),
+      mergeMap(serviceList => {
+        console.log('ServiceList => ', serviceList );
+        return from(serviceList).pipe(
+          map(service => this.formatServiceToGraphQLSchema(service)),
+          toArray()
+        );
+      }),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );

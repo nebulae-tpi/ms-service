@@ -2,7 +2,7 @@
 
 const uuidv4 = require("uuid/v4");
 const { of, empty, forkJoin, from, Observable, Subject } = require("rxjs");
-const { mergeMapTo, mergeMap, map, mapTo, filter, catchError, tap } = require('rxjs/operators');
+const { mergeMap, map, mapTo, filter, catchError, tap } = require('rxjs/operators');
 const mqtt = require('mqtt');
 
 
@@ -41,12 +41,17 @@ class DriverAppLinkBroker {
             this.mqttClient = mqtt.connect(connStr);
             obs.next(`DriverAppLinkBroker Mqtt connected: ${connStr}`);
             this.mqttClient.on('message', (topic, message) => {
-                const envelope = JSON.parse(message);
-                // message is Buffer
-                this.incomingMessages$.next({
-                    topic: topic,
-                    ...envelope
-                });
+                const msg = JSON.parse(message);
+                if (msg && msg.att && msg.att.sId && msg.t && msg.data) {
+                    // message is Buffer
+                    this.incomingMessages$.next({
+                        topic: topic,
+                        ...msg
+                    });
+                }else{
+                    console.error(`WARNING: invalid incoming message structure: ${message}`);
+                }
+
             });
             obs.next(`DriverAppLinkBroker Mqtt onMessage linked to rx.subject`);
             this.listeningTopics.forEach(topic => {
@@ -109,8 +114,6 @@ class DriverAppLinkBroker {
      */
     getMessageListener$(topic, types = [], ignoreSelfEvents = true) {
         return this.incomingMessages$.pipe(
-            //tap(x => console.log(JSON.stringify(x))),
-            filter(msg => msg),
             filter(
                 msg => !ignoreSelfEvents || msg.att.sId !== this.senderId
             ),
@@ -159,7 +162,7 @@ class DriverAppLinkBroker {
      * Logs an error at the console.error printing only the message and the stack related to the project source code
      * @param {Error} error 
      */
-    logError(error){
+    logError(error) {
         if (!error.stack) {
             console.error(error);
             return;

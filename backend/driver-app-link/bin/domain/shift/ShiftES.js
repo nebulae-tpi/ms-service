@@ -47,7 +47,7 @@ class ShiftES {
      * @param {Event} shiftConnectedEvt
      */
     handleShiftConnected$({ aid }) {
-        return empty();
+        return of({});
     }
 
     /**
@@ -55,7 +55,7 @@ class ShiftES {
      * @param {Event} shiftDisconnectedEvt
      */
     handleShiftDisconnected$({ aid }) {
-        return empty();
+        return of({});
     }
 
     /**
@@ -121,7 +121,7 @@ class ShiftES {
      * @param {Event} shiftLocationReportedEvt
      */
     handleShiftLocationReported$({ aid, data }) {
-        return empty();
+        return of({});
     }
 
 
