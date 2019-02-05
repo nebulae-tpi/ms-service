@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, interval, Observable, empty , throwError} = require("rxjs");
+const { of, interval, Observable, empty, throwError } = require("rxjs");
 const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
@@ -33,7 +33,7 @@ class ShiftDAL {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
                 mergeMap(evt => Observable.create(evtObs => {
                     this.handlers[evt.t](evt).subscribe(
-                        (handlerEvt) => {},
+                        (handlerEvt) => { },
                         (handlerErr) => console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${ShiftDAL.logError(handlerErr)}`),
                         () => console.log(`ShiftDAL.handlerErr[${evt.t}]: Completed`),
                     );
@@ -56,10 +56,7 @@ class ShiftDAL {
      * @param {Event} shiftStartedEvt
      */
     handleShiftLocationReported$({ data }) {
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)).pipe(
-            //throwError(new Error("my error"))
-            tap(x => console.log(`=============${x.a.a}`))
-        ); //Build and send ShiftLocationReported event (event-sourcing)
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)); //Build and send ShiftLocationReported event (event-sourcing)
     }
 
 
