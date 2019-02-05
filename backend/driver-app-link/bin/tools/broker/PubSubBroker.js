@@ -99,7 +99,7 @@ class PubSubBroker {
             Rx.from(topics)
                 .filter(topicName => Object.keys(this.listeningTopics).indexOf(topicName) === -1)
                 .mergeMap(topicName => {
-                    const subscriptionName = `${topicName}_service`;
+                    const subscriptionName = `${topicName}_service_dal`;
 
                     return this.getSubscription$(topicName, subscriptionName)
                         .map(subsription => { 
