@@ -42,7 +42,7 @@ class DriverCQRS {
       tap( x => console.log(`01=========${JSON.stringify(x)}==========`) ),
       filter(driver => driver),
       tap( x => console.log(`02=========${JSON.stringify(x)}==========`) ),
-      map(  ({ assignedVehicles })  => { (!assignedVehicles || assignedVehicles.length <= 0) ? [] : assignedVehicles }),
+      map(  ({ assignedVehicles })  => { return (!assignedVehicles || assignedVehicles.length <= 0) ? [] : assignedVehicles ;}),
       tap( x => console.log(`03=========${JSON.stringify(x)}==========`) ),
       first(),
       tap( x => console.log(`04=========${JSON.stringify(x)}==========`) ),
