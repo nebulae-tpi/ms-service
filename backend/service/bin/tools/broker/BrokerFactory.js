@@ -7,6 +7,7 @@ class BrokerFactory {
      * Factory instance and config
      */
     constructor() {
+        console.log("BROKER TYPE ==> ", process.env.BROKER_TYPE);
         switch (process.env.BROKER_TYPE) {
             case 'PUBSUB':
                 const PubSubBroker = require('./PubSubBroker');

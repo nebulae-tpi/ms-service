@@ -106,26 +106,7 @@
                 type="datetime"
                 #pickerEndDate
               ></mat-datepicker>
-            </mat-form-field>
-
-
-            <mat-form-field>
-              <input
-                matInput
-                placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_NAME' | translate}}"
-                formControlName="clientName"
-                id="clientName"
-                maxlength="20"/>
-            </mat-form-field>
-
-            <mat-form-field>
-                <input
-                  matInput
-                  placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_NAME' | translate}}"
-                  formControlName="driverName"
-                  id="driverName"
-                  maxlength="20"/>
-            </mat-form-field>
+            </mat-form-field>            
             
             <mat-form-field>
                 <input
@@ -137,22 +118,60 @@
             </mat-form-field>
 
             <mat-form-field>
-                <input
-                  matInput
-                  placeholder="{{'SERVICE.SERVICE_FILTERS.LICENSE_PLATE' | translate}}"
-                  formControlName="licensePlate"
-                  id="licensePlate"
-                  maxlength="20"/>
+              <input
+                matInput
+                placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_FULLNAME' | translate}}"
+                formControlName="driverFullname"
+                id="driverFullname"
+                maxlength="20"/>
+            </mat-form-field>
+            
+            <mat-form-field>
+              <input
+                matInput
+                placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_USERNAME' | translate}}"
+                formControlName="clientUsername"
+                id="clientUsername"
+                maxlength="20"/>
             </mat-form-field>
 
             <mat-form-field>
+              <input
+                matInput
+                placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_FULLNAME' | translate}}"
+                formControlName="clientFullname"
+                id="clientFullname"
+                maxlength="20"/>
+            </mat-form-field>
+
+            <mat-form-field>
+                <input
+                  matInput
+                  placeholder="{{'SERVICE.SERVICE_FILTERS.LICENSE_PLATE' | translate}}"
+                  formControlName="vehicleLicensePlate"
+                  id="vehicleLicensePlate"
+                  maxlength="20"/>
+            </mat-form-field>
+
+            <!-- <mat-form-field>
                 <input
                   matInput
                   placeholder="{{'SERVICE.SERVICE_FILTERS.STATE' | translate}}"
                   formControlName="state"
                   id="state"
                   maxlength="20"/>
+            </mat-form-field> -->
+
+            <mat-form-field>
+              <mat-select placeholder="{{'SERVICE.SERVICE_FILTERS.STATES' | translate}}"
+               formControlName="states" multiple>
+                <mat-option *ngFor="let state of stateList" [value]="state">
+                  {{ "SERVICE.SERVICE_STATES."+state | translate}}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
+
+            <mat-checkbox formControlName="showClosedServices">{{'SERVICE.SERVICE_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>
 
             
               <button
@@ -217,7 +236,7 @@
           fusePerfectScrollbar
         >
 
-          <!-- Name Column -->
+          <!-- Timestamp Column -->
           <ng-container cdkColumnDef="timestamp">
             <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.TIMESTAMP" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let service">
@@ -232,7 +251,7 @@
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.CLIENT_NAME" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
                 <p class="text-truncate">
-                  {{ service.client.name}}
+                  {{ service.client.fullname}}
                 </p>
               </mat-cell>
           </ng-container>
@@ -242,7 +261,7 @@
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
                 <p class="text-truncate">
-                  {{ service.driver.name}}
+                  {{ service.driver.fullname}}
                 </p>
               </mat-cell>
           </ng-container>
@@ -262,7 +281,7 @@
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.PAYMENT_TYPE" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
                 <p class="text-truncate">
-                  {{ service.paymentType}}
+                  {{ "SERVICE.SERVICE_PAYMENT_TYPE."+service.paymentType | translate}}
                 </p>
               </mat-cell>
           </ng-container>
@@ -273,7 +292,7 @@
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.STATE" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
                 <p class="text-truncate">
-                  {{ service.state}}
+                  {{ "SERVICE.SERVICE_STATES."+service.state | translate}}
                 </p>
               </mat-cell>
           </ng-container>

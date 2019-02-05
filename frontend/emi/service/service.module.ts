@@ -13,6 +13,8 @@ import { ServiceDetailComponent } from './service-detail/service-detail.componen
 import { ServiceDetailGeneralInfoComponent } from './service-detail/general-info/service-general-info.component';
 import { ToolbarService } from '../../toolbar/toolbar.service';
 import { DialogComponent } from './dialog/dialog.component';
+import { ServiceStateChangesComponent } from './service-detail/state-changes/service-state-changes.component';
+import { ServiceRouteTrackingComponent } from './service-detail/route-tracking/service-route-tracking.component';
 
 const routes: Routes = [
   {
@@ -35,6 +37,8 @@ const routes: Routes = [
     DialogComponent,
     ServiceListComponent,
     ServiceDetailComponent,
+    ServiceStateChangesComponent,
+    ServiceRouteTrackingComponent,
     ServiceDetailGeneralInfoComponent
   ],
   entryComponents: [DialogComponent],

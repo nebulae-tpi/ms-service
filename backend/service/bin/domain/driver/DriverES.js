@@ -23,7 +23,6 @@ class DriverES {
      * @param {*} businessCreatedEvent business created event
      */
     handleDriverCreated$(driverCreatedEvent) { 
-        console.log("########################## handleDriverCreated$ #################################");
         return of(driverCreatedEvent.data)
         .pipe(
             map(driver => ({
@@ -77,6 +76,18 @@ class DriverES {
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result))
         );
     }
+
+    handleDriverAuthCreated$(driverAuthCreatedEvent){
+        return of(driverAuthCreatedEvent.data.username)
+        .pipe(
+            mergeMap(newUsername => DriverDA.updateUserName$(driverAuthCreatedEvent.aid, newUsername) )
+        )
+
+    }
+
+    handleDriverAuthDeleted$(driverAuthDeletedEvent){
+        return DriverDA.updateUserName$(driverAuthDeletedEvent.aid, '');
+    }
     
     handleVehicleAssigned$(VehicleAssignedEvent){
         return of(VehicleAssignedEvent.data.vehicleLicensePlate)
@@ -88,9 +99,6 @@ class DriverES {
     }
 
     handleVehicleUnassigned$(VehicleUnassignedEvent){
-        console.log("#############   handleVehicleUnassigned   ##############", VehicleUnassignedEvent.aid,
-         VehicleUnassignedEvent.data.vehicleLicensePlate  );
-        
         return of(VehicleUnassignedEvent.data.vehicleLicensePlate)
         .pipe(
             mergeMap(plate => DriverDA.unassignVehicle$(VehicleUnassignedEvent.aid, plate)),

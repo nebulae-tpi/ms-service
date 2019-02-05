@@ -4,7 +4,7 @@ const uuidv4 = require("uuid/v4");
 const { of, interval } = require("rxjs");
 const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
-const ServiceDA = require("../../data/ServiceDA");
+const ServiceDA = require('./data-access/ServiceDA');
 const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
 const GraphqlResponseTools = require('../../tools/GraphqlResponseTools');
@@ -47,17 +47,45 @@ class ServiceCQRS {
         const businessId = !isPlatformAdmin? (authToken.businessId || ''): null;
         return ServiceDA.getService$(args.id, businessId)
       }),
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-      catchError(err => GraphqlResponseTools.handleError$(error))
+      map(service => this.formatServiceToGraphQLSchema(service)),
+      mergeMap(rawResponse => {
+        console.log('rawResponse => ', rawResponse);
+        return GraphqlResponseTools.buildSuccessResponse$(rawResponse);
+      }),
+      catchError(err => GraphqlResponseTools.handleError$(err))
     );
   }
 
+
+    /**  
+   * Gets the Service list
+   *
+   * @param {*} args args
+   */
+  getServiceSatelliteList$({ args }, authToken) {
+    console.log('getServiceSatelliteList$ --*** ');
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Service",
+      "getServiceSatelliteList",
+      PERMISSION_DENIED,
+      ["SATELLITE"]
+    ).pipe(
+      mergeMap(roles => ServiceDA.getServiceSatelliteList$(filterInput, args.paginationInput)),
+      toArray(),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
+  
   /**  
    * Gets the Service list
    *
    * @param {*} args args
    */
   getServiceList$({ args }, authToken) {
+    console.log('getServiceList$ --*** ');
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
@@ -67,11 +95,13 @@ class ServiceCQRS {
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        const isSatellite = roles["SATELLITE"];
         //If an user does not have the role to get the Service from other business, the query must be filtered with the businessId of the user
-        const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        const businessId = !isPlatformAdmin? (authToken.businessId || '-1'): args.filterInput.businessId;
+        const clientId = !isPlatformAdmin && isSatellite ? (authToken.clientId || '-1'): null;
         const filterInput = args.filterInput;
         filterInput.businessId = businessId;
-
+        filterInput.clientId = clientId;
         return ServiceDA.getServiceList$(filterInput, args.paginationInput);
       }),
       toArray(),
@@ -95,10 +125,14 @@ class ServiceCQRS {
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        const isSatellite = roles["SATELLITE"];
         //If an user does not have the role to get the Service from other business, the query must be filtered with the businessId of the user
         const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        const clientId = !isPlatformAdmin && isSatellite ? (authToken.clientId || '-1'): null;
+
         const filterInput = args.filterInput;
         filterInput.businessId = businessId;
+        filterInput.clientId = clientId;
 
         return ServiceDA.getServiceSize$(filterInput);
       }),
@@ -107,39 +141,116 @@ class ServiceCQRS {
     );
   }
 
-  getDriverVehicles$({ args }, authToken) {
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "Service",
-      "getDriverVehicles",
-      PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]
-    ).pipe(
-      mergeMap(roles => {
-        // const isPlatformAdmin = roles["PLATFORM-ADMIN"];
-        //If an user does not have the role to get the Service from other business, the query must be filtered with the businessId of the user
-        // const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
-        // const filterInput = args.filterInput;
-        // filterInput.businessId = businessId;
+      /**
+     * Fromats Service to the GraphQL schema 
+     * @param Object service
+     */
+    formatServiceToGraphQLSchema(service) {
+      return {
+        _id: service._id,
+        businessId: service.businessId,
+        shiftId: service.shiftId,
+        timestamp: service.timestamp,
+        requestedFeatures: service.requestedFeatures,
+        pickUp: this.buildPickUpAndDropOff(service.pickUp),
+        dropOff: this.buildPickUpAndDropOff(service.dropOff),
+        pickUpETA: service.pickUpETA,
+        pickUpETA: service.pickUpETA,
+        dropOffETA: service.dropOffETA,
+        verificationCode: service.verificationCode,
+        paymentType: service.paymentType,
+        fareDiscount: service.fareDiscount,
+        fare: service.fare,
+        state: service.state,
+        stateChanges: this.buildStateChangesArray(service.stateChanges),
+        vehicle: service.vehicle,
+        driver: service.driver,
+        driver: service.driver,
+        tip: service.tip,
+        route: this.buildRouteArray(service.route ? service.route.coordinates: null),
+        lastModificationTimestamp: service.lastModificationTimestamp,
+        client: service.client
+      };
+    }
 
-        // return ServiceDA.getServiceSize$(filterInput);
-        return of([
-          {
-            licensePlate: 'TKM909',
-            model: 2018,
-            fuelType: 'GASOLINE',
-            brand: 'Mazda',
-            active: true
-          }
-        ])
-      }),
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-      catchError(err => GraphqlResponseTools.handleError$(err))
-    );
-  }
+    buildStateChangesArray(stateChanges){
+      if(!stateChanges){
+        return null;
+      }
+      const stateChangesArray = [];
+
+      stateChanges.forEach(stateChange => {
+        stateChangesArray.push({
+          state: stateChange.state,
+          timestamp: stateChange.timestamp,
+          location: this.buildCoordinate(stateChange.location),
+          notes: stateChange.notes,
+        });
+      });
+      return stateChangesArray;
+    }
+
+    buildRouteArray(routes){
+      if(!routes){
+        return null;
+      }
+      const routesArray = [];
+
+      routes.forEach(route => {
+        routesArray.push(this.buildCoordinate(route));
+      });
+      return routesArray;
+    }
+
+    buildCoordinate(location){
+      if(!location){
+        return null;
+      }
+      return {
+        lat: location[0],
+        lng: location[1]
+      }
+    }
+
+    buildPickUpAndDropOff(pointLocation){
+      if(!pointLocation){
+        return null;
+      }
+      let marker = null;
+      let polygon = null;
+  
+      if(pointLocation.marker){
+        marker = {
+          lat: pointLocation.marker.coordinates[0],
+          lng: pointLocation.marker.coordinates[1],
+        };
+      } 
+  
+      if(pointLocation.polygon){
+        polygon = [];
+        pointLocation.polygon.coordinates[0].forEach(element => {
+          polygon.push({
+            lat: element[0],
+            lng: element[1],
+          });
+        });
+      } 
+      
+      const location = {
+        marker: marker,
+        polygon: polygon,
+        city: pointLocation.city,
+        zone: pointLocation.zone,
+        neighborhood: pointLocation.neighborhood,
+        addressLine1: pointLocation.addressLine1,
+        addressLine2: pointLocation.addressLine2,
+        notes: pointLocation.notes,
+      };
+  
+      return location;
+    }
 
   //#endregion
-
 
 }
 

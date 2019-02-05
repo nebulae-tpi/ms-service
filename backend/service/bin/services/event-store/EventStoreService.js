@@ -134,6 +134,14 @@ class EventStoreService {
         fn: DriverES.handleDriverStateUpdated$,
         obj: DriverES
       },
+      DriverAuthCreated: {
+        fn: DriverES.handleDriverAuthCreated$,
+        obj: DriverES 
+      },
+      DriverAuthDeleted: {
+        fn: DriverES.handleDriverAuthDeleted$,
+        obj: DriverES 
+      },
       VehicleCreated: {
         fn: VehicleES.handleVehicleCreated$,
         obj: VehicleES
@@ -177,6 +185,14 @@ class EventStoreService {
       {
         aggregateType: "Driver",
         eventType: "DriverStateUpdated"
+      },
+      {
+        aggregateType: "Driver",
+        eventType: "DriverAuthCreated"
+      },
+      {
+        aggregateType: "Driver",
+        eventType: "DriverAuthDeleted"
       },
       {
         aggregateType: "Vehicle",

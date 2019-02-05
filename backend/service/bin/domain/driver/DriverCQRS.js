@@ -61,6 +61,7 @@ class DriverCQRS {
    * @param {*} args args
    */
   getDriverList$({ args }, authToken) {
+    console.log("getDriverList$", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",
@@ -88,7 +89,7 @@ class DriverCQRS {
    * @param {*} args args
    */
   getDriverListSize$({ args }, authToken) {
-    console.log('getDriverListSize$', args);
+    console.log("getDriverListSize$", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",
@@ -110,8 +111,7 @@ class DriverCQRS {
     );
   }
 
-  assignVehicleToDriver$({ args }, authToken) {
-    console.log(" CQRS assignVehicleToDriver$", args);
+  assignVehicleToDriver$({ args }, authToken) {    
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
@@ -138,7 +138,6 @@ class DriverCQRS {
   }
 
   unassignVehicleFromDriver$({ args }, authToken) {
-    console.log(" CQRS assignVehicleToDriver$", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
@@ -171,7 +170,6 @@ class DriverCQRS {
   }
 
   getDriverVehicles$({ args }, authToken) {
-    console.log("getDriverVehicles$", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
@@ -181,7 +179,6 @@ class DriverCQRS {
     ).pipe(
       mergeMap(() => DriverDA.getDriver$(args.driverId)),
       map(driver => driver.assignedVehicles),
-      tap(r => console.log("Assigned vehicles => ", r)),
       mergeMap((vehicleLit => VehicleDA.getDriverVehicles$(vehicleLit) )),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))

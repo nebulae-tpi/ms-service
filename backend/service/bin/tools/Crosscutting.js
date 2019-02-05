@@ -1,5 +1,6 @@
 'use strict'
 
+const datejs = require('datejs')
 const uuidv4 = require("uuid/v4");
 const GMT_OFFSET = ((parseInt(process.env.GMT_TO_SERVE.replace('GMT', '') * 60)) + new Date().getTimezoneOffset()) * 60000;
 
@@ -20,23 +21,57 @@ class Crosscutting{
     }
 
     /**
-     * Generates a suffix (MMyy) according to the date.
-     * Format: MMyy
+     * Generates a suffix (yyMM) according to the date.
+     * Format: yyMM
      * 
      * @example
      * month: 06
      * year: 2018
-     * // returns 0618
+     * // returns 1806
      * 
      * @param {*} date 
      */
-    static getMonthYear(date){
-        let month = date.getMonth()+1;
+    static getYearMonth(date){
+        let month = ""+(date.getMonth()+1);
         let year = date.getFullYear() + '';
         month = (month.length == 1 ? '0': '') + month;
         year = year.substr(year.length - 2)
 
-        return `${month}${year}`;
+        return `${year}${month}`;
+    }
+
+    /**
+     * Returns an array of yearmonth according to the initDate and the endDate
+     * @param {*} date1 
+     * @param {*} date2 
+     */
+   static getYearMonthArray(date1, date2) {
+        const startDate = new Date(date1.toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+        const stopDate = new Date(date2.toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+
+        // const startDate = new Date(date1.getTime() + GMT_OFFSET);
+        // const stopDate = new Date(date2.getTime() + GMT_OFFSET);
+        startDate.setHours(0,0,0,0);
+        startDate.setDate(1);
+
+        stopDate.setHours(0,0,0,0);
+        stopDate.setDate(1);
+
+
+        const dateArray = new Array();
+        let currentDate = startDate;
+        while (currentDate <= stopDate) {
+            dateArray.push(currentDate);
+            currentDate = this.addMonth(currentDate, 1);
+        }
+        console.log('dateArray => ', dateArray);
+        return dateArray;
+    }
+
+    static addMonth(date, amountOfMonths){
+        const newDate = new Date(date);
+        newDate.add(amountOfMonths).month();
+        return newDate;
     }
 
 }
