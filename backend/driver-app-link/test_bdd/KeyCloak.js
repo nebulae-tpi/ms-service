@@ -17,6 +17,7 @@ const {
 } = require('rxjs/operators');
 
 class KeyCloak {
+    
 
     constructor() {
         this.jwt = undefined;

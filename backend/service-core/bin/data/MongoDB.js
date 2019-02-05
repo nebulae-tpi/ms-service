@@ -21,6 +21,7 @@ class MongoDB {
     this.historicalDbs = {};
   }
 
+  
   /**
    * Starts DB connections
    * @returns {Rx.Observable} Obserable that resolve to the DB client
