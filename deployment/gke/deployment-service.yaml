@@ -13,7 +13,7 @@ spec:
         app: service
     spec:      
       containers:
-      - image: nebulaetpi/service.backend.service:0.0.8
+      - image: nebulaetpi/service.backend.service:0.0.9
         name: service
         volumeMounts:
         - name: google-application-credentials
@@ -53,6 +53,9 @@ spec:
           value: '2000'
         - name: BROKER_TYPE
           value: PUBSUB
+        # BACKEND PARAMETERS
+        - name: GMT_TO_SERVE
+          value: "GMT-5"
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
           value: "0.0.2"
