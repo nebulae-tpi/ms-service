@@ -76,6 +76,18 @@ class DriverES {
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result))
         );
     }
+
+    handleDriverAuthCreated$(driverAuthCreatedEvent){
+        return of(driverAuthCreatedEvent.data.username)
+        .pipe(
+            mergeMap(newUsername => DriverDA.updateUserName$(driverAuthCreatedEvent.aid, newUsername) )
+        )
+
+    }
+
+    handleDriverAuthDeleted$(driverAuthDeletedEvent){
+        return DriverDA.updateUserName$(driverAuthDeletedEvent.aid, '');
+    }
     
     handleVehicleAssigned$(VehicleAssignedEvent){
         return of(VehicleAssignedEvent.data.vehicleLicensePlate)

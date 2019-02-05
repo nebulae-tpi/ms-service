@@ -128,6 +128,19 @@ class DriverDA {
     );
   }
 
+  static updateUserName$(driverId, newUsername){
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(()=>
+        collection.findOneAndUpdate(
+          { _id: driverId },
+          { $set: { username: newUsername } },
+          { returnOriginal: false }
+        )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
+    );
+  }
+
   /**
    * Updates the Driver state 
    * @param {string} id Driver ID
