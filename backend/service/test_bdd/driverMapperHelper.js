@@ -162,7 +162,7 @@ class DriverMapperHelper {
         const forbidennEmails = [
             "jhon@hotmail.com", "no@hotmail.com",
             "jorge@hotmail.com", "rtellovivas@gmail.com",
-            "luis@hotmail.com"];
+            "luis@hotmail.com", "nada@hotmail.com"];
         const email = lineAsArray[4].trim();
         return forbidennEmails.includes(email) 
             ? `${lineAsArray[3]}@autogen.com`

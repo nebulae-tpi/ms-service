@@ -71,8 +71,8 @@ describe("BDD - MAIN TEST", function() {
                         .pipe(es.split())
                         .pipe(es.mapSync(function (line) {
                             inputStream.pause();
-                            const lineSplited = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/);
-                            lineSplited.map(i => i.trim());
+                            let lineSplited = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/);
+                            lineSplited = lineSplited.map(i => i.trim());
                             of(lineSplited)
                                 .pipe(
                                     map(lineSplited => {
@@ -88,36 +88,44 @@ describe("BDD - MAIN TEST", function() {
                                         ? of({})
                                         : DriverMapperHelper.mapToDriverVehicleObj$(driverVehicleInfo, BUSINESS_ID )
                                             .pipe(
+                                                tap(({ driver }) =>
+                                                    console.log(`######################### ${driver.documentId} ${driver.name} ${driver.lastname} ########################`)
+                                                ),
+
                                                 // TO REMOVE DRIVER AUTH
 
                                                 // mergeMap(({driver, vehicle}) => DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId)),
                                                 // mergeMap(driverId => DriverGraphQlHelper.removeAuth$(graphQL, driverId)
                                                 //     .pipe(
-                                                //         delay(20)
+                                                //         delay(20),
+                                                //         catchError(e => of('ERROR'))
+
                                                 //     )
                                                 // ),
 
                                                 // TO INSER DRIVER, VEHICLES, ASSIGN VEHICLES AND  DRIVER AUTH
-
-                                                // mergeMap(({driver, vehicle}) => forkJoin(
-                                                //     DriverGraphQlHelper.createDriver$(graphQL, driver),
-                                                //     VehicleGraphQlHelper.createVehicle$(graphQL, vehicle),
-                                                //     of({vehicle, driver})
-                                                // )),
-                                                // delay(3000),
-                                                // mergeMap(([a,b, { vehicle, driver }]) =>
-                                                //     DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId)
-                                                //     .pipe(
-                                                //         map( (driverId) => ({ driver: { ...driver, _id: driverId }, vehicle: vehicle  }))
-                                                //     )
-                                                // ),
+                                               
+                                                mergeMap(({driver, vehicle}) => forkJoin(
+                                                    DriverGraphQlHelper.createDriver$(graphQL, driver),
+                                                    VehicleGraphQlHelper.createVehicle$(graphQL, vehicle),
+                                                    of({vehicle, driver})
+                                                )),
                                                 // delay(500),
-                                                // mergeMap(({ vehicle, driver }) => forkJoin(
-                                                //     DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
-                                                //     DriverGraphQlHelper.createCredentials$(graphQL, driver)
-                                                // )),
-                                                tap(() => console.log("##### \n")),
-                                                delay(1000)
+                                                mergeMap(([a,b, { vehicle, driver }]) =>
+                                                    VehicleGraphQlHelper.findByPlate$(graphQL, vehicle.licensePlate)                                                   
+                                                    .pipe(
+                                                        mergeMap(() => DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId) ),
+                                                        map( (driverId) => ({ driver: { ...driver, _id: driverId }, vehicle: vehicle  }))
+                                                    )
+                                                ),
+                                                mergeMap(({ vehicle, driver }) => forkJoin(
+                                                    DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
+                                                    DriverGraphQlHelper.createCredentials$(graphQL, driver)
+                                                )),
+                                                // delay(500),
+
+                                                tap(() => console.log("======================== \n")),
+                                                // delay(1000)
 
                                             )
                                     ),

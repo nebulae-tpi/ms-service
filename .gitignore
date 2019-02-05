@@ -9,3 +9,6 @@
 #SECRETS
 *service-key.json
 *data.csv
+
+api/emi-gateway/graphql/driver
+api/emi-gateway/graphql/vehicle
