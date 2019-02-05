@@ -31,6 +31,7 @@ function getResponseFromBackEnd$(response) {
 module.exports = {
     //// QUERY ///////
 
+    
     Query: {        
         ServiceServicesSize(root, args, context) {
             console.log('ServiceServicesSize query');
