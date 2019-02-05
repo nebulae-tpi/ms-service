@@ -52,7 +52,7 @@ class DriverGraphQlHelper {
                 }
             }),
            
-            // tap(r => console.log("DRIVER CREATED"))
+            tap(r => console.log("DRIVER CREATED"))
         );
     }
 
@@ -112,7 +112,7 @@ class DriverGraphQlHelper {
                     return throwError(error)
                 }
             }),
-            // tap(() => console.log(`${vehicleId} assigned to `, driverId))
+            tap(() => console.log(`${vehicleId} assigned to `, driverId))
           );
 
     }
@@ -150,7 +150,8 @@ class DriverGraphQlHelper {
                   console.log(JSON.stringify(error));
                   console.log("#############################################################################");
                   return throwError(error)
-              })
+              }),
+              tap(() => console.log("AUTH WAS CREATED") )
           );
     }
 

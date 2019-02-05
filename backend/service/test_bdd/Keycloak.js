@@ -23,17 +23,17 @@ class KeyCloak {
 
         this.client_id = 'emi';
 
-        this.baseUrl = 'http://localhost:8080/auth';
-        this.realmName = 'DEV_TPI';
-        this.client_id = 'emi';
-        this.username = '****';
-        this.password = '****';
+        // this.baseUrl = 'http://localhost:8080/auth';
+        // this.realmName = 'DEV_TPI';
+        // this.client_id = 'emi';
+        // this.username = 'juan.santa';
+        // this.password = '_____';
         
-        // this.baseUrl = 'https://tpi-dev.nebulae.com.co/auth';
-        // this.realmName = 'TPI';
-        // this.client_id = 'EMI';
-        // this.username = '****';
-        // this.password = '****';       
+        this.baseUrl = 'https://tpi-dev.nebulae.com.co/auth';
+        this.realmName = 'TPI';
+        this.client_id = 'EMI';
+        this.username = 'juan.santa';
+        this.password = '______';       
     }
 
     logIn$() {
