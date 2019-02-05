@@ -31,7 +31,7 @@ module.exports = {
     DriverAssignedVehicles: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'DriverAssignedVehicles', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Driver", "drivergateway.graphql.query.DriverAssignedVehicles", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Driver", "drivergateway.graphql.query.DriverAssignedVehicles", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
@@ -40,7 +40,7 @@ module.exports = {
     OpenShift: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'OpenShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.query.OpenShift", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.query.OpenShift", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
@@ -49,7 +49,7 @@ module.exports = {
     AssignedService: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'AssignedService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Service", "drivergateway.graphql.query.AssignedService", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Service", "drivergateway.graphql.query.AssignedService", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
@@ -58,7 +58,7 @@ module.exports = {
     HistoricalDriverServices: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalDriverServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Service", "drivergateway.graphql.query.HistoricalDriverServices", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Service", "drivergateway.graphql.query.HistoricalDriverServices", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
@@ -70,7 +70,7 @@ module.exports = {
     startShift: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'startShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.mutation.startShift", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.mutation.startShift", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
@@ -79,7 +79,7 @@ module.exports = {
     stopShift: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'stopShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.mutation.stopShift", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.mutation.stopShift", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
@@ -88,7 +88,7 @@ module.exports = {
     setShiftState: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'setShiftState', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.mutation.setShiftState", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Shift", "drivergateway.graphql.mutation.setShiftState", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
@@ -97,7 +97,7 @@ module.exports = {
     acceptServiceOffer: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'acceptServiceOffer', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Service", "drivergateway.graphql.mutation.acceptServiceOffer", { root, args, jwt: context.encodedToken }, 500)
+          broker.forwardAndGetReply$("Service", "drivergateway.graphql.mutation.acceptServiceOffer", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
