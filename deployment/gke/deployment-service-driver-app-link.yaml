@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: nebulaetpi/service.backend.driverapplink:0.1.4
+      - image: nebulaetpi/service.backend.driverapplink:0.1.5
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials

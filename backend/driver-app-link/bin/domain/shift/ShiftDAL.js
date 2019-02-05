@@ -41,7 +41,6 @@ class ShiftDAL {
             obs.next('ShiftDAL.subscription engine started');
             obs.complete();
         });
-
     }
 
     /**
