@@ -1,0 +1,8 @@
+[
+    {
+        "name": "service-core",
+        "type": "graphql",        
+        "src": "api/driver-gateway/graphql/service-core",
+        "preBuildCommands": []
+    }
+]
