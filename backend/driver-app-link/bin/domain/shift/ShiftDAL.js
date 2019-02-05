@@ -32,7 +32,7 @@ class ShiftDAL {
         return Observable.create(obs => {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
                 mergeMap(evt => this.handlers[evt.t](evt)),                
-                catchError(_ => { this.logError(_); return of(_); }),
+                catchError(_ => { this.logError(_); instance.start$() }),
             ).subscribe(
                 (evt) => console.log(`ShiftDAL.subscription: ${evt}`),
                 (err) => { console.log(`ShiftDAL.subscription ERROR: ${err}`); process.exit(1); },
