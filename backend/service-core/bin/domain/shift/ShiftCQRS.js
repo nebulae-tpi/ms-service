@@ -212,6 +212,7 @@ class ShiftCQRS {
    */
   formatShitToGraphQLSchema(shift) {
     return (!shift) ? undefined : {
+      _id: shift._id,
       state: shift.state,
       driver: {
         fullname: shift.driver.fullname,

@@ -37,25 +37,15 @@ class DriverCQRS {
   queryDriverAssignedVehicles$({ root, args, jwt }, authToken) {
     const { driverId } = authToken;
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(
-      tap( x => console.log(`00=========${JSON.stringify(x)}==========`) ),
       mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),
-      tap( x => console.log(`01=========${JSON.stringify(x)}==========`) ),
       filter(driver => driver),
-      tap( x => console.log(`02=========${JSON.stringify(x)}==========`) ),
       map(  ({ assignedVehicles })  => { return (!assignedVehicles || assignedVehicles.length <= 0) ? [] : assignedVehicles ;}),
-      tap( x => console.log(`03=========${JSON.stringify(x)}==========`) ),
       first(),
-      tap( x => console.log(`04=========${JSON.stringify(x)}==========`) ),
       mergeMap(( assignedVehicles ) => from(assignedVehicles)),
-      tap( x => console.log(`05=========${JSON.stringify(x)}==========`) ),
       mergeMap(licensePlate => VehicleDA.findByLicensePlate$(licensePlate).pipe(filter(v => v))),
-      tap( x => console.log(`06=========${JSON.stringify(x)}==========`) ),
       map(vehicle => ({ plate: vehicle.licensePlate, blocks: vehicle.blocks, active: vehicle.active })),
-      tap( x => console.log(`07=========${JSON.stringify(x)}==========`) ),
       toArray(),
-      tap( x => console.log(`08=========${JSON.stringify(x)}==========`) ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-      tap( x => console.log(`09=========${JSON.stringify(x)}==========`) ),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
   }
