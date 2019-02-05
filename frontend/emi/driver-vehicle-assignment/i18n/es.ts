@@ -29,8 +29,10 @@ export const locale = {
           GASOLINE: 'Gasolina',
           GAS: 'Gas',
           GASOLINE_AND_GAS: 'Gas y Gasolina',
+          GAS_AND_GASOLINE: 'Gas y gasolina',
           DIESEL: 'Diesel',
-          ELECTRIC: 'Electricidad'
+          ELECTRIC: 'Electricidad',
+          null : 'No especificado'
         }
       },
       LICENSE_PLATE: 'Placa',

@@ -80,10 +80,11 @@ class DriverGraphQlHelper {
                               console.log(error);
                               return this.finDriverId$(graphQlInstance, documentId);
                           }),
-                          delay(30),
+                          delay(5),
                           map(response => response.ServiceDrivers[0]._id)
                       )
-              )
+              ),
+              tap(r => console.log( "DRIVER ENCONTRADO ==> ", r ))
           );
 
 

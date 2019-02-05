@@ -27,13 +27,13 @@ class KeyCloak {
         // this.realmName = 'DEV_TPI';
         // this.client_id = 'emi';
         // this.username = 'juan.santa';
-        // this.password = '_____';
+        // this.password = '__________';
         
         this.baseUrl = 'https://tpi-dev.nebulae.com.co/auth';
         this.realmName = 'TPI';
         this.client_id = 'EMI';
         this.username = 'juan.santa';
-        this.password = '______';       
+        this.password = '_________';       
     }
 
     logIn$() {

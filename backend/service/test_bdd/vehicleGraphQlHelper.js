@@ -73,7 +73,6 @@ class VehicleGraphQlHelper {
                 mergeMap(({ responseFields, queryArgs }) =>
                     graphQlInstance.executeQuery$(
                         `query{VehicleVehicles(${graphQlInstance.convertObjectToInputArgs(queryArgs)}){${responseFields}}}`
-                        // `mutation{createAuthor(${graphQlInstance.convertObjectToInputArgs({firstName: "felipe", lastName:"santa"})}){firstName, lastName}}`
 
                     )
                     .pipe(
@@ -97,7 +96,8 @@ class VehicleGraphQlHelper {
                     }else{
                         return throwError(error)
                     }
-                })
+                }),
+                tap(r => console.log("VEHICLUCO ENCONTRADO  ==> ", r))
             );
 
     }
