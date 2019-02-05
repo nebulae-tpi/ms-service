@@ -191,5 +191,4 @@ class MqttBroker {
     return Rx.fromPromise(this.mqttClient.end());
   }
 }
-
 module.exports = MqttBroker;
