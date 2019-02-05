@@ -4,6 +4,7 @@ const datejs = require('datejs')
 const uuidv4 = require("uuid/v4");
 const GMT_OFFSET = ((parseInt(process.env.GMT_TO_SERVE.replace('GMT', '') * 60)) + new Date().getTimezoneOffset()) * 60000;
 
+
 class Crosscutting{
 
     /**
@@ -64,7 +65,6 @@ class Crosscutting{
             dateArray.push(currentDate);
             currentDate = this.addMonth(currentDate, 1);
         }
-        console.log('dateArray => ', dateArray);
         return dateArray;
     }
 

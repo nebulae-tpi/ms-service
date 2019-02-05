@@ -153,7 +153,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/service/
             export DOCKERHUB_IMAGE=service.backend.service
-            export DOCKERHUB_TAG=0.0.7
+            export DOCKERHUB_TAG=0.0.10
             gitChanged backend/service || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service/
             gitChanged backend/service || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/service || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
@@ -165,7 +165,7 @@ jobs:
 
 # ################ DEPLOYMENT ################ 
 
-  deploy-prod:
+  deploy-dev:
       /home/nesas-ing/Projects/tpi: ~/nebulae/
       docker:
         - image: google/cloud-sdk:latest
@@ -191,6 +191,14 @@ jobs:
             command: |
               (ls ~/nebulae/api/DOCKERHUB_GENERATED_IMAGE_DIGEST && echo docker image DIGEST to set $(< ~/nebulae/api/DOCKERHUB_GENERATED_IMAGE_DIGEST) ) || echo api not found
               (ls ~/nebulae/api/DOCKERHUB_GENERATED_IMAGE_DIGEST && kubectl set image deployment/api-emi-gateway api-emi-gateway=$(< ~/nebulae/api/DOCKERHUB_GENERATED_IMAGE_DIGEST) ) || echo api not found
+        - run:
+            name: Deploy Service replicaset persistence 
+            command: |
+              kubectl apply -f ~/nebulae/repo/deployment/gke/gcloud-ssd-service.yaml
+              kubectl apply -f ~/nebulae/repo/deployment/gke/deployment-service-mongo.yaml
+              for xi in $(seq 0 30); do kubectl get pod | grep dbserv-0 | grep Running && break; sleep 5; done
+              kubectl exec dbserv-0 -- mongo --host dbserv-0.dbserv --port 27017  --eval "rs.conf()" || \
+              kubectl exec dbserv-0 -- mongo --host dbserv-0.dbserv --port 27017  --eval  "rs.initiate({ _id : \"rs0\", members: [{ _id: 0, host: \"dbserv-0.dbserv:27017\" },{ _id: 1, host: \"dbserv-1.dbserv:27017\" },{ _id: 2, host: \"dbserv-2.dbserv:27017\" }]})"
         - run:
             name: Deploy BackEnds 
             command: |
@@ -221,7 +229,7 @@ workflows:
           requires:
             - prepare
             - build-mbinit      
-      - deploy-prod:
+      - deploy-dev:
           context: TPI
           requires:
             - build-frontend
