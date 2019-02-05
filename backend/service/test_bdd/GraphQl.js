@@ -22,8 +22,8 @@ class GraphQL {
     constructor(jwt) {
         console.log("---------------------", jwt);
         this.jwt = jwt;
-        this.url = 'http://localhost:3000/api/emi-gateway/graphql/http';
-        // this.url = 'https://tpi-dev.nebulae.com.co/api/emi-gateway/graphql/http';        
+        // this.url = 'http://localhost:3000/api/emi-gateway/graphql/http';
+        this.url = 'https://tpi-dev.nebulae.com.co/api/emi-gateway/graphql/http';        
     }
 
     connect$() {

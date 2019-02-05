@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, interval, forkJoin } = require("rxjs");
+const { of, interval, forkJoin, empty } = require("rxjs");
 const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
@@ -69,7 +69,10 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockRemovedEvt
      */
     handleShiftVehicleBlockRemoved$({ aid, data }) {
-        return ShiftDA.updateOpenShiftVehicleBlock$(aid, false, data.blockKey);
+        return ShiftDA.updateOpenShiftVehicleBlock$(aid, false, data.blockKey).pipe(
+            filter(shift => shift),
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+        );
     }
 
     /**
@@ -77,7 +80,10 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockAddedEvt
      */
     handleShiftVehicleBlockAdded$({ aid, data }) {
-        return ShiftDA.updateOpenShiftVehicleBlock$(aid, true, data.blockKey);
+        return ShiftDA.updateOpenShiftVehicleBlock$(aid, true, data.blockKey).pipe(
+            filter(shift => shift),
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+        );
     }
 
     /**
@@ -85,7 +91,10 @@ class ShiftES {
     * @param {Event} shiftDriverBlockRemovedEvt
     */
     handleShiftDriverBlockRemoved$({ aid, data }) {
-        return ShiftDA.updateOpenShiftDriverBlock$(aid, false, data.blockKey);
+        return ShiftDA.updateOpenShiftDriverBlock$(aid, false, data.blockKey).pipe(
+            filter(shift => shift),
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+        );
     }
 
     /**
@@ -93,7 +102,10 @@ class ShiftES {
      * @param {Event} shiftDriverBlockAddedEvt
      */
     handleShiftDriverBlockAdded$({ aid, data }) {
-        return ShiftDA.updateOpenShiftDriverBlock$(aid, true, data.blockKey);
+        return ShiftDA.updateOpenShiftDriverBlock$(aid, true, data.blockKey).pipe(
+            filter(shift => shift),
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+        );
     }
 
     /**
@@ -101,7 +113,23 @@ class ShiftES {
      * @param {Event} shiftLocationReportedEvt
      */
     handleShiftLocationReported$({ aid, data }) {
-        return ShiftDA.updateShiftLocation$(aid, data.location);
+        return ShiftDA.updateShiftLocation$(aid, data.location)
+    }
+
+    /**
+     * Verifies if the shift should be blocked or unblocked and emits the ShiftStateChanged event if neccesary
+     * @param {*} shift 
+     */
+    blockOrUnblockShiftStateIfNeeded$(shift) {
+        const shouldBeBlocked = shift.vehicle.blocks.length > 0 || shift.driver.blocks.length > 0;
+        const isCurrentlyBlocked = shift.state === 'BLOCKED';
+        return (isCurrentlyBlocked === shouldBeBlocked)
+            ? empty()
+            : (!shouldBeBlocked)
+                ? eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(shift._id, 'AVAILABLE', shift.businessId, shift.driver.username))
+                : (shift.state !== 'BUSY')
+                    ? eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(shift._id, 'BLOCKED', shift.businessId, shift.driver.username))
+                    : empty();
     }
 
 
@@ -120,6 +148,24 @@ class ShiftES {
             eventTypeVersion: 1,
             user: 'SYSTEM',
             data: {}
+        });
+    }
+
+    /**
+     * Builds a Event-Sourcing Event of type ShiftStateChanged
+     * @param {*} shiftId 
+     * @returns {Event}
+     */
+    buildShiftStateChangedEsEvent(shiftId, state, businessId, driverUsername) {
+        return new Event({
+            aggregateType: 'Shift',
+            aid: shiftId,
+            eventType: 'ShiftStateChanged',
+            eventTypeVersion: 1,
+            user: 'SYSTEM',
+            data: {
+                businessId, driverUsername, state
+            }
         });
     }
 

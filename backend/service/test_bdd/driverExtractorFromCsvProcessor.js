@@ -6,7 +6,7 @@ const expect = require("chai").expect;
 const fs = require('fs');   
 const es = require('event-stream');
 
-const FILE_PATH = './test_bdd/driverVsVehicles.csv';
+const FILE_PATH = './test_bdd/driverVsVehicles_data.csv';
 
 const KeyCloak = require('./Keycloak');
 const GraphQL = require('./GraphQl');
@@ -61,6 +61,7 @@ describe("BDD - MAIN TEST", function() {
         it("start service backend and its Database", function (done) {
             this.timeout(600000);
             const DriverMapperHelper = require("./driverMapperHelper");
+            const BUSINESS_ID = "5d09e774-1f60-4df8-ac50-78ea00af9aa8";
 
             return defer(() => {
                 const that = this;
@@ -70,8 +71,8 @@ describe("BDD - MAIN TEST", function() {
                         .pipe(es.split())
                         .pipe(es.mapSync(function (line) {
                             inputStream.pause();
-                            const lineSplited = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/);
-                            lineSplited.map(i => i.trim());
+                            let lineSplited = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/);
+                            lineSplited = lineSplited.map(i => i.trim());
                             of(lineSplited)
                                 .pipe(
                                     map(lineSplited => {
@@ -85,36 +86,46 @@ describe("BDD - MAIN TEST", function() {
                                     }),
                                     mergeMap(driverVehicleInfo => driverVehicleInfo === null
                                         ? of({})
-                                        : DriverMapperHelper.mapToDriverVehicleObj$(driverVehicleInfo,'Q1W2-E3R4-T5Y6-U7I8-O9P0' )
+                                        : DriverMapperHelper.mapToDriverVehicleObj$(driverVehicleInfo, BUSINESS_ID )
                                             .pipe(
+                                                tap(({ driver }) =>
+                                                    console.log(`######################### ${driver.documentId} ${driver.name} ${driver.lastname} ########################`)
+                                                ),
+
                                                 // TO REMOVE DRIVER AUTH
 
                                                 // mergeMap(({driver, vehicle}) => DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId)),
                                                 // mergeMap(driverId => DriverGraphQlHelper.removeAuth$(graphQL, driverId)
                                                 //     .pipe(
-                                                //         delay(20)
+                                                //         delay(20),
+                                                //         catchError(e => of('ERROR'))
+
                                                 //     )
                                                 // ),
 
                                                 // TO INSER DRIVER, VEHICLES, ASSIGN VEHICLES AND  DRIVER AUTH
+                                               
+                                                mergeMap(({driver, vehicle}) => forkJoin(
+                                                    DriverGraphQlHelper.createDriver$(graphQL, driver),
+                                                    VehicleGraphQlHelper.createVehicle$(graphQL, vehicle),
+                                                    of({vehicle, driver})
+                                                )),
+                                                // delay(500),
+                                                mergeMap(([a,b, { vehicle, driver }]) =>
+                                                    VehicleGraphQlHelper.findByPlate$(graphQL, vehicle.licensePlate)                                                   
+                                                    .pipe(
+                                                        mergeMap(() => DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId) ),
+                                                        map( (driverId) => ({ driver: { ...driver, _id: driverId }, vehicle: vehicle  }))
+                                                    )
+                                                ),
+                                                mergeMap(({ vehicle, driver }) => forkJoin(
+                                                    DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
+                                                    DriverGraphQlHelper.createCredentials$(graphQL, driver)
+                                                )),
+                                                // delay(500),
 
-                                                // mergeMap(({driver, vehicle}) => forkJoin(
-                                                //     DriverGraphQlHelper.createDriver$(graphQL, driver),
-                                                //     VehicleGraphQlHelper.createVehicle$(graphQL, vehicle),
-                                                //     of({vehicle, driver})
-                                                // )),
-                                                // mergeMap(([a,b, { vehicle, driver }]) =>
-                                                //     DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId)
-                                                //     .pipe(
-                                                //         map( (driverId) => ({ driver: { ...driver, _id: driverId }, vehicle: vehicle  }))
-                                                //     )
-                                                // ),
-                                                // mergeMap(({ vehicle, driver }) => forkJoin(
-                                                //     DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
-                                                //     DriverGraphQlHelper.createCredentials$(graphQL, driver)
-                                                // )),
-                                                tap(() => console.log("##### \n")),
-                                                delay(1000)
+                                                tap(() => console.log("======================== \n")),
+                                                // delay(1000)
 
                                             )
                                     ),

@@ -3,7 +3,7 @@
 
 const uuidv4 = require("uuid/v4");
 const { of, interval, forkJoin, from } = require("rxjs");
-const { mergeMapTo, mergeMap, catchError, map, toArray, filter, first, tap } = require('rxjs/operators');
+const { mergeMapTo, mergeMap, catchError, map, toArray, filter, first, tap ,defaultIfEmpty} = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
 const { Event } = require("@nebulae/event-store");
@@ -34,13 +34,14 @@ class DriverCQRS {
   /**  
    * Gets Driver's Assigned Vehicles
    */
-  queryDriverAssignedVehicles$({ root, args, jwt }, authToken) {    
+  queryDriverAssignedVehicles$({ root, args, jwt }, authToken) {
     const { driverId } = authToken;
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(            
-      mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),      
-      filter(driver => driver),
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(
+      mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),
+      defaultIfEmpty( {assignedVehicles:[]} ),
+      map(  ({ assignedVehicles })  => { return (!assignedVehicles || assignedVehicles.length <= 0) ? [] : assignedVehicles ;}),
       first(),
-      mergeMap(({ assignedVehicles }) => from(assignedVehicles)),
+      mergeMap(( assignedVehicles ) => from(assignedVehicles)),
       mergeMap(licensePlate => VehicleDA.findByLicensePlate$(licensePlate).pipe(filter(v => v))),
       map(vehicle => ({ plate: vehicle.licensePlate, blocks: vehicle.blocks, active: vehicle.active })),
       toArray(),

@@ -40,6 +40,8 @@ type Driver {
 
 "Driver's shift info"
 type Shift {
+   "Shift ID"
+   _id: String
    "shift's state"
    state: String,
    "shift's vehicle"

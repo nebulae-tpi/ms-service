@@ -32,9 +32,10 @@ const start = () => {
             console.error('Failed to start', error);
             process.exit(1);
         },
-        () => console.log('service started')
+        () => console.log('service started')        
     );
 };
+
 
 start();
 

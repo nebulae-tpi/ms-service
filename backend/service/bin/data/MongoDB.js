@@ -52,8 +52,12 @@ class MongoDB {
    */
   createIndexes$() {
     return Observable.create(async observer => {
+
       observer.next(`Creating index for service.Vehicle => ({ licensePlate: 1}, { unique: true})`);
-      await this.db.collection('Vehicle').createIndex( { licensePlate: 1}, { unique: true} );
+      await this.db.collection('Vehicle').createIndex( { licensePlate: 1}, { unique: true} ).catch((err) => console.log(`Failed to create index: ${err}`));;
+
+      observer.next(`Creating index for master.Driver => ({ documentId: 1}, { unique: true})`);
+      await this.db.collection('Driver').createIndex( { documentId: 1}, { unique: true} );
 
       observer.next("All indexes created");
       observer.complete();

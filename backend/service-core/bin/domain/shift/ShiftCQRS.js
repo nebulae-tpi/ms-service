@@ -16,7 +16,7 @@ const {
   DefaultError,
   INTERNAL_SERVER_ERROR_CODE,
   PERMISSION_DENIED,
-  ERROR_23010, ERROR_23011, ERROR_23012, ERROR_23013, ERROR_23014, ERROR_23015, ERROR_23016, ERROR_23020, ERROR_23021, ERROR_23025, ERROR_2306, ERROR_23027, ERROR_23028,
+  ERROR_23010, ERROR_23011, ERROR_23012, ERROR_23013, ERROR_23014, ERROR_23015, ERROR_23016, ERROR_23020, ERROR_23021, ERROR_23025, ERROR_23026, ERROR_23027, ERROR_23028,
 } = require("../../tools/customError");
 
 const { ShiftDA, VehicleDA, DriverDA, ServiceDA } = require('./data-access')
@@ -60,7 +60,7 @@ class ShiftCQRS {
       tap(([vehicle, driver]) => { if (!vehicle) throw ERROR_23015; if (!driver) throw ERROR_23016 }), // Driver or Vehicle not found verfication
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
       tap(([vehicle, driver]) => { if (driver.assignedVehicles.map(p => p.toUpperCase()).indexOf(vehicle.licensePlate.toUpperCase()) <= -1) throw ERROR_23014; }),// vehicle not assigned to driver verification
-      map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver)),// build shift with all needed proerties
+      map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, authToken)),// build shift with all needed proerties
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -117,7 +117,7 @@ class ShiftCQRS {
    * @param {*} vehicle 
    * @param {*} driver 
    */
-  buildShift(businessId, vehicle, driver) {
+  buildShift(businessId, vehicle, driver, authToken) {
     const vehicleBlocked = (vehicle.blocks && vehicle.blocks.length > 0);
     const driverBlocked = (driver.blocks && driver.blocks.length > 0);
     const state = (vehicleBlocked || driverBlocked) ? 'BLOCKED' : 'AVAILABLE';
@@ -144,7 +144,7 @@ class ShiftCQRS {
         "pmr": driver.pmr,
         "languages": driver.languages,
         "phone": driver.phone,
-        "username": driver.username,
+        "username": authToken.preferred_username,
       },
       "vehicle": {
         "id": vehicle._id,
@@ -186,7 +186,7 @@ class ShiftCQRS {
       eventType: 'ShiftStateChanged',
       eventTypeVersion: 1,
       user: authToken.preferred_username,
-      data: { state }
+      data: { state, businessId: shift.businessId, driverUsername: shift.driver.username }
     });
   }
 
@@ -202,7 +202,7 @@ class ShiftCQRS {
       eventType: 'ShiftStopped',
       eventTypeVersion: 1,
       user: authToken.preferred_username,
-      data: {}
+      data: {businessId: shift.businessId, driverUsername: shift.driver.username }
     });
   }
 
@@ -212,6 +212,7 @@ class ShiftCQRS {
    */
   formatShitToGraphQLSchema(shift) {
     return (!shift) ? undefined : {
+      _id: shift._id,
       state: shift.state,
       driver: {
         fullname: shift.driver.fullname,

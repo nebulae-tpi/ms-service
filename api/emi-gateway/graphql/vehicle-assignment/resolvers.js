@@ -28,11 +28,9 @@ function getResponseFromBackEnd$(response) {
     );
 }
 
-
 module.exports = {
 
     //// QUERY ///////
-
     Query: {
         ServiceDrivers(root, args, context) {
             console.log("Query.ServiceDrivers", args);

@@ -85,7 +85,6 @@ static checkPermissions$(
   
     return found;
   }
-
 };
   
   module.exports = RoleValidator;

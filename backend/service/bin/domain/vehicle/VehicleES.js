@@ -21,7 +21,8 @@ class VehicleES {
      * Persists the driver on the materialized view according to the received data from the event store.
      * @param {*} businessCreatedEvent business created event
      */
-    handleVehicleCreated$(vehicleCreatedEvent) {  
+    handleVehicleCreated$(vehicleCreatedEvent) {
+        console.log("##########  handleVehicleCreated$  #######################3");
         return of(vehicleCreatedEvent.data)
         .pipe(
             map(vehicle => ({
@@ -33,9 +34,15 @@ class VehicleES {
                 brand: vehicle.generalInfo.brand,
                 line: vehicle.generalInfo.line,
                 model: vehicle.generalInfo.model,
-                fuelType: vehicle.features.fuel,
-                features: vehicle.features.others ? vehicle.features.others.filter(f => f.active).map(e => e.name) : []
+                fuelType: vehicle.features ? vehicle.features.fuel : null,
+                features:  vehicle.features 
+                    ? vehicle.features.others
+                        ? vehicle.features.others.filter(f => f.active).map(e => e.name) 
+                        : []
+                    : []
+
             })),
+            tap(r => console.log(r)),
             mergeMap(vehicle => VehicleDA.createVehicle$(vehicle)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result.ops[0]))
         );

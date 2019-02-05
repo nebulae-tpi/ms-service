@@ -30,10 +30,10 @@ class ShiftDA {
   static findOpenShiftByDriver$(driverId, projection = undefined) {
     const explorePastMonth = Date.today().getDate() <= 2;
     const query = { "state": { "$ne": "CLOSED" }, "driver.id": driverId };
-    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(      
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
-      mergeMap(collection => defer(() => collection.findOne(query, {projection}))),
+      mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
       first(shift => shift, undefined)
     );
   }
@@ -61,7 +61,7 @@ class ShiftDA {
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
-      mergeMap(collection => defer(() => collection.findOne(query, {projection}))),
+      mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
       first(shift => shift, undefined)
     );
   }
@@ -140,7 +140,7 @@ class ShiftDA {
 
 
   /**
-   * Adds or Removes a block key from Shift.vehicle.blocks
+   * Adds or Removes a block key from Shift.vehicle.blocks.  returns the shifts blocks and current state
    * @param {string} _id shift ID
    * @param {boolean} blockAdded true=adding, false=removing
    * @param {string} blockKey block key to remove/add
@@ -148,15 +148,19 @@ class ShiftDA {
   static updateOpenShiftVehicleBlock$(_id, blockAdded, blockKey) {
     const update = blockAdded ? { $push: { "vehicle.blocks": blockKey } } : { $pull: { "vehicle.blocks": blockKey } };
     return defer(
-      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
         { update },
-        { upsert: false }
-      ));
+        {
+          projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username":1, "businessId":1 },
+          upsert: false,
+          returnOriginal: false
+        }
+      )).pipe(map(result => result && result.value ? result.value : undefined));
   }
 
   /**
-   * Adds or Removes a block key from Shift.driver.blocks
+   * Adds or Removes a block key from Shift.driver.blocks.  returns the shifts blocks and current state
    * @param {string} _id shift ID
    * @param {boolean} blockAdded true=adding, false=removing
    * @param {string} blockKey block key to remove/add
@@ -164,11 +168,15 @@ class ShiftDA {
   static updateOpenShiftDriverBlock$(_id, blockAdded, blockKey) {
     const update = blockAdded ? { $push: { "driver.blocks": blockKey } } : { $pull: { "driver.blocks": blockKey } };
     return defer(
-      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
         { update },
-        { upsert: false }
-      ));
+        {
+          projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username":1, "businessId":1 },
+          upsert: false,
+          returnOriginal: false
+        }
+      )).pipe(map(result => result && result.value ? result.value : undefined));
   }
 
 }
