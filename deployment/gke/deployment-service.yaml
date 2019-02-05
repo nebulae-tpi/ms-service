@@ -13,7 +13,7 @@ spec:
         app: service
     spec:      
       containers:
-      - image: nebulaetpi/service.backend.service:0.0.7
+      - image: nebulaetpi/service.backend.service:0.0.8
         name: service
         volumeMounts:
         - name: google-application-credentials
@@ -55,7 +55,7 @@ spec:
           value: PUBSUB
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
-          value: "0.0.1"
+          value: "0.0.2"
         
       volumes:
       - name: google-application-credentials

@@ -64,7 +64,6 @@ class Crosscutting{
             dateArray.push(currentDate);
             currentDate = this.addMonth(currentDate, 1);
         }
-        console.log('dateArray => ', dateArray);
         return dateArray;
     }
 
