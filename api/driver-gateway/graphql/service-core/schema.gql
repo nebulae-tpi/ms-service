@@ -1,0 +1,152 @@
+"Async CMD server acknowledge"
+type CommandAck{
+   "message accepted by the server"
+   accepted: Boolean
+}
+
+"Vehicle or Driver Block info"
+type Block{
+   "block unique key, aka ENUM"
+   key: String
+   "Additional note"
+   notes: String
+   "Block start time"
+   startTime: BigInt
+   "Block end time"
+   endTime: BigInt
+}
+
+"Vehicle info"
+type Vehicle {
+   "License plate"
+   plate: String
+   "Current blocks"
+   blocks: [Block]   
+   "Active flag"
+   active: Boolean
+}
+
+"Driver info"
+type Driver {
+   "Driver fullname"
+   fullname: String
+   "username"
+   username: String
+   "Current blocks"
+   blocks: [Block]   
+   "Active flag"
+   active: Boolean
+}
+
+"Driver's shift info"
+type Shift {
+   "shift's state"
+   state: String,
+   "shift's vehicle"
+   vehicle: Vehicle
+   "shift's Driver"
+   driver: Driver
+}
+
+"Client info"
+type Client {
+   "Full name"
+   name: String
+   "Tip given to the client. Eg. satellites"
+   tip: BigInt,
+   "Tiping type"
+   tipType: String
+}
+
+"Geo point"
+type Point {
+   "Latitude"
+   lat: Float
+   "Longitude"
+   lng: Float
+}
+
+"Location info"
+type Location {
+   "Accurate location, Exact marker point: Lat,Lng"
+   marker: Point
+   "Non-Accurate location, describes an area"
+   polygon: [Point]
+   "City name"
+   city: String
+   "Zone name"
+   zone: String
+   "Neighborhood name"
+   neighborhood: String
+   "Street address 1"
+   addressLine1: String
+   "Street address 2"
+   addressLine2: String
+   "location notes"
+   notes: String
+}
+
+"Service info"
+type Service{
+   "Service Identifier"
+   id: String
+   "Client info"
+   client: Client
+   "Passenger pick up location"
+   pickUp: Location
+   "Passenger drop off location"
+   dropOff: Location
+   "Service verification code"
+   verificationCode: String
+   "Requested features keys"
+   requestedFeatures: [String]
+   "Payment type key"
+   paymentType: String
+   "Applicable fare discount"
+   fareDiscount: Float
+   "pre calculated fare"
+   fare: BigInt
+   "Tip given to the driver"
+   tip: BigInt
+   "Exact route taken by the driver"
+   route: [Point]   
+   "current service state"
+   state: String
+}
+
+type Query{
+   "Get driver's assigned vehicles"
+   DriverAssignedVehicles: [Vehicle] @requireAuth
+
+   "Get driver's currently open shift"
+   OpenShift: Shift @requireAuth
+
+   "Get shift's currenty assigned service"
+   AssignedService: Service @requireAuth
+
+   "Get the latest trips done by the driver"
+   HistoricalDriverServices: [Service]
+}
+
+type Mutation{
+   "Starts a new shift"
+   startShift(
+      "Vehicle's plate to use"
+      vehiclePlate: String
+   ): CommandAck @requireAuth
+
+   "Stop currently open shift"
+   stopShift: CommandAck @requireAuth
+
+   "Sets the shift state"
+   setShiftState(
+      "state to set"
+      state: String
+   ): CommandAck @requireAuth
+
+   "Accept a service offer"
+   acceptServiceOffer(
+      "Service Id"
+      serviceId: String
+   ): CommandAck @requireAuth
+}
