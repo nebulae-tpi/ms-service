@@ -14,6 +14,7 @@ const ServiceDA = require('./domain/service/data-access/ServiceDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
+
 const start = () => {
     Rx.concat(
         eventSourcing.eventStore.start$(),
