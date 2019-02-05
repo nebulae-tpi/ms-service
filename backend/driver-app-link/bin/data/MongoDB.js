@@ -55,7 +55,6 @@ class MongoDB {
    */
   createIndexes$() {
     return Observable.create(async observer => {      
-
       observer.next("All indexes created");
       observer.complete();
     });
