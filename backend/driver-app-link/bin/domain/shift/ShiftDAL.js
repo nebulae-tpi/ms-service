@@ -31,7 +31,7 @@ class ShiftDAL {
     start$() {
         return Observable.create(obs => {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
-                mergeMap(evt => this.handlers[evt.t](evt)),
+                mergeMap(evt => this.handlers[evt.t](evt)),                
                 catchError(_ => { this.logError(_); return of(_); }),
             ).subscribe(
                 (evt) => console.log(`ShiftDAL.subscription: ${evt}`),
