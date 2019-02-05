@@ -50,6 +50,38 @@ module.exports = {
                 mergeMap(response => getResponseFromBackEnd$(response))
             ).toPromise();
         },
+        ServiceServicesSatellite(root, args, context) {
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceServicesSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE"])
+            .pipe(
+                mergeMap(() =>
+                    broker
+                    .forwardAndGetReply$(
+                        "Service",
+                        "emigateway.graphql.query.ServiceServicesSatellite",
+                        { root, args, jwt: context.encodedToken },
+                        2000
+                    )
+                ),
+                catchError(err => handleError$(err, "ServiceServicesSatellite")),
+                mergeMap(response => getResponseFromBackEnd$(response))
+            ).toPromise();
+        },
+        ServiceClientSatellite(root, args, context) {
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceClientSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE"])
+            .pipe(
+                mergeMap(() =>
+                    broker
+                    .forwardAndGetReply$(
+                        "Service",
+                        "emigateway.graphql.query.ServiceClientSatellite",
+                        { root, args, jwt: context.encodedToken },
+                        2000
+                    )
+                ),
+                catchError(err => handleError$(err, "ServiceClientSatellite")),
+                mergeMap(response => getResponseFromBackEnd$(response))
+            ).toPromise();
+        },
         ServiceServices(root, args, context) {
             console.log('ServiceServices query');
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceServices', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"])

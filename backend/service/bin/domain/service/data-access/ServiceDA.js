@@ -43,6 +43,44 @@ class ServiceDA {
     return defer(() => collection.findOne(query));
   }
 
+  static getServiceSatelliteList$(filter, pagination) {
+    console.log('getServiceSatelliteList ', filter);
+
+    const projection = {dropOff: 0, route: 0};
+
+    const states = ['REQUEST', 'ASSIGNED', 'ARRIVED'];    
+    const query = {};
+    query["state"] = { $in: states};
+    
+    const currentDate = new Date();
+    const endDate = new Date(currentDate);
+    let initDate = null;
+    if(currentDate.getDate() > 3){
+      initDate = Crosscutting.addMonth(currentDate, -1);
+    }else{
+      initDate = new Date(currentDate);;
+    }
+    
+    return from(Crosscutting.getYearMonthArray(initDate, endDate))
+    .pipe(
+      map(date => {        
+        const yearMonth = Crosscutting.getYearMonth(date);
+        const collection = mongoDB.client.db(`${DatabaseName}${yearMonth}`).collection(CollectionName);
+        return collection;
+      }),
+      mergeMap(collection => {
+        const cursor = collection
+        .find(query, {projection})
+        .skip(pagination.count * pagination.page)
+        .limit(pagination.count)
+        .sort({ creationTimestamp: pagination.sort });
+
+        return mongoDB.extractAllFromMongoCursor$(cursor);
+      })
+    );
+  }
+
+
   static getServiceList$(filter, pagination) {
     console.log('getServiceList ', filter);   
     const projection = {timestamp: 1, paymentType: 1, client: 1, driver: 1, vehicle: 1, state: 1, businessId: 1};
@@ -50,6 +88,10 @@ class ServiceDA {
 
     if (filter.businessId) {
       query.businessId = filter.businessId;
+    }
+
+    if (filter.clientId) {
+      query["client.id"] = filter.clientId;
     }
 
     if (filter.driverDocumentId) {
@@ -72,23 +114,27 @@ class ServiceDA {
       query["client.fullname"] = { $regex: filter.clientFullname, $options: "i" };
     }
 
-    if (filter.state) {
-      query["state"] = filter.state;
+    if (filter.states) {
+      query["state"] = { $in: filter.states};
     }
 
     if (filter.initTimestamp && filter.endTimestamp) {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp};
     }
 
+    if(!filter.showClosedServices){
+      query.open = true;
+    }
+
 
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
     
-    return from(Crosscutting.getMonthYearArray(initDate, endDate))
+    return from(Crosscutting.getYearMonthArray(initDate, endDate))
     .pipe(
       map(date => {        
-        const monthYear = Crosscutting.getMonthYear(date);
-        const collection = mongoDB.client.db(`${DatabaseName}${monthYear}`).collection(CollectionName);
+        const yearMonth = Crosscutting.getYearMonth(date);
+        const collection = mongoDB.client.db(`${DatabaseName}${yearMonth}`).collection(CollectionName);
         return collection;
       }),
       mergeMap(collection => {
@@ -110,6 +156,10 @@ class ServiceDA {
       query.businessId = filter.businessId;
     }
 
+    if (filter.clientId) {
+      query["client.id"] = filter.clientId;
+    }
+
     if (filter.driverDocumentId) {
       query["driver.documentId"] = filter.driverDocumentId;
     }
@@ -130,22 +180,26 @@ class ServiceDA {
       query["client.fullname"] = { $regex: filter.clientFullname, $options: "i" };
     }
 
-    if (filter.state) {
-      query["state"] = filter.state;
+    if (filter.states) {
+      query["state"] = { $in: filter.states};
     }
 
     if (filter.initTimestamp && filter.endTimestamp) {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp};
     }
 
+    if(!filter.showClosedServices){
+      query.open = true;
+    }
+
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
 
-    return from(Crosscutting.getMonthYearArray(initDate, endDate))
+    return from(Crosscutting.getYearMonthArray(initDate, endDate))
     .pipe(
       map(date => {
-        const monthYear = Crosscutting.getMonthYear(date);
-        const collection = mongoDB.client.db(`${DatabaseName}${monthYear}`).collection(CollectionName);
+        const yearMonth = Crosscutting.getYearMonth(date);
+        const collection = mongoDB.client.db(`${DatabaseName}${yearMonth}`).collection(CollectionName);
         return collection;
       }),
       mergeMap(collection => collection.count(query)),
