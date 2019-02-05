@@ -27,7 +27,6 @@ function getResponseFromBackEnd$(response) {
 module.exports = {
 
   Query: {
-
     DriverAssignedVehicles: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'DriverAssignedVehicles', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
