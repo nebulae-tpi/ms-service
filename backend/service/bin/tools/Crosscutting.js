@@ -1,8 +1,9 @@
 'use strict'
 
-const datejs = require('datejs')
+require('datejs');
+const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
-const GMT_OFFSET = ((parseInt(process.env.GMT_TO_SERVE.replace('GMT', '') * 60)) + new Date().getTimezoneOffset()) * 60000;
+//const GMT_OFFSET = ((parseInt(process.env.GMT_TO_SERVE.replace('GMT', '') * 60)) + new Date().getTimezoneOffset()) * 60000;
 
 class Crosscutting{
 
@@ -14,8 +15,9 @@ class Crosscutting{
      * @param {*} date Date with which will be generated the suffix of the uuid.
      */
     static generateHistoricalUuid(date) {
-        const dateGMT = new Date(date.getTime() + GMT_OFFSET)
-        const sufixUuid = this.getMonthYear(dateGMT);
+        const dateGMT = new Date(date.toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+        //const dateGMT = new Date(date.getTime() + GMT_OFFSET)
+        const sufixUuid = this.getYearMonth(dateGMT);
         const uuId = `${uuidv4()}-${sufixUuid}`;
         return uuId;
     }
@@ -31,13 +33,15 @@ class Crosscutting{
      * 
      * @param {*} date 
      */
-    static getYearMonth(date){
-        let month = ""+(date.getMonth()+1);
-        let year = date.getFullYear() + '';
-        month = (month.length == 1 ? '0': '') + month;
-        year = year.substr(year.length - 2)
+    static getYearMonth(date){        
+        // let month = ""+(date.getMonth()+1);
+        // let year = date.getFullYear() + '';
+        // month = (month.length == 1 ? '0': '') + month;
+        // year = year.substr(year.length - 2)
 
-        return `${year}${month}`;
+        // return `${year}${month}`;
+
+        return dateFormat(date, "yymm")
     }
 
     /**
