@@ -7,7 +7,7 @@ export const ServiceServiceFieldsFragment = gql`
       businessId
       shiftId
       timestamp
-      requestedFeatures 
+      requestedFeatures
       pickUp {
         marker {
           lat
@@ -65,7 +65,7 @@ export const ServiceServiceFieldsFragment = gql`
         lat
         lng
         timestamp
-      }      
+      }
       vehicle {
         licensePlate
       }
@@ -81,13 +81,13 @@ export const ServiceServiceFieldsFragment = gql`
         tip
         tipType
       }
-      tip      
+      tip
       route {
         lat
         lng
         timestamp
       }
-      lastModificationTimestamp      
+      lastModificationTimestamp
     }
   `;
 
@@ -99,7 +99,7 @@ export const ServiceService = gql`
       businessId
       shiftId
       timestamp
-      requestedFeatures 
+      requestedFeatures
       pickUp {
         marker {
           lat
@@ -157,7 +157,7 @@ export const ServiceService = gql`
         lat
         lng
         timestamp
-      }      
+      }
       vehicle {
         licensePlate
       }
@@ -173,13 +173,13 @@ export const ServiceService = gql`
         tip
         tipType
       }
-      tip      
+      tip
       route {
         lat
         lng
         timestamp
       }
-      lastModificationTimestamp 
+      lastModificationTimestamp
     }
   }
 `;
@@ -191,7 +191,7 @@ export const ServiceServices = gql`
       businessId
       shiftId
       timestamp
-      requestedFeatures 
+      requestedFeatures
       pickUp {
         marker {
           lat
@@ -249,7 +249,7 @@ export const ServiceServices = gql`
         lat
         lng
         timestamp
-      }      
+      }
       vehicle {
         licensePlate
       }
@@ -265,13 +265,13 @@ export const ServiceServices = gql`
         tip
         tipType
       }
-      tip      
+      tip
       route {
         lat
         lng
         timestamp
       }
-      lastModificationTimestamp 
+      lastModificationTimestamp
     }
   }
 `;
@@ -290,7 +290,7 @@ export const ServiceServiceUpdatedSubscription = gql`
       businessId
       shiftId
       timestamp
-      requestedFeatures 
+      requestedFeatures
       pickUp {
         marker {
           lat
@@ -348,7 +348,7 @@ export const ServiceServiceUpdatedSubscription = gql`
         lat
         lng
         timestamp
-      }      
+      }
       vehicle {
         licensePlate
       }
@@ -364,13 +364,13 @@ export const ServiceServiceUpdatedSubscription = gql`
         tip
         tipType
       }
-      tip      
+      tip
       route {
         lat
         lng
         timestamp
       }
-      lastModificationTimestamp 
+      lastModificationTimestamp
     }
   }
 `;

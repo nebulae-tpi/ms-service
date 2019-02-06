@@ -114,7 +114,72 @@ module.exports = {
                 catchError(err => handleError$(err, "ServiceService")),
                 mergeMap(response => getResponseFromBackEnd$(response))
             ).toPromise();
-        }
+        },
+
+
+        // SHIFT SECTION
+
+        
+        ServiceShifts(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'ServiceShifts', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Shift",
+                                "emigateway.graphql.query.serviceShifts",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceShifts")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
+        },
+        ServiceShiftsSize(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'ServiceShiftsSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Shift",
+                                "emigateway.graphql.query.serviceShiftsSize",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceShiftsSize")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
+        },
+        ServiceShift(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'ServiceShift', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Shift",
+                                "emigateway.graphql.query.serviceShift",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceShift")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
+        },
     },
 
     //// MUTATIONS ///////
