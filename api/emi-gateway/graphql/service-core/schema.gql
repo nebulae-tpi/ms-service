@@ -85,9 +85,23 @@ type ServiceCoreVehicle {
     "License plate"
     licensePlate: String
 }
+"Vehicle info"
+input ServiceCoreVehicleInput {
+    "License plate"
+    licensePlate: String
+}
 
 "Driver info"
 type ServiceCoreDriver {
+    "Driver fullname"
+    fullname: String
+    "document"
+    document: String
+    "driver id"
+    id: String
+}
+"Driver info"
+input ServiceCoreDriverInput {
     "Driver fullname"
     fullname: String
     "document"
@@ -197,4 +211,56 @@ type Mutation{
         "Tip given to the driver"
         tip: BigInt
     ): ServiceCoreCommandAck
+
+    "Cancel a requested service"
+    ServiceCoreCancelService(
+        "Service Identifier"
+        id: String!
+        "cancellation reason"
+        reason: String!
+        "cancellation author type: DRIVER | CLIENT | OPERTAOR"
+        authorType: String!
+        "cancellation additional notes"
+        notes: String!        
+    ): ServiceCoreCommandAck
+
+    "Manually assign the service to eather a SHIFT (using ony the shiftId) or to a Driver & Vehicle (inserting all data)"
+    ServiceCoreAssignService(
+        "Service Identifier"
+        id: String!
+        "Shift ID"
+        shiftId: String
+        "vehicle info"
+        Vehicle: ServiceCoreVehicleInput
+        "driver info"
+        driver: ServiceCoreDriverInput
+    ): ServiceCoreCommandAck
+
+    "Manually report service pickup eta"
+    ServiceCoreReportServicePickupETA(
+        "Service Identifier"
+        id: String!
+        "Estimated Time of Arrival: exact date-time in UTC millis"
+        eta: BigInt
+    ): ServiceCoreCommandAck
+
+    "Manually report service as ARRIVED"
+    ServiceCoreReportServiceAsArrived(
+        "Service Identifier"
+        id: String!        
+    ): ServiceCoreCommandAck
+
+    "Manually report service as client picked up"
+    ServiceCoreReportServiceAsPickedUp(
+        "Service Identifier"
+        id: String!        
+    ): ServiceCoreCommandAck
+
+    "Manually report service as COMPLETE"
+    ServiceCoreReportServiceAsCompleted(
+        "Service Identifier"
+        id: String!        
+    ): ServiceCoreCommandAck
+
+
 }
