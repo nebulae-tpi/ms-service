@@ -33,9 +33,9 @@ class ShiftDAL {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
                 mergeMap(evt => Observable.create(evtObs => {
                     this.handlers[evt.t](evt).subscribe(
-                        (handlerEvt) => { },
-                        (handlerErr) => console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${ShiftDAL.logError(handlerErr)}`),
-                        () => console.log(`ShiftDAL.handlerErr[${evt.t}]: Completed`),
+                        (handlerEvt) => { console.log(`ShiftDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`);},
+                        (handlerErr) => { console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`); ShiftDAL.logError(handlerErr);},
+                        () => console.log(`ShiftDAL.handlerCompleted[${evt.t}]`),
                     );
                     evtObs.complete();
                 }))
@@ -56,7 +56,10 @@ class ShiftDAL {
      * @param {Event} shiftStartedEvt
      */
     handleShiftLocationReported$({ data }) {
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)); //Build and send ShiftLocationReported event (event-sourcing)
+        //Build and send ShiftLocationReported event (event-sourcing)
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)).pipe(
+            mapTo(` - Sent ShiftLocationReported for shift._id=${ata._id}: ${JSON.stringify(data.location)}`)
+        );
     }
 
 

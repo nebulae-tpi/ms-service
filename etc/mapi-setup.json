@@ -10,5 +10,11 @@
         "type": "graphql",        
         "src": "api/emi-gateway/graphql/vehicle-assignment",
         "preBuildCommands": []
+    },
+    {
+        "name": "satellite",
+        "type": "graphql",        
+        "src": "api/emi-gateway/graphql/service-core",
+        "preBuildCommands": []
     }
 ]

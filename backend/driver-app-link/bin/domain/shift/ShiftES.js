@@ -27,6 +27,7 @@ class ShiftES {
      * @param {Event} shiftStartedEvt
      */
     handleShiftStarted$({ data }) {
+        console.log(`ShiftES: handleShiftStarted: ${JSON.stringify(data)} `); //TODO: DELETE LINE
         const businessId = data.businessId;
         const driverUserName = data.driver.username;
         return driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driverUserName, 'ShiftStateChanged', this.formatShitToGraphQLSchema(data));
@@ -37,6 +38,7 @@ class ShiftES {
      * @param {Event} shiftStateChangedEvt 
      */
     handleShiftStateChanged$({ aid, data }) {
+        console.log(`ShiftES: handleShiftStateChanged: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         const businessId = data.businessId;
         const driverUserName = data.driverUsername;
         return driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driverUserName, 'ShiftStateChanged', { _id: aid, state: data.state });
@@ -47,6 +49,7 @@ class ShiftES {
      * @param {Event} shiftConnectedEvt
      */
     handleShiftConnected$({ aid }) {
+        console.log(`ShiftES: handleShiftStateChanged: ${JSON.stringify({ aid })} `);  //TODO: DELETE LINE
         return of({});
     }
 
@@ -55,6 +58,7 @@ class ShiftES {
      * @param {Event} shiftDisconnectedEvt
      */
     handleShiftDisconnected$({ aid }) {
+        console.log(`ShiftES: handleShiftDisconnected: ${JSON.stringify({ aid })} `);  //TODO: DELETE LINE
         return of({});
     }
 
@@ -63,6 +67,7 @@ class ShiftES {
      * @param {Event} shiftStoppedEvt
      */
     handleShiftStopped$({ aid, data }) {
+        console.log(`ShiftES: handleShiftStopped: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         const businessId = data.businessId;
         const driverUserName = data.driverUsername;
         return driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driverUserName, 'ShiftStateChanged', { _id: aid, state: 'CLOSED' });
@@ -73,6 +78,7 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockRemovedEvt
      */
     handleShiftVehicleBlockRemoved$({ aid, data }) {
+        console.log(`ShiftES: handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         const businessId = data.businessId;
         const driverUserName = data.driverUsername;
         return ShiftDA.findById$(aid, { vehicle: 1 }).pipe(
@@ -85,6 +91,7 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockAddedEvt
      */
     handleShiftVehicleBlockAdded$({ aid, data }) {
+        console.log(`ShiftES: handleShiftVehicleBlockAdded: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         const businessId = data.businessId;
         const driverUserName = data.driverUsername;
         return ShiftDA.findById$(aid, { vehicle: 1 }).pipe(
@@ -97,6 +104,7 @@ class ShiftES {
     * @param {Event} shiftDriverBlockRemovedEvt
     */
     handleShiftDriverBlockRemoved$({ aid, data }) {
+        console.log(`ShiftES: handleShiftDriverBlockRemoved: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         const businessId = data.businessId;
         const driverUserName = data.driverUsername;
         return ShiftDA.findById$(aid, { driver: 1 }).pipe(
@@ -109,6 +117,7 @@ class ShiftES {
      * @param {Event} shiftDriverBlockAddedEvt
      */
     handleShiftDriverBlockAdded$({ aid, data }) {
+        console.log(`ShiftES: handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         const businessId = data.businessId;
         const driverUserName = data.driverUsername;
         return ShiftDA.findById$(aid, { driver: 1 }).pipe(
@@ -121,6 +130,7 @@ class ShiftES {
      * @param {Event} shiftLocationReportedEvt
      */
     handleShiftLocationReported$({ aid, data }) {
+        console.log(`ShiftES: handleShiftLocationReported: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         return of({});
     }
 

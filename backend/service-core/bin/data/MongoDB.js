@@ -4,7 +4,7 @@ require('datejs');
 const Rx = require("rxjs");
 const MongoClient = require("mongodb").MongoClient;
 let instance = null;
-const { map } = require("rxjs/operators");
+const { map, switchMap } = require("rxjs/operators");
 const { of, bindNodeCallback, Observable } = require("rxjs");
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
@@ -65,16 +65,16 @@ class MongoDB {
 
       const historicalDb = this.getHistoricalDb();
 
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "state": 1, "driver.id": 1 }  `);
+      observer.next(`Creating index for ${historicalDb}.Shift => { "state": 1, "driver.id": 1 }  `);
       await historicalDb.collection('Shift').createIndex({ "state": 1, "driver.id": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
 
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "state": 1, "vehicle.licensePlate": 1 }  `);
+      observer.next(`Creating index for ${historicalDb}.Shift => { "state": 1, "vehicle.licensePlate": 1 }  `);
       await historicalDb.collection('Shift').createIndex({ "state": 1, "vehicle.licensePlate": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
 
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "vehicle.licensePlate": 1 }  `);
+      observer.next(`Creating index for ${historicalDb}.Shift => { "vehicle.licensePlate": 1 }  `);
       await historicalDb.collection('Shift').createIndex({ "vehicle.licensePlate": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
 
-      observer.next(`Creating index for ${historicalDbName}.Shift => { "location":  "2dsphere" }  `);
+      observer.next(`Creating index for ${historicalDb}.Shift => { "location":  "2dsphere" }  `);
       await historicalDb.collection('Shift').createIndex({ "location": "2dsphere" }).catch((err) => console.log(`Failed to create index: ${err}`));
           
       observer.next("All indexes created");

@@ -7,4 +7,4 @@ nebulae compose-ui development --shell-type=FUSE2_ANGULAR --shell-repo=https://g
 nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/emi-gateway --api-id=emi-gateway --output-dir=emi-gateway  --setup-file=../etc/mapi-setup.json
 
 # API - Driver-GateWay composition
-nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/driver-gateway --api-id=driver-gateway --output-dir=driver-gateway  --setup-file=../etc/mapi-setup.json
+nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/driver-gateway --api-id=driver-gateway --output-dir=driver-gateway  --setup-file=../etc/mapi-driver-setup.json

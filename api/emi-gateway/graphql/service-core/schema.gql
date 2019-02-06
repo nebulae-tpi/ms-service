@@ -1,0 +1,200 @@
+
+"Async CMD server acknowledge"
+type ServiceCoreCommandAck{
+    "message accepted by the server"
+    accepted: Boolean
+}
+
+
+"Service info"
+type ServiceCoreService{
+    "Service Identifier"
+    id: String
+    "Business ID"
+    businessId: String
+    "Shift ID"
+    shiftId: String
+    "Creation timestamp"
+    timestamp: BigInt
+    "Requested features keys"
+    requestedFeatures: [String]
+    "Client info"
+    client: ServiceCoreClient
+    "Passenger pick up location"
+    pickUp: ServiceCoreLocation
+    "Passenger drop off location"
+    dropOff: ServiceCoreLocation
+    "Service verification code"
+    verificationCode: String
+    "Pickup ETA"
+    pickUpETA: BigInt
+    "Dropoff ETA"
+    dropOffpETA: BigInt   
+    "Payment type key"
+    paymentType: String
+    "Applicable fare discount"
+    fareDiscount: Float
+    "pre calculated fare"
+    fare: BigInt
+    "Tip given to the driver"
+    tip: BigInt
+    "Exact route taken by the driver"
+    route: [ServiceCorePoint]   
+    "current service state: REQUESTED,ASSIGNED,ARRIVED,ON_BOARD,DONE,CANCELLED_CLIENT,CANCELLED_DRIVER,"
+    state: String
+    "All state changes"
+    StateChanges: [ServiceCoreStateChange]
+    "current location"
+    location: ServiceCorePoint
+    "vehicle info"
+    Vehicle: ServiceCoreVehicle
+    "driver info"
+    driver: ServiceCoreDriver
+    "Last service modification timestamp"
+    lastModificationTimestamp: BigInt
+}
+
+"Client info"
+type ServiceCoreClient {
+    "Client ID"
+    id: String
+    "Business ID"
+    businessId: String
+    "Full name"
+    fullname: String
+    "user name"
+    username: String
+    "Tip given to the client. Eg. satellites"
+    tip: BigInt,
+    "Tiping type"
+    tipType: String    
+}
+
+"Client info"
+input ServiceCoreClientInput {
+    "Full name"
+    fullname: String!
+    "Tip given to the client. Eg. satellites"
+    tip: BigInt!
+    "Tiping type"
+    tipType: String! 
+}
+
+"Vehicle info"
+type ServiceCoreVehicle {
+    "License plate"
+    licensePlate: String
+}
+
+"Driver info"
+type ServiceCoreDriver {
+    "Driver fullname"
+    fullname: String
+    "document"
+    document: String
+    "driver id"
+    id: String
+}
+
+
+
+"Location info"
+type ServiceCoreLocation {
+    "Accurate location, Exact marker point: Lat,Lng"
+    marker: ServiceCorePoint
+    "Non-Accurate location, describes an area"
+    polygon: [ServiceCorePoint]
+    "City name"
+    city: String
+    "Zone name"
+    zone: String
+    "Neighborhood name"
+    neighborhood: String
+    "Street address 1"
+    addressLine1: String
+    "Street address 2"
+    addressLine2: String
+    "location notes"
+    notes: String
+}
+
+"Location info"
+input ServiceCoreLocationInput {
+    "Accurate location, Exact marker point: Lat,Lng"
+    marker: ServiceCorePointInput
+    "Non-Accurate location, describes an area"
+    polygon: [ServiceCorePointInput]
+    "City name"
+    city: String
+    "Zone name"
+    zone: String
+    "Neighborhood name"
+    neighborhood: String
+    "Street address 1"
+    addressLine1: String
+    "Street address 2"
+    addressLine2: String
+    "location notes"
+    notes: String
+}
+
+"Geo point"
+type ServiceCorePoint {
+    "Latitude"
+    lat: Float
+    "Longitude"
+    lng: Float
+    "Optional timestamp"
+    timestamp: BigInt
+}
+
+"Geo point"
+input ServiceCorePointInput {
+    "Latitude"
+    lat: Float
+    "Longitude"
+    lng: Float
+    "Optional timestamp"
+    timestamp: BigInt
+}
+
+
+"Service State Changes"
+type ServiceCoreStateChange{
+    "service state"
+    state: String
+    "state timestamp"
+    timestamp: BigInt
+    "location"
+    location: ServiceCorePoint,
+    "notes"
+    notes: String
+}
+
+
+type Query{
+    "Gets a Service by its ID"
+    ServiceCoreService(id: String): [ServiceCoreService]
+}
+
+type Mutation{
+    "Request a new service"
+    ServiceCoreRequestService(
+        "client info"
+        client: ServiceCoreClientInput!
+        "Passenger pick up location"
+        pickUp: ServiceCoreLocationInput!
+        "Payment type key"
+        paymentType: String!
+        "Requested features keys"
+        requestedFeatures: [String]
+        "Passenger drop off location"
+        dropOff: ServiceCoreLocationInput       
+        "Applicable fare discount"
+        fareDiscount: Float
+        "pre calculated fare"
+        fare: BigInt 
+        "Tip given to the driver"
+        tip: BigInt
+    ): ServiceCoreCommandAck
+}

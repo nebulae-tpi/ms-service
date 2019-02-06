@@ -35,7 +35,11 @@ class DriverCQRS {
    * Gets Driver's Assigned Vehicles
    */
   queryDriverAssignedVehicles$({ root, args, jwt }, authToken) {
+
     const { driverId } = authToken;
+
+    console.log(`DriverCQRS.queryDriverAssignedVehicles RQST: ${JSON.stringify({driverId})}`); //TODO: DELETE THIS LINE
+
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),
       defaultIfEmpty( {assignedVehicles:[]} ),
@@ -45,7 +49,8 @@ class DriverCQRS {
       mergeMap(licensePlate => VehicleDA.findByLicensePlate$(licensePlate).pipe(filter(v => v))),
       map(vehicle => ({ plate: vehicle.licensePlate, blocks: vehicle.blocks, active: vehicle.active })),
       toArray(),
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      tap(x => console.log(`DriverCQRS.queryDriverAssignedVehicles RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),      
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
   }
