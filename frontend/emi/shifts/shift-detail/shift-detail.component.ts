@@ -5,14 +5,8 @@ import {
   OnDestroy
 } from '@angular/core';
 
-import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  Validators
-} from '@angular/forms';
 
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
 import { map, mergeMap, tap, takeUntil, take } from 'rxjs/operators';
@@ -20,22 +14,15 @@ import { Subject, of} from 'rxjs';
 
 //////////// ANGULAR MATERIAL ///////////
 import {
-  MatPaginator,
-  MatSort,
-  MatTableDataSource,
   MatSnackBar
 } from '@angular/material';
 
 //////////// i18n ////////////
-import {
-  TranslateService
-} from '@ngx-translate/core';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
 import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
 
 //////////// Other Services ////////////
-import { KeycloakService } from 'keycloak-angular';
 import { ShiftDetailService } from './shift-detail.service';
 
 @Component({
@@ -49,15 +36,54 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
-  service: any;
+  shift: any;
+
+  // test
+
+  SHIFT_TEST = {
+    '_id': 'q1w2e3-r4t5y6-edfr567gt-yhuyj-734',
+    'businessId': 'q1q1q1q-w2w2-e3e3-r4r4-t5y66656-545644',
+    'timestamp': 1000000,
+    'state': 'AVAILABLE',
+    'stateChanges': [
+      {
+        'state': '',
+        'timestamp': 123456,
+      }
+    ],
+    'online': true,
+    'onlineChanges': [{ 'online': true, 'timestamp': 23456 }],
+    'lastReceivedComm': 1000000,
+    'location': {
+      'type': 'Point',
+      'coordinates': [-73.9928, 40.7193]
+    },
+    'driver': {
+      'id': 'e3r4t5-y6u7i8-q1w2e3-r4tt5y6-j6k7l8',
+      'fullname': 'Juan Felipe Santa Ospina',
+      'blocks': ['KEY', 'KEY'],
+      'documentType': 'CC',
+      'documentId': '1045059869',
+      'pmr': false,
+      'languages': ['EN'],
+      'phone': '3125210012',
+      'username': 'juan.santa',
+    },
+    'vehicle': {
+      'id': 'w2e3-r4t5-y6u7-i8o9',
+      'licensePlate': 'MNP137',
+      'blocks': ['KEY', 'KEY'],
+      'features': ['AC', 'TRUNK'],
+      'brand': 'MAZDA',
+      'line': 'Sport',
+      'model': '2017',
+    },
+  };
+
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
-    private translate: TranslateService,
-    private formBuilder: FormBuilder,
     public snackBar: MatSnackBar,
-    private router: Router,
-    private activatedRouter: ActivatedRoute,
     private shiftDetailService: ShiftDetailService,
     private route: ActivatedRoute
   ) {
@@ -66,35 +92,37 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.loadservice();
+    this.loadShift();
     this.subscribeServiceUpdated();
   }
 
-  loadservice(){
+  loadShift(){
     this.route.params
     .pipe(
       map(params => params['id']),
-      mergeMap(entityId => entityId !== 'new' ?
-        this.shiftDetailService.getServiceService$(entityId).pipe(
-          map(res => res.data.ServiceService)
-        ) : of(null)
+      mergeMap(shiftId => shiftId !== 'new'
+        ? this.shiftDetailService.getShiftDetails$(shiftId).
+          pipe(map(res => res.data.ServiceService))
+        : of(null)
       ),
-      takeUntil(this.ngUnsubscribe)
+      takeUntil(this.ngUnsubscribe),
+
+      // REMOVE
+      map(() => this.SHIFT_TEST),
+
+      tap(shift => this.shift = shift )
     )
-    .subscribe((service: any) => {
-      this.service = service;
-    }, e => console.log(e));
+    .subscribe(() => {}, e => console.log(e));
   }
-  
+
   subscribeServiceUpdated(){
     this.shiftDetailService.subscribeServiceServiceUpdatedSubscription$()
     .pipe(
       map(subscription => subscription.data.ServiceServiceUpdatedSubscription),
-      takeUntil(this.ngUnsubscribe)
+      takeUntil(this.ngUnsubscribe),
+      tap(shift => this.shift = shift)
     )
-    .subscribe((service: any) => {
-      this.service = service;
-    })
+    .subscribe(() => {}, e => console.log(e), () => {} );
   }
 
   showSnackBar(message) {

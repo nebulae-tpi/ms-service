@@ -15,15 +15,15 @@ export class ShiftDetailService {
 
   }
 
-  getServiceService$(id: string) {
+  getShiftDetails$(id: string) {
     console.log('getServiceService => ', id);
     return this.gateway.apollo.query<any>({
       query: ServiceService,
       variables: {
         id: id
       },
-      fetchPolicy: "network-only",
-      errorPolicy: "all"
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
     });
   }
 

@@ -67,8 +67,37 @@ import { ToolbarService } from '../../../../toolbar/toolbar.service';
 export class ShiftStateChangesComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
-
   @Input('shift') shift: any;
+
+  ////////////////// Table for state changes  //////////////////////
+  stateChangesDataSource = new MatTableDataSource();
+
+  @ViewChild('stateChangesPaginator') stateChangesPaginator: MatPaginator;
+  stateChangesTableSize: number;
+  stateChangesTablePage = 0;
+  stateChangesTableCount = 10;
+
+  // Columns to show in the table
+  stateChangesDisplayedColumns = [
+    'timestamp',
+    'state'
+  ];
+  //////////////////////////////////////////////////////////////////////
+  ////////////////// Table for state changes  //////////////////////
+  conectDisconectDataSource = new MatTableDataSource();
+
+  @ViewChild('conectDisconectPaginator') conectDisconectPaginator: MatPaginator;
+  conectDisconectTableSize: number;
+  conectDisconectTablePage = 0;
+  conectDisconectTableCount = 10;
+
+  // Columns to show in the table
+  conectDisconectDisplayedColumns = [
+    'timestamp',
+    'state'
+  ];
+   //////////////////////////////////////////////////////////////////////
+
 
 
   constructor(
@@ -87,6 +116,8 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+
+    this.initPaginatorsListeners();
 
   }
 
@@ -124,6 +155,60 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+  }
+
+  selectState(state){
+
+  }
+
+  initPaginatorsListeners(){
+    // combineLatest(
+    //   this.stateChangesPaginator.page.pipe(startWith({pagination: {page: 0, count: 10, sort: -1}})),
+    //   this.conectDisconectPaginator.page.pipe(startWith({pagination: {page: 0, count: 10, sort: -1}}))
+    // )
+    // .pipe(
+    //   takeUntil(this.ngUnsubscribe),
+    //   map(() => ([])),
+    //   tap(r => console.log(r))
+    // )
+    //   .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
+
+    this.stateChangesPaginator.page
+    .pipe(
+      startWith({pagination: {page: 0, count: 10, sort: -1}}),
+      takeUntil(this.ngUnsubscribe),
+      // query here
+      map(() => ([
+        {state: 'AVAILABLE', timestamp: Date.now()},
+        {state: 'NOT_AVAILABLE', timestamp: Date.now()},
+        {state: 'BUSY', timestamp: Date.now()},
+        {state: 'BLOCKED', timestamp: Date.now()},
+        {state: 'CLOSED', timestamp: Date.now()},
+      ])),
+      tap(result => this.stateChangesDataSource.data = result)
+    )
+    .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
+
+    this.conectDisconectPaginator.page
+    .pipe(
+      startWith({pagination: {page: 0, count: 10, sort: -1}}),
+      takeUntil(this.ngUnsubscribe),
+      // query here
+      map(() => ([
+        {online: true, timestamp: Date.now()},
+        {online: false, timestamp: Date.now()},
+        {online: true, timestamp: Date.now()},
+        {online: false, timestamp: Date.now()},
+        {online: true, timestamp: Date.now()},
+        {online: false, timestamp: Date.now()},
+        {online: true, timestamp: Date.now()},
+        {online: false, timestamp: Date.now()},
+      ])),
+      tap(result => this.conectDisconectDataSource.data = result)
+    )
+    .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
+
+
   }
 
 }

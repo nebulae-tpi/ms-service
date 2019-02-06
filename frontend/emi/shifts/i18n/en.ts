@@ -3,20 +3,56 @@ export const locale = {
   data: {
     SHIFT: {
       HEADER_TITLE: 'SHIFTS',
-      DETAIL_HEADER_NAME: 'Service detail',
+      DETAIL_HEADER_NAME: 'Shift detail',
       SHIFT_TABLE_LIST: {
         TIMESTAMP: 'Date',
         CLIENT_NAME: 'Client name',
         DRIVER_NAME: 'Driver name',
         LICENSE_PLATE: 'License plate',
-        PAYMENT_TYPE: 'Payment type',
-        STATE: 'State'
+        DRIVER_DOCUMENT: 'Driver document ID',
+        VEHICLE_MODEL: 'Vehicle model'
+      },
+      DRIVER_DETAIL: {
+        ID: 'ID',
+        FULL_NAME: 'Fullname',
+        DOC_TYPE: 'Document Type',
+        DOC_TYPES: {
+          CC: 'Document ID'
+        },
+        LANGUAGES_TITLE: 'Languages',
+        BLOCKS_TITLE: 'Blocks',
+        LANGUAGES: {
+          EN: 'English'
+        },
+        DOCUMENT_ID: 'Document',
+        PHONE: 'Phone',
+        USERNAME: 'User name'
+      },
+      VEHICLE_DETAIL: {
+        ID: 'ID',
+        BRAND: 'Brand',
+        MODEL: 'Model',
+        LINE: 'Line',
+        BLOCKS_TITLE: 'Blocks',
+        FEATURES_TITLE: 'Features',
+        FEATURES: {
+          AC: 'Air Conditioning',
+          TRUNK: 'Trunk',
+          ROOF_RACK: 'Roof Rack',
+          PETS: 'Pets',
+          BIKE_RACK: 'Bike Rack'
+        }
+      },
+      STATE_CHANGES: {
+        TIMESTAMP: 'Time',
+        STATE: 'State',
+        ONLINE: 'Online',
+        OFFLINE: 'Offline'
       },
       SHIFT_FILTERS: {
         INIT_TIMESTAMP: 'Initial date',
         END_TIMESTAMP: 'Final date',
-        CLIENT_USERNAME: 'Client username',
-        CLIENT_FULLNAME: 'Client name',
+        VEHICLE_LICENSE_PLATE: 'Vehicle license plate',
         DRIVER_NAME: 'Driver name',
         DRIVER_DOCUMENT_ID: 'Driver document id',
         DRIVER_FULLNAME: 'Driver name',
@@ -34,16 +70,12 @@ export const locale = {
         BLOCKED: 'Blocked',
         CLOSED: 'Closed'
       },
-      SHIFT_PAYMENT_TYPE: {
-        CASH: 'Cash',
-        CREDIT_CARD: 'Credit card'
-      },
       DETAILS: {
         GENERAL_INFO: 'General info',
         TABS: {
-          GENERAL_INFO: 'General info',
+          DRIVER_INFO: 'Driver info',
           STATE_CHANGES: 'State changes',
-          ROUTE_TRACKING: 'Route tracking'
+          VEHICLE_INFO: 'Vehicle info'
         },
         CLIENT: 'Client',
         DRIVER: 'Driver',

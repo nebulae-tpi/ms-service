@@ -63,7 +63,7 @@
 
               <!-- VEHICLE LICENSE PLATE -->
               <mat-form-field>
-                <input matInput placeholder="{{'SHIFT.SHIFT_FILTERS.CLIENT_USERNAME' | translate}}" formControlName="vehicleLicensePlate"
+                <input matInput placeholder="{{'SHIFT.SHIFT_FILTERS.VEHICLE_LICENSE_PLATE' | translate}}" formControlName="vehicleLicensePlate"
                   id="vehicleLicensePlate" maxlength="20" />
               </mat-form-field>
 
@@ -159,11 +159,7 @@
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
           <mat-row *cdkRowDef="let row; columns: displayedColumns" class="selectedElement" (click)="selectserviceRow(row)"
-            [ngClass]="{
-                                highlight:
-                                selectedService &&
-                                selectedService._id == row._id
-                              }"
+            [ngClass]="{highlight: selectedService && selectedService._id == row._id}"
             [routerLink]="row._id" matRipple>
           </mat-row>
         </mat-table>

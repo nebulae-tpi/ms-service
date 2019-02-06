@@ -12,7 +12,8 @@ import {
   FormBuilder,
   FormGroup,
   FormControl,
-  Validators
+  Validators,
+  FormArray
 } from '@angular/forms';
 
 import { Router, ActivatedRoute } from '@angular/router';
@@ -68,8 +69,7 @@ export class ShiftDriverInfoComponent implements OnInit, OnDestroy {
 
   @Input('shift') shift: any;
 
-  serviceGeneralInfoForm: any;
-  serviceStateForm: any;
+  shiftDriverInfoForm: any;
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -87,9 +87,17 @@ export class ShiftDriverInfoComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.serviceGeneralInfoForm = new FormGroup({
-      name: new FormControl(this.shift ? (this.shift.driver || {}).name : ''),
-      // description: new FormControl(this.shift ? (this.shift.driver || {}).description : '')
+    console.log(this.shift);
+    this.shiftDriverInfoForm = new FormGroup({
+      id: new FormControl(this.shift ? (this.shift.driver || {}).id : ''),
+      fullName: new FormControl(this.shift ? (this.shift.driver || {}).fullname : ''),
+      docType: new FormControl(this.shift ? (this.shift.driver || {}).documentType : ''),
+      documentId: new FormControl(this.shift ? (this.shift.driver || {}).documentId : ''),
+      phone: new FormControl(this.shift ? (this.shift.driver || {}).phone : ''),
+      username: new FormControl(this.shift ? (this.shift.driver || {}).username : ''),
+      pmr: new FormControl(this.shift ? (this.shift.driver || {}).pmr : ''),
+      // blocks: new FormArray([]),
+      // languages: new FormArray([])
     });
   }
 

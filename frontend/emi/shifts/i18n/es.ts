@@ -3,20 +3,56 @@ export const locale = {
   data: {
     SHIFT: {
       HEADER_TITLE: 'SERVICIOS',
-      DETAIL_HEADER_NAME: 'Detalle del servicio',
+      DETAIL_HEADER_NAME: 'Detalle del turno',
       SHIFT_TABLE_LIST: {
         TIMESTAMP: 'Fecha',
         CLIENT_NAME: 'Nombre cliente',
         DRIVER_NAME: 'Nombre conductor',
         LICENSE_PLATE: 'Placa vehículo',
-        PAYMENT_TYPE: 'Tipo pago',
-        STATE: 'Estado'
+        DRIVER_DOCUMENT: 'Cédula de conductor',
+        VEHICLE_MODEL: 'Modelo'
+      },
+      DRIVER_DETAIL: {
+        ID: 'ID',
+        FULL_NAME: 'Nombre',
+        DOC_TYPE: 'Tipo de documento',
+        DOC_TYPES: {
+          CC: 'Cédula de Ciudadanía'
+        },
+        LANGUAGES_TITLE: 'Idiomas',
+        BLOCKS_TITLE: 'Bloqueos',
+        LANGUAGES: {
+          EN: 'Inglés'
+        },
+        DOCUMENT_ID: 'Documento',
+        PHONE: 'Teléfono',
+        USERNAME: 'Nombre de usuario'
+      },
+      VEHICLE_DETAIL: {
+        ID: 'ID',
+        BRAND: 'Marca',
+        MODEL: 'Modelo',
+        LINE: 'Línea',
+        BLOCKS_TITLE: 'Bloqueos',
+        FEATURES_TITLE: 'Características',
+        FEATURES: {
+          AC: 'Aire acondicionado',
+          TRUNK: 'Baúl',
+          ROOF_RACK: 'Parrilla de techo',
+          PETS: 'Permite mascotas',
+          BIKE_RACK: 'Portabicicletas'
+        }
+      },
+      STATE_CHANGES: {
+        TIMESTAMP: 'Hora',
+        STATE: 'Estado',
+        ONLINE: 'En línea',
+        OFFLINE: 'Desconectado'
       },
       SHIFT_FILTERS: {
         INIT_TIMESTAMP: 'Fecha inicial',
         END_TIMESTAMP: 'Fecha final',
-        CLIENT_USERNAME: 'Nombre de usuario cliente',
-        CLIENT_FULLNAME: 'Nombre cliente',
+        VEHICLE_LICENSE_PLATE: 'PLaca de vehículo',
         DRIVER_NAME: 'Nombre conductor',
         DRIVER_DOCUMENT_ID: 'Documento ID conductor',
         DRIVER_FULLNAME: 'Nombre conductor',
@@ -34,16 +70,12 @@ export const locale = {
         BLOCKED: 'Bloqueado',
         CLOSED: 'Cerrado'
       },
-      SHIFT_PAYMENT_TYPE: {
-        CASH: 'Efectivo',
-        CREDIT_CARD: 'Credit card'
-      },
       DETAILS: {
         GENERAL_INFO: 'Información general',
         TABS: {
-          GENERAL_INFO: 'Información general',
+          DRIVER_INFO: 'Información de conductor',
           STATE_CHANGES: 'Cambios de estado',
-          ROUTE_TRACKING: 'Seguimiento de ruta'
+          VEHICLE_INFO: 'Información de vehículo'
         },
         CLIENT: 'Cliente',
         DRIVER: 'Conductor',

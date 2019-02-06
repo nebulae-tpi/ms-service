@@ -12,7 +12,8 @@ import {
   FormBuilder,
   FormGroup,
   FormControl,
-  Validators
+  Validators,
+  FormArray
 } from '@angular/forms';
 
 import { Router, ActivatedRoute } from '@angular/router';
@@ -53,7 +54,7 @@ import { FuseTranslationLoaderService } from '../../../../../core/services/trans
 import { KeycloakService } from 'keycloak-angular';
 import { ShiftDetailService } from '../shift-detail.service';
 import { DialogComponent } from '../../dialog/dialog.component';
-import { ToolbarService } from "../../../../toolbar/toolbar.service";
+import { ToolbarService } from '../../../../toolbar/toolbar.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -68,8 +69,7 @@ export class ShiftVehicleInfoComponent implements OnInit, OnDestroy {
 
   @Input('shift') shift: any;
 
-  serviceGeneralInfoForm: any;
-  serviceStateForm: any;
+  shiftVehicleInfoForm: any;
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -87,19 +87,20 @@ export class ShiftVehicleInfoComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.serviceGeneralInfoForm = new FormGroup({
-      name: new FormControl(this.shift ? (this.shift.vehicle || {}).licensePlate : ''),
-      // description: new FormControl(this.shift ? (this.shift.driver || {}).description : '')
+    console.log(this.shift);
+    this.shiftVehicleInfoForm = new FormGroup({
+      id: new FormControl(this.shift ? (this.shift.vehicle || {}).id : ''),
+      brand: new FormControl(this.shift ? (this.shift.vehicle || {}).brand : ''),
+      model: new FormControl(this.shift ? (this.shift.vehicle || {}).model : ''),
+      line: new FormControl(this.shift ? (this.shift.vehicle || {}).line : ''),
+      blocks: new FormArray([]),
+      features: new FormArray([])
     });
-
-    // this.serviceStateForm = new FormGroup({
-    //   state: new FormControl(this.shift ? this.shift.state : true)
-    // });
   }
 
   showConfirmationDialog$(dialogMessage, dialogTitle) {
     return this.dialog
-      //Opens confirm dialog
+      // Opens confirm dialog
       .open(DialogComponent, {
         data: {
           dialogMessage,
@@ -144,8 +145,8 @@ export class ShiftVehicleInfoComponent implements OnInit, OnDestroy {
               this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
             });
           } else {
-            response.errors.forEach(error => {
-              this.showMessageSnackbar('ERRORS.' + error.message.code);
+            response.errors.forEach(err => {
+              this.showMessageSnackbar('ERRORS.' + err.message.code);
             });
           }
         });
@@ -159,7 +160,7 @@ export class ShiftVehicleInfoComponent implements OnInit, OnDestroy {
    * @param detailMessageKey Key of the detail message to i18n
    */
   showMessageSnackbar(messageKey, detailMessageKey?) {
-    let translationData = [];
+    const translationData = [];
     if (messageKey) {
       translationData.push(messageKey);
     }

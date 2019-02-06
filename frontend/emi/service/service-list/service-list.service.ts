@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from "rxjs";
+import { Observable, BehaviorSubject } from 'rxjs';
 import {
   startWith
-} from "rxjs/operators";
+} from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
 import {
   ServiceServices,
   ServiceServicesSize
 } from '../gql/service';
-import * as moment from "moment";
+import * as moment from 'moment';
 
 @Injectable()
 export class ServiceListService {
@@ -32,7 +32,7 @@ export class ServiceListService {
   /**
    * Gets the service list
    * @param filter Data to filter the list
-   * @param paginator Object that contains info about page number and amount of records to recover 
+   * @param paginator Object that contains info about page number and amount of records to recover
    * @returns {Observable} Observable with the service list
    */
   getserviceList$(filterInput, paginatorInput){
@@ -42,8 +42,8 @@ export class ServiceListService {
         filterInput: filterInput,
         paginationInput: paginatorInput
       },
-      fetchPolicy: "network-only",
-      errorPolicy: "all"
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
     });
   }
 
@@ -58,8 +58,8 @@ export class ServiceListService {
       variables: {
         filterInput: filterInput
       },
-      fetchPolicy: "network-only",
-      errorPolicy: "all"
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
     });
   }
 
@@ -70,7 +70,7 @@ export class ServiceListService {
    * @returns {Observable<any>}
    */
   get filter$(): Observable<any> {
-    return this._filterSubject$.asObservable()
+    return this._filterSubject$.asObservable();
   }
 
   /**
@@ -78,7 +78,7 @@ export class ServiceListService {
    * @returns {Observable<any>}
    */
   get paginator$(): Observable<any> {
-    return this._paginatorSubject$.asObservable()
+    return this._paginatorSubject$.asObservable();
   }
 
   updateFilterData(filterData){
