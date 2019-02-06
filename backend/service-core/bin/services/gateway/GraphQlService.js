@@ -2,6 +2,7 @@
 
 const { ShiftCQRS } = require("../../domain/shift");
 const { DriverCQRS } = require("../../domain/driver");
+const { ServiceCQRS } = require("../../domain/service");
 const broker = require("../../tools/broker/BrokerFactory")();
 const { of, from } = require("rxjs");
 const jsonwebtoken = require("jsonwebtoken");
@@ -169,6 +170,16 @@ class GraphQlService {
         messageType: "drivergateway.graphql.query.DriverAssignedVehicles"
       },     
 
+      //SERVICE
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.query.ServiceCoreService"
+      },   
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.ServiceCoreRequestService"
+      },   
+
 
     ];
   }
@@ -204,6 +215,14 @@ class GraphQlService {
       },
 
       // SERVICES
+      "emigateway.graphql.query.ServiceCoreService": {
+        fn: ServiceCQRS.queryService$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.mutation.ServiceCoreRequestService": {
+        fn: ServiceCQRS.requestServices$,
+        obj: ServiceCQRS
+      },
                   
     };
   }

@@ -8,10 +8,11 @@ const Rx = require('rxjs');
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
-const graphQlService = require('./services/driver-gateway/GraphQlService')();
+const graphQlService = require('./services/gateway/GraphQlService')();
 const shift = require('./domain/shift');
 const driver = require('./domain/driver');
 const vehicle = require('./domain/vehicle');
+const service = require('./domain/service');
 
 const start = () => {
     Rx.concat(
@@ -21,6 +22,7 @@ const start = () => {
         shift.start$,
         driver.start$,
         vehicle.start$,
+        service.start$,
         graphQlService.start$()
     ).subscribe(
         (evt) => {
