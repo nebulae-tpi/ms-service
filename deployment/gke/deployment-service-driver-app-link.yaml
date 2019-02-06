@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: nebulaetpi/service.backend.driverapplink:0.2.1
+      - image: nebulaetpi/service.backend.driverapplink:0.2.3
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -59,31 +59,31 @@ spec:
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
           value: "19-02-05_1340"
-        - name: DRIVER_APP_MQTT_URL
+        - name: DRIVER_APP_MQTT_SERVER_URL
           valueFrom:
            secretKeyRef:
              name: driver-app-link
-             key: DRIVER_APP_MQTT_URL
-        - name: DRIVER_APP_MQTT_PORT
+             key: DRIVER_APP_MQTT_SERVER_URL
+        - name: DRIVER_APP_MQTT_SERVER_PORT
           valueFrom:
            secretKeyRef:
              name: driver-app-link
-             key: DRIVER_APP_MQTT_PORT
-        - name: DRIVER_APP_MQTT_CLIENT_ID
+             key: DRIVER_APP_MQTT_SERVER_PORT
+        - name: DRIVER_APP_MQTT_SERVER_CLIENT_ID
           valueFrom:
            secretKeyRef:
              name: driver-app-link
-             key: DRIVER_APP_MQTT_CLIENT_ID
-        - name: DRIVER_APP_MQTT_USER
+             key: DRIVER_APP_MQTT_SERVER_CLIENT_ID
+        - name: DRIVER_APP_MQTT_SERVER_USER
           valueFrom:
            secretKeyRef:
              name: driver-app-link
-             key: DRIVER_APP_MQTT_USER
-        - name: DRIVER_APP_MQTT_PASSWORD
+             key: DRIVER_APP_MQTT_SERVER_USER
+        - name: DRIVER_APP_MQTT_SERVER_PASSWORD
           valueFrom:
            secretKeyRef:
              name: driver-app-link
-             key: DRIVER_APP_MQTT_PASSWORD
+             key: DRIVER_APP_MQTT_SERVER_PASSWORD
         
       volumes:
       - name: google-application-credentials

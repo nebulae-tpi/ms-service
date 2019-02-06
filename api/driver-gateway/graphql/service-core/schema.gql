@@ -53,7 +53,7 @@ type Shift {
 "Client info"
 type Client {
    "Full name"
-   name: String
+   fullName: String
    "Tip given to the client. Eg. satellites"
    tip: BigInt,
    "Tiping type"
@@ -91,7 +91,9 @@ type Location {
 "Service info"
 type Service{
    "Service Identifier"
-   id: String
+   id_: String
+   "Service created timestamp"
+   timestamp: BigInt
    "Client info"
    client: Client
    "Passenger pick up location"
