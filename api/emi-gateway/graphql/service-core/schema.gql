@@ -47,7 +47,7 @@ type ServiceCoreService{
     "current location"
     location: ServiceCorePoint
     "vehicle info"
-    Vehicle: ServiceCoreVehicle
+    vehicle: ServiceCoreVehicle
     "driver info"
     driver: ServiceCoreDriver
     "Last service modification timestamp"
@@ -231,7 +231,7 @@ type Mutation{
         "Shift ID"
         shiftId: String
         "vehicle info"
-        Vehicle: ServiceCoreVehicleInput
+        vehicle: ServiceCoreVehicleInput
         "driver info"
         driver: ServiceCoreDriverInput
     ): ServiceCoreCommandAck
