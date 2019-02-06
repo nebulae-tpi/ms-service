@@ -1,0 +1,274 @@
+<div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
+
+    <form name="serviceGeneralInfoForm" [formGroup]="serviceGeneralInfoForm" class="w-100-p"
+      fxLayout="column" class="mat-white-bg p-12 mr-24 mb-12">
+
+      <div class="w-100-p" fxLayout="column" class="mat-white-bg mr-24">
+    
+          <div fxLayout="row wrap" fxLayoutAlign="space-between center">
+
+              <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                  <span class="title secondary-text">{{'SHIFT.DETAILS.DATE' | translate}}:</span>
+                  <span>&nbsp;&nbsp;</span>
+                  <span class="value">{{shift.timestamp | date: "dd/MM/y HH:mm:ss"}}</span>
+              </div>
+
+              <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                  <span class="title secondary-text">{{'SHIFT.DETAILS.STATE' | translate}}: </span>
+                  <span>&nbsp;&nbsp;</span>
+                  <span class="value">{{"SHIFT.SHIFT_STATES." +shift.state | translate}}</span>
+              </div>
+
+              <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                  <span class="title secondary-text">{{'SHIFT.DETAILS.PAYMENT_TYPE' | translate}}: </span>
+                  <span>&nbsp;&nbsp;</span>
+                  <span class="value">{{"SHIFT.SHIFT_PAYMENT_TYPE." +shift.paymentType | translate}}</span>
+              </div>
+
+              <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                  <span class="title secondary-text">{{'SHIFT.DETAILS.FARE' | translate}}: </span>
+                  <span>&nbsp;&nbsp;</span>
+                  <span class="value">{{shift.fare | currency}}</span>
+              </div>
+
+              <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                  <span class="title secondary-text">{{'SHIFT.DETAILS.FARE_DISCOUNT' | translate}}: </span>
+                  <span>&nbsp;&nbsp;</span>
+                  <span class="value">{{shift.fareDiscount | percent}}</span>
+              </div>
+          </div>          
+      </div>
+
+
+      <div fxLayout="row wrap">
+
+        <div fxFlex="48" class="section pb-8 pt-20 mr-8">
+
+            <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon class="m-0 mr-16">place</mat-icon>
+                <div class="h2 secondary-text">{{'SHIFT.DETAILS.PICKED_UP' | translate}}</div>
+            </div>
+    
+            <div class="pickup pl-12 pt-8 pb-12 mat-elevation-z1" fxLayout="column">
+
+                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="start">
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.CITY' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.pickUp.city}}</span>
+                    </div>
+
+
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.NEIGHBORHOOD' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.pickUp.neighborhood}}</span>
+                    </div>
+                </div>
+
+                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="space-between start">
+                        <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                            <span class="title secondary-text">{{'SHIFT.DETAILS.ZONE' | translate}}: </span>
+                            <span>&nbsp;&nbsp;</span>
+                            <span class="value">{{shift.pickUp.zone}}</span>
+                        </div>
+                </div>
+                
+                <div fxFlex="100" fxLayout="row">
+
+                    
+
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.ADDRESSLINE1' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.pickUp.addressLine1}}</span>
+                    </div>
+    
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="shift.pickUp.addressLine2">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.ADDRESSLINE2' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.pickUp.addressLine2}}</span>
+                    </div>               
+    
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="shift.pickUp.notes">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.NOTES' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.pickUp.notes}}</span>
+                    </div>                 
+
+                </div>                              
+
+            </div>
+      </div>
+
+      <div fxFlex="48" class="section pb-8 pt-20" *ngIf="shift.dropOff">
+
+            <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon class="m-0 mr-16">place</mat-icon>
+                <div class="h2 secondary-text">{{'SHIFT.DETAILS.DROP_OFF' | translate}}</div>
+            </div>
+    
+            <div class="dropOff pl-12 pt-8 pb-12 mat-elevation-z1" fxLayout="column">
+
+                <div fxFlex="100" fxLayout="row" fxLayoutAlign="start center">
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.CITY' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.dropOff.city}}</span>
+                    </div>
+
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.NEIGHBORHOOD' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.dropOff.neighborhood}}</span>
+                    </div>
+                </div> 
+
+                <div fxFlex="100" fxLayout="row"  fxLayoutAlign="space-between start">
+                        <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                            <span class="title secondary-text">{{'SHIFT.DETAILS.ZONE' | translate}}: </span>
+                            <span>&nbsp;&nbsp;</span>
+                            <span class="value">{{shift.dropOff.zone}}</span>
+                        </div>
+                </div>
+                
+                <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between start">
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="shift.dropOff.addressLine1">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.ADDRESSLINE1' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.dropOff.addressLine1}}</span>
+                    </div>
+    
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="shift.dropOff.addressLine2">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.ADDRESSLINE2' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.dropOff.addressLine2}}</span>
+                    </div>               
+    
+                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="shift.dropOff.notes">
+                        <span class="title secondary-text">{{'SHIFT.DETAILS.NOTES' | translate}}: </span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span class="value">{{shift.dropOff.notes}}</span>
+                    </div>                 
+
+                </div>                              
+
+            </div>
+      </div>
+
+      </div>
+      
+
+
+      <div class="section pb-8 pt-20">
+
+        <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
+            <mat-icon class="m-0 mr-16">account_circle</mat-icon>
+            <div class="h2 secondary-text">{{'SHIFT.DETAILS.CLIENT' | translate}}</div>
+        </div>
+
+        <div class="client pb-12">
+            <table class="simple mat-elevation-z1">
+                <thead>
+                    <tr>
+                        <th>{{'SHIFT.DETAILS.CLIENT_FULLNAME' | translate}}</th>
+                        <th>{{'SHIFT.DETAILS.CLIENT_USERNAME' | translate}}</th>
+                        <th>{{'SHIFT.DETAILS.CLIENT_TIP_TYPE' | translate}}</th>
+                        <th>{{'SHIFT.DETAILS.CLIENT_TIP' | translate}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                          <span class="text-truncate">{{shift.client.fullname}}</span>
+                        </td>
+                        <td>
+                          <span class="text-truncate">{{shift.client.username}}</span>
+                        </td>
+                        <td>
+                          <span class="text-truncate">{{"SHIFT.DETAILS.TIP_TYPES."+shift.client.tipType  | translate}}</span>
+                        </td>
+                        <td>
+                            <span class="company text-truncate">{{shift.client.tip | currency}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pt-12 pb-12" fxLayout="row" fxLayout.xs="column">
+
+          <div fxFlex="100" fxLayoutAlign="start center">          
+            <div fxFlex="100" fxLayout="column" class="driver mr-8">
+                <mat-icon class="m-0 mr-16">airline_seat_recline_normal</mat-icon>
+                <div class="h2 secondary-text">{{'SHIFT.DETAILS.DRIVER' | translate}}</div>
+                <table class="simple mat-elevation-z1">
+                    <thead>
+                        <tr>
+                            <th>{{'SHIFT.DETAILS.DRIVER_DOCUMENT_ID' | translate}}</th>
+                            <th>{{'SHIFT.DETAILS.DRIVER_FULLNAME' | translate}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                              <span class="text-truncate">{{shift.driver.documentId}}</span>
+                              </td>
+                            <td>
+                              <span class="text-truncate">{{shift.driver.fullname}}</span>
+                            </td>                    
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+          </div>
+
+        <div fxFlex="100" fxLayout="column" fxFlex.xs="100">
+            <div fxFlex="100" class="pb-4" fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon class="m-0 mr-16">local_taxi</mat-icon>
+                <div class="h2 secondary-text">{{'SHIFT.DETAILS.VEHICLE' | translate}}</div>
+            </div>
+    
+            <div fxFlex="100" class="vehicle">
+                <table class="simple mat-elevation-z1">
+                    <thead>
+                        <tr>
+                            <th>{{'SHIFT.DETAILS.VEHICLE_LICENSE_PLATE' | translate}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                              <span class="text-truncate">{{shift.vehicle.licensePlate}}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
+          <mat-icon class="m-0 mr-16">settings_applications</mat-icon>
+          <div class="h2 secondary-text">{{"SHIFT.DETAILS.SHIFT_PARAMS" | translate}}</div>
+      </div>
+
+      <div class="param pb-12">
+          <mat-list role="list">
+            <mat-list-item *ngFor="let requestedFeature of shift.requestedFeatures">
+                <mat-icon mat-list-icon>arrow_right</mat-icon>
+                <h4 mat-line>{{"SHIFT.DETAILS.FEATURES."+requestedFeature | translate}}</h4>
+            </mat-list-item>
+          </mat-list>      
+      </div>
+
+      
+      
+      
+
+    </form>
+
+</div>

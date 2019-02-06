@@ -36,16 +36,16 @@ import { FuseTranslationLoaderService } from '../../../../core/services/translat
 
 //////////// Other Services ////////////
 import { KeycloakService } from 'keycloak-angular';
-import { ServiceDetailService } from './service-detail.service';
+import { ShiftDetailService } from './shift-detail.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
-  selector: 'service',
-  templateUrl: './service-detail.component.html',
-  styleUrls: ['./service-detail.component.scss']
+  selector: 'emi-shift-info',
+  templateUrl: './shift-detail.component.html',
+  styleUrls: ['./shift-detail.component.scss']
 })
 // tslint:disable-next-line:class-name
-export class ServiceDetailComponent implements OnInit, OnDestroy {
+export class ShiftDetailComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
@@ -58,7 +58,7 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
     public snackBar: MatSnackBar,
     private router: Router,
     private activatedRouter: ActivatedRoute,
-    private ServiceDetailservice: ServiceDetailService,
+    private shiftDetailService: ShiftDetailService,
     private route: ActivatedRoute
   ) {
       this.translationLoader.loadTranslations(english, spanish);
@@ -75,7 +75,7 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
     .pipe(
       map(params => params['id']),
       mergeMap(entityId => entityId !== 'new' ?
-        this.ServiceDetailservice.getServiceService$(entityId).pipe(
+        this.shiftDetailService.getServiceService$(entityId).pipe(
           map(res => res.data.ServiceService)
         ) : of(null)
       ),
@@ -87,7 +87,7 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
   }
   
   subscribeServiceUpdated(){
-    this.ServiceDetailservice.subscribeServiceServiceUpdatedSubscription$()
+    this.shiftDetailService.subscribeServiceServiceUpdatedSubscription$()
     .pipe(
       map(subscription => subscription.data.ServiceServiceUpdatedSubscription),
       takeUntil(this.ngUnsubscribe)

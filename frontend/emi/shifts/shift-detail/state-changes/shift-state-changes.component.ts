@@ -53,25 +53,23 @@ import { FuseTranslationLoaderService } from '../../../../../core/services/trans
 
 //////////// Others ////////////
 import { KeycloakService } from 'keycloak-angular';
-import { ServiceDetailService } from '../service-detail.service';
+import { ShiftDetailService } from '../shift-detail.service';
 import { DialogComponent } from '../../dialog/dialog.component';
-import { ToolbarService } from "../../../../toolbar/toolbar.service";
+import { ToolbarService } from '../../../../toolbar/toolbar.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
-  selector: 'service-general-info',
-  templateUrl: './service-general-info.component.html',
-  styleUrls: ['./service-general-info.component.scss']
+  selector: 'shift-state-changes',
+  templateUrl: './shift-state-changes.component.html',
+  styleUrls: ['./shift-state-changes.component.scss']
 })
 // tslint:disable-next-line:class-name
-export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
+export class ShiftStateChangesComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
-  @Input('service') service: any;
+  @Input('shift') shift: any;
 
-  serviceGeneralInfoForm: any;
-  serviceStateForm: any;
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -80,7 +78,7 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
     public snackBar: MatSnackBar,
     private router: Router,
     private activatedRouter: ActivatedRoute,
-    private ServiceDetailService: ServiceDetailService,
+    private shiftDetailService: ShiftDetailService,
     private dialog: MatDialog,
     private toolbarService: ToolbarService
   ) {
@@ -89,71 +87,10 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.serviceGeneralInfoForm = new FormGroup({
-      name: new FormControl(this.service ? (this.service.generalInfo || {}).name : ''),
-      description: new FormControl(this.service ? (this.service.generalInfo || {}).description : '')
-    });
 
-    this.serviceStateForm = new FormGroup({
-      state: new FormControl(this.service ? this.service.state : true)
-    });
   }
 
-  showConfirmationDialog$(dialogMessage, dialogTitle) {
-    return this.dialog
-      //Opens confirm dialog
-      .open(DialogComponent, {
-        data: {
-          dialogMessage,
-          dialogTitle
-        }
-      })
-      .afterClosed()
-      .pipe(
-        filter(okButton => okButton),
-      );
-  }
 
-  showSnackBar(message) {
-    this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-      this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
-        duration: 6000
-      });
-  }
-
-  graphQlAlarmsErrorHandler$(response) {
-    return of(JSON.parse(JSON.stringify(response)))
-      .pipe(
-        tap((resp: any) => {
-          this.showSnackBarError(resp);
-
-          return resp;
-        })
-      );
-  }
-
-  /**
-   * Shows an error snackbar
-   * @param response
-   */
-  showSnackBarError(response) {
-    if (response.errors) {
-
-      if (Array.isArray(response.errors)) {
-        response.errors.forEach(error => {
-          if (Array.isArray(error)) {
-            error.forEach(errorDetail => {
-              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
-            });
-          } else {
-            response.errors.forEach(error => {
-              this.showMessageSnackbar('ERRORS.' + error.message.code);
-            });
-          }
-        });
-      }
-    }
-  }
 
   /**
    * Shows a message snackbar on the bottom of the page
@@ -161,7 +98,7 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
    * @param detailMessageKey Key of the detail message to i18n
    */
   showMessageSnackbar(messageKey, detailMessageKey?) {
-    let translationData = [];
+    const translationData = [];
     if (messageKey) {
       translationData.push(messageKey);
     }

@@ -121,5 +121,39 @@
         ],
         "environmentVars": {
         }
+    },
+    {
+        "name": "shifts",
+        "src": "frontend/emi/shifts",
+        "groups": [
+            {
+              "id": "OPERATION",
+              "icon": "location_searching",
+              "translate": {
+                "en": "Operation",
+                "es": "Operación"
+              },
+              "priority": 200
+            }
+          ],
+        "contents": [
+            {
+                "groupId": "OPERATION",  
+                "id": "shifts",
+                "icon": "ballot",
+                "translate": {
+                    "en": "Shifts",
+                    "es": "Turnos"
+                },
+                "navURL": "/shifts",
+                "path": "shifts",
+                "loadChildren": "./main/content/shifts/shifts.module#ShiftsModule",
+                "priority": 1000,
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"],
+                "default" : false
+            }            
+        ],
+        "environmentVars": {
+        }
     }
 ]
