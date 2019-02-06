@@ -7,7 +7,8 @@ import {
   ViewChild,
   ElementRef,
   HostBinding, 
-  Renderer2
+  Renderer2,
+  Input
 } from "@angular/core";
 
 import {
@@ -76,13 +77,16 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
   //Subject to unsubscribe 
   private ngUnsubscribe = new Subject();
 
+  @Input('serviceList') serviceList: any = [];
+
   @ViewChild('openButton') openButton;
   @ViewChild('panel') panel;
   @ViewChild('overlay') overlay: ElementRef;
 
-  @HostBinding('class.bar-closed') barClosed: boolean;
+  @HostBinding('class.bar-closed') barClosed: boolean = true;
 
   dateNow = Date.now();
+  items = [1, 2, 3, 4, 5, 6, 7, 8];
 
   public player: AnimationPlayer;
 
@@ -111,6 +115,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   closeBar()
   {
+    console.log('closeBar ');
       this.player =
           this.animationBuilder
               .build([
@@ -127,6 +132,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
   
   openBar()
   {
+    console.log('openBar ');
     this.barClosed = false;
 
     this.player =
@@ -137,6 +143,10 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
             ]).create(this.panel.nativeElement);
 
     this.player.play();
+  }
+
+  selectService(service){
+    console.log('Selected service => ', service);
   }
 
   showSnackBar(message) {

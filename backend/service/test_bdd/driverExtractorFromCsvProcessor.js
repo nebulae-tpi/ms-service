@@ -110,7 +110,7 @@ describe("BDD - MAIN TEST", function() {
                                                     VehicleGraphQlHelper.createVehicle$(graphQL, vehicle),
                                                     of({vehicle, driver})
                                                 )),
-                                                // delay(500),
+                                                // delay(2000),
                                                 mergeMap(([a,b, { vehicle, driver }]) =>
                                                     VehicleGraphQlHelper.findByPlate$(graphQL, vehicle.licensePlate)                                                   
                                                     .pipe(
@@ -118,14 +118,13 @@ describe("BDD - MAIN TEST", function() {
                                                         map( (driverId) => ({ driver: { ...driver, _id: driverId }, vehicle: vehicle  }))
                                                     )
                                                 ),
-                                                mergeMap(({ vehicle, driver }) => forkJoin(
+                                                mergeMap(({ vehicle, driver }) => forkJoin(                                                    
                                                     DriverGraphQlHelper.assignVehicle$(graphQL, driver._id, vehicle.licensePlate),
                                                     DriverGraphQlHelper.createCredentials$(graphQL, driver)
                                                 )),
-                                                // delay(500),
 
-                                                tap(() => console.log("======================== \n")),
-                                                // delay(1000)
+                                                tap(() => console.log("========================================================================================= \n")),
+                                                // delay(2000)
 
                                             )
                                     ),

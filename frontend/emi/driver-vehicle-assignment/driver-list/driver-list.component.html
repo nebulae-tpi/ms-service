@@ -30,13 +30,14 @@
             <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
 
               <mat-form-field>
-                <input maxlength="30" matInput placeholder="{{'DRIVER.NAME' | translate}}" formControlName="name"/>
+                <input maxlength="20" matInput placeholder="{{'DRIVER.NAME' | translate}}" formControlName="name"/>
               </mat-form-field>
               <mat-form-field>
-                <input maxlength="30" matInput placeholder="{{'DRIVER.LASTNAME' | translate}}" formControlName="lastname"/>
+                <input maxlength="20" matInput placeholder="{{'DRIVER.LASTNAME' | translate}}" formControlName="lastname"/>
               </mat-form-field>
               <mat-form-field>
-                <input maxlength="30" type="number" matInput placeholder="{{'DRIVER.PERSON_ID' | translate}}" formControlName="documentId"/>
+                <input maxlength="15" matInput placeholder="{{'DRIVER.PERSON_ID' | translate}}"
+                  formControlName="documentId"/>
               </mat-form-field>
 
               <!-- <mat-form-field>
