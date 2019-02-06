@@ -37,7 +37,7 @@ class DriverAppLinkBroker {
 
     start$() {
         return Observable.create(obs => {
-            mqtt.connect(this.url, {
+            this.mqttClient = mqtt.connect(this.url, {
                 host: this.url,
                 port: this.port,
                 path: '/mqtt',
