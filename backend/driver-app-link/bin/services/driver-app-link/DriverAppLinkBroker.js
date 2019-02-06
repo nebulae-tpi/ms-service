@@ -37,9 +37,15 @@ class DriverAppLinkBroker {
 
     start$() {
         return Observable.create(obs => {
-            const connStr = `${this.url}:${this.port}`;
-            this.mqttClient = mqtt.connect(connStr);
-            obs.next(`DriverAppLinkBroker Mqtt connected: ${connStr}`);
+            mqtt.connect(this.url, {
+                host: this.url,
+                port: this.port,
+                path: '/mqtt',
+                clientId: this.clientId,
+                username: this.user,
+                password: this.password
+            });
+            obs.next(`DriverAppLinkBroker Mqtt connected: ${this.url}:${this.port} { clientId:${this.clientId}, username:${this.user} }`);
             this.mqttClient.on('message', (topic, message) => {
                 const msg = JSON.parse(message);
                 if (msg && msg.att && msg.att.sId && msg.t && msg.data) {
@@ -48,7 +54,7 @@ class DriverAppLinkBroker {
                         topic: topic,
                         ...msg
                     });
-                }else{
+                } else {
                     console.error(`WARNING: invalid incoming message structure: ${message}`);
                 }
 
@@ -150,9 +156,9 @@ class DriverAppLinkBroker {
         );
         return of(dataBuffer)
             .pipe(
-                tap((db) => { console.log(`Sending to app-driver using ${topicName} : ${db}`) ;} ), //TODO: DELETE LINE
+                tap((db) => { console.log(`Sending to app-driver using ${topicName} : ${db}`); }), //TODO: DELETE LINE
                 tap((db) => { this.mqttClient.publish(`${topicName}`, db, { qos: 1 }); }),
-                tap((db) => { console.log(`sent ${uuid}`) ;} ),//TODO: DELETE LINE
+                tap((db) => { console.log(`sent ${uuid}`); }),//TODO: DELETE LINE
                 mapTo(uuid)
             );
     }
@@ -189,11 +195,11 @@ module.exports = () => {
     if (!instance) {
         instance = new DriverAppLinkBroker(
             {
-                url: process.env.DRIVER_APP_MQTT_URL,
-                port: process.env.DRIVER_APP_MQTT_PORT,
-                clientId: process.env.DRIVER_APP_MQTT_CLIENT_ID,
-                user: process.env.DRIVER_APP_MQTT_USER,
-                password: process.env.DRIVER_APP_MQTT_PASSWORD,
+                url: process.env.DRIVER_APP_MQTT_SERVER_URL,
+                port: process.env.DRIVER_APP_MQTT_SERVER_PORT,
+                clientId: process.env.DRIVER_APP_MQTT_SERVER_CLIENT_ID,
+                user: process.env.DRIVER_APP_MQTT_SERVER_USER,
+                password: process.env.DRIVER_APP_MQTT_SERVER_PASSWORD,
             }
         );
         console.log(`${instance.constructor.name} Singleton created`);
