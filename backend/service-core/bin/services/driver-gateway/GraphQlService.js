@@ -53,7 +53,6 @@ class GraphQlService {
     const handler = this.functionMap[messageType];
     const subscription = broker
       .getMessageListener$([aggregateType], [messageType]).pipe(
-        tap(x => console.log(`REQUEST: ${JSON.stringify(x)}`)), //TODO: DELETE LINE
         mergeMap(message => this.verifyRequest$(message)),
         mergeMap(request => ( request.failedValidations.length > 0)
           ? of(request.errorResponse)
@@ -61,7 +60,6 @@ class GraphQlService {
               //ROUTE MESSAGE TO RESOLVER
               mergeMap(({ authToken, message }) =>
               handler.fn.call(handler.obj, message.data, authToken).pipe(
-                  tap(response => console.log(`RESPONSE: ${JSON.stringify({ response, correlationId: message.id, replyTo: message.attributes.replyTo })}`)), //TODO: DELETE LINE
                   map(response => ({ response, correlationId: message.id, replyTo: message.attributes.replyTo }))
                 )
             )

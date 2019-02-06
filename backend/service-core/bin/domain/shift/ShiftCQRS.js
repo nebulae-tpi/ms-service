@@ -36,9 +36,13 @@ class ShiftCQRS {
    */
   queryOpenShift$({ root, args, jwt }, authToken) {
     const { driverId } = authToken;
+
+    console.log(`ShiftCQRS.queryOpenShift RQST: ${JSON.stringify({ driverId, })}`); //TODO: DELETE THIS LINE
+
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "queryOpenShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)),
       map(shift => this.formatShitToGraphQLSchema(shift)),
+      tap(x => console.log(`ShiftCQRS.queryOpenShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -50,6 +54,8 @@ class ShiftCQRS {
   startShift$({ root, args, jwt }, authToken) {
     const vehiclePlate = args.vehiclePlate.toUpperCase();
     const { businessId, driverId } = authToken;
+
+    console.log(`ShiftCQRS.startShift RQST: ${JSON.stringify({ vehiclePlate, driverId, businessId })}`); //TODO: DELETE THIS LINE
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
@@ -63,6 +69,7 @@ class ShiftCQRS {
       map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, authToken)),// build shift with all needed proerties
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
+      tap(x => console.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -77,6 +84,8 @@ class ShiftCQRS {
     const VALID_STATES = ["AVAILABLE", "NOT_AVAILABLE"];
     const { businessId, driverId } = authToken;
 
+    console.log(`ShiftCQRS.setShiftState RQST: ${JSON.stringify({ state, driverId, businessId })}`); //TODO: DELETE THIS LINE
+
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "setShiftState", PERMISSION_DENIED, ["DRIVER"]).pipe(
       tap(() => { if (VALID_STATES.indexOf(state) <= -1) throw ERROR_23027; }), //Invalid input state verification
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)), // query driver's open shift
@@ -87,6 +96,7 @@ class ShiftCQRS {
       //mergeMap(shift => ServiceDA.findOpeneServiceByShift$(shift._id).pipe(tap(service => { if (service) throw ERROR_23028; }), mapTo(shift))),// Open Service verfication
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(authToken, shift, state))), //Build and send ShiftStateChanged event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
+      tap(x => console.log(`ShiftCQRS.setShiftState RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -97,6 +107,9 @@ class ShiftCQRS {
    */
   stopShift$({ root, args, jwt }, authToken) {
     const { businessId, driverId } = authToken;
+
+    console.log(`ShiftCQRS.stopShift RQST: ${JSON.stringify({ driverId, businessId })}`); //TODO: DELETE THIS LINE
+
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "stopShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)), // query driver's open shift
       tap(shift => { if (!shift) throw ERROR_23020; }),// Driver does not have an open shift verification
@@ -104,6 +117,7 @@ class ShiftCQRS {
       //mergeMap(shift => ServiceDA.findOpeneServiceByShift$(shift._id).pipe(tap(service => { if (service) throw ERROR_23021; }), mapTo(shift))),// Open Service verfication
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStoppedEsEvent(authToken, shift))), //Build and send ShiftStopped event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
+      tap(x => console.log(`ShiftCQRS.stopShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -202,7 +216,7 @@ class ShiftCQRS {
       eventType: 'ShiftStopped',
       eventTypeVersion: 1,
       user: authToken.preferred_username,
-      data: {businessId: shift.businessId, driverUsername: shift.driver.username }
+      data: { businessId: shift.businessId, driverUsername: shift.driver.username }
     });
   }
 
