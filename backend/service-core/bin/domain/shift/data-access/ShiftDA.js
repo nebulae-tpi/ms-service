@@ -150,9 +150,9 @@ class ShiftDA {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        { update },
+        update,
         {
-          projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username":1, "businessId":1 },
+          projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username": 1, "businessId": 1 },
           upsert: false,
           returnOriginal: false
         }
@@ -170,9 +170,9 @@ class ShiftDA {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        { update },
+        update,
         {
-          projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username":1, "businessId":1 },
+          projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username": 1, "businessId": 1 },
           upsert: false,
           returnOriginal: false
         }

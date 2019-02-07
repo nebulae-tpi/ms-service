@@ -11,6 +11,7 @@ const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
 const graphQlService = require('./services/driver-gateway/GraphQlService')();
 const shift = require('./domain/shift');
+const service = require('./domain/service');
 
 const start = () => {
     Rx.concat(
@@ -19,6 +20,7 @@ const start = () => {
         mongoDB.start$(),
         driverAppLinkBroker.start$(),
         shift.start$,
+        service.start$,
         graphQlService.start$()
     ).subscribe(
         (evt) => {

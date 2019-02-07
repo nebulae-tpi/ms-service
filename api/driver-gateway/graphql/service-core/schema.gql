@@ -68,6 +68,14 @@ type Point {
    lng: Float
 }
 
+"Geo point"
+input PointInput {
+   "Latitude"
+   lat: Float
+   "Longitude"
+   lng: Float
+}
+
 "Location info"
 type Location {
    "Accurate location, Exact marker point: Lat,Lng"
@@ -150,7 +158,11 @@ type Mutation{
 
    "Accept a service offer"
    acceptServiceOffer(
+      "Shift id"
+      shiftId: String
       "Service Id"
       serviceId: String
+      "Current shift location"
+      location: PointInput
    ): CommandAck @requireAuth
 }

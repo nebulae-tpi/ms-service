@@ -4,6 +4,7 @@ const eventSourcing = require("../../tools/EventSourcing")();
 const { ShiftES } = require("../../domain/shift");
 const { DriverES } = require("../../domain/driver");
 const { VehicleES } = require("../../domain/vehicle");
+const { ServiceES } = require("../../domain/service");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -125,7 +126,6 @@ class EventStoreService {
     return {
 
       //SHIFT 
-
       ShiftStarted: { fn: ShiftES.handleShiftStarted$, obj: ShiftES },
       ShiftStateChanged: { fn: ShiftES.handleShiftStateChanged$, obj: ShiftES },
       ShiftConnected: { fn: ShiftES.handleShiftConnected$, obj: ShiftES },
@@ -142,6 +142,18 @@ class EventStoreService {
       //VEHICLE
       VehicleBlockRemoved: { fn: VehicleES.handleVehicleBlockRemoved$, obj: VehicleES },
       VehicleBlockAdded: { fn: VehicleES.handleVehicleBlockAdded$, obj: VehicleES },
+      //SERVICE
+      ServiceRequested: { fn: ServiceES.handleServiceRequested$, obj: ServiceES },
+      ServiceAssigned: { fn: ServiceES.handleServiceAssigned$, obj: ServiceES },
+      ServicePickUpETAReported: { fn: ServiceES.handleServicePickUpETAReported$, obj: ServiceES },
+      ServiceLocationReported: { fn: ServiceES.handleServiceLocationReported$, obj: ServiceES },
+      ServiceArrived: { fn: ServiceES.handleServiceArrived$, obj: ServiceES },
+      ServicePassengerBoarded: { fn: ServiceES.handleServicePassengerBoarded$, obj: ServiceES },
+      ServiceCompleted: { fn: ServiceES.handleServiceCompleted$, obj: ServiceES },
+      ServiceDropOffETAReported: { fn: ServiceES.handleServiceDropOffETAReported$, obj: ServiceES },
+      ServiceCancelledByDriver: { fn: ServiceES.handleServiceCancelledByDriver$, obj: ServiceES },
+      ServiceCancelledByClient: { fn: ServiceES.handleServiceCancelledByClient$, obj: ServiceES },
+      ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperator$, obj: ServiceES },
     };
   }
 
@@ -167,6 +179,17 @@ class EventStoreService {
       //DRIVER  
       { aggregateType: "Driver", eventType: "DriverBlockRemoved" },
       { aggregateType: "Driver", eventType: "DriverBlockAdded" },
+      //SERVICE
+      { aggregateType: "Service", eventType: "ServiceAssigned" },
+      { aggregateType: "Service", eventType: "ServicePickUpETAReported" },
+      { aggregateType: "Service", eventType: "ServiceLocationReported" },
+      { aggregateType: "Service", eventType: "ServiceArrived" },
+      { aggregateType: "Service", eventType: "ServicePassengerBoarded" },
+      { aggregateType: "Service", eventType: "ServiceCompleted" },
+      { aggregateType: "Service", eventType: "ServiceDropOffETAReported" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByOperator" },      
     ]
   }
 }

@@ -28,7 +28,7 @@ class ShiftDA {
    * @param {*} _id 
    * @param {*} projection 
    */
-  static findById(_id, projection = undefined) {
+  static findById$(_id, projection = undefined) {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOne(
         { _id },
