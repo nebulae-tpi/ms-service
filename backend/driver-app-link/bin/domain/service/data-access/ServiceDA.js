@@ -46,7 +46,7 @@ class ServiceDA {
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection('Shift')),
-      mergeMap(collection => defer(() => collection.find(query, { projection }))),
+      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection }))  )),
     );
   }
 
