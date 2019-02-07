@@ -57,7 +57,7 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
-      mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state, driver, vehicle })),
+      mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state:1, driver:1, vehicle:1 })),
       first(shift => shift, undefined),
       tap(shift => { if (!shift) { throw ERROR_23101; }; }),//  invalid shift
       map(shift => ({
