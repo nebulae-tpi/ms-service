@@ -162,7 +162,6 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
   }
 
   initPaginatorsListeners(){
-
     this.stateChangesPaginator.page
     .pipe(
       startWith({pageIndex: 0, pageSize: 10}),
