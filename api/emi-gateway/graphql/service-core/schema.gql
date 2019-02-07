@@ -71,13 +71,17 @@ type ServiceCoreClient {
 }
 
 "Client info"
-input ServiceCoreClientInput {
+input ServiceCoreClientInput {    
     "Full name"
     fullname: String!
     "Tip given to the client. Eg. satellites"
     tip: BigInt!
     "Tiping type"
     tipType: String! 
+    "client id"
+    id: String
+    "client username"
+    username: String
 }
 
 "Vehicle info"

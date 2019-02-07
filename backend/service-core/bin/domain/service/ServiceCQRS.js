@@ -332,6 +332,13 @@ class ServiceCQRS {
     const { requestedFeatures, fareDiscount, fare, pickUp, tip } = request;
     const _id = Crosscutting.generateDateBasedUuid();
 
+
+
+    "client id"
+    id: String
+    "client username"
+    username: String
+
     return new Event({
       aggregateType: 'Service',
       aggregateId: _id,
@@ -340,6 +347,12 @@ class ServiceCQRS {
       user: authToken.preferred_username,
       data: {
         ...request,
+        client:{
+          id: authToken.clientId,
+          businessId: authToken.businessId,
+          username: authToken.preferred_username,
+          ...request.client,
+        },
         _id,
         businessId: authToken.businessId,
         timestamp: Date.now(),
@@ -355,6 +368,7 @@ class ServiceCQRS {
         tip: tip <= 0 ? undefined : tip,
         route: { type: "LineString", coordinates: [] },
         lastModificationTimestamp: Date.now(),
+        closed: false,
       }
     });
   }
