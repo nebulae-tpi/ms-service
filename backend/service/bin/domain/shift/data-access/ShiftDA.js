@@ -23,12 +23,13 @@ class ShiftDA {
   }
 
   static getShiftById$(id) {
-    const yymm = id.substring(id.length - 4);
-    const dbToSearch = this.client.db(`historical_${yymm}`).collection(COLLECTION_NAME);
-    return defer(() => dbToSearch.findOne(
-      { _id: id },
-      { projection: { stateChanges: 0, onlineChanges: 0  } }
-      ));
+    // mongoDB.getHistoricalDbByYYMM
+    // const yymm = id.substring(id.length - 4);
+    // const dbToSearch = this.client.db(`historical_${yymm}`).collection(COLLECTION_NAME);
+    // return defer(() => dbToSearch.findOne(
+    //   { _id: id },
+    //   { projection: { stateChanges: 0, onlineChanges: 0  } }
+    //   ));
   }
 
     /**
