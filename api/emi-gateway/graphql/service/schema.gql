@@ -301,11 +301,13 @@ type ServiceShift {
   vehicle: ServiceShiftVehicle
 }
 
-type Query {
-  "Get Services with state REQUESTED, ASSIGNED AND ARRIVED that belongs to the client satellite logged"
+type Query {  
+  "Get Services with state REQUESTED, ASSIGNED AND ARRIVED that belongs to the client satellite logged."
   ServiceServicesSatellite: [ServiceService]
   "Get client satellite data of the client satellite logged"
   ServiceClientSatellite: ServiceClientSatellite
+  "Gets the client satellite by its name"
+  ServiceClientSatellites(clientName: String): [ServiceClientSatellite]
   "Get Services filtered"
   ServiceServices(filterInput: ServiceServiceFilterInput!, paginationInput: ServiceServicePaginationInput!): [ServiceService]
   "Get the amount of Services filtered "

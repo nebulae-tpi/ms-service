@@ -21,7 +21,7 @@ class ServiceES {
   startServiceUpdatedEmitter(){
     this.serviceUpdatedEventEmitter$
     .pipe(
-        groupBy(service => service._id),
+        groupBy(serviceEvent => serviceEvent.aid),
         mergeMap(group$ => group$.pipe(debounceTime(5000))),
         mergeMap(service => this.sendServiceUpdatedEvent$(service))
     )
@@ -50,7 +50,7 @@ class ServiceES {
      * @param {*} serviceEvent service event
      */
     handleServiceEvents$(serviceEvent) {
-      console.log("handleServiceEvents");
+      console.log("handleServiceEvents => ", serviceEvent);
       return of(serviceEvent)
       .pipe(
         tap(res => {

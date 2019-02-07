@@ -2,6 +2,7 @@ export const locale = {
   lang: 'es',
   data: {
     'SATELLITE': {
+      'CLOSE': 'Cerrar',
       'REQUEST_VEHICLE_TITLE': 'Solicitud de servicio',
       'OTHERS': 'Otros',
       'REQUEST_TAXI': 'Solicitar taxi',
@@ -10,6 +11,8 @@ export const locale = {
       'PAYMENT_TYPE': 'Tipo pago',
       'TIP': 'Propina conductor',
       'FEATURES': 'Características',
+      'NOTES': 'Notas',
+      'SERVICE': 'Servicio',
       'FEATURES_LIST': {
         'AC': 'Aire acondicionado',
         'TRUNK': 'Baúl',
@@ -18,12 +21,26 @@ export const locale = {
         'BIKE_RACK': 'Portabicicletas'
       },
       'SERVICES': {
-        'MIN_MAX_TIP': 'La propina (Opcional) debe estar entre $500 y $1000',
+        'ERROR_OPERATION': 'Error realizando operación, intente nuevamente.',
+        'REQUEST_SERVICE_SUCCESS': 'Solicitud de servicio enviada exitosamente', 
+        'CANCEL_SERVICE_SUCCESS': 'Cancelación de servicio enviada exitosamente', 
+        'NOT_SERVICES': 'No hay servicios disponibles',
+        'CANCEL_REQUEST': 'Cancelar solicitud',
+        'CANCEL_SERVICE': 'Cancelar servicio',
+        'SEE_DETAIL': 'Ver detalle',
+        'MIN_MAX_TIP': 'La propina es un valor opcional pero debe estar entre $500 y $100.000.',
         'LICENSE_PLATE': 'Placa',
         'DRIVER': 'Conductor',
         'SERVICE_PARAMS': 'Parámetros',
         'STATE': 'Estado',
         'REFERENCE': 'Referencia',
+        'CANCEL_OPTIONS': {
+          'IT_TAKES_TOO_MUCH_TIME': 'Demasiado tiempo', 
+          'DOESNT_REQUIRED': 'Ya no se requiere',
+          'OTHER': 'Otro',
+          'PLATE_DOESNT_MATCH': 'Placa no coincide',
+          'IS_NOT_THE_DRIVER': 'No es el conductor'
+        },
         'PAYMENT_TYPES': {
           'CASH': 'Efectivo',
           'CREDIT_CARD': 'Tarjeta de crédito'

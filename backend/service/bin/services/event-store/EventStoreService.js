@@ -4,6 +4,7 @@ const eventSourcing = require("../../tools/EventSourcing")();
 const { DriverES } = require("../../domain/driver");
 const { ClientES } = require("../../domain/client");
 const { VehicleES } = require("../../domain/vehicle");
+const { ServiceES } = require("../../domain/service");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -174,7 +175,19 @@ class EventStoreService {
       ClientSatelliteEnabled: {
         fn: ClientES.handleClientSatelliteEnabled$,
         obj: ClientES
-      }
+      },
+      //SERVICE
+      ServiceRequested: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceAssigned: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServicePickUpETAReported: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceLocationReported: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceArrived: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServicePassengerBoarded: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceCompleted: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceDropOffETAReported: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceCancelledByDriver: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceCancelledByClient: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceCancelledByOperator: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
     };
   }
 
@@ -231,7 +244,19 @@ class EventStoreService {
       {
         aggregateType: "Client",
         eventType: "ClientSatelliteEnabled"
-      }
+      },
+      //SERVICE
+      { aggregateType: "Service", eventType: "ServiceRequested" },
+      { aggregateType: "Service", eventType: "ServiceAssigned" },
+      { aggregateType: "Service", eventType: "ServicePickUpETAReported" },
+      { aggregateType: "Service", eventType: "ServiceLocationReported" },
+      { aggregateType: "Service", eventType: "ServiceArrived" },
+      { aggregateType: "Service", eventType: "ServicePassengerBoarded" },
+      { aggregateType: "Service", eventType: "ServiceCompleted" },
+      { aggregateType: "Service", eventType: "ServiceDropOffETAReported" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
     ]
   }
 }

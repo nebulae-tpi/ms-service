@@ -1,0 +1,30 @@
+<h1 mat-dialog-title>{{ "SATELLITE.SERVICES.CANCEL_SERVICE" | translate }}</h1>
+<mat-dialog-content>
+  <form fxLayout="column" fxLayoutAlign="start" fxFlex="100" name="form" *ngIf="cancelServiceForm" [formGroup]="cancelServiceForm">
+
+      <mat-radio-group formControlName="reason" fxLayout="column">
+        <mat-radio-button  *ngFor="let cancelReason of cancelOptions" [value]="cancelReason">
+          {{ "SATELLITE.SERVICES.CANCEL_OPTIONS."+cancelReason | translate }}
+        </mat-radio-button>
+      </mat-radio-group>
+
+      <mat-form-field>
+          <textarea
+            matInput
+            class="mt-4"
+            placeholder="{{'SATELLITE.NOTES' | translate}}"
+            formControlName="notes"
+            id="notes"
+            maxlength="40"></textarea>
+      </mat-form-field>
+
+  </form>
+
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-raised-button class="mat-accent compose-dialog-button" [disabled]="cancelServiceForm.invalid || cancelServiceForm.pristine"
+    aria-label="Cancell service" (click)="cancelService()">
+    {{ "SATELLITE.SERVICES.CANCEL_SERVICE" | translate }}
+  </button>
+  <button mat-raised-button mat-dialog-close (click)="closeDialog(false)">{{'SATELLITE.CLOSE' | translate}}</button>
+</mat-dialog-actions>

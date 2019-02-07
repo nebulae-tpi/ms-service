@@ -28,7 +28,7 @@ const VALID_SERVICE_CLIENT_TIP_TYPES = ['CASH', 'VIRTUAL_WALLET'];
 const VALID_SERVICE_PAYMENT_TYPES = ['CASH', 'CREDIT_CARD'];
 const VALID_SERVICE_REQUEST_FEATURES = ['AC', 'TRUNK', 'ROOF_RACK', 'PETS', 'BIKE_RACK'];
 const VALID_SERVICE_CANCEL_BY_DRIVER_REASONS = ['MECHANICAL_FAILURE', 'INVALID_ADDRESS', 'USER_DOESNT_ANSWER', 'CONGESTION_ON_THE_ROAD', 'DRUNK_USER', 'BRING_PET', 'USER_IS_NOT_HERE', 'VEHICLE_FROM_OTHER_COMPANY', 'DIFFERENT_TRIP_SERVICE', 'SERVICE_CODE'];
-const VALID_SERVICE_CANCEL_BY_CLIENT_REASONS = ['PlATE_DOESNT_MATCH', 'IS_NOT_THE_DRIVER', 'IT_TAKES_TOO_MUCH_TIME', 'DOESNT_REQUIRED'];
+const VALID_SERVICE_CANCEL_BY_CLIENT_REASONS = ['PLATE_DOESNT_MATCH', 'IS_NOT_THE_DRIVER', 'IT_TAKES_TOO_MUCH_TIME', 'DOESNT_REQUIRED'];
 const VALID_SERVICE_CANCEL_BY_OPERATOR_REASONS = ['IT_TAKES_TOO_MUCH_TIME', 'DOESNT_REQUIRED', 'OTHER'];
 const VALID_SERVICE_CANCEL_BY_AUTHORS = ['DRIVER', 'CLIENT', 'OPERATOR'];
 const VALID_SERVICE_CANCEL_REASON_BY_AUTHOR = { 'DRIVER': VALID_SERVICE_CANCEL_BY_DRIVER_REASONS, 'CLIENT': VALID_SERVICE_CANCEL_BY_CLIENT_REASONS, 'OPERATOR': VALID_SERVICE_CANCEL_BY_OPERATOR_REASONS };
@@ -135,7 +135,7 @@ class ServiceCQRS {
       tap(request => this.validateServiceCancellationRequestInput(request)),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
-      tap(({ service, request }) => { if (!service.open) throw ERROR_23224; }),// service is already closed
+      tap(({ service, request }) => { if (service.closed) throw ERROR_23224; }),// service is already closed
       mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
         request.id,
@@ -296,7 +296,7 @@ class ServiceCQRS {
   validateServiceCancellationRequestInput({ id, reason, authorType, notes }) {
     if (!id || !reason || !authorType) throw ERROR_23220; // insuficient data id, authorType and  and reason are mandatory
     if (VALID_SERVICE_CANCEL_BY_AUTHORS.indexOf(authorType) == -1) throw ERROR_23221; // invalid Author type
-    if (VALID_SERVICE_CANCEL_REASON_BY_AUTHOR[authorType].indexOf(authorType) == -1) throw ERROR_23222; // invalid reason type
+    if (VALID_SERVICE_CANCEL_REASON_BY_AUTHOR[authorType].indexOf(reason) == -1) throw ERROR_23222; // invalid reason type
   }
 
   /**

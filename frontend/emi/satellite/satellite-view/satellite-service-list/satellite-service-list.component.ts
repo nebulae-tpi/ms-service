@@ -1,3 +1,4 @@
+import { CancelServiceDialogComponent } from './../../dialog/cancel-service-dialog/cancel-service-dialog.component';
 import { EventEmitter } from '@angular/core';
 
 ////////// ANGULAR //////////
@@ -95,7 +96,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   public player: AnimationPlayer;
 
-  constructor(    
+  constructor( 
     private formBuilder: FormBuilder,
     private translate: TranslateService,
     private snackBar: MatSnackBar,
@@ -170,29 +171,27 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
    * @param service 
    */
   cancelService(service){
-    return of(service)
+    this.getRoles$()
     .pipe(
-      map(service => {
-        return {
-          id: service._id, 
-          //reason: service.reason, 
-          authorType: service.authorType, 
-          //notes: service.notes
-        };
+      mergeMap(roles => {
+        const authorType = roles.some(role => role === 'OPERATOR') ? 'OPERATOR': 'CLIENT';
+        return this.dialog
+        // Opens confirm dialog
+        .open(CancelServiceDialogComponent, {data: { serviceId: service._id, authorType: authorType}})
+        .afterClosed()
+        
       }),
-      mergeMap(serviceCoreCancelService => this.satelliteServiceListService.cancelServiceCoreCancelService$(serviceCoreCancelService)),
       takeUntil(this.ngUnsubscribe)
-    ).subscribe(
-      (result: any) => {
-        if (result.accepted) {
-          this.showSnackBar('SATELLITE.SERVICES.WAIT_OPERATION');
-        }
-      },
-      error => {
-        this.showSnackBar('SATELLITE.ERROR_OPERATION');
-        console.log('Error ==> ', error);
-      }
-    );    
+    ).subscribe(result => {
+
+    });
+  }
+
+    /**
+   * Checks if the logged user has role OPERATOR
+   */
+  getRoles$() {
+    return of(this.keycloakService.getUserRoles(true));
   }
 
   showSnackBar(message) {

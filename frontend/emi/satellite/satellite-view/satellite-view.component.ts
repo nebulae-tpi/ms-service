@@ -95,7 +95,7 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   clientMarker: MarkerRef = null;
   clientData = null;
   serviceList = [];
-
+  selectedService = null;
 
     //////// FORMS //////////
   requestForm: FormGroup;
@@ -171,7 +171,7 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     // Reactive Filter Form
     this.requestForm = new FormGroup({
       taxisNumber: new FormControl(1),
-      paymentType: new FormControl('CASH', [Validators.required]),
+      paymentType: new FormControl({value: 'CASH', disabled: true}, Validators.required),
       notes: new FormControl(''),
       features : new FormArray([]),
       tip: new FormControl(null, [Validators.max(100000), Validators.min(500)])
@@ -335,6 +335,7 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe((service: any) => {
+      console.log('subscribeServiceServiceUpdated =>', service);
       this.serviceMarkerUpdater.next(service);
     })
   }
@@ -378,7 +379,7 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
           dropOff: null,
           fareDiscount: null, 
           fare: null, 
-          tip: 0, 
+          tip: requestServiceForm.tip, 
         };
       }),
       mergeMap(serviceCoreRequest=> this.satelliteViewService.createServiceCoreRequestService$(serviceCoreRequest)),
@@ -386,8 +387,8 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     )
     .subscribe(
       (result: any) => {
-        if (result.accepted) {
-          this.showSnackBar('SATELLITE.SERVICES.WAIT_OPERATION');
+        if (result.data && result.data.ServiceCoreRequestService && result.data.ServiceCoreRequestService.accepted) {
+          this.showSnackBar('SATELLITE.SERVICES.REQUEST_SERVICE_SUCCESS');
         }
       },
       error => {
@@ -413,8 +414,11 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   }
 
   onSelectedService(service){
+    //this.selectedService = service;
     const marker = this.getMarkerFromArray(service._id)
-    this.onMarkerClick(marker, null);
+    if(marker){
+      this.onMarkerClick(marker, null);
+    }
   }
 
 
@@ -445,13 +449,46 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     });
     marker.setAnimation(google.maps.Animation.BOUNCE);
     marker.setAnimation(null);
+    this.selectedService = this.getServiceFromArray(marker.id);
+    marker.updateInfoWindowContent(this.buildServiceInfoWindowContent(this.selectedService));
     marker.infoWindow.open(this.map, marker);
+  }
+
+  /**
+   * get services from cache
+   */
+  getServiceFromArray(serviceId){
+    if(this.serviceList && this.serviceList.length > 0){
+      return this.serviceList.find(service => service._id == serviceId);
+    }
+    return null;
+  }
+
+  buildServiceInfoWindowContent(service){
+    console.log('buildServiceInfoWindowContent', service);
+
+    
+    const serviceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICE'); 
+    const licensePlateTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.LICENSE_PLATE');    
+    const serviceReferenceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.REFERENCE');  
+    
+    const serviceInfoWindowContent = `<html>
+      <body>
+          <div id="serviceInfoWindow">
+          <h2>${serviceTitle}</h2>
+          <p> <strong>${licensePlateTitle}: </strong>${service.vehicle.licensePlate}</p>
+          <p> <strong>${serviceReferenceTitle}: </strong>${service.pickUp.notes}</p>
+        </div>
+      </body>
+    </html>
+    `;
+    return serviceInfoWindowContent;
   }
 
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-      this.translationLoader.getTranslate().instant('SATELLITE.CLOSE'), {duration: 4000}
+      this.translationLoader.getTranslate().instant('SATELLITE.CLOSE'), {duration: 5000}
     );
   }
 
