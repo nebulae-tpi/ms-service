@@ -139,6 +139,7 @@ class ServiceES {
     handleServiceCancelledByDriver$({ aid, data }) {
         const { reason, notes, location } = data;
         return ServiceDA.setCancelState$(aid, 'CANCELLED_DRIVER', location, reason, notes);
+        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
     }
 
 
@@ -150,6 +151,7 @@ class ServiceES {
     handleServiceCancelledByClient$({ aid, data }) {
         const { reason, notes, location } = data;
         return ServiceDA.setCancelState$(aid, 'CANCELLED_CLIENT', location, reason, notes);
+        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
     }
 
     /**
@@ -160,6 +162,7 @@ class ServiceES {
     handleServiceCancelledByOperator$({ aid, data }) {
         const { reason, notes, location } = data;
         return ServiceDA.setCancelState$(aid, 'CANCELLED_OPERATOR', location, reason, notes);
+        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
     }
 
 

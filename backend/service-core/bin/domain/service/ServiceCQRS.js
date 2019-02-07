@@ -50,7 +50,7 @@ class ServiceCQRS {
    */
   acceptServiceOffer$({ root, args, jwt }, authToken) {
     const { serviceId, shiftId } = args;
-    const location = {
+    const location =  !args.location ? undefined : {
       type: "Point",
       coordinates: [args.location.lng, args.location.lat]
     }
