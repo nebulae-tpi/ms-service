@@ -50,6 +50,7 @@
     {
         "name": "satellite",
         "src": "frontend/emi/satellite",
+        "assets" :"frontend/emi/assets/satellite",
         "groups": [
             {
               "id": "SATELLITE",
@@ -74,7 +75,7 @@
                 "path": "satellite",
                 "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
                 "priority": 1000,
-                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"],
+                "roles" : ["SATELLITE", "OPERATOR"],
                 "default" : false
             }            
         ],

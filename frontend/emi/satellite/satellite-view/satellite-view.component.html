@@ -82,7 +82,10 @@
               fxLayout="row wrap"
               fxLayoutAlign="space-between center"
               fxFlex="100">
-            <div fxFlex="100" class="h1 secondary-text">{{'SATELLITE.REQUEST_VEHICLE_TITLE' | translate}}</div>
+            <div fxFlex="100" class="mat-title h1 secondary-text" style="text-align: center">
+              {{'SATELLITE.REQUEST_VEHICLE_TITLE' | translate}}
+              <mat-divider></mat-divider>
+            </div>
 
             <div fxFlex="100">                    
                 <div fxLayout="column" fxLayoutAlign="space-between center" >                      
@@ -107,26 +110,123 @@
 
 
 
-          <mat-divider fxFlex="100"></mat-divider>
-          <div fxFlex="100" class="mt-12 h3 secondary-text">{{'SATELLITE.FEATURES' | translate}}</div>
-          
-          <div fxFlex="100" formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
-            <div fxFlex="100" [formGroupName]="i">
-                <mat-checkbox fxFlex="100" class="example-margin"  [formControlName]="'active'">
-                    {{ 'SATELLITE.FEATURES_LIST.' + feature.get('name').value | translate }}
-                </mat-checkbox>
+
+
+
+
+
+
+          <div
+          fxLayout="row wrap"
+          fxLayoutAlign="space-between center"
+          fxFlex="100">
+            <div fxFlex="100" class="mt-20 mb-8 h2">
+              <mat-divider></mat-divider>
+              {{'SATELLITE.OTHERS' | translate}}
+              <mat-divider></mat-divider>
+            </div>
+
+            <div fxFlex="100">  
+                <div fxLayout="column" fxLayoutAlign="center start">                                     
+
+                    <mat-form-field>
+                        <mat-select placeholder="{{'SATELLITE.PAYMENT_TYPE' | translate}}" formControlName="paymentType">
+                          <mat-option *ngFor="let paymentType of paymentTypes" [value]="paymentType">
+                              {{ "SATELLITE.SERVICES.PAYMENT_TYPES."+paymentType | translate}}
+                          </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <input
+                          matInput
+                          class="mt-4"
+                          placeholder="{{'SATELLITE.REFERENCE' | translate}}"
+                          formControlName="notes"
+                          id="notes"
+                          maxlength="20"/>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <input
+                          matInput
+                          type="number"
+                          class="mt-4"
+                          placeholder="{{'SATELLITE.TIP' | translate}}"
+                          formControlName="tip"
+                          id="tip"
+                          maxlength="20"/>
+                          <mat-error *ngIf="requestForm.hasError('min', ['tip']) || requestForm.hasError('max', ['tip'])">
+                              {{'SATELLITE.SERVICES.MIN_MAX_TIP' | translate}}
+                          </mat-error>
+                    </mat-form-field>
+                  
+                </div>
+                
+
+                    
+
+
+            
             </div>
           </div>
 
-          <mat-divider></mat-divider>
-          <mat-form-field>
-              <input
-                matInput
-                placeholder="{{'SATELLITE.REFERENCE' | translate}}"
-                formControlName="notes"
-                id="notes"
-                maxlength="20"/>
-          </mat-form-field>
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
+
+
+
+          <div
+          fxLayout="row wrap"
+          fxLayoutAlign="space-between center"
+          fxFlex="100">
+            <div fxFlex="100" class="mt-20 h2">
+              <mat-divider></mat-divider>
+              {{'SATELLITE.FEATURES' | translate}}
+              <mat-divider></mat-divider>
+            </div>
+
+            <div fxFlex="100">  
+                <div fxLayout="column" fxLayoutAlign="center start">                   
+                  <mat-divider fxFlex="100"></mat-divider>
+                  <div fxFlex="100" formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
+                    <div fxFlex="100" class="ml-12" [formGroupName]="i" fxLayoutAlign="start start" >
+                        <mat-checkbox fxFlex="100" [formControlName]="'active'">
+                            {{ 'SATELLITE.FEATURES_LIST.' + feature.get('name').value | translate }}
+                        </mat-checkbox>
+                    </div>
+                  </div>
+                </div> 
+            
+            </div>
+          </div>
+
+
+
+          
+          <!-- <div fxFlex="100" class="mt-12 h3 secondary-text">{{'SATELLITE.FEATURES' | translate}}</div>
+          
+          <div fxFlex="100" formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
+            <div fxFlex="100" [formGroupName]="i" fxLayoutAlign="start start">
+                <mat-checkbox fxFlex="100" [formControlName]="'active'">
+                    {{ 'SATELLITE.FEATURES_LIST.' + feature.get('name').value | translate }}
+                </mat-checkbox>
+            </div>
+          </div> -->
+
+
 
               
           </div>
@@ -134,18 +234,12 @@
             </form>
   
             <div class="p-24">
-              <button
-                fxFlex
-                mat-raised-button
-                mat-button
-                class="mat-accent compose-dialog-button"
-                aria-label="Request taxi"
-                (click)="reuqestTaxi()"
-              >
+              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" [disabled]="requestForm.invalid"
+                aria-label="Request taxi" (click)="requestService()">
                 {{ "SATELLITE.REQUEST_TAXI" | translate }}
               </button>
             </div>
-          </div>
+            </div>
 
 
 
@@ -159,12 +253,11 @@
         
       <!-- CONTENT HEADER -->
       <div fxLayout="row" fxLayoutAlign="space-between center">
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center">
+        
+        <div style="position: absolute; top: 60px; left: 10px; z-index: 99;">
           <button
-            mat-button
-            class="mat-icon-button sidenav-toggle"
+            mat-fab 
+            class="sidenav-toggle"
             fuseMatSidenavToggler="carded-left-sidenav"
             
             aria-label="Toggle Sidenav">
@@ -186,4 +279,4 @@
     <!-- / CENTER -->
   </mat-sidenav-container>
 </div>
-<satellite-service-list [serviceList]="serviceList"></satellite-service-list>
+<satellite-service-list [serviceList]="serviceList" (selectedServiceChange)="onSelectedService($event)"></satellite-service-list>

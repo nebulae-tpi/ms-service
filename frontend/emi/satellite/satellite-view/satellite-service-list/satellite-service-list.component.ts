@@ -1,3 +1,4 @@
+import { EventEmitter } from '@angular/core';
 
 ////////// ANGULAR //////////
 import {
@@ -8,7 +9,8 @@ import {
   ElementRef,
   HostBinding, 
   Renderer2,
-  Input
+  Input,
+  Output
 } from "@angular/core";
 
 import {
@@ -79,6 +81,8 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   @Input('serviceList') serviceList: any = [];
 
+  @Output() selectedServiceChange = new EventEmitter();
+
   @ViewChild('openButton') openButton;
   @ViewChild('panel') panel;
   @ViewChild('overlay') overlay: ElementRef;
@@ -115,7 +119,8 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   closeBar()
   {
-    console.log('closeBar ');
+    if(!this.barClosed){
+      console.log('closeBar ');
       this.player =
           this.animationBuilder
               .build([
@@ -128,25 +133,33 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
       this.player.onDone(() => {
           this.barClosed = true;
       });
+    }
   }
   
   openBar()
   {
-    console.log('openBar ');
-    this.barClosed = false;
+    if(this.barClosed){    
+      console.log('openBar ');
+      this.barClosed = false;
 
-    this.player =
-        this.animationBuilder
-            .build([
-                style({transform: 'translate3d(100%,0,0)'}),
-                animate('400ms ease', style({transform: 'translate3d(0,0,0)'}))
-            ]).create(this.panel.nativeElement);
+      this.player =
+          this.animationBuilder
+              .build([
+                  style({transform: 'translate3d(100%,0,0)'}),
+                  animate('400ms ease', style({transform: 'translate3d(0,0,0)'}))
+              ]).create(this.panel.nativeElement);
 
-    this.player.play();
+      this.player.play();
+    }
   }
 
+  /**
+   * Set the selected service
+   * @param service 
+   */
   selectService(service){
     console.log('Selected service => ', service);
+    this.selectedServiceChange.emit(service);
   }
 
   showSnackBar(message) {
