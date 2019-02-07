@@ -180,6 +180,7 @@ class EventStoreService {
       { aggregateType: "Driver", eventType: "DriverBlockRemoved" },
       { aggregateType: "Driver", eventType: "DriverBlockAdded" },
       //SERVICE
+      { aggregateType: "Service", eventType: "ServiceRequested" },
       { aggregateType: "Service", eventType: "ServiceAssigned" },
       { aggregateType: "Service", eventType: "ServicePickUpETAReported" },
       { aggregateType: "Service", eventType: "ServiceLocationReported" },

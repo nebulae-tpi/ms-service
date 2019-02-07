@@ -27,7 +27,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ data }) {
-        return ServiceDA.insertService$(evt);
+        return ServiceDA.insertService$(data);
     }
 
 
