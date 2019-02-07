@@ -162,7 +162,10 @@ class ServiceDA {
         },
         "route.coordinates": location.coordinates
       }
-    }
+    };
+
+    console.log(JSON.stringify(find));
+    console.log(JSON.stringify(update));
 
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(

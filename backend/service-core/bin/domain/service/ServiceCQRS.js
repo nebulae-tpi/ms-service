@@ -49,7 +49,7 @@ class ServiceCQRS {
    */
   acceptServiceOffer$({ root, args, jwt }, authToken) {
     const { serviceId, shiftId } = args;
-    const location =  !args.location ? undefined : {
+    const location = !args.location ? undefined : {
       type: "Point",
       coordinates: [args.location.lng, args.location.lat]
     }
@@ -57,7 +57,7 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
-      mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state:1, driver:1, vehicle:1 })),
+      mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state: 1, driver: 1, vehicle: 1 })),
       first(shift => shift, undefined),
       tap(shift => { if (!shift) { throw ERROR_23101; }; }),//  invalid shift
       map(shift => ({
@@ -72,7 +72,7 @@ class ServiceCQRS {
           id: shift.driver.id
         },
       })),
-      mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location, _id: 0 })),
+      mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
       mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
         service._id,
@@ -334,18 +334,18 @@ class ServiceCQRS {
 
     pickUp = !pickUp ? undefined : {
       ...pickUp,
-      marker: pickUp.marker ? {type:"Point", coordinates:[pickUp.marker.lng,pickUp.marker.lat]} : {},
+      marker: pickUp.marker ? { type: "Point", coordinates: [pickUp.marker.lng, pickUp.marker.lat] } : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
     };
-    dropOff = !dropOff ? undefined :  {
+    dropOff = !dropOff ? undefined : {
       ...dropOff,
-      marker: dropOff.marker ? {type:"Point", coordinates:[dropOff.marker.lng,dropOff.marker.lat]} : {},
+      marker: dropOff.marker ? { type: "Point", coordinates: [dropOff.marker.lng, dropOff.marker.lat] } : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
     };
 
 
     const _id = Crosscutting.generateDateBasedUuid();
-    
+
     return new Event({
       aggregateType: 'Service',
       aggregateId: _id,
@@ -356,7 +356,7 @@ class ServiceCQRS {
         ...request,
         pickUp,
         dropOff,
-        client:{
+        client: {
           id: authToken.clientId,
           businessId: authToken.businessId,
           username: authToken.preferred_username,
