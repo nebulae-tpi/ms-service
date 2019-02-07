@@ -207,6 +207,8 @@ type ServiceShiftDriver {
   blocks: [String]
   "Driver Document Type"
   documentType: String
+  "Driver document id"
+  documentId: String
   "Driver PMR state"
   pmr: Boolean
   "Driver Languages"

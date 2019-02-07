@@ -2,8 +2,8 @@
 
 
 const uuidv4 = require("uuid/v4");
-const { of, interval, forkJoin, iif } = require("rxjs");
-const { mapTo, mergeMap, catchError, map, mergeMapTo, tap } = require('rxjs/operators');
+const { of, interval, forkJoin, } = require("rxjs");
+const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first } = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
 const { Event } = require("@nebulae/event-store");

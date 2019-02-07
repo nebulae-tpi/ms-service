@@ -175,7 +175,8 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
 
     this.stateChangesPaginator.page
     .pipe(
-      startWith({pagination: {page: 0, count: 10, sort: -1}}),
+      startWith({pageIndex: 1, pageSize: 10}),
+      map(p => ({pagination: {page: p.pageIndex, count: p.pageSize , sort: -1}})),
       takeUntil(this.ngUnsubscribe),
       // query here
       mergeMap(pagination => forkJoin(
@@ -192,7 +193,8 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
 
     this.conectDisconectPaginator.page
     .pipe(
-      startWith({pagination: {page: 0, count: 10, sort: -1}}),
+      startWith({pageIndex: 1, pageSize: 10}),
+      map(p => ({pagination: {page: p.pageIndex, count: p.pageSize , sort: -1}})),
       takeUntil(this.ngUnsubscribe),
       // query here
       mergeMap(pagination => forkJoin(

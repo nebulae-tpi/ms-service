@@ -20,6 +20,7 @@ export const ServiceShift = gql`
         fullname
         blocks
         documentType
+        documentId
         pmr
         languages
         phone
@@ -56,6 +57,7 @@ export const ServiceShifts = gql`
         fullname
         blocks
         documentType
+        documentId
         pmr
         languages
         phone
