@@ -107,16 +107,6 @@ class ShiftDA {
 
 
   static getShiftListSize$(filter) {
-    // const collection = mongoDB.db.collection(COLLECTION_NAME);
-    // const query = {};
-    // if (filter.businessId) { query.businessId = filter.businessId;}
-    // if (filter.name) { query["generalInfo.name"] = { $regex: filter.name, $options: "i" }; }
-    // if (filter.creationTimestamp) { query.creationTimestamp = filter.creationTimestamp; }
-    // if (filter.creatorUser) { query.creatorUser = { $regex: filter.creatorUser, $options: "i" }; }
-    // if (filter.modifierUser) { query.modifierUser = { $regex: filter.modifierUser, $options: "i" };}
-    // return collection.count(query);
-
-
     console.log('::::::::::::: getShiftListSize ', filter);
     const query = {};
 
