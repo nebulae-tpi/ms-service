@@ -87,7 +87,7 @@ export class ShiftVehicleInfoComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    console.log(this.shift);
+    console.log('VEHICLE ==> ', this.shift.vehicle);
     this.shiftVehicleInfoForm = new FormGroup({
       id: new FormControl(this.shift ? (this.shift.vehicle || {}).id : ''),
       brand: new FormControl(this.shift ? (this.shift.vehicle || {}).brand : ''),

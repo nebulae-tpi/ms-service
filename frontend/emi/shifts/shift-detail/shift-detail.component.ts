@@ -93,7 +93,7 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadShift();
-    this.subscribeServiceUpdated();
+    // this.subscribeServiceUpdated();
   }
 
   loadShift(){
@@ -102,28 +102,28 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
       map(params => params['id']),
       mergeMap(shiftId => shiftId !== 'new'
         ? this.shiftDetailService.getShiftDetails$(shiftId).
-          pipe(map(res => res.data.ServiceService))
+          pipe(map(res => res.data.ServiceShift))
         : of(null)
       ),
       takeUntil(this.ngUnsubscribe),
 
-      // REMOVE
-      map(() => this.SHIFT_TEST),
+      // // REMOVE
+      // map(() => this.SHIFT_TEST),
 
       tap(shift => this.shift = shift )
     )
     .subscribe(() => {}, e => console.log(e));
   }
 
-  subscribeServiceUpdated(){
-    this.shiftDetailService.subscribeServiceServiceUpdatedSubscription$()
-    .pipe(
-      map(subscription => subscription.data.ServiceServiceUpdatedSubscription),
-      takeUntil(this.ngUnsubscribe),
-      tap(shift => this.shift = shift)
-    )
-    .subscribe(() => {}, e => console.log(e), () => {} );
-  }
+  // subscribeServiceUpdated(){
+  //   this.shiftDetailService.subscribeServiceServiceUpdatedSubscription$()
+  //   .pipe(
+  //     map(subscription => subscription.data.ServiceServiceUpdatedSubscription),
+  //     takeUntil(this.ngUnsubscribe),
+  //     tap(shift => this.shift = shift)
+  //   )
+  //   .subscribe(() => {}, e => console.log(e), () => {} );
+  // }
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),

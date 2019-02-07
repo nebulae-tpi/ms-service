@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, of } from "rxjs";
 import {
-  startWith, mergeMap, map, filter, tap
+  startWith, mergeMap, map, filter, tap,
 } from "rxjs/operators";
 import { GatewayService } from '../../../../../api/gateway.service';
 import {
   ServiceServicesSatellite,
-  ServiceClientSatellite
+  ServiceClientSatellite,
+  ServiceCoreCancelService
 } from '../../gql/satellite';
 import * as moment from "moment";
 
@@ -68,7 +69,23 @@ export class SatelliteServiceListService {
     });
   }
 
-
+  /**
+   * Cancel a service
+   * @param serviceCoreCancelService 
+   */
+  cancelServiceCoreCancelService$(serviceCoreCancelService: any) {
+    return this.gateway.apollo
+    .mutate<any>({
+      mutation: ServiceCoreCancelService,
+      variables: {
+        id: serviceCoreCancelService.id, 
+        reason: serviceCoreCancelService.reason, 
+        authorType: serviceCoreCancelService.authorType, 
+        notes: serviceCoreCancelService.notes
+      },
+      errorPolicy: 'all'
+    });
+  }
 
 
   private notify() {

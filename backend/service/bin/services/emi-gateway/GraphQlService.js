@@ -1,6 +1,7 @@
 "use strict";
 
 const { DriverCQRS } = require("../../domain/driver");
+const { ShiftCQRS } = require("../../domain/shift");
 const { ServiceCQRS } = require("../../domain/service");
 const { ClientCQRS } = require("../../domain/client");
 const broker = require("../../tools/broker/BrokerFactory")();
@@ -192,7 +193,37 @@ class GraphQlService {
       {
         aggregateType: "Client",
         messageType: "emigateway.graphql.query.ServiceClientSatellite"
-      }
+      },
+      // SHIFTs
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.serviceShifts"
+      },
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.serviceShift"
+      },
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.serviceShiftsSize"
+      },
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.serviceShiftStateChangesList"
+      },
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.serviceShiftStateChangesListSize"
+      },
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.serviceShiftOnlineChangesList"
+      },
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.serviceShiftOnlineChangesListSize"
+      },
+
     ];
   }
 
@@ -248,7 +279,37 @@ class GraphQlService {
       "emigateway.graphql.query.ServiceClientSatellite": {
         fn: ClientCQRS.getClientSatellite$,
         obj: ClientCQRS
-      },              
+      },        
+      // SHIFTS
+      "emigateway.graphql.query.serviceShifts": {
+        fn: ShiftCQRS.getShiftList$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.query.serviceShift": {
+        fn: ShiftCQRS.getShift$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.query.serviceShiftsSize": {
+        fn: ShiftCQRS.getShiftListSize$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.query.serviceShiftStateChangesList": {
+        fn: ShiftCQRS.getShiftStateChangesList$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.query.serviceShiftStateChangesListSize": {
+        fn: ShiftCQRS.getShiftStateChangesListSize$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.query.serviceShiftOnlineChangesList": {
+        fn: ShiftCQRS.getShiftOnlineChangesList$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.query.serviceShiftOnlineChangesListSize": {
+        fn: ShiftCQRS.getShiftOnlineChangesListSize$,
+        obj: ShiftCQRS
+      }
+
     };
   }
 }

@@ -3,7 +3,7 @@
 const {of} = require("rxjs");
 const { tap, mergeMap, catchError, map, mapTo } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
-const ClientDA = require('./data-access/ClientDA');
+const ClientDA = require('./data-access/ShiftDA');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 
 /**
@@ -16,14 +16,15 @@ class ClientES {
     constructor() {
     }
 
+
     /**
      * Handles client satellite enbaled event
      * @param {*} clientSatelliteEnabled 
      */
     handleClientSatelliteEnabled$(clientSatelliteEnabled){
-        return of(clientSatelliteEnabled)
+        return of(clientSatelliteEnabled.data)
         .pipe(
-            mergeMap(clientSatelliteEnabled => ClientDA.updateClientSatellite$(clientSatelliteEnabled.aid, clientSatelliteEnabled.data) )
+            mergeMap(data => ClientDA.updateClientSatellite$(data.aid, data) )
         )
     }
 

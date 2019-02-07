@@ -32,7 +32,7 @@ import {
   take
 } from "rxjs/operators";
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from "rxjs";
+import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest, range } from "rxjs";
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -57,7 +57,7 @@ import { FuseTranslationLoaderService } from "../../../../core/services/translat
 ////////// GOOGLE MAP ///////////
 
 import { MapRef } from './map-entities/agmMapRef';
-import { MarkerRef, VehiclePoint, MARKER_REF_ORIGINAL_INFO_WINDOW_CONTENT } from './map-entities/markerRef';
+import { MarkerRef, MARKER_REF_ORIGINAL_INFO_WINDOW_CONTENT, Point } from './map-entities/markerRef';
 
 ///////// DATEPICKER //////////
 import * as moment from "moment";
@@ -78,6 +78,8 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   //Subject to unsubscribe 
   private ngUnsubscribe = new Subject();
 
+  private serviceMarkerUpdater = new Subject();
+
   @ViewChild('gmap') gmapElement: any;
 
   map: MapRef;
@@ -85,7 +87,13 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   markers: MarkerRef[] = [];
   selectedMarker: MarkerRef;
   features = ['AC', 'TRUNK', 'ROOF_RACK', 'PETS', 'BIKE_RACK' ];
+  paymentTypes = ['CASH', 'CREDIT_CARD'];
 
+  isOperator = false;
+  isSatellite = false;
+
+  clientMarker: MarkerRef = null;
+  clientData = null;
   serviceList = [];
 
 
@@ -111,8 +119,42 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initMap(); // initialize the map element
     this.buildRequestTaxiForm(); 
-    this.loadServiceSatelliteList();
+    this.loadServiceClientSatellite();
+    this.loadAliveServicesList();   
+    this.initMarkerUpdater();
+    this.subscribeServiceServiceUpdated();
   }
+
+  initMarkerUpdater(){
+    this.serviceMarkerUpdater.pipe(
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe((service: any) => {
+      
+      if(service){
+        const marker = this.getMarkerFromArray(service._id);
+        if(marker){
+          // Check if the new info is is more up to date
+          if(marker.lastModificationTimestamp < service.lastModificationTimestamp){
+            marker.sendNewLocation({lat: service.location.lat, lng: service.location.lng});
+          }          
+        }else{
+          this.createServiceMarker(service);
+        }
+      }
+    });
+  }
+
+
+
+  /**
+   * Indicates if the marker indicated exists in the array of markers
+   * @param markerId marker id
+   */
+  getMarkerFromArray(markerId){
+    const markersFiltered = this.markers.find(marker => marker.id == markerId);
+    return markersFiltered;
+  }
+  
 
   initMap() {
     this.map = new MapRef(this.gmapElement.nativeElement, {
@@ -129,8 +171,10 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     // Reactive Filter Form
     this.requestForm = new FormGroup({
       taxisNumber: new FormControl(1),
+      paymentType: new FormControl('CASH', [Validators.required]),
       notes: new FormControl(''),
-      features : new FormArray([])
+      features : new FormArray([]),
+      tip: new FormControl(null, [Validators.max(100000), Validators.min(500)])
     });
 
     this.features.forEach(featureKey => {
@@ -146,32 +190,120 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     });
   }
 
-/**
-   * Loads the client satellite data
+  /**
+   * Loads the services that are alive
    */
-  loadServiceClientSatellite(){
+  loadAliveServicesList(){
     this.getServiceList$()
     .pipe(
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(services => {
-      this.serviceList = services
-      console.log('loadServiceSatelliteList => ', this.serviceList);
+      this.serviceList = services;
+
+      if(this.serviceList && this.serviceList.length > 0){
+        this.serviceList.forEach(service => {
+          this.createServiceMarker(service);
+        })
+      }
+      console.log('loadServiceSatelliteList  => ', this.serviceList);
     });
   }
 
+
+
   /**
-   * Loads the services request by the Satellite client
+   * Loads the client satellite data
    */
-  loadServiceSatelliteList(){
-    this.getServiceList$()
+  loadServiceClientSatellite(){
+    this.checkRoles$()
     .pipe(
+      filter(roles => roles.some(role => role === 'SATELLITE')),
+      mergeMap(() => this.getServiceClientSatellite$()),
       takeUntil(this.ngUnsubscribe)
-    )
-    .subscribe(services => {
-      this.serviceList = services
-      console.log('loadServiceSatelliteList => ', this.serviceList);
+    ).subscribe(client => {
+      if(client){
+        this.clientData = client
+        console.log('loadServiceClientSatellite => ', this.clientData);
+
+        if(!this.clientData.location || !this.clientData.location.lat || !this.clientData.location.lng){
+          this.showSnackBar('SATELLITE.SERVICES.CLIENT_LOCATION_MISSING');
+        }else{
+          this.createPickUpMarker(client._id, this.clientData.location.lat, this.clientData.location.lng);     
+        }        
+      }else {
+        console.log('Error => Not client data');
+      }
     });
+  }
+
+  createPickUpMarker(id, lat, lng){
+    const pickUpMarker = new MarkerRef(
+      id,
+      new Point({coordinates: {lat: lat, lng: lng}}),
+      {
+        position: {
+          lat: parseFloat(lat),
+          lng: parseFloat(lng)
+        }, 
+        map: this.map,
+        draggable: true
+      }
+    );
+    this.clientMarker = pickUpMarker;
+    this.clientMarker.updateIcon("./assets/satellite/icono-sucursal.svg");
+    this.addMarkerToMap(pickUpMarker);
+  }
+
+  createServiceMarker(service){
+    if(!service || !service.location){
+      return;
+    }
+    const serviceMarker = new MarkerRef(
+      service._id,
+      new Point({coordinates: {lat: service.location.lat, lng: service.location.lng}}),
+      {
+        position: {
+          lat: parseFloat(service.location.lat),
+          lng: parseFloat(service.location.lng)
+        }, 
+        map: this.map,
+        draggable: false
+      }
+    );
+
+    const iconUrl = this.getServiceMarkerIcon(service);
+    serviceMarker.updateIcon(iconUrl);
+
+    this.markers.push(serviceMarker);
+    this.addMarkerToMap(serviceMarker);
+  }
+
+  getServiceMarkerIcon(service){
+    let iconUrl = null;
+    switch(service.state){
+      case 'ASSIGNED':
+        iconUrl = './assets/satellite/marker_orange.png'
+        break;
+      case 'ARRIVED':
+        iconUrl = './assets/satellite/marker_blue.png'
+        break;
+      case 'ON_BOARD':
+        iconUrl = './assets/satellite/marker_gray.png'
+        break;
+      case 'CANCELLED_CLIENT':
+        iconUrl = './assets/satellite/marker_red.png'
+        break;
+      case 'CANCELLED_DRIVER':
+        iconUrl = './assets/satellite/marker_red.png'
+        break;
+      case 'DONE':
+        iconUrl = './assets/satellite/marker_green.png'
+        break;
+      default:
+        iconUrl = '';
+    }
+    return iconUrl;
   }
 
   /**
@@ -184,7 +316,138 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
       map(resp => resp.data.ServiceServicesSatellite)
     );
   }
-  
+
+  /**
+   * Gets the service client data
+   */
+  getServiceClientSatellite$(){
+    return this.satelliteViewService.getServiceClientSatellite$()
+    .pipe(
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      map(resp => resp.data.ServiceClientSatellite)
+    );
+  }
+
+  subscribeServiceServiceUpdated(){
+    this.satelliteViewService.subscribeServiceServiceUpdatedSubscription$()
+    .pipe(
+      map(subscription => subscription.data.ServiceServiceUpdatedSubscription),
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe((service: any) => {
+      this.serviceMarkerUpdater.next(service);
+    })
+  }
+
+
+  /**
+   * Send a request service to the server
+   */
+  requestService(){
+    const requestServiceForm = this.requestForm.getRawValue();
+
+    return range(1, requestServiceForm.taxisNumber || 1)
+    .pipe(
+      map(requestNumber => {
+        console.log('Client marker position => ', this.clientMarker.getPosition());
+        const features = requestServiceForm.features.filter(feature => feature.active).map(feature => feature.name);
+
+        return {
+          client: {
+            fullname: this.clientData.generalInfo.name,
+            tip: 0,
+            tipType: '' 
+          },
+          pickUp: {
+            marker: {
+              lat: this.clientMarker.getPosition().lat(),
+              lng: this.clientMarker.getPosition().lng(),
+              // lat: this.clientData.location.lat,clientMarker
+              // lng: this.clientData.location.lng,
+            }, 
+            polygon: null, 
+            city: this.clientData.generalInfo.city,
+            zone: this.clientData.generalInfo.zone,
+            neighborhood: this.clientData.generalInfo.neighborhood,
+            addressLine1: this.clientData.generalInfo.address,
+            addressLine2: '',
+            notes: requestServiceForm.reference
+          },          
+          paymentType: requestServiceForm.paymentType, // ?
+          requestedFeatures: features,
+          dropOff: null,
+          fareDiscount: null, 
+          fare: null, 
+          tip: 0, 
+        };
+      }),
+      mergeMap(serviceCoreRequest=> this.satelliteViewService.createServiceCoreRequestService$(serviceCoreRequest)),
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe(
+      (result: any) => {
+        if (result.accepted) {
+          this.showSnackBar('SATELLITE.SERVICES.WAIT_OPERATION');
+        }
+      },
+      error => {
+        this.showSnackBar('SATELLITE.ERROR_OPERATION');
+        console.log('Error ==> ', error);
+      }
+    );
+  }
+
+
+
+  /**
+   * Checks if the logged user has role OPERATOR
+   */
+  checkRoles$() {
+    return of(this.keycloakService.getUserRoles(true))
+    .pipe(
+      tap(userRoles => {
+        this.isOperator = userRoles.some(role => role === 'OPERATOR');
+        this.isSatellite = userRoles.some(role => role === 'SATELLITE');
+      })
+    )
+  }
+
+  onSelectedService(service){
+    const marker = this.getMarkerFromArray(service._id)
+    this.onMarkerClick(marker, null);
+  }
+
+
+   /**
+   * Adds a marker to the map and configure observables to listen to the events associated with the marker (Click, etc)
+   * @param marker marker to be added
+   */
+  addMarkerToMap(marker: MarkerRef) {
+    marker.inizialiteEvents();
+    marker.clickEvent.subscribe(event => {
+      this.onMarkerClick(marker, event);
+    });
+  }
+
+    /**
+   * Opens the infoWindow of the clicked marker and closes the other infoWindows in case that these were open.
+   * @param marker clicked marker
+   * @param event Event
+   */
+  onMarkerClick(marker: MarkerRef, event) {
+
+    console.log('onMarkerClick ', marker);
+
+    this.selectedMarker = marker;
+    this.markers.forEach(m => {
+      m.infoWindow.close();
+      m.setAnimation(null);
+    });
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    marker.setAnimation(null);
+    marker.infoWindow.open(this.map, marker);
+  }
+
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
@@ -250,6 +513,12 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   }
   
   ngOnDestroy() {
+    if(this.markers){
+      this.markers.forEach(marker => {
+        marker.destroy();
+      })
+    }
+    this.serviceMarkerUpdater.complete();
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }

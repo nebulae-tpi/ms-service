@@ -6,7 +6,10 @@ import {
 import { GatewayService } from '../../../../api/gateway.service';
 import {
   ServiceServicesSatellite,
-  ServiceClientSatellite
+  ServiceClientSatellite,
+  ServiceCoreRequestService,
+  ServiceCoreCancelService,
+  ServiceServiceUpdatedSubscription
 } from '../gql/satellite';
 import * as moment from "moment";
 @Injectable()
@@ -64,6 +67,39 @@ export class SatelliteViewService {
       variables: {},
       fetchPolicy: "network-only",
       errorPolicy: "all"
+    });
+  }
+
+  /**
+ * Event triggered when a business is created, updated or deleted.
+ */
+subscribeServiceServiceUpdatedSubscription$(): Observable<any> {
+  return this.gateway.apollo
+  .subscribe({
+    query: ServiceServiceUpdatedSubscription
+  });
+}
+
+
+  /**
+   * Send a request service to the server
+   * @param serviceCoreRequest 
+   */
+  createServiceCoreRequestService$(serviceCoreRequest: any) {
+    return this.gateway.apollo
+    .mutate<any>({
+      mutation: ServiceCoreRequestService,
+      variables: {
+        client: serviceCoreRequest.client,
+        pickUp: serviceCoreRequest.pickUp,
+        paymentType: serviceCoreRequest.paymentType,
+        requestedFeatures: serviceCoreRequest.requestedFeatures,
+        dropOff: serviceCoreRequest.dropOff,
+        fareDiscount: serviceCoreRequest.fareDiscount,
+        fare: serviceCoreRequest.fare,
+        tip: serviceCoreRequest.tip,
+      },
+      errorPolicy: 'all'
     });
   }
 

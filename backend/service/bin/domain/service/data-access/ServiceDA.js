@@ -46,12 +46,24 @@ class ServiceDA {
   /**
    * get services from the satellite
    */
-  static getServiceSatelliteList$() {
-    const projection = {dropOff: 0, route: 0};
+  static getServiceSatelliteList$(businessId, clientId) {
+    const projection = {};
 
-    const states = ['REQUEST', 'ASSIGNED', 'ARRIVED'];    
-    const query = {};
-    query["state"] = { $in: states};    
+    // const states = ['REQUEST', 'ASSIGNED', 'ARRIVED'];
+    // query["state"] = { $in: states};        
+    const query = {
+      closed: false
+    };    
+
+    if (businessId) {
+      query.businessId = businessId;
+    }
+
+    if (clientId) {
+      query["client.id"] = clientId;
+    }
+
+    console.log('getServiceSatelliteList => ', query);
 
     const explorePastMonth = Date.today().getDate() <= 2;
 

@@ -12,6 +12,7 @@ const mongoDB = require('./data/MongoDB').singleton();
 const DriverDA = require('./data/DriverDA');
 const VehicleDA = require('./data/VehicleDA');
 const ServiceDA = require('./domain/service/data-access/ServiceDA');
+const ClientDA = require('./domain/client/data-access/ClientDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
@@ -24,6 +25,7 @@ const start = () => {
         DriverDA.start$(),
         VehicleDA.start$(),
         ServiceDA.start$(),
+        ClientDA.start$(),
         graphQlService.start$()
     ).subscribe(
         (evt) => {

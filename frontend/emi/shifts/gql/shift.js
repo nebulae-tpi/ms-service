@@ -1,286 +1,116 @@
 import gql from "graphql-tag";
 
-// FRAGMENTS
-export const ServiceServiceFieldsFragment = gql`
-    fragment ServiceServiceFieldsFragment on ServiceService {
-      _id
-      businessId
-      shiftId
-      timestamp
-      requestedFeatures 
-      pickUp {
-        marker {
-          lat
-          lng
-          timestamp
-        }
-        polygon {
-          lat
-          lng
-          timestamp
-        }
-        city
-        zone
-        neighborhood
-        addressLine1
-        addressLine2
-        notes
-      }
-      dropOff {
-        marker {
-          lat
-          lng
-          timestamp
-        }
-        polygon {
-          lat
-          lng
-          timestamp
-        }
-        city
-        zone
-        neighborhood
-        addressLine1
-        addressLine2
-        notes
-      }
-      pickUpETA
-      dropOffETA
-      verificationCode
-      paymentType
-      fareDiscount
-      fare
-      state
-      stateChanges {
-        state
-        timestamp
-        location {
-          lat
-          lng
-          timestamp
-        }
-        notes
-      }
-      location {
-        lat
-        lng
-        timestamp
-      }      
-      vehicle {
-        licensePlate
-      }
-      driver {
-        documentId
-        fullname
-      }
-      client {
-        id
-        businessId
-        username
-        fullname
-        tip
-        tipType
-      }
-      tip      
-      route {
-        lat
-        lng
-        timestamp
-      }
-      lastModificationTimestamp      
-    }
-  `;
 
 // We use the gql tag to parse our query string into a query document
-export const ServiceService = gql`
-  query ServiceService($id: String!) {
-    ServiceService(id: $id) {
+export const ServiceShift = gql`
+  query ServiceShift($id: String!) {
+    ServiceShift(id: $id) {
       _id
       businessId
-      shiftId
       timestamp
-      requestedFeatures 
-      pickUp {
-        marker {
-          lat
-          lng
-          timestamp
-        }
-        polygon {
-          lat
-          lng
-          timestamp
-        }
-        city
-        zone
-        neighborhood
-        addressLine1
-        addressLine2
-        notes
-      }
-      dropOff {
-        marker {
-          lat
-          lng
-          timestamp
-        }
-        polygon {
-          lat
-          lng
-          timestamp
-        }
-        city
-        zone
-        neighborhood
-        addressLine1
-        addressLine2
-        notes
-      }
-      pickUpETA
-      dropOffETA
-      verificationCode
-      paymentType
-      fareDiscount
-      fare
       state
-      stateChanges {
-        state
-        timestamp
-        location {
-          lat
-          lng
-          timestamp
-        }
-        notes
-      }
+      online
+      lastReceivedComm
       location {
-        lat
-        lng
-        timestamp
-      }      
-      vehicle {
-        licensePlate
+        type
+        coordinates
       }
       driver {
-        documentId
-        fullname
-      }
-      client {
         id
-        businessId
-        username
         fullname
-        tip
-        tipType
+        blocks
+        documentType
+        pmr
+        languages
+        phone
+        username
       }
-      tip      
-      route {
-        lat
-        lng
-        timestamp
+      vehicle {
+        id
+        licensePlate
+        blocks
+        features
+        brand
+        line
+        model
       }
-      lastModificationTimestamp 
     }
   }
 `;
 
-export const ServiceServices = gql`
-  query ServiceServices($filterInput: ServiceServiceFilterInput!, $paginationInput: ServiceServicePaginationInput!) {
-    ServiceServices(filterInput: $filterInput, paginationInput: $paginationInput) {
+export const ServiceShifts = gql`
+  query ServiceShifts($filterInput: ServiceShiftFilterInput!, $paginationInput: ServiceShiftPaginationInput!) {
+    ServiceShifts(filterInput: $filterInput, paginationInput: $paginationInput) {
       _id
       businessId
-      shiftId
       timestamp
-      requestedFeatures 
-      pickUp {
-        marker {
-          lat
-          lng
-          timestamp
-        }
-        polygon {
-          lat
-          lng
-          timestamp
-        }
-        city
-        zone
-        neighborhood
-        addressLine1
-        addressLine2
-        notes
-      }
-      dropOff {
-        marker {
-          lat
-          lng
-          timestamp
-        }
-        polygon {
-          lat
-          lng
-          timestamp
-        }
-        city
-        zone
-        neighborhood
-        addressLine1
-        addressLine2
-        notes
-      }
-      pickUpETA
-      dropOffETA
-      verificationCode
-      paymentType
-      fareDiscount
-      fare
       state
-      stateChanges {
-        state
-        timestamp
-        location {
-          lat
-          lng
-          timestamp
-        }
-        notes
-      }
+      online
+      lastReceivedComm
       location {
-        lat
-        lng
-        timestamp
-      }      
-      vehicle {
-        licensePlate
+        type
+        coordinates
       }
       driver {
-        documentId
-        fullname
-      }
-      client {
         id
-        businessId
-        username
         fullname
-        tip
-        tipType
+        blocks
+        documentType
+        pmr
+        languages
+        phone
+        username
       }
-      tip      
-      route {
-        lat
-        lng
-        timestamp
+      vehicle {
+        id
+        licensePlate
+        blocks
+        features
+        brand
+        line
+        model
       }
-      lastModificationTimestamp 
     }
   }
 `;
 
-export const ServiceServicesSize = gql`
-  query ServiceServicesSize($filterInput: ServiceServiceFilterInput!) {
-    ServiceServicesSize(filterInput: $filterInput)
+export const ServiceShiftsSize = gql`
+  query ServiceShiftsSize($filterInput: ServiceShiftFilterInput!) {
+    ServiceShiftsSize(filterInput: $filterInput)
   }
 `;
+
+
+export const ServiceShiftStateChangesList = gql`
+  query ServiceShiftStateChangesList( $id: String!, $paginationInput: ServiceShiftPaginationInput!) {
+    ServiceShiftStateChangesList(id: $id, paginationInput: $paginationInput) {
+      state
+      timestamp
+    }
+  }
+`;
+
+export const ServiceShiftStateChangesListSize = gql`
+  query ServiceShiftStateChangesListSize($id: String!) {
+    ServiceShiftStateChangesListSize(id: $id)
+  }
+`;
+
+export const ServiceShiftOnlineChangesList = gql`
+  query ServiceShiftOnlineChangesList( $id:String! $paginationInput: ServiceShiftPaginationInput!) {
+    ServiceShiftOnlineChangesList(id: $id, paginationInput: $paginationInput) {
+      online
+      timestamp
+    }
+  }
+`;
+
+export const ServiceShiftOnlineChangesListSize = gql`
+  query ServiceShiftOnlineChangesListSize($id: String!) {
+    ServiceShiftOnlineChangesListSize(id: $id)
+  }
+`;
+
 
 // SUBSCRIPTION
 export const ServiceServiceUpdatedSubscription = gql`
@@ -290,7 +120,7 @@ export const ServiceServiceUpdatedSubscription = gql`
       businessId
       shiftId
       timestamp
-      requestedFeatures 
+      requestedFeatures
       pickUp {
         marker {
           lat
@@ -348,7 +178,7 @@ export const ServiceServiceUpdatedSubscription = gql`
         lat
         lng
         timestamp
-      }      
+      }
       vehicle {
         licensePlate
       }
@@ -364,13 +194,13 @@ export const ServiceServiceUpdatedSubscription = gql`
         tip
         tipType
       }
-      tip      
+      tip
       route {
         lat
         lng
         timestamp
       }
-      lastModificationTimestamp 
+      lastModificationTimestamp
     }
   }
 `;

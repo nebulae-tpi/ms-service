@@ -178,14 +178,15 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
       startWith({pagination: {page: 0, count: 10, sort: -1}}),
       takeUntil(this.ngUnsubscribe),
       // query here
-      map(() => ([
-        {state: 'AVAILABLE', timestamp: Date.now()},
-        {state: 'NOT_AVAILABLE', timestamp: Date.now()},
-        {state: 'BUSY', timestamp: Date.now()},
-        {state: 'BLOCKED', timestamp: Date.now()},
-        {state: 'CLOSED', timestamp: Date.now()},
-      ])),
-      tap(result => this.stateChangesDataSource.data = result)
+      mergeMap(pagination => forkJoin(
+        this.shiftDetailService.getStateChangesList$(this.shift._id, pagination).pipe(map(r => r.data.ServiceShiftStateChangesList )),
+        this.shiftDetailService.getStateChangesListSize$(this.shift._id).pipe(map(r => r.data.ServiceShiftStateChangesListSize ))
+      )),
+      tap(([stateChangesList, listSize]) => {
+        this.stateChangesTableSize = listSize;
+        this.stateChangesDataSource.data = stateChangesList;
+      }),
+      tap(r => console.log(r))
     )
     .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
 
@@ -194,17 +195,16 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
       startWith({pagination: {page: 0, count: 10, sort: -1}}),
       takeUntil(this.ngUnsubscribe),
       // query here
-      map(() => ([
-        {online: true, timestamp: Date.now()},
-        {online: false, timestamp: Date.now()},
-        {online: true, timestamp: Date.now()},
-        {online: false, timestamp: Date.now()},
-        {online: true, timestamp: Date.now()},
-        {online: false, timestamp: Date.now()},
-        {online: true, timestamp: Date.now()},
-        {online: false, timestamp: Date.now()},
-      ])),
-      tap(result => this.conectDisconectDataSource.data = result)
+      mergeMap(pagination => forkJoin(
+        this.shiftDetailService.getOnlineChangesList$(this.shift._id, pagination).pipe(map(r => r.data.ServiceShiftOnlineChangesList )),
+        this.shiftDetailService.getOnlineChangesListSize$(this.shift._id).pipe(map(r => r.data.ServiceShiftOnlineChangesListSize )),
+      )),
+      tap(([onlineChangesList, onlineChangesListSize])  => {
+        this.conectDisconectTableSize = onlineChangesListSize;
+        this.conectDisconectDataSource.data = onlineChangesList;
+      }),
+
+      tap(result => console.log(result) )
     )
     .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
 

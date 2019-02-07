@@ -63,15 +63,22 @@ class ServiceCQRS {
    * @param {*} args args
    */
   getServiceSatelliteList$({ args }, authToken) {
-    console.log('getServiceSatelliteList$ --*** ');
+    console.log('getServiceSatelliteList$ --*');
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
       "getServiceSatelliteList",
       PERMISSION_DENIED,
-      ["SATELLITE"]
+      ["OPERATOR","SATELLITE"]
     ).pipe(
-      mergeMap(roles => ServiceDA.getServiceSatelliteList$()),
+      mergeMap(roles => {
+        const isOperator = roles["OPERATOR"];
+        const isSatellite = roles["SATELLITE"];
+
+        const businessId = authToken.businessId || '-1';
+        const clientId = !isOperator && isSatellite ? (authToken.clientId || '-1'): null;
+        return ServiceDA.getServiceSatelliteList$(businessId, clientId);
+      }),
       toArray(),
       mergeMap(serviceList => {
         console.log('ServiceList => ', serviceList );
@@ -153,6 +160,8 @@ class ServiceCQRS {
      * @param Object service
      */
     formatServiceToGraphQLSchema(service) {
+
+      console.log('service.location => ', service.route);
       return {
         _id: service._id,
         businessId: service.businessId,
@@ -169,6 +178,7 @@ class ServiceCQRS {
         fareDiscount: service.fareDiscount,
         fare: service.fare,
         state: service.state,
+        location: this.buildCoordinate(service.location),
         stateChanges: this.buildStateChangesArray(service.stateChanges),
         vehicle: service.vehicle,
         driver: service.driver,
@@ -202,9 +212,13 @@ class ServiceCQRS {
         return null;
       }
       const routesArray = [];
-
+      console.log('routes => ',routes);
       routes.forEach(route => {
-        routesArray.push(this.buildCoordinate(route));
+        routesArray.push({
+          lat: route[1],
+          lng: route[0]
+        })
+
       });
       return routesArray;
     }
@@ -213,9 +227,10 @@ class ServiceCQRS {
       if(!location){
         return null;
       }
+
       return {
-        lat: location[0],
-        lng: location[1]
+        lat: location.coordinates[1],
+        lng: location.coordinates[0]
       }
     }
 
@@ -228,8 +243,8 @@ class ServiceCQRS {
   
       if(pointLocation.marker){
         marker = {
-          lat: pointLocation.marker.coordinates[0],
-          lng: pointLocation.marker.coordinates[1],
+          lat: pointLocation.marker.coordinates[1],
+          lng: pointLocation.marker.coordinates[0],
         };
       } 
   
@@ -237,8 +252,8 @@ class ServiceCQRS {
         polygon = [];
         pointLocation.polygon.coordinates[0].forEach(element => {
           polygon.push({
-            lat: element[0],
-            lng: element[1],
+            lat: element[1],
+            lng: element[0],
           });
         });
       } 

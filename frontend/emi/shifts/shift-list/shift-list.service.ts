@@ -5,8 +5,8 @@ import {
 } from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
 import {
-  ServiceServices,
-  ServiceServicesSize
+  ServiceShifts,
+  ServiceShiftsSize
 } from '../gql/shift';
 import * as moment from 'moment';
 
@@ -35,9 +35,9 @@ export class ShiftListService {
    * @param paginator Object that contains info about page number and amount of records to recover
    * @returns {Observable} Observable with the service list
    */
-  getserviceList$(filterInput, paginatorInput){
+  getShiftList$(filterInput, paginatorInput){
     return this.gateway.apollo.query<any>({
-      query: ServiceServices,
+      query: ServiceShifts,
       variables: {
         filterInput: filterInput,
         paginationInput: paginatorInput
@@ -52,9 +52,9 @@ export class ShiftListService {
    * @param filter Data to filter the list
    * @returns {Observable} Observable with the amount of service
    */
-  getserviceSize$(filterInput){
+  getShiftListSize$(filterInput){
     return this.gateway.apollo.query<any>({
-      query: ServiceServicesSize,
+      query: ServiceShiftsSize,
       variables: {
         filterInput: filterInput
       },
@@ -82,7 +82,6 @@ export class ShiftListService {
   }
 
   updateFilterData(filterData){
-    console.log('filterData -->> ', filterData);
     this._filterSubject$.next(filterData);
   }
 

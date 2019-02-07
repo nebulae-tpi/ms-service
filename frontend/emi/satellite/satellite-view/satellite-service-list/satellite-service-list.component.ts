@@ -1,3 +1,4 @@
+import { EventEmitter } from '@angular/core';
 
 ////////// ANGULAR //////////
 import {
@@ -8,7 +9,8 @@ import {
   ElementRef,
   HostBinding, 
   Renderer2,
-  Input
+  Input,
+  Output
 } from "@angular/core";
 
 import {
@@ -57,6 +59,7 @@ import {
 } from "@ngx-translate/core";
 import { locale as english } from "../../i18n/en";
 import { locale as spanish } from "../../i18n/es";
+import { FuseTranslationLoaderService } from "../../../../../core/services/translation-loader.service";
 
 ///////// DATEPICKER //////////
 import * as moment from "moment";
@@ -79,6 +82,8 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   @Input('serviceList') serviceList: any = [];
 
+  @Output() selectedServiceChange = new EventEmitter();
+
   @ViewChild('openButton') openButton;
   @ViewChild('panel') panel;
   @ViewChild('overlay') overlay: ElementRef;
@@ -95,6 +100,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private snackBar: MatSnackBar,
     private satelliteServiceListService: SatelliteServiceListService,
+    private translationLoader: FuseTranslationLoaderService,
     private router: Router,
     private activatedRouter: ActivatedRoute,
     private keycloakService: KeycloakService,
@@ -103,6 +109,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
     private animationBuilder: AnimationBuilder,
     private renderer: Renderer2
   ) {
+    this.translationLoader.loadTranslations(english, spanish);
   }
     
 
@@ -115,7 +122,8 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   closeBar()
   {
-    console.log('closeBar ');
+    if(!this.barClosed){
+      console.log('closeBar ');
       this.player =
           this.animationBuilder
               .build([
@@ -128,32 +136,70 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
       this.player.onDone(() => {
           this.barClosed = true;
       });
+    }
   }
   
   openBar()
   {
-    console.log('openBar ');
-    this.barClosed = false;
+    if(this.barClosed){    
+      console.log('openBar ');
+      this.barClosed = false;
 
-    this.player =
-        this.animationBuilder
-            .build([
-                style({transform: 'translate3d(100%,0,0)'}),
-                animate('400ms ease', style({transform: 'translate3d(0,0,0)'}))
-            ]).create(this.panel.nativeElement);
+      this.player =
+          this.animationBuilder
+              .build([
+                  style({transform: 'translate3d(100%,0,0)'}),
+                  animate('400ms ease', style({transform: 'translate3d(0,0,0)'}))
+              ]).create(this.panel.nativeElement);
 
-    this.player.play();
+      this.player.play();
+    }
   }
 
+  /**
+   * Set the selected service
+   * @param service 
+   */
   selectService(service){
     console.log('Selected service => ', service);
+    this.selectedServiceChange.emit(service);
+  }
+
+      /**
+   * cancel a service
+   * @param service 
+   */
+  cancelService(service){
+    return of(service)
+    .pipe(
+      map(service => {
+        return {
+          id: service._id, 
+          //reason: service.reason, 
+          authorType: service.authorType, 
+          //notes: service.notes
+        };
+      }),
+      mergeMap(serviceCoreCancelService => this.satelliteServiceListService.cancelServiceCoreCancelService$(serviceCoreCancelService)),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(
+      (result: any) => {
+        if (result.accepted) {
+          this.showSnackBar('SATELLITE.SERVICES.WAIT_OPERATION');
+        }
+      },
+      error => {
+        this.showSnackBar('SATELLITE.ERROR_OPERATION');
+        console.log('Error ==> ', error);
+      }
+    );    
   }
 
   showSnackBar(message) {
-    // this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-    //   this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
-    //     duration: 4000
-    //   });
+    this.snackBar.open(this.translationLoader.getTranslate().instant(message),
+      this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
+         duration: 4000
+    });
   }
 
   graphQlAlarmsErrorHandler$(response) {

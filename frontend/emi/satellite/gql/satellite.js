@@ -115,21 +115,112 @@ export const ServiceClientSatellite = gql`
   }
 `;
 
+// MUTATIONS 
+export const ServiceCoreRequestService = gql `
+  mutation ServiceCoreRequestService($client: ServiceCoreClientInput!, $pickUp: ServiceCoreLocationInput!, $paymentType: String!, $requestedFeatures: [String], $dropOff: ServiceCoreLocationInput, $fareDiscount: Float, $fare: BigInt, $tip: BigInt){
+    ServiceCoreRequestService(client: $client, pickUp: $pickUp, paymentType: $paymentType, requestedFeatures: $requestedFeatures, dropOff: $dropOff, fareDiscount: $fareDiscount, fare: $fare, tip: $tip){
+      accepted
+    }
+  }
+`;
+
+export const ServiceCoreCancelService = gql `
+  mutation ServiceCoreCancelService($id: String!, $reason: String!, $authorType: String!, $notes: String){
+    ServiceCoreCancelService(id: $id, reason: $reason, authorType: $authorType, notes: $notes){
+      accepted
+    }
+  }
+`;
 
 // SUBSCRIPTION
-export const ServiceDriverUpdatedSubscription = gql`
+export const ServiceServiceUpdatedSubscription = gql`
   subscription{
-    ServiceDriverUpdatedSubscription{
+    ServiceServiceUpdatedSubscription{
       _id
-      generalInfo {
-        name
-        description
+      businessId
+      shiftId
+      timestamp
+      requestedFeatures 
+      pickUp {
+        marker {
+          lat
+          lng
+          timestamp
+        }
+        polygon {
+          lat
+          lng
+          timestamp
+        }
+        city
+        zone
+        neighborhood
+        addressLine1
+        addressLine2
+        notes
       }
+      dropOff {
+        marker {
+          lat
+          lng
+          timestamp
+        }
+        polygon {
+          lat
+          lng
+          timestamp
+        }
+        city
+        zone
+        neighborhood
+        addressLine1
+        addressLine2
+        notes
+      }
+      pickUpETA
+      dropOffETA
+      verificationCode
+      paymentType
+      fareDiscount
+      fare
       state
-      creationTimestamp
-      creatorUser
-      modificationTimestamp
-      modifierUser
+      stateChanges {
+        state
+        timestamp
+        location {
+          lat
+          lng
+          timestamp
+        }
+        notes
+      }
+      location {
+        lat
+        lng
+        timestamp
+      }      
+      vehicle {
+        licensePlate
+      }
+      driver {
+        documentId
+        fullname
+      }
+      client {
+        id
+        businessId
+        username
+        fullname
+        tip
+        tipType
+      }
+      tip      
+      route {
+        lat
+        lng
+        timestamp
+      }
+      lastModificationTimestamp 
     }
   }
 `;
