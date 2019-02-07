@@ -331,12 +331,12 @@ class ServiceCQRS {
 
     let { requestedFeatures, fareDiscount, fare, pickUp, tip, dropOff } = request;
 
-    pickUp = {
+    pickUp = !pickUp ? undefined : {
       ...pickUp,
       marker: !pickUp.marker ? {type:"Point", coordinates:[pickUp.marker.lng,pickUp.marker.lat]} : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
     };
-    dropOff = {
+    dropOff = !dropOff ? undefined :  {
       ...dropOff,
       marker: !dropOff.marker ? {type:"Point", coordinates:[dropOff.marker.lng,dropOff.marker.lat]} : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
