@@ -45,7 +45,7 @@ class ServiceES {
             'ShiftStateChanged',
             { _id: shiftId, state: 'BUSY' }
         ))).pipe(
-            mapTo(` - Sent ServicePickUpETAReported for service._id=${_id}: ${JSON.stringify(data)}`)
+            mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
         );
         return skipPersist ? of({}).pipe(sendEvt$) : ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(sendEvt$);
     }
