@@ -162,16 +162,6 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
   }
 
   initPaginatorsListeners(){
-    // combineLatest(
-    //   this.stateChangesPaginator.page.pipe(startWith({pagination: {page: 0, count: 10, sort: -1}})),
-    //   this.conectDisconectPaginator.page.pipe(startWith({pagination: {page: 0, count: 10, sort: -1}}))
-    // )
-    // .pipe(
-    //   takeUntil(this.ngUnsubscribe),
-    //   map(() => ([])),
-    //   tap(r => console.log(r))
-    // )
-    //   .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
 
     this.stateChangesPaginator.page
     .pipe(
