@@ -12,7 +12,8 @@ import {
   FormBuilder,
   FormGroup,
   FormControl,
-  Validators
+  Validators,
+  FormArray
 } from '@angular/forms';
 
 import { Router, ActivatedRoute } from '@angular/router';
@@ -44,34 +45,31 @@ import {
 } from '@angular/material';
 
 //////////// i18n ////////////
-import {
-  TranslateService
-} from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { locale as english } from '../../i18n/en';
 import { locale as spanish } from '../../i18n/es';
 import { FuseTranslationLoaderService } from '../../../../../core/services/translation-loader.service';
 
 //////////// Others ////////////
 import { KeycloakService } from 'keycloak-angular';
-import { ServiceDetailService } from '../service-detail.service';
+import { ShiftDetailService } from '../shift-detail.service';
 import { DialogComponent } from '../../dialog/dialog.component';
-import { ToolbarService } from "../../../../toolbar/toolbar.service";
+import { ToolbarService } from '../../../../toolbar/toolbar.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
-  selector: 'service-general-info',
-  templateUrl: './service-general-info.component.html',
-  styleUrls: ['./service-general-info.component.scss']
+  selector: 'shift-driver-info',
+  templateUrl: './shift-driver-info.component.html',
+  styleUrls: ['./shift-driver-info.component.scss']
 })
 // tslint:disable-next-line:class-name
-export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
+export class ShiftDriverInfoComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
-  @Input('service') service: any;
+  @Input('shift') shift: any;
 
-  serviceGeneralInfoForm: any;
-  serviceStateForm: any;
+  shiftDriverInfoForm: any;
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -80,7 +78,7 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
     public snackBar: MatSnackBar,
     private router: Router,
     private activatedRouter: ActivatedRoute,
-    private ServiceDetailService: ServiceDetailService,
+    private shiftDetailService: ShiftDetailService,
     private dialog: MatDialog,
     private toolbarService: ToolbarService
   ) {
@@ -89,19 +87,23 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.serviceGeneralInfoForm = new FormGroup({
-      name: new FormControl(this.service ? (this.service.generalInfo || {}).name : ''),
-      description: new FormControl(this.service ? (this.service.generalInfo || {}).description : '')
-    });
-
-    this.serviceStateForm = new FormGroup({
-      state: new FormControl(this.service ? this.service.state : true)
+    console.log(this.shift);
+    this.shiftDriverInfoForm = new FormGroup({
+      id: new FormControl(this.shift ? (this.shift.driver || {}).id : ''),
+      fullName: new FormControl(this.shift ? (this.shift.driver || {}).fullname : ''),
+      docType: new FormControl(this.shift ? (this.shift.driver || {}).documentType : ''),
+      documentId: new FormControl(this.shift ? (this.shift.driver || {}).documentId : ''),
+      phone: new FormControl(this.shift ? (this.shift.driver || {}).phone : ''),
+      username: new FormControl(this.shift ? (this.shift.driver || {}).username : ''),
+      pmr: new FormControl(this.shift ? (this.shift.driver || {}).pmr : ''),
+      // blocks: new FormArray([]),
+      // languages: new FormArray([])
     });
   }
 
   showConfirmationDialog$(dialogMessage, dialogTitle) {
     return this.dialog
-      //Opens confirm dialog
+      // Opens confirm dialog
       .open(DialogComponent, {
         data: {
           dialogMessage,
@@ -146,8 +148,8 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
               this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
             });
           } else {
-            response.errors.forEach(error => {
-              this.showMessageSnackbar('ERRORS.' + error.message.code);
+            response.errors.forEach(err => {
+              this.showMessageSnackbar('ERRORS.' + err.message.code);
             });
           }
         });
@@ -161,7 +163,7 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
    * @param detailMessageKey Key of the detail message to i18n
    */
   showMessageSnackbar(messageKey, detailMessageKey?) {
-    let translationData = [];
+    const translationData = [];
     if (messageKey) {
       translationData.push(messageKey);
     }

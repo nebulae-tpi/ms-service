@@ -49,8 +49,6 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
-  pageType: string;
-
   service: any;
 
   constructor(
@@ -85,7 +83,6 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
     )
     .subscribe((service: any) => {
       this.service = service;
-      this.pageType = (service && service._id) ? 'edit' : 'new'
     }, e => console.log(e));
   }
   

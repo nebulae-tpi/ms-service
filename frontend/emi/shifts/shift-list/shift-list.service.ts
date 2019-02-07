@@ -7,11 +7,11 @@ import { GatewayService } from '../../../../api/gateway.service';
 import {
   ServiceServices,
   ServiceServicesSize
-} from '../gql/service';
+} from '../gql/shift';
 import * as moment from 'moment';
 
 @Injectable()
-export class ServiceListService {
+export class ShiftListService {
 
   private _filterSubject$ = new BehaviorSubject({
       initTimestamp: moment().startOf('month'),

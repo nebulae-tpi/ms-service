@@ -1,0 +1,62 @@
+<div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
+  <form name="shiftDriverInfoForm" [formGroup]="shiftDriverInfoForm" fxLayout="row wrap">
+
+    <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <input readonly="true" matInput name="id" formControlName="id" maxlength="40" placeholder="{{'SHIFT.DRIVER_DETAIL.ID' | translate}}">
+    </mat-form-field>
+
+    <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <input readonly="true" matInput name="fullName" formControlName="fullName" maxlength="40" placeholder="{{'SHIFT.DRIVER_DETAIL.FULL_NAME' | translate}}">
+    </mat-form-field>
+
+    <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <input readonly="true" matInput name="docType" formControlName="docType" maxlength="40" placeholder="{{'SHIFT.DRIVER_DETAIL.DOC_TYPE' | translate}}">
+    </mat-form-field>
+
+    <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <input readonly="true" matInput name="documentId" formControlName="documentId" maxlength="40" placeholder="{{'SHIFT.DRIVER_DETAIL.DOCUMENT_ID' | translate}}">
+    </mat-form-field>
+
+    <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <input readonly="true" matInput name="phone" formControlName="phone" maxlength="40" placeholder="{{'SHIFT.DRIVER_DETAIL.PHONE' | translate}}">
+    </mat-form-field>
+
+    <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <input readonly="true" matInput name="username" formControlName="username" maxlength="40" placeholder="{{'SHIFT.DRIVER_DETAIL.USERNAME' | translate}}">
+    </mat-form-field>
+
+    <div class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+        <div class="pb-8 pt-8"> {{ 'SHIFT.DRIVER_DETAIL.BLOCKS_TITLE' | translate }} </div>
+        <mat-chip-list>
+            <mat-chip *ngFor="let block of shift.driver.blocks" color="primary" selected>{{ block }}</mat-chip>
+        </mat-chip-list>
+    </div>
+
+    <div *ngIf="shift.driver.languages && shift.driver.languages.length > 0" class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+        <div class="pb-8 pt-8">{{ 'SHIFT.DRIVER_DETAIL.LANGUAGES_TITLE' | translate }} </div>
+        <mat-chip-list>
+            <mat-chip *ngFor="let language of shift.driver.languages" color="primary" selected>{{ 'SHIFT.DRIVER_DETAIL.LANGUAGES.' + language | translate }}</mat-chip>
+        </mat-chip-list>
+    </div>
+
+
+
+    <!-- <div class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <div *ngFor="let block of shift.driver.blocks">
+
+      </div>
+    </div> -->
+    <!-- <h2>{{ 'VEHICLE.FEATURES.OTHERS_TITLE' | translate }}</h2>
+
+    <div fxFlex="100" formArrayName="others" *ngFor="let feature of shiftDriverInfoForm.get('others').controls ; let i = index;">
+      <div [formGroupName]="i">
+        <mat-checkbox class="example-margin" [formControlName]="'active'">
+          {{ 'VEHICLE.FEATURES.OTHERS.' + feature.get('name').value | translate }}
+        </mat-checkbox>
+      </div> -->
+      <!-- orderForm.controls.items.controls[i].controls.name.value -->
+    <!-- </div> -->
+
+  </form>
+
+</div>

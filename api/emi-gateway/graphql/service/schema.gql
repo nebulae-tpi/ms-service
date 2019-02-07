@@ -185,6 +185,120 @@ input ServiceServicePaginationInput {
   sort: Int
 }
 
+
+
+##  SHIFT SEGMENT  ##
+
+input ServiceShiftPaginationInput {
+  "Page"
+  page: Int!
+  "Count"
+  count: Int!
+  "Sort, default: ASC"
+  sort: Int
+}
+
+type ServiceShiftDriver {
+  "Driver ID"
+  id: String
+  "Driver fullname"
+  fullname: String
+  "Driver Blocks"
+  blocks: [String]
+  "Driver Document Type"
+  documentType: String
+  "Driver PMR state"
+  pmr: Boolean
+  "Driver Languages"
+  languages: [String]
+  "Driver phone"
+  phone: String
+  "Driver username"
+  username: String
+}
+
+type ServiceShiftVehicle {
+  "Vehicle id"
+  id: String
+  "VehicleLicense Plate"
+  licensePlate: String
+  "Vehicle blocks"
+  blocks: [String]
+  "Vehicle features"
+  features: [String]
+  "Vehicle brand"
+  brand: String
+  "Vehicle line"
+  line: String
+  "Vehicle model"
+  model: String
+}
+
+type ServiceShiftStateChange {
+  "State change name"
+  state: String
+  "State Change timestamp"
+  timestamp: BigInt
+}
+
+type ServiceShiftOnlineChange {
+  "online change status"
+  online: Boolean
+  "online change timestamp"
+  timestamp: BigInt
+}
+
+type ServiceShiftLocation {
+  "location type"
+  type: String
+  "Location Coordinates"
+  coordinates: [Float]
+}
+
+input ServiceShiftFilterInput {
+  "ID of the business"
+  businessId: String
+  "Init date"
+  initTimestamp: BigInt
+  "End date"
+  endTimestamp: BigInt
+  "Driver document id"
+  driverDocumentId: String
+  "Driver fullname"
+  driverFullname: String
+  "Vehicle license plate"
+  vehicleLicensePlate: String
+  "State"
+  states: [String]
+  "Show closed services"
+  showClosedServices: Boolean
+}
+
+type ServiceShift {
+  "Service ID"
+  _id: ID!
+  "Business ID"
+  businessId: String!
+  "Last update timestamp"
+  timestamp: BigInt
+  "Shift State"
+  state: String
+  "Shift State changes" 
+  stateChanges: [ServiceShiftStateChange]
+  "Shift online status"
+  online: Boolean
+  "Shift online changes"
+  onlineChanges: [ServiceShiftOnlineChange]
+  "Shift last received comunication"
+  lastReceivedComm: BigInt
+  "Shift current location"
+  location: ServiceShiftLocation  
+  "Shift driver"
+  driver: ServiceShiftDriver
+  "Shift vehicle"
+  vehicle: ServiceShiftVehicle
+}
+
 type Query {
   "Get Services with state REQUESTED, ASSIGNED AND ARRIVED that belongs to the client satellite logged"
   ServiceServicesSatellite: [ServiceService]
@@ -196,6 +310,14 @@ type Query {
   ServiceServicesSize(filterInput: ServiceServiceFilterInput!): Int!
   "Get Service by its id"
   ServiceService(id: String!): ServiceService
+  ## SHIFTS
+  "Get Shift filtered"
+  ServiceShifts(filterInput: ServiceShiftFilterInput!, paginationInput: ServiceShiftPaginationInput!): [ServiceShift]
+  "Get amount of Shifts filtered"
+  ServiceShiftsSize(filterInput: ServiceShiftFilterInput!): [ServiceShift]
+  "Get shift by its id"
+  ServiceShift(id: String!): ServiceShift
+
 }
 
 type Subscription {

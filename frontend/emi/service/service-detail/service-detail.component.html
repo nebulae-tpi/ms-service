@@ -37,7 +37,7 @@
         <mat-tab-group dynamicHeight *ngIf="service">
 
           <mat-tab label="{{'SERVICE.DETAILS.TABS.GENERAL_INFO' | translate}}">
-            <service-general-info [pageType]="pageType" [service]="service" >
+            <service-general-info [service]="service" >
             </service-general-info>
           </mat-tab>
           <mat-tab label="{{'SERVICE.DETAILS.TABS.STATE_CHANGES' | translate}}">

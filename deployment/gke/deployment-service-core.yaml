@@ -13,7 +13,7 @@ spec:
         app: service-core
     spec:      
       containers:
-      - image: nebulaetpi/service.backend.servicecore:0.2.0
+      - image: nebulaetpi/service.backend.servicecore:0.2.1
         name: service-core
         volumeMounts:
         - name: google-application-credentials
@@ -59,31 +59,6 @@ spec:
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
           value: "19-02-05_1340"
-        - name: DRIVER_APP_MQTT_URL
-          valueFrom:
-           secretKeyRef:
-             name: driver-app-link
-             key: DRIVER_APP_MQTT_URL
-        - name: DRIVER_APP_MQTT_PORT
-          valueFrom:
-           secretKeyRef:
-             name: driver-app-link
-             key: DRIVER_APP_MQTT_PORT
-        - name: DRIVER_APP_MQTT_CLIENT_ID
-          valueFrom:
-           secretKeyRef:
-             name: driver-app-link
-             key: DRIVER_APP_MQTT_CLIENT_ID
-        - name: DRIVER_APP_MQTT_USER
-          valueFrom:
-           secretKeyRef:
-             name: driver-app-link
-             key: DRIVER_APP_MQTT_USER
-        - name: DRIVER_APP_MQTT_PASSWORD
-          valueFrom:
-           secretKeyRef:
-             name: driver-app-link
-             key: DRIVER_APP_MQTT_PASSWORD
         
       volumes:
       - name: google-application-credentials

@@ -54,8 +54,6 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     licensePlate: new FormControl('')
   });
 
-  pageType: string;
-
   driver: any;
 
   /////// TABLE /////////
@@ -121,8 +119,6 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
       console.log('DRIVER ==> ', driver);
       console.log('VEHICLE_LIST ==> ', vehicleList);
       this.driver = driver;
-      this.pageType = (driver && driver._id) ? 'edit' : 'new';
-      console.log(this.driver, this.pageType);
       this.tableSize = this.driver.assignedVehicles.length;
 
       this.dataSource.data = vehicleList;
