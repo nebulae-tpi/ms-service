@@ -58,7 +58,7 @@ class ShiftDAL {
     handleShiftLocationReported$({ data }) {
         //Build and send ShiftLocationReported event (event-sourcing)
         return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)).pipe(
-            mapTo(` - Sent ShiftLocationReported for shift._id=${ata._id}: ${JSON.stringify(data.location)}`)
+            mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data.location)}`)
         );
     }
 
