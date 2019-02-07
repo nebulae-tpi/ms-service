@@ -91,8 +91,7 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.loaddriver();
-    this.subscribeDriverVehicleAssigments();
+    this.loaddriver();    
     this.stopWaitingOperation();
   }
 
@@ -116,18 +115,15 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe( ({ driver, vehicleList }) => {
-      console.log('DRIVER ==> ', driver);
-      console.log('VEHICLE_LIST ==> ', vehicleList);
       this.driver = driver;
       this.tableSize = this.driver.assignedVehicles.length;
-
+      this.subscribeDriverVehicleAssigments();
       this.dataSource.data = vehicleList;
-
     }, e => console.log(e));
   }
 
   subscribeDriverVehicleAssigments(){
-    this.vehicleAssignmentService.listenServiceDriverVehicleAssignedEvts$()
+    this.vehicleAssignmentService.listenServiceDriverVehicleAssignedEvts$(this.driver._id)
     .pipe(
       map(subscription => subscription.data.ServiceDriverVehicleAssignedSubscription),
       takeUntil(this.ngUnsubscribe),
@@ -166,7 +162,6 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
   }
 
   addVehicleToDriver(){
-    console.log(this.assignmentForm.getRawValue());
     this.vehicleAssignmentService.assignVehicleToDriver$( this.driver._id, this.assignmentForm.getRawValue().licensePlate.toUpperCase())
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
@@ -178,7 +173,6 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
   }
 
   removeVehicleFromDriver(vehicleRow: any){
-    console.log(vehicleRow);
     this.vehicleAssignmentService.unassignVehicleToDriver$(this.driver._id, vehicleRow.licensePlate )
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),

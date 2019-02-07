@@ -46,6 +46,8 @@ type ServiceDriverGeneralInfo {
 type ServiceDriverVehicle {
   "Vehicle ID"
   _id: ID
+  "Driver ID"
+  driverId: String
   "Vehicle business ID"
   businessId: String
   "Vehicle license plate"
@@ -113,5 +115,5 @@ type Mutation {
 
 type Subscription {
   "This events is triggered when a Driver is created or updated"
-  ServiceDriverVehicleAssignedSubscription: ServiceDriverVehicle  
+  ServiceDriverVehicleAssignedSubscription(driverId: String): ServiceDriverVehicle  
 }

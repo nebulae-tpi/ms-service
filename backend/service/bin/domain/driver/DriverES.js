@@ -94,7 +94,9 @@ class DriverES {
         .pipe(
             mergeMap(newVehicle => DriverDA.assignVehicle$(VehicleAssignedEvent.aid, newVehicle) ),
             mergeMap(() => VehicleDA.getVehicleByPlate$(VehicleAssignedEvent.data.vehicleLicensePlate)),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverVehicleAssigned`, result))
+            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverVehicleAssigned`,
+                { ...result, driverId: VehicleAssignedEvent.aid })
+            )
         )
     }
 
