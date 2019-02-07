@@ -4,8 +4,8 @@ let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
 const COLLECTION_NAME = "Shift";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, reduce } = require("rxjs/operators");
-const { of, Observable, defer, from } = require("rxjs");
+const { map, mergeMap, reduce, tap } = require("rxjs/operators");
+const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
 
 class ShiftDA {
@@ -22,14 +22,15 @@ class ShiftDA {
     });
   }
 
+  /**
+   * Get the Shift data
+  * @param {string} id Shift ID
+   */
   static getShiftById$(id) {
-    // mongoDB.getHistoricalDbByYYMM
-    // const yymm = id.substring(id.length - 4);
-    // const dbToSearch = this.client.db(`historical_${yymm}`).collection(COLLECTION_NAME);
-    // return defer(() => dbToSearch.findOne(
-    //   { _id: id },
-    //   { projection: { stateChanges: 0, onlineChanges: 0  } }
-    //   ));
+    const collection = mongoDB.getHistoricalDbByYYMM(id.length - 4).collection(COLLECTION_NAME);
+    return defer(() => collection.findOne(
+      { _id: id }
+    ));
   }
 
     /**
@@ -49,45 +50,119 @@ class ShiftDA {
   
   
   static getShiftList$(filter, pagination) {
-    const collection = mongoDB.db.collection(COLLECTION_NAME);
-
+    console.log('::::::::::::: getShiftList ', filter, pagination);
+    const projection = { stateChanges: 0, onlineChanges: 0 };
     const query = {};
 
-    if (filter.businessId) {
-      query.businessId = filter.businessId;
+
+    if (filter.businessId) { query["businessId"] = filter.businessId; }
+    if (filter.driverDocumentId) { query["driver.documentId"] = filter.driverDocumentId; }
+    if (filter.driverFullname) { query["driver.fullname"] = { $regex: filter.driverFullname, $options: "i" }; }
+    if (filter.vehicleLicensePlate) { query["vehicle.licensePlate"] = { $regex: filter.vehicleLicensePlate, $options: "i" }; }
+    if (filter.states) { query["state"] = { $in: filter.states }; }
+    if (filter.initTimestamp && filter.endTimestamp) { }
+    if (filter.showClosedShifts && filter.initTimestamp && filter.endTimestamp) {
+      query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp };
     }
 
-    if (filter.name) {
-      query["name"] = { $regex: filter.name, $options: "i" };
-    }
-    if (filter.lastname) {
-      query["lastname"] = { $regex: filter.lastname, $options: "i" };
-    }
-    if (filter.documentId) {
-      query["documentId"] = { $regex: filter.documentId, $options: "i" };
-    }
+    return of(query.timestamp)
+      .pipe(
+        mergeMap(includeClosed => includeClosed
+          ? of({})
+            .pipe(
+              mergeMap(() => {
+                const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
+                const dateNow = new Date( new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
+                const monthsBeforedate1 = Crosscutting.monthDiff(date1, date2);
+                const monthsBeforedate2 = Crosscutting.monthDiff(date2, dateNow);
+                return of({
+                  start: monthsBeforedate1,
+                  count: (monthsBeforedate1 - monthsBeforedate2) * -1
+                });
 
-  
+              })
+            )
+          : of(Date.today().getDate() <= 2)
+            .pipe(
+              mergeMap(searchInBeforeMonth => searchInBeforeMonth
+                ? of({ start: -1, count: 2 })
+                : of({ start: 0, count: 1 })
+              )
+            )
+        ),
+        mergeMap(({ start, count }) => range(start, count)),
+        map(date => mongoDB.getHistoricalDb(date)),
+        map(db => db.collection(COLLECTION_NAME)),
+        mergeMap(collection => {
+          const cursor = collection
+            .find(query, { projection })
+            .skip(pagination.count * pagination.page)
+            .limit(pagination.count)
+            .sort({ creationTimestamp: pagination.sort });
 
-    const cursor = collection
-      .find(query)
-      .skip(pagination.count * pagination.page)
-      .limit(pagination.count)
-      .sort({ creationTimestamp: pagination.sort });
-
-    return mongoDB.extractAllFromMongoCursor$(cursor);
+          return mongoDB.extractAllFromMongoCursor$(cursor);
+        }));
   }
 
 
-  static getShiftSize$(filter) {
-    const collection = mongoDB.db.collection(COLLECTION_NAME);
+  static getShiftListSize$(filter) {
+    // const collection = mongoDB.db.collection(COLLECTION_NAME);
+    // const query = {};
+    // if (filter.businessId) { query.businessId = filter.businessId;}
+    // if (filter.name) { query["generalInfo.name"] = { $regex: filter.name, $options: "i" }; }
+    // if (filter.creationTimestamp) { query.creationTimestamp = filter.creationTimestamp; }
+    // if (filter.creatorUser) { query.creatorUser = { $regex: filter.creatorUser, $options: "i" }; }
+    // if (filter.modifierUser) { query.modifierUser = { $regex: filter.modifierUser, $options: "i" };}
+    // return collection.count(query);
+
+
+    console.log('::::::::::::: getShiftListSize ', filter);
     const query = {};
-    if (filter.businessId) { query.businessId = filter.businessId;}
-    if (filter.name) { query["generalInfo.name"] = { $regex: filter.name, $options: "i" }; }
-    if (filter.creationTimestamp) { query.creationTimestamp = filter.creationTimestamp; }
-    if (filter.creatorUser) { query.creatorUser = { $regex: filter.creatorUser, $options: "i" }; }
-    if (filter.modifierUser) { query.modifierUser = { $regex: filter.modifierUser, $options: "i" };}
-    return collection.count(query);
+
+
+    if (filter.businessId) { query["businessId"] = filter.businessId; }
+    if (filter.driverDocumentId) { query["driver.documentId"] = filter.driverDocumentId; }
+    if (filter.driverFullname) { query["driver.fullname"] = { $regex: filter.driverFullname, $options: "i" }; }
+    if (filter.vehicleLicensePlate) { query["vehicle.licensePlate"] = { $regex: filter.vehicleLicensePlate, $options: "i" }; }
+    if (filter.states) { query["state"] = { $in: filter.states }; }
+    if (filter.initTimestamp && filter.endTimestamp) { }
+    if (filter.showClosedShifts && filter.initTimestamp && filter.endTimestamp) {
+      query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp };
+    }
+
+    return of(query.timestamp)
+      .pipe(
+        mergeMap(includeClosed => includeClosed
+          ? of({})
+            .pipe(
+              mergeMap(() => {
+                const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
+                const dateNow = new Date( new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
+                const monthsBeforedate1 = Crosscutting.monthDiff(date1, date2);
+                const monthsBeforedate2 = Crosscutting.monthDiff(date2, dateNow);
+                return of({
+                  start: monthsBeforedate1,
+                  count: (monthsBeforedate1 - monthsBeforedate2) * -1
+                });
+
+              })
+            )
+          : of(Date.today().getDate() <= 2)
+            .pipe(
+              mergeMap(searchInBeforeMonth => searchInBeforeMonth
+                ? of({ start: -1, count: 2 })
+                : of({ start: 0, count: 1 })
+              )
+            )
+        ),
+        mergeMap(({ start, count }) => range(start, count)),
+        map(date => mongoDB.getHistoricalDb(date)),
+        map(db => db.collection(COLLECTION_NAME)),
+        mergeMap(collection => collection.count(query) )
+
+        );
   }
 
 

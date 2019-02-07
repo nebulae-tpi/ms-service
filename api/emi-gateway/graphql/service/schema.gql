@@ -272,8 +272,8 @@ input ServiceShiftFilterInput {
   vehicleLicensePlate: String
   "State"
   states: [String]
-  "Show closed services"
-  showClosedServices: Boolean
+  "Show closed Shifts"
+  showClosedShifts: Boolean
 }
 
 type ServiceShift {
