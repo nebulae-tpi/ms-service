@@ -91,7 +91,7 @@ type Location {
 "Service info"
 type Service{
    "Service Identifier"
-   id_: String
+   _id: String
    "Service created timestamp"
    timestamp: BigInt
    "Client info"
