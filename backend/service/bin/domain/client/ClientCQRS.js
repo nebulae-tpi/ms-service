@@ -49,7 +49,7 @@ class ClientCQRS {
 
   /**
    * Get the satellite clients data (Location, neighborhood, city, ...)
-   * @param {*} param0 
+   * @param {*} args 
    * @param {*} authToken 
    */
   getSatelliteClients$({ args }, authToken) {

@@ -1,9 +1,5 @@
-<h1 mat-dialog-title>{{data.dialogTitle | translate}}</h1>
+<h1 mat-dialog-title>{{ "SATELLITE.SERVICES.CANCEL_SERVICE" | translate }}</h1>
 <mat-dialog-content>
-  <p>{{data.dialogMessage | translate}}</p>
-
-
-
   <form fxLayout="column" fxLayoutAlign="start" fxFlex="100" name="form" *ngIf="cancelServiceForm" [formGroup]="cancelServiceForm">
 
       <mat-radio-group formControlName="reason" fxLayout="column">

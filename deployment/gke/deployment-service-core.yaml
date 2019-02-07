@@ -13,7 +13,7 @@ spec:
         app: service-core
     spec:      
       containers:
-      - image: nebulaetpi/service.backend.servicecore:1.0.13
+      - image: nebulaetpi/service.backend.servicecore:1.0.14
         name: service-core
         volumeMounts:
         - name: google-application-credentials
