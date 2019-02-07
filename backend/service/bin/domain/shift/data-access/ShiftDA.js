@@ -32,23 +32,7 @@ class ShiftDA {
       { _id: id },
       { projection: { stateChanges: 0, onlineChanges: 0 } }
     ));
-  }
-
-    /**
-   * Gets an user by its username
-   */
-  static getShift$(id, businessId) {
-    const collection = mongoDB.db.collection(COLLECTION_NAME);
-    const query = {
-      _id: id      
-    };
-    if(businessId){
-      query.businessId = businessId;
-    }
-
-    return defer(() => collection.findOne(query));
-  }
-  
+  }  
   
   static getShiftList$(filter, pagination) {
     console.log('::::::::::::: getShiftList ', filter, pagination);
@@ -154,6 +138,73 @@ class ShiftDA {
         mergeMap(collection => collection.count(query) )
 
         );
+  }
+
+
+  static getShiftStateChangeList$(shiftId, pagination) {
+    const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
+    return defer(() => collection
+      .find( { _id: shiftId } )
+      .project({ _id: 1, stateChanges: { $slice: [pagination.count * pagination.page, pagination.count] } })
+      .toArray()
+    )
+      .pipe(
+        map(result => result ? result[0].stateChanges : []),
+        tap(r => console.log("getShiftStateChangeList$", r) )
+      )
+  }
+
+  static getShiftStateChangeListSize$(shiftId){
+    const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
+
+    return defer(() => collection.aggregate([
+      { $match : { _id : shiftId } },
+      {        
+        $project: {
+          _id: 1,          
+          stateChangeListSize: { $cond: { if: { $isArray: "$stateChanges" }, then: { $size: "$stateChanges" }, else: -1 } }
+        }
+      }
+    ])
+    .toArray()
+    )
+    .pipe(
+      map(result => result ? result[0].stateChangeListSize : 0 ),
+      tap(r => console.log("getShiftStateChangeListSize$", r) )
+    )    
+  }
+
+  static getShiftOnlineChangeList$(shiftId, pagination) {
+    const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
+    return defer(() => collection
+      .find( { _id: shiftId } )
+      .project({ _id: 1, onlineChanges: { $slice: [pagination.count * pagination.page, pagination.count] } })
+      .toArray()
+    )
+      .pipe(
+        map(result => result ? result[0].onlineChanges : []),
+        tap(r => console.log("getShiftStateChangeList$", r) )
+      )
+  }
+
+  static getShiftOnlineChangeListSize$(shiftId){
+    const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
+
+    return defer(() => collection.aggregate([
+      { $match : { _id : shiftId } },
+      {        
+        $project: {
+          _id: 1,          
+          onlineChangesListSize: { $cond: { if: { $isArray: "$onlineChanges" }, then: { $size: "$onlineChanges" }, else: -1 } }
+        }
+      }
+    ])
+    .toArray()
+    )
+    .pipe(
+      map(result => result ? result[0].onlineChangesListSize : 0 ),
+      tap(r => console.log("getShiftOnlineChangeListSize$", r) )
+    )    
   }
 
 
