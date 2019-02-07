@@ -160,8 +160,6 @@ class ServiceCQRS {
      * @param Object service
      */
     formatServiceToGraphQLSchema(service) {
-
-      console.log('service.location => ', service.route);
       return {
         _id: service._id,
         businessId: service.businessId,
