@@ -4,8 +4,8 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Service";
 const { ERROR_23104 } = require("../../../tools/customError");
-const { map, mergeMap, first, filter } = require("rxjs/operators");
-const { of, Observable, defer, catchError, throwError, range } = require("rxjs");
+const { map, mergeMap, first, filter, catchError } = require("rxjs/operators");
+const { of, Observable, defer, throwError, range } = require("rxjs");
 
 class ServiceDA {
 
@@ -39,7 +39,7 @@ class ServiceDA {
    * @returns {Observable}
    */
   static insertService$(service) {
-    console.log('service._id  => ', service._id );
+    console.log('service._id  => ', service._id);
     return defer(() => mongoDB.getHistoricalDbByYYMM(service._id.split('-').pop()).collection(CollectionName)
       .insertOne(service));
   }
@@ -82,7 +82,7 @@ class ServiceDA {
    * appends state
    * @returns {Observable}
    */
-  static appendstate$(_id, state, location,timestamp) {
+  static appendstate$(_id, state, location, timestamp) {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
@@ -143,7 +143,7 @@ class ServiceDA {
       state: 'REQUESTED',
     };
     // The shift is within the sent and actives offers
-    find[`offers.${shiftId}.active`] = true;
+    // find[`offers.${shiftId}.active`] = true;  //TODO: CRITICO> Habilitar
 
     const update = {
       $set: {
@@ -162,7 +162,10 @@ class ServiceDA {
         },
         "route.coordinates": location.coordinates
       }
-    }
+    };
+
+    console.log(JSON.stringify(find));
+    console.log(JSON.stringify(update));
 
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
