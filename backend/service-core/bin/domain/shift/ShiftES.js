@@ -122,6 +122,7 @@ class ShiftES {
      * @param {Event} shiftLocationReportedEvt
      */
     handleShiftLocationReported$({ aid, data }) {
+        if(aid === undefined) return of({});//TODO: DELETE THIS LINE
         console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
         return ShiftDA.updateShiftLocation$(aid, data.location)
     }
