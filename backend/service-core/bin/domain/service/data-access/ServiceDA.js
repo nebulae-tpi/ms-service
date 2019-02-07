@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Service";
 const { ERROR_23104 } = require("../../../tools/customError");
-const { map, mergeMap, first, filter, catchError } = require("rxjs/operators");
+const { map, mergeMap, first, filter, catchError,tap } = require("rxjs/operators");
 const { of, Observable, defer, throwError, range } = require("rxjs");
 
 class ServiceDA {
@@ -178,6 +178,7 @@ class ServiceDA {
         }
       )).pipe(
         first(),
+        tap(x => console.log(`=====DBRESP====${x}==`)),
         catchError(err => throwError(ERROR_23104)), // possible concurrent modification
       );
   }

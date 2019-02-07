@@ -51,7 +51,8 @@ class ServiceES {
                             { _id: shiftId, state: 'BUSY' }
                         )
                     )
-                )
+                ),
+                mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
             );
         } else {
             return ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(
@@ -128,7 +129,7 @@ class ServiceES {
             'ShiftStateChanged',
             { _id: shiftId, state: 'AVAILABLE' }
         ))).pipe(
-            mapTo(` - Sent ServicePickUpETAReported for service._id=${_id}: ${JSON.stringify(data)}`)
+            mapTo(` - Sent ShiftStateChanged for service._id=${_id}: ${JSON.stringify(data)}`)
         );
 
         //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
