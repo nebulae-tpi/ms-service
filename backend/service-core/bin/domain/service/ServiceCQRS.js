@@ -329,16 +329,21 @@ class ServiceCQRS {
    */
   buildServiceRequestedEsEvent(authToken, request) {
 
-    const { requestedFeatures, fareDiscount, fare, pickUp, tip } = request;
+    let { requestedFeatures, fareDiscount, fare, pickUp, tip, dropOff } = request;
+
+    pickUp = {
+      ...pickUp,
+      marker: !pickUp.marker ? {type:"Point", coordinates:[pickUp.marker.lng,pickUp.marker.lat]} : {},
+      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+    };
+    dropOff = {
+      ...dropOff,
+      marker: !dropOff.marker ? {type:"Point", coordinates:[dropOff.marker.lng,dropOff.marker.lat]} : {},
+      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+    };
+
+
     const _id = Crosscutting.generateDateBasedUuid();
-
-
-
-    "client id"
-    id: String
-    "client username"
-    username: String
-
     
     return new Event({
       aggregateType: 'Service',
@@ -348,6 +353,8 @@ class ServiceCQRS {
       user: authToken.preferred_username,
       data: {
         ...request,
+        pickUp,
+        dropOff,
         client:{
           id: authToken.clientId,
           businessId: authToken.businessId,
