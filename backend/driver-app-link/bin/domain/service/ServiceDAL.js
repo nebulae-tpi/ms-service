@@ -49,8 +49,8 @@ class ServiceDAL {
                 }))
             ).subscribe(
                 (evt) => console.log(`ServiceDAL.subscription: ${evt}`),
-                (err) => { console.log(`ServiceDAL.subscription ERROR: ${err}`); },
-                () => { console.log(`ServiceDAL.subscription STOPPED`); },
+                (err) => { console.log(`ServiceDAL.subscription ERROR: ${err}`); process.exit(1) },
+                () => { console.log(`ServiceDAL.subscription STOPPED`); process.exit(1); },
             );
             obs.next('ServiceDAL.subscription engine started');
             obs.complete();

@@ -71,13 +71,17 @@ type ServiceCoreClient {
 }
 
 "Client info"
-input ServiceCoreClientInput {
+input ServiceCoreClientInput {    
     "Full name"
     fullname: String!
     "Tip given to the client. Eg. satellites"
     tip: BigInt!
     "Tiping type"
     tipType: String! 
+    "client id"
+    id: String
+    "client username"
+    username: String
 }
 
 "Vehicle info"
@@ -221,7 +225,7 @@ type Mutation{
         "cancellation author type: DRIVER | CLIENT | OPERTAOR"
         authorType: String!
         "cancellation additional notes"
-        notes: String!        
+        notes: String        
     ): ServiceCoreCommandAck
 
     "Manually assign the service to eather a SHIFT (using ony the shiftId) or to a Driver & Vehicle (inserting all data)"

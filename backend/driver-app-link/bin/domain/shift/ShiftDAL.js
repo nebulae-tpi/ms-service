@@ -2,7 +2,7 @@
 
 
 const { of, interval, Observable, empty, throwError } = require("rxjs");
-const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
+const { mergeMapTo, mapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -33,16 +33,16 @@ class ShiftDAL {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
                 mergeMap(evt => Observable.create(evtObs => {
                     this.handlers[evt.t](evt).subscribe(
-                        (handlerEvt) => { console.log(`ShiftDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`);},
-                        (handlerErr) => { console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`); ShiftDAL.logError(handlerErr);},
+                        (handlerEvt) => { console.log(`ShiftDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`); },
+                        (handlerErr) => { console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`); ShiftDAL.logError(handlerErr); },
                         () => console.log(`ShiftDAL.handlerCompleted[${evt.t}]`),
                     );
                     evtObs.complete();
                 }))
             ).subscribe(
                 (evt) => console.log(`ShiftDAL.subscription: ${evt}`),
-                (err) => { console.log(`ShiftDAL.subscription ERROR: ${err}`); },
-                () => { console.log(`ShiftDAL.subscription STOPPED`); },
+                (err) => { console.log(`ShiftDAL.subscription ERROR: ${err}`); process.exit(1) },
+                () => { console.log(`ShiftDAL.subscription STOPPED`); process.exit(1); },
             );
             obs.next('ShiftDAL.subscription engine started');
             obs.complete();
@@ -56,9 +56,9 @@ class ShiftDAL {
      * @param {Event} shiftStartedEvt
      */
     handleShiftLocationReported$({ data }) {
-        //Build and send ShiftLocationReported event (event-sourcing)
+        if(!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
         return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)).pipe(
-            mapTo(` - Sent ShiftLocationReported for shift._id=${ata._id}: ${JSON.stringify(data.location)}`)
+            mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data.location)}`)
         );
     }
 

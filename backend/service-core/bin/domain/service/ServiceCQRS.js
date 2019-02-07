@@ -54,7 +54,7 @@ class ServiceCQRS {
       coordinates: [args.location.lng, args.location.lat]
     }
     console.log(`ServiceCQRS.acceptServiceOffer RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
       mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state, driver, vehicle })),
@@ -329,9 +329,22 @@ class ServiceCQRS {
    */
   buildServiceRequestedEsEvent(authToken, request) {
 
-    const { requestedFeatures, fareDiscount, fare, pickUp, tip } = request;
-    const _id = Crosscutting.generateDateBasedUuid();
+    let { requestedFeatures, fareDiscount, fare, pickUp, tip, dropOff } = request;
 
+    pickUp = !pickUp ? undefined : {
+      ...pickUp,
+      marker: pickUp.marker ? {type:"Point", coordinates:[pickUp.marker.lng,pickUp.marker.lat]} : {},
+      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+    };
+    dropOff = !dropOff ? undefined :  {
+      ...dropOff,
+      marker: dropOff.marker ? {type:"Point", coordinates:[dropOff.marker.lng,dropOff.marker.lat]} : {},
+      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+    };
+
+
+    const _id = Crosscutting.generateDateBasedUuid();
+    
     return new Event({
       aggregateType: 'Service',
       aggregateId: _id,
@@ -340,6 +353,14 @@ class ServiceCQRS {
       user: authToken.preferred_username,
       data: {
         ...request,
+        pickUp,
+        dropOff,
+        client:{
+          id: authToken.clientId,
+          businessId: authToken.businessId,
+          username: authToken.preferred_username,
+          ...request.client,
+        },
         _id,
         businessId: authToken.businessId,
         timestamp: Date.now(),
@@ -355,6 +376,7 @@ class ServiceCQRS {
         tip: tip <= 0 ? undefined : tip,
         route: { type: "LineString", coordinates: [] },
         lastModificationTimestamp: Date.now(),
+        closed: false,
       }
     });
   }
