@@ -2,7 +2,7 @@
 
 
 const { of, interval, forkJoin, Observable } = require("rxjs");
-const { take, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
+const { mapTo, mergeMap, mergeMapTo, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -38,7 +38,16 @@ class ServiceES {
      */
     handleServiceAssigned$({ aid, data }) {
         const { shiftId, driver, vehicle, skipPersist } = data;
-        return skipPersist ? of({}) : ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle);
+
+        const sendEvt$ = mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceES.buildEventSourcingEvent(
+            'Shift',
+            shiftId,
+            'ShiftStateChanged',
+            { _id: shiftId, state: 'BUSY' }
+        ))).pipe(
+            mapTo(` - Sent ServicePickUpETAReported for service._id=${_id}: ${JSON.stringify(data)}`)
+        );
+        return skipPersist ? of({}).pipe(sendEvt$) : ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(sendEvt$);
     }
 
     /**
@@ -78,7 +87,7 @@ class ServiceES {
      */
     handleServicePassengerBoarded$({ aid, data }) {
         const { location, timestamp } = data;
-        return ServiceDA.appendstate$(aid, 'ON_BOARD', location,timestamp);
+        return ServiceDA.appendstate$(aid, 'ON_BOARD', location, timestamp);
     }
 
     /**
@@ -87,8 +96,29 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCompleted$({ aid, data }) {
+
+
         const { location, timestamp } = data;
-        return ServiceDA.appendstate$(aid, 'DONE', location,timestamp);
+
+
+        const sendEvt$ = mergeMap(shiftId => eventSourcing.eventStore.emitEvent$(ServiceES.buildEventSourcingEvent(
+            'Shift',
+            shiftId,
+            'ShiftStateChanged',
+            { _id: shiftId, state: 'AVAILABLE' }
+        ))).pipe(
+            mapTo(` - Sent ServicePickUpETAReported for service._id=${_id}: ${JSON.stringify(data)}`)
+        );
+
+        //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
+        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
+        return ServiceDA.appendstate$(aid, 'DONE', location, timestamp).pipe(
+            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
+            map(({ shiftId }) => shiftId),
+            sendEvt$
+        );
+
+
     }
 
     /**
@@ -129,7 +159,7 @@ class ServiceES {
      */
     handleServiceCancelledByOperator$({ aid, data }) {
         const { reason, notes, location } = data;
-        return ServiceDA.setCancelState$(aid,'CANCELLED_OPERATOR',location,reason,notes);
+        return ServiceDA.setCancelState$(aid, 'CANCELLED_OPERATOR', location, reason, notes);
     }
 
 
@@ -138,6 +168,24 @@ class ServiceES {
     //#region Object builders
 
 
+    /**
+     * Generates an EventSourcing Event
+     * @param {*} aggregateType 
+     * @param {*} aggregateId defaults to generated DateBased Uuid
+     * @param {*} eventType 
+     * @param {*} data defaults to {}
+     * @param {*} eventTypeVersion defaults to 1
+    */
+    static buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, eventTypeVersion = 1) {
+        return new Event({
+            aggregateType,
+            aggregateId,
+            eventType,
+            eventTypeVersion,
+            user: 'SYSTEM',
+            data
+        });
+    }
 
     //#endregion
 }
