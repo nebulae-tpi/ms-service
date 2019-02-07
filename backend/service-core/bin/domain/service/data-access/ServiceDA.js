@@ -174,7 +174,8 @@ class ServiceDA {
         {
           projection,
           upsert: false,
-          returnOriginal: false
+          returnOriginal: false,
+          returnNewDocument : true
         }
       )).pipe(
         first(),
