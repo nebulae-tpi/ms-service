@@ -175,9 +175,9 @@ class ServiceDA {
           projection,
           upsert: false,
           returnOriginal: false,
-          returnNewDocument : true
         }
-      )).pipe(
+      )).pipe(        
+        map(result => result.value),
         first(),
         tap(x => console.log(`=====DBRESP====${JSON.stringify(x)}==`)),
         catchError(err => throwError(ERROR_23104)), // possible concurrent modification
