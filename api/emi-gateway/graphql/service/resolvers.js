@@ -51,7 +51,7 @@ module.exports = {
             ).toPromise();
         },
         ServiceServicesSatellite(root, args, context) {
-            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceServicesSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE"])
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceServicesSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE", "OPERATOR"])
             .pipe(
                 mergeMap(() =>
                     broker
@@ -72,7 +72,7 @@ module.exports = {
                 mergeMap(() =>
                     broker
                     .forwardAndGetReply$(
-                        "Service",
+                        "Client",
                         "emigateway.graphql.query.ServiceClientSatellite",
                         { root, args, jwt: context.encodedToken },
                         2000

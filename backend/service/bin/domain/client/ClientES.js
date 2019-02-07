@@ -16,15 +16,14 @@ class ClientES {
     constructor() {
     }
 
-
     /**
      * Handles client satellite enbaled event
      * @param {*} clientSatelliteEnabled 
      */
     handleClientSatelliteEnabled$(clientSatelliteEnabled){
-        return of(clientSatelliteEnabled.data)
+        return of(clientSatelliteEnabled)
         .pipe(
-            mergeMap(data => ClientDA.updateClientSatellite$(data.aid, data) )
+            mergeMap(clientSatelliteEnabled => ClientDA.updateClientSatellite$(clientSatelliteEnabled.aid, clientSatelliteEnabled.data) )
         )
     }
 

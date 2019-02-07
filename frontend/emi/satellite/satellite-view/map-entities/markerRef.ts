@@ -1,5 +1,6 @@
+import { takeUntil } from 'rxjs/operators';
 
-import { Subject } from 'rxjs';
+import { Subject, interval } from 'rxjs';
 // <reference types="googlemaps" />
 
 import { MapRef } from './agmMapRef';
@@ -18,7 +19,12 @@ export const MARKER_REF_ORIGINAL_INFO_WINDOW_CONTENT = `<html>
   </html>
   `;
 
-  
+export class Point {
+  location: { coordinates: { lat: number, lng: number } };
+  constructor( location: {coordinates: { lat: number, lng: number } }) {
+    this.location = location;
+  }
+}
 
 export class VehiclePoint {
   _id: string;
@@ -47,27 +53,11 @@ export class LocationPath {
 }
 
 export class MarkerRef extends google.maps.Marker {
-  animation_changedEvent = new  Subject();
+
+  ngUnSubscribe = new Subject();
+  updateLocation$ = new  Subject();
   clickEvent = new Subject<google.maps.MouseEvent>();
-  clickable_changedEvent = new Subject();
-  cursor_changedEvent = new Subject();
   dblclickEvent = new Subject();
-  dragEvent = new Subject();
-  dragendEvent = new Subject();
-  draggable_changedEvent = new Subject();
-  dragstartEvent = new Subject();
-  flat_changedEvent = new Subject();
-  icon_changedEvent = new Subject();
-  mousedownEvent = new Subject();
-  mouseoutEvent = new Subject();
-  mouseoverEvent = new Subject();
-  mouseupEvent = new Subject();
-  position_changedEvent = new Subject();
-  rightclickEvent = new Subject();
-  shape_changedEvent = new Subject();
-  title_changedEvent = new Subject();
-  visible_changedEvent = new Subject();
-  zindex_changedEvent = new Subject();
 
   contentString = MARKER_REF_ORIGINAL_INFO_WINDOW_CONTENT;
 
@@ -78,9 +68,12 @@ export class MarkerRef extends google.maps.Marker {
   /**
    * Historical route path of the vehicle
    */
+  id = null;
   routePath: google.maps.Polyline;
-  vehiclePoint: VehiclePoint = null;
-  lastTimeLocationReported = null;
+  //vehiclePoint: VehiclePoint = null;
+  //clientPoint: ClientPoint = null;
+  point: Point = null;
+  lastModificationTimestamp = null;
   index = 0;
   deltaLat = 0;
   deltaLng = 0;
@@ -92,64 +85,70 @@ export class MarkerRef extends google.maps.Marker {
   lastLocationPath: [LocationPath];
   allMap: MapRef;
 
-  constructor(vehiclePoint: VehiclePoint, opts?: google.maps.MarkerOptions) {
+  constructor(id, point: Point, opts?: google.maps.MarkerOptions) {
     super(opts);
+    this.id = id;
     // const icon = {
-    //   url: "./assets/devices-location/bus.svg",
-    //   anchor: new google.maps.Point(30, 30),
-    //   scaledSize: new google.maps.Size(30, 30)
+    //   url: "./assets/service-map-viewer/markers/icono-sucursal.png",
+    //   // anchor: new google.maps.Point(30, 30),
+    //   // scaledSize: new google.maps.Size(30, 30)
     // };
     this.setClickable(false);
     this.setLabel(' ');
     // this.setTitle('D-HUB');
-    this.setDraggable(false);
+    //this.setDraggable(false);
     // this.setIcon('./assets/devices-location/tpm_bus_30_30.png');
-    // this.setIcon(icon);
-    this.vehiclePoint = vehiclePoint;
-    this.lastTimeLocationReported = 0;
-    this.updateIcon();
+    //this.setIcon(icon);
+    this.point = point;
+    this.lastModificationTimestamp = 0;
+    this.updateLocationListener();
   }
+
+  updateLocationListener(){
+    this.updateLocation$
+    .pipe(
+      takeUntil(this.ngUnSubscribe)
+    )
+    .subscribe((location: any) => {
+      this.updateData(location.lat, location.lng, location.lastModificationTimestamp);
+    })
+  }
+
+  // transition(newPosition) {
+  //   this.index = 0;
+  //   this.deltaLat = (newPosition[0] - this.getPosition().lat())/ this.numDeltas;
+  //   this.deltaLng = (newPosition[1] - this.getPosition().lng())/ this.numDeltas;
+  //   this.moveMarker1();
+  // }
+
+  // moveMarker1(){
+  //   const lat = this.getPosition().lat() + this.deltaLat;
+  //   const lng = this.getPosition().lng() + this.deltaLng;
+  //   this.setPosition(
+  //     new google.maps.LatLng(lat, lng)
+  //   );
+
+  //   if (this.index != this.numDeltas) {
+  //     this.index++;
+  //     setTimeout(moveMarker, delay);
+  //   }
+  // }
 
   /**
    * Updates the marker icon according to the vehicle states (Online, Alarmed, Offline)
    */
 
-  updateIcon() {
-    // const newIconUrl = './assets/coverage-reports/pos_02.png';
-
-    // if (
-    //   ( this.vehicle.online ) {
-    //   newIconUrl = './assets/devices-location/busAlarmed.svg';
-    // } else if (this.vehicle.online) {
-    //   newIconUrl = './assets/devices-location/busOnline.svg';
-    // } else {
-    //   newIconUrl = './assets/devices-location/busOffline.svg';
-    // }
-
-    // console.log(" Icon: ", newIconUrl, (newIconUrl != this.iconUrl), " Vehicle: ", this.vehicle);
-
-    // if(this.iconUrl == "./assets/devices-location/busOnline.svg"){
-    //   newIconUrl = "./assets/devices-location/busOffline.svg";
-    // }else if(this.iconUrl == "./assets/devices-location/busOffline.svg"){
-    //   newIconUrl = "./assets/devices-location/busAlarmed.svg";
-    // }else if(this.iconUrl == "./assets/devices-location/busAlarmed.svg"){
-    //   newIconUrl = "./assets/devices-location/busOnline.svg";
-    // }
-
-    // We only upodate the icon if it had changed.
-    // if (newIconUrl !== this.iconUrl) {
-    //   this.iconUrl = newIconUrl;
-    //   const icon = {
-    //     url: newIconUrl,
-    //     anchor: new google.maps.Point(40, 40),
-    //     scaledSize: new google.maps.Size(40, 40)
-    //   };
-    //   this.setIcon(icon);
-    // }
+  updateIcon(iconUrl) {
+    const icon = {
+      url: iconUrl,
+      anchor: new google.maps.Point(40, 40),
+      scaledSize: new google.maps.Size(40, 40)
+    };
+    console.log('updateIcon => ', iconUrl);
+    this.setIcon(icon);
   }
 
-  updateData( lng: number, lat: number, delay: number, timeLocationReported: number, online: Boolean,
-    center = false, showDisconnectedDevices = true) {
+  updateData( lng: number, lat: number, timeLocationReported: number) {
 
     this.setVisibility(100);
     this.index = 0;
@@ -159,11 +158,6 @@ export class MarkerRef extends google.maps.Marker {
     this.lastLat = lat;
     this.lastLng = lng;
 
-    if (!online && !showDisconnectedDevices) {
-      this.setVisible(showDisconnectedDevices);
-    }
-
-    this.updateIcon();
     this.moveMarkerSmoothly(timeLocationReported, false);
   }
 
@@ -181,12 +175,12 @@ export class MarkerRef extends google.maps.Marker {
     endCallBack?
   ) {
     // The marker only can be moved if the time of the new location is greater than the time of the last location reported
-    if (this.lastTimeLocationReported < timeLocationReported) {
+    if (this.lastModificationTimestamp < timeLocationReported) {
       if (initCallBack) {
         initCallBack(this);
       }
 
-      this.lastTimeLocationReported = timeLocationReported;
+      this.lastModificationTimestamp = timeLocationReported;
       this.moveMarker(center, endCallBack);
     }
   }
@@ -274,6 +268,10 @@ export class MarkerRef extends google.maps.Marker {
     this.setTitle(title);
   }
 
+  sendNewLocation(location){
+    this.updateLocation$.next(location);
+  }
+
   inizialiteEvents() {
     this.addListener('click', (e: google.maps.MouseEvent) => {
       this.clickEvent.next(e);
@@ -283,6 +281,17 @@ export class MarkerRef extends google.maps.Marker {
     });
     // this.addListener('dragend', (e) => { this.dragendEvent.next(e); });
     // this.addListener('position_changed', (e) => { this.position_changedEvent.next(e); });
+  }
+
+  destroy(){
+    this.ngUnSubscribe.next();
+    this.ngUnSubscribe.complete();
+    this.updateLocation$.next();
+    this.updateLocation$.complete();
+    this.clickEvent.next();
+    this.clickEvent.complete();
+    this.dblclickEvent.next();
+    this.dblclickEvent.complete();
   }
 }
 

@@ -227,6 +227,11 @@ class EventStoreService {
         aggregateType: "Driver",
         eventType: "VehicleUnassigned"
       },
+      // CLIENT
+      {
+        aggregateType: "Client",
+        eventType: "ClientSatelliteEnabled"
+      }
     ]
   }
 }

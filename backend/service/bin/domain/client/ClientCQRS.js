@@ -36,7 +36,7 @@ class ClientCQRS {
   getClientSatellite$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Service",
+      "Client",
       "getClientSatellite",
       PERMISSION_DENIED,
       ["SATELLITE"]

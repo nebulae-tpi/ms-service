@@ -78,6 +78,7 @@ type ServiceServiceState {
 }
 
 type ServiceClientSatellite {
+  _id: String
   "General info of the client"
   generalInfo: ServiceClientSatelliteGeneralInfo
   "Location of the client"
@@ -93,6 +94,8 @@ type ServiceClientSatelliteGeneralInfo {
   address: String
   "Client city"
   city: String
+  "Client email"
+  email: String
   "Client neighborhood"
   neighborhood: String
   "Referrer driver document id"
