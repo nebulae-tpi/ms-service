@@ -59,6 +59,7 @@ import {
 } from "@ngx-translate/core";
 import { locale as english } from "../../i18n/en";
 import { locale as spanish } from "../../i18n/es";
+import { FuseTranslationLoaderService } from "../../../../../core/services/translation-loader.service";
 
 ///////// DATEPICKER //////////
 import * as moment from "moment";
@@ -99,6 +100,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private snackBar: MatSnackBar,
     private satelliteServiceListService: SatelliteServiceListService,
+    private translationLoader: FuseTranslationLoaderService,
     private router: Router,
     private activatedRouter: ActivatedRoute,
     private keycloakService: KeycloakService,
@@ -107,6 +109,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
     private animationBuilder: AnimationBuilder,
     private renderer: Renderer2
   ) {
+    this.translationLoader.loadTranslations(english, spanish);
   }
     
 
@@ -162,11 +165,41 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
     this.selectedServiceChange.emit(service);
   }
 
+      /**
+   * cancel a service
+   * @param service 
+   */
+  cancelService(service){
+    return of(service)
+    .pipe(
+      map(service => {
+        return {
+          id: service._id, 
+          //reason: service.reason, 
+          authorType: service.authorType, 
+          //notes: service.notes
+        };
+      }),
+      mergeMap(serviceCoreCancelService => this.satelliteServiceListService.cancelServiceCoreCancelService$(serviceCoreCancelService)),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(
+      (result: any) => {
+        if (result.accepted) {
+          this.showSnackBar('SATELLITE.SERVICES.WAIT_OPERATION');
+        }
+      },
+      error => {
+        this.showSnackBar('SATELLITE.ERROR_OPERATION');
+        console.log('Error ==> ', error);
+      }
+    );    
+  }
+
   showSnackBar(message) {
-    // this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-    //   this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
-    //     duration: 4000
-    //   });
+    this.snackBar.open(this.translationLoader.getTranslate().instant(message),
+      this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
+         duration: 4000
+    });
   }
 
   graphQlAlarmsErrorHandler$(response) {

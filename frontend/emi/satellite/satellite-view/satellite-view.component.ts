@@ -396,7 +396,6 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
       }
     );
   }
-  
 
 
 

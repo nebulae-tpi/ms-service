@@ -23,6 +23,16 @@ class ShiftDA {
     });
   }
 
+  /**
+   * Gets Shift by its _id
+   * @returns {Observable}
+   */
+  static findOpenShiftById$(_id, projection = undefined) {
+    const query = { _id, state : 'AVAILABLE' };
+    return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
+      .findOne(query, { projection }));
+  }
+
 
 }
 /**

@@ -2,6 +2,7 @@
 const { of, from, concat } = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const { ShiftES } = require("../../domain/shift");
+const { ServiceES } = require("../../domain/service");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -132,6 +133,18 @@ class EventStoreService {
       ShiftDriverBlockRemoved: { fn: ShiftES.handleShiftDriverBlockRemoved$, obj: ShiftES },
       ShiftDriverBlockAdded: { fn: ShiftES.handleShiftDriverBlockAdded$, obj: ShiftES },
       ShiftLocationReported: { fn: ShiftES.handleShiftLocationReported$, obj: ShiftES },
+      //SERVICE
+      ServiceRequested: { fn: ServiceES.handleServiceRequested$, obj: ServiceES },
+      ServiceAssigned: { fn: ServiceES.handleServiceAssigned$, obj: ServiceES },
+      //ServicePickUpETAReported: { fn: ServiceES.handleServicePickUpETAReported$, obj: ServiceES },
+      //ServiceLocationReported: { fn: ServiceES.handleServiceLocationReported$, obj: ServiceES },
+      ServiceArrived: { fn: ServiceES.handleServiceArrived$, obj: ServiceES },
+      ServicePassengerBoarded: { fn: ServiceES.handleServicePassengerBoarded$, obj: ServiceES },
+      ServiceCompleted: { fn: ServiceES.handleServiceCompleted$, obj: ServiceES },
+      //ServiceDropOffETAReported: { fn: ServiceES.handleServiceDropOffETAReported$, obj: ServiceES },
+      ServiceCancelledByDriver: { fn: ServiceES.handleServiceCancelledByDriver$, obj: ServiceES },
+      ServiceCancelledByClient: { fn: ServiceES.handleServiceCancelledByClient$, obj: ServiceES },
+      ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperator$, obj: ServiceES },
     };
   }
 
@@ -151,6 +164,18 @@ class EventStoreService {
       { aggregateType: "Shift", eventType: "ShiftDriverBlockRemoved" },
       { aggregateType: "Shift", eventType: "ShiftDriverBlockAdded" },
       { aggregateType: "Shift", eventType: "ShiftLocationReported" },
+      //SERVICE
+      { aggregateType: "Service", eventType: "ServiceRequested" },
+      { aggregateType: "Service", eventType: "ServiceAssigned" },
+      //{ aggregateType: "Service", eventType: "ServicePickUpETAReported" },
+      //{ aggregateType: "Service", eventType: "ServiceLocationReported" },
+      { aggregateType: "Service", eventType: "ServiceArrived" },
+      { aggregateType: "Service", eventType: "ServicePassengerBoarded" },
+      { aggregateType: "Service", eventType: "ServiceCompleted" },
+      //{ aggregateType: "Service", eventType: "ServiceDropOffETAReported" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
     ]
   }
 }

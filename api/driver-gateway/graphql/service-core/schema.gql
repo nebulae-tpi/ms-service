@@ -16,6 +16,7 @@ type Block{
    endTime: BigInt
 }
 
+
 "Vehicle info"
 type Vehicle {
    "License plate"
@@ -62,6 +63,14 @@ type Client {
 
 "Geo point"
 type Point {
+   "Latitude"
+   lat: Float
+   "Longitude"
+   lng: Float
+}
+
+"Geo point"
+input PointInput {
    "Latitude"
    lat: Float
    "Longitude"
@@ -150,7 +159,11 @@ type Mutation{
 
    "Accept a service offer"
    acceptServiceOffer(
+      "Shift id"
+      shiftId: String
       "Service Id"
       serviceId: String
+      "Current shift location"
+      location: PointInput
    ): CommandAck @requireAuth
 }

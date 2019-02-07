@@ -179,8 +179,34 @@ class GraphQlService {
         aggregateType: "Service",
         messageType: "emigateway.graphql.mutation.ServiceCoreRequestService"
       },   
-
-
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.ServiceCoreCancelService"
+      },   
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.ServiceCoreAssignService"
+      },   
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.ServiceCoreReportServicePickupETA"
+      },   
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.ServiceCoreReportServiceAsArrived"
+      },   
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.ServiceCoreReportServiceAsPickedUp"
+      },   
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.ServiceCoreReportServiceAsCompleted"
+      },   
+      {
+        aggregateType: "Service",
+        messageType: "drivergateway.graphql.mutation.acceptServiceOffer"
+      },   
     ];
   }
 
@@ -223,7 +249,34 @@ class GraphQlService {
         fn: ServiceCQRS.requestServices$,
         obj: ServiceCQRS
       },
-                  
+      "emigateway.graphql.mutation.ServiceCoreCancelService": {
+        fn: ServiceCQRS.cancelService$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.mutation.ServiceCoreAssignService": {
+        fn: ServiceCQRS.assignService$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.mutation.ServiceCoreReportServicePickupETA": {
+        fn: ServiceCQRS.reportServicePickupETA$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.mutation.ServiceCoreReportServiceAsArrived": {
+        fn: ServiceCQRS.reportServiceAsArrived$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.mutation.ServiceCoreReportServiceAsPickedUp": {
+        fn: ServiceCQRS.reportServiceAsPickedUp$,
+        obj: ServiceCQRS
+      },
+      "emigateway.graphql.mutation.ServiceCoreReportServiceAsCompleted": {
+        fn: ServiceCQRS.reportServiceAsCompleted$,
+        obj: ServiceCQRS
+      },            
+      "drivergateway.graphql.mutation.acceptServiceOffer": {
+        fn: ServiceCQRS.acceptServiceOffer$,
+        obj: ServiceCQRS
+      },            
     };
   }
 }

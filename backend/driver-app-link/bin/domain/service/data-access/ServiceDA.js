@@ -2,12 +2,13 @@
 
 require('datejs');
 let mongoDB = undefined;
-const CollectionName = "Shift";
+const CollectionName = "Service";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, first, filter } = require("rxjs/operators");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
+const { map, mergeMap, first, filter } = require("rxjs/operators");
 
-class ShiftDA {
+class ServiceDA {
+
   static start$(mongoDbInstance) {
     return Observable.create(observer => {
       if (mongoDbInstance) {
@@ -23,7 +24,7 @@ class ShiftDA {
 
 
   /**
-   * Finds a shift by its ID
+   * Finds a Service by its ID
    * @param {*} _id 
    * @param {*} projection 
    */
@@ -33,11 +34,24 @@ class ShiftDA {
         { _id },
         projection
       )
-    ).pipe(first(shift => shift, undefined));
+    ).pipe(filter(val => val));
+  }
+
+  /**
+   * Finds all open shift// DELETE, JUST FOR TESTING
+   */
+  static findOpenShifts$(projection = undefined) {
+    const explorePastMonth = Date.today().getDate() <= 2;
+    const query = { "state": "AVAILABLE" };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection('Shift')),
+      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
+    );
   }
 
 }
 /**
- * @returns {ShiftDA}
+ * @returns {ServiceDA}
  */
-module.exports = ShiftDA;
+module.exports = ServiceDA;
