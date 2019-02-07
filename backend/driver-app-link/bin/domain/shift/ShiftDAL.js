@@ -56,7 +56,7 @@ class ShiftDAL {
      * @param {Event} shiftStartedEvt
      */
     handleShiftLocationReported$({ data }) {
-        //Build and send ShiftLocationReported event (event-sourcing)
+        if(!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
         return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)).pipe(
             mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data.location)}`)
         );

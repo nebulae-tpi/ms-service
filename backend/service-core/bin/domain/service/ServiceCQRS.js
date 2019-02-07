@@ -54,7 +54,7 @@ class ServiceCQRS {
       coordinates: [args.location.lng, args.location.lat]
     }
     console.log(`ServiceCQRS.acceptServiceOffer RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
       mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state, driver, vehicle })),
