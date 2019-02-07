@@ -87,6 +87,7 @@ class ServiceCQRS {
   }
 
 
+
   /**  
    * Queries and return a Service by its ID
    */
