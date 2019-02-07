@@ -149,7 +149,6 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
             this.serviceList.push(service);
             this.createServiceMarker(service);
           }else{
-
             if(lastServiceData){
               // If the service was closed , we have to remove the service from the table and the map
               if(service.closed){
