@@ -40,8 +40,8 @@ class ServiceES {
         const { shiftId, driver, vehicle, skipPersist } = data;
 
 
-        return skipPersist ?
-            of({}).pipe(
+        if (skipPersist) {
+            return of({}).pipe(
                 mergeMap(service =>
                     eventSourcing.eventStore.emitEvent$(
                         ServiceES.buildEventSourcingEvent(
@@ -52,8 +52,9 @@ class ServiceES {
                         )
                     )
                 )
-            )
-            : ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(
+            );
+        } else {
+            return ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(
                 mergeMap(service =>
                     eventSourcing.eventStore.emitEvent$(
                         ServiceES.buildEventSourcingEvent(
@@ -66,6 +67,8 @@ class ServiceES {
                 ),
                 mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
             );
+        }
+
     }
 
     /**
