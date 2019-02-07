@@ -116,10 +116,17 @@ export const ServiceClientSatellite = gql`
 `;
 
 // MUTATIONS 
-
 export const ServiceCoreRequestService = gql `
   mutation ServiceCoreRequestService($client: ServiceCoreClientInput!, $pickUp: ServiceCoreLocationInput!, $paymentType: String!, $requestedFeatures: [String], $dropOff: ServiceCoreLocationInput, $fareDiscount: Float, $fare: BigInt, $tip: BigInt){
     ServiceCoreRequestService(client: $client, pickUp: $pickUp, paymentType: $paymentType, requestedFeatures: $requestedFeatures, dropOff: $dropOff, fareDiscount: $fareDiscount, fare: $fare, tip: $tip){
+      accepted
+    }
+  }
+`;
+
+export const ServiceCoreCancelService = gql `
+  mutation ServiceCoreCancelService($id: String!, $reason: String!, $authorType: String!, $notes: String){
+    ServiceCoreCancelService(id: $id, reason: $reason, authorType: $authorType, notes: $notes){
       accepted
     }
   }

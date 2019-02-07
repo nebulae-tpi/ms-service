@@ -8,6 +8,7 @@ import {
   ServiceServicesSatellite,
   ServiceClientSatellite,
   ServiceCoreRequestService,
+  ServiceCoreCancelService,
   ServiceServiceUpdatedSubscription
 } from '../gql/satellite';
 import * as moment from "moment";

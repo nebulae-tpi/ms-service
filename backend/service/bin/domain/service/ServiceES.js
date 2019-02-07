@@ -14,18 +14,18 @@ let instance;
 
 class ServiceES {
 
-    constructor() {
-        this.serviceUpdatedEventEmitter$ = new Subject();
-    }
+  constructor() {
+      this.serviceUpdatedEventEmitter$ = new Subject();
+  }
 
-    startServiceUpdatedEmitter(){
-        this.serviceUpdatedEventEmitter$
-        .pipe(
-            groupBy(business => business._id),
-            mergeMap(group$ => group$.pipe(debounceTime(5000))),
-
-        )
-    }
+  startServiceUpdatedEmitter(){
+    this.serviceUpdatedEventEmitter$
+    .pipe(
+        groupBy(service => service._id),
+        mergeMap(group$ => group$.pipe(debounceTime(5000))),
+        mergeMap(service => this.sendServiceUpdatedEvent$(service))
+    )
+  }
 
    /**
    * Sends an event with the service data updated.
@@ -34,26 +34,30 @@ class ServiceES {
   sendServiceUpdatedEvent$(serviceEvent){
     return of(serviceEvent)
     .pipe(
-      mergeMap(business => WalletDA.getWallet$(business._id)),
-      mergeMap(wallet => {
-        return of(wallet)
-        .pipe(
-          mergeMap(wallet => broker.send$(MATERIALIZED_VIEW_TOPIC, 'walletPocketUpdated', wallet)),
-          mergeMap(res => {
-            return eventSourcing.eventStore.emitEvent$(
-              new Event({
-                eventType: 'WalletPocketUpdated',
-                eventTypeVersion: 1,
-                aggregateType: "Wallet",
-                aggregateId: wallet._id,
-                data: wallet,
-                user: 'SYSTEM'
-              })
-            );
-          })
-        )
-      })
+      mergeMap(service => ServiceDA.getService$(service._id)),
+      mergeMap(service => broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service))
+    ).subscribe(
+      (result) => {},
+      (err) => { console.log(err) },
+      () => { }
     );
+  }
+
+  
+
+    /**
+     * Handles the service event
+     * @param {*} serviceEvent service event
+     */
+    handleServiceEvents$(serviceEvent) {
+      console.log("handleServiceEvents");
+      return of(serviceEvent)
+      .pipe(
+        tap(res => {
+          //console.log('serviceEvent => ', res[0])
+          this.serviceUpdatedEventEmitter$.next(serviceEvent);
+        }),
+      );
   }
 
 
