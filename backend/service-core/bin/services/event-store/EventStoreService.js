@@ -111,9 +111,9 @@ class EventStoreService {
       switchMap(() => eventSourcing.eventStore.retrieveUnacknowledgedEvents$(aggregateType, mbeKey)),
       filter(evt => evt.et === eventType),
       concatMap(evt => concat(
-        handler.fn.call(handler.obj, evt),
         //MANDATORY:  ACKWOWLEDGE THIS EVENT WAS PROCESSED
-        eventSourcing.eventStore.acknowledgeEvent$(evt, mbeKey)
+        eventSourcing.eventStore.acknowledgeEvent$(evt, mbeKey),
+        handler.fn.call(handler.obj, evt),        
       ))
     );
   }
