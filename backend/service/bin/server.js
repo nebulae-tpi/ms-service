@@ -18,8 +18,6 @@ const Rx = require('rxjs');
 
 const shift = require('./domain/shift');
 
-
-
 const start = () => {
     Rx.concat(
         eventSourcing.eventStore.start$(),
