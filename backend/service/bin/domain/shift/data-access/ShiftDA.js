@@ -27,9 +27,10 @@ class ShiftDA {
   * @param {string} id Shift ID
    */
   static getShiftById$(id) {
-    const collection = mongoDB.getHistoricalDbByYYMM(id.length - 4).collection(COLLECTION_NAME);
+    const collection = mongoDB.getHistoricalDbByYYMM(id.substring(id.length - 4)).collection(COLLECTION_NAME);
     return defer(() => collection.findOne(
-      { _id: id }
+      { _id: id },
+      { projection: { stateChanges: 0, onlineChanges: 0 } }
     ));
   }
 
