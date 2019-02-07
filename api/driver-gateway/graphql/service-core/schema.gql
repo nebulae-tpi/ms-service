@@ -53,7 +53,7 @@ type Shift {
 "Client info"
 type Client {
    "Full name"
-   fullName: String
+   fullname: String
    "Tip given to the client. Eg. satellites"
    tip: BigInt,
    "Tiping type"
