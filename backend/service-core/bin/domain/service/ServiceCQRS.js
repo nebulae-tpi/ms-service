@@ -24,7 +24,6 @@ const {
 const { ShiftDA, ServiceDA } = require('./data-access')
 
 
-
 const VALID_SERVICE_CLIENT_TIP_TYPES = ['CASH', 'VIRTUAL_WALLET'];
 const VALID_SERVICE_PAYMENT_TYPES = ['CASH', 'CREDIT_CARD'];
 const VALID_SERVICE_REQUEST_FEATURES = ['AC', 'TRUNK', 'ROOF_RACK', 'PETS', 'BIKE_RACK'];
