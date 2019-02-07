@@ -339,6 +339,7 @@ class ServiceCQRS {
     "client username"
     username: String
 
+    
     return new Event({
       aggregateType: 'Service',
       aggregateId: _id,
