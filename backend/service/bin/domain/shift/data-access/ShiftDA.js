@@ -2,7 +2,7 @@
 
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
-const CollectionName = "Shift";
+const COLLECTION_NAME = "Shift";
 const { CustomError } = require("../../../tools/customError");
 const { map, mergeMap, reduce } = require("rxjs/operators");
 const { of, Observable, defer, from } = require("rxjs");
@@ -22,11 +22,20 @@ class ShiftDA {
     });
   }
 
+  static getShiftById$(id) {
+    const yymm = id.substring(id.length - 4);
+    const dbToSearch = this.client.db(`historical_${yymm}`).collection(COLLECTION_NAME);
+    return defer(() => dbToSearch.findOne(
+      { _id: id },
+      { projection: { stateChanges: 0, onlineChanges: 0  } }
+      ));
+  }
+
     /**
    * Gets an user by its username
    */
   static getShift$(id, businessId) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
     const query = {
       _id: id      
     };
@@ -39,7 +48,7 @@ class ShiftDA {
   
   
   static getShiftList$(filter, pagination) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
 
     const query = {};
 
@@ -70,7 +79,7 @@ class ShiftDA {
 
 
   static getShiftSize$(filter) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
     const query = {};
     if (filter.businessId) { query.businessId = filter.businessId;}
     if (filter.name) { query["generalInfo.name"] = { $regex: filter.name, $options: "i" }; }

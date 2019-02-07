@@ -38,49 +38,6 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
 
   shift: any;
 
-  // test
-
-  SHIFT_TEST = {
-    '_id': 'q1w2e3-r4t5y6-edfr567gt-yhuyj-734',
-    'businessId': 'q1q1q1q-w2w2-e3e3-r4r4-t5y66656-545644',
-    'timestamp': 1000000,
-    'state': 'AVAILABLE',
-    'stateChanges': [
-      {
-        'state': '',
-        'timestamp': 123456,
-      }
-    ],
-    'online': true,
-    'onlineChanges': [{ 'online': true, 'timestamp': 23456 }],
-    'lastReceivedComm': 1000000,
-    'location': {
-      'type': 'Point',
-      'coordinates': [-73.9928, 40.7193]
-    },
-    'driver': {
-      'id': 'e3r4t5-y6u7i8-q1w2e3-r4tt5y6-j6k7l8',
-      'fullname': 'Juan Felipe Santa Ospina',
-      'blocks': ['KEY', 'KEY'],
-      'documentType': 'CC',
-      'documentId': '1045059869',
-      'pmr': false,
-      'languages': ['EN'],
-      'phone': '3125210012',
-      'username': 'juan.santa',
-    },
-    'vehicle': {
-      'id': 'w2e3-r4t5-y6u7-i8o9',
-      'licensePlate': 'MNP137',
-      'blocks': ['KEY', 'KEY'],
-      'features': ['AC', 'TRUNK'],
-      'brand': 'MAZDA',
-      'line': 'Sport',
-      'model': '2017',
-    },
-  };
-
-
   constructor(
     private translationLoader: FuseTranslationLoaderService,
     public snackBar: MatSnackBar,
@@ -106,10 +63,6 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
         : of(null)
       ),
       takeUntil(this.ngUnsubscribe),
-
-      // // REMOVE
-      // map(() => this.SHIFT_TEST),
-
       tap(shift => this.shift = shift )
     )
     .subscribe(() => {}, e => console.log(e));
