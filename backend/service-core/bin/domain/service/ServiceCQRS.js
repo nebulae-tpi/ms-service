@@ -78,7 +78,7 @@ class ServiceCQRS {
         'Service',
         service._id,
         'ServiceAssigned',
-        {...service, skipPersist : true},
+        { ...service, skipPersist: true },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       tap(x => console.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
@@ -355,7 +355,7 @@ class ServiceCQRS {
         }],
         tip: tip <= 0 ? undefined : tip,
         route: { type: "LineString", coordinates: [] },
-        lastModificationTimestamp: Date.now(),        
+        lastModificationTimestamp: Date.now(),
       }
     });
   }
@@ -380,6 +380,13 @@ class ServiceCQRS {
     });
   }
 
+  /**
+   * Build regular Command Accepted ACK
+   */
+  buildCommandAck() {
+    return { accepted: true };
+  }
+
   //#endregion
 
 
@@ -388,6 +395,8 @@ class ServiceCQRS {
   formatServiceToGraphQLSchema(service) {
     return { ...service, route: undefined, id: service._id };
   }
+
+
 
   //#endregion
 
