@@ -223,7 +223,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/service-core/
             export DOCKERHUB_IMAGE=service.backend.servicecore
-            export DOCKERHUB_TAG=1.0.20
+            export DOCKERHUB_TAG=1.0.21
             gitChanged backend/service-core || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service-core/
             gitChanged backend/service-core || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/service-core || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
