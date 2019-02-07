@@ -30,6 +30,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ aid, data }) {
+        const {pickUp} = data;
         console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //TODO: DELETE LINE
         return ServiceDA.findOpenShifts$({ "driver.username": 1, "businessId": 1, "timestamp": 1 }).pipe(
             mergeMap(shift => driverAppLinkBroker.sendServiceEventToDrivers$(
