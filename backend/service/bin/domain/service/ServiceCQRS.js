@@ -63,7 +63,7 @@ class ServiceCQRS {
    * @param {*} args args
    */
   getServiceSatelliteList$({ args }, authToken) {
-    console.log('getServiceSatelliteList$ --*** ');
+    console.log('getServiceSatelliteList$ --*');
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",

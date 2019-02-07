@@ -206,7 +206,7 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
           this.createServiceMarker(service);
         })
       }
-      console.log('loadServiceSatelliteList => ', this.serviceList);
+      console.log('loadServiceSatelliteList  => ', this.serviceList);
     });
   }
 
