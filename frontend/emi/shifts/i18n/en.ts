@@ -10,7 +10,8 @@ export const locale = {
         DRIVER_NAME: 'Driver name',
         LICENSE_PLATE: 'License plate',
         DRIVER_DOCUMENT: 'Driver document ID',
-        VEHICLE_MODEL: 'Vehicle model'
+        VEHICLE_MODEL: 'Vehicle model',
+        LAST_COMMUNICATION: 'Last communication established'
       },
       DRIVER_DETAIL: {
         ID: 'ID',

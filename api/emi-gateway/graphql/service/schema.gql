@@ -311,7 +311,7 @@ type Query {
   "Get Shift filtered"
   ServiceShifts(filterInput: ServiceShiftFilterInput!, paginationInput: ServiceShiftPaginationInput!): [ServiceShift]
   "Get amount of Shifts filtered"
-  ServiceShiftsSize(filterInput: ServiceShiftFilterInput!): [ServiceShift]
+  ServiceShiftsSize(filterInput: ServiceShiftFilterInput!): Int!
   "Get shift by its id"
   ServiceShift(id: String!): ServiceShift
 

@@ -107,7 +107,8 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       'driverUsername',
       'driverDocumentId',
       'licensePlate',
-      'vehicleModel'
+      'vehicleModel',
+      'lastReceivedComm'
     ];
 
   /////// OTHERS ///////
@@ -138,49 +139,6 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     this.updatePaginatorDataSubscription();
     this.loadLastFilters();
     this.refreshTableSubscription();
-
-    this.CONST_LIST_RESPONSE = [
-      {
-        '_id': 'q1w2e3-r4t5y6-edfr567gt-yhuyj-734',
-        'businessId': 'q1q1q1q-w2w2-e3e3-r4r4-t5y66656-545644',
-        'timestamp': 1000000,
-        'state': 'AVAILABLE',
-        'stateChanges': [
-          {
-            'state': '',
-            'timestamp': 123456,
-          }
-        ],
-        'online': true,
-        'onlineChanges': [{ 'online': true, 'timestamp': 23456 }],
-        'lastReceivedComm': 1000000,
-        'location': {
-          'type': 'Point',
-          'coordinates': [-73.9928, 40.7193]
-        },
-        'driver': {
-          'id': 'e3r4t5-y6u7i8-q1w2e3-r4tt5y6-j6k7l8',
-          'fullname': 'Juan Felipe Santa Ospina',
-          'blocks': ['KEY', 'KEY'],
-          'documentType': 'CC',
-          'documentId': '1045059869',
-          'pmr': false,
-          'languages': ['EN'],
-          'phone': '3125210012',
-          'username': 'juan.santa',
-        },
-        'vehicle': {
-          'id': 'w2e3-r4t5-y6u7-i8o9',
-          'licensePlate': 'MNP137',
-          'blocks': ['KEY', 'KEY'],
-          'features': ['AC', 'TRUNK'],
-          'brand': 'MAZDA',
-          'line': 'Sport',
-          'model': '2017',
-        },
-      }
-    ];
-
 
   }
 
@@ -234,7 +192,6 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       states: [null]
     });
 
-    console.log('raw => ', this.filterForm.getRawValue());
     this.filterForm.disable({
       onlySelf: true,
       emitEvent: false
@@ -244,18 +201,17 @@ export class ShiftListComponent implements OnInit, OnDestroy {
   updateFilterDataSubscription() {
     this.listenFilterFormChanges$()
       .pipe(
-        takeUntil(this.ngUnsubscribe)
+        takeUntil(this.ngUnsubscribe),
+        tap(filterData => this.shiftListservice.updateFilterData(filterData) )
       )
-      .subscribe(filterData => {
-        this.shiftListservice.updateFilterData(filterData);
-      });
+      .subscribe();
   }
 
   updatePaginatorDataSubscription() {
     this.listenPaginatorChanges$()
       .pipe(
         takeUntil(this.ngUnsubscribe),
-        map(pagination => ({page: pagination.pageIndex, count: pagination.pageSize, sort: -1})),
+        map(pagination => ({ pagination: {page: pagination.pageIndex, count: pagination.pageSize, sort: -1} })),
         tap(paginator => this.shiftListservice.updatePaginatorData(paginator) )
       )
       .subscribe();
@@ -272,7 +228,6 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(([filterValue, paginator]) => {
           if (filterValue) {
-            console.log('loadLastFilters => ', filterValue);
             this.filterForm.patchValue({
               initTimestamp: filterValue.initTimestamp,
               endTimestamp: filterValue.endTimestamp,
@@ -306,7 +261,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       debounceTime(500),
       filter(([filterValue, paginator, selectedBusiness]) => (filterValue != null && paginator != null)),
       map(([filterValue, paginator, selectedBusiness]) => {
-        console.log('filterForm --> ', this.filterForm.getRawValue());
+
 
         const filterInput = {
           businessId: selectedBusiness ? selectedBusiness.id : null,
@@ -318,6 +273,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
           states: filterValue.states,
           showClosedShifts: filterValue.showClosedShifts
         };
+        console.log('paginator', paginator);
 
         const paginationInput = {
           page: paginator.pagination.page,
@@ -328,14 +284,18 @@ export class ShiftListComponent implements OnInit, OnDestroy {
         return [filterInput, paginationInput];
       }),
       mergeMap(([filterInput, paginationInput]) => forkJoin(
-        this.getserviceList$(filterInput, paginationInput),
-        this.getserviceSize$(filterInput),
+        this.getShiftList$(filterInput, paginationInput),
+        this.getShiftListSize$(filterInput),
       )),
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
 
-      list = this.CONST_LIST_RESPONSE;
+      console.log('###############################');
+      console.log(size);
+      console.log(list);
+      console.log('###############################');
+
 
       this.dataSource.data = list;
       this.tableSize = size;
@@ -347,11 +307,11 @@ export class ShiftListComponent implements OnInit, OnDestroy {
    * @param filterInput
    * @param paginationInput
    */
-  getserviceList$(filterInput, paginationInput){
-    return this.shiftListservice.getserviceList$(filterInput, paginationInput)
+  getShiftList$(filterInput, paginationInput){
+    return this.shiftListservice.getShiftList$(filterInput, paginationInput)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      map(resp => resp.data.ServiceServices)
+      map(resp => resp.data.ServiceShifts)
     );
   }
 
@@ -359,11 +319,11 @@ export class ShiftListComponent implements OnInit, OnDestroy {
    * Gets the service size
    * @param filterInput
    */
-  getserviceSize$(filterInput){
-    return this.shiftListservice.getserviceSize$(filterInput)
+  getShiftListSize$(filterInput){
+    return this.shiftListservice.getShiftListSize$(filterInput)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      map(resp => resp.data.ServiceServicesSize)
+      map(resp => resp.data.ServiceShiftsSize)
     );
   }
 

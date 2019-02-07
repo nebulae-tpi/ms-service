@@ -102,13 +102,13 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
       map(params => params['id']),
       mergeMap(shiftId => shiftId !== 'new'
         ? this.shiftDetailService.getShiftDetails$(shiftId).
-          pipe(map(res => res.data.ServiceService))
+          pipe(map(res => res.data.ServiceShift))
         : of(null)
       ),
       takeUntil(this.ngUnsubscribe),
 
-      // REMOVE
-      map(() => this.SHIFT_TEST),
+      // // REMOVE
+      // map(() => this.SHIFT_TEST),
 
       tap(shift => this.shift = shift )
     )

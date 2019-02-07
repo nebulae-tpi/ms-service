@@ -3,7 +3,7 @@ import { Observable, BehaviorSubject, of } from 'rxjs';
 import { startWith,  tap, mergeMap } from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
 import {
-  ServiceService,
+  ServiceShift,
   ServiceServiceUpdatedSubscription
 } from '../gql/shift.js';
 
@@ -16,9 +16,8 @@ export class ShiftDetailService {
   }
 
   getShiftDetails$(id: string) {
-    console.log('getServiceService => ', id);
     return this.gateway.apollo.query<any>({
-      query: ServiceService,
+      query: ServiceShift,
       variables: {
         id: id
       },
