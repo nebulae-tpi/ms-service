@@ -66,6 +66,22 @@ module.exports = {
                 mergeMap(response => getResponseFromBackEnd$(response))
             ).toPromise();
         },
+        ServiceClientSatellites(root, args, context) {
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceClientSatellites', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["OPERATOR"])
+            .pipe(
+                mergeMap(() =>
+                    broker
+                    .forwardAndGetReply$(
+                        "Client",
+                        "emigateway.graphql.query.ServiceClientSatellites",
+                        { root, args, jwt: context.encodedToken },
+                        2000
+                    )
+                ),
+                catchError(err => handleError$(err, "ServiceClientSatellites")),
+                mergeMap(response => getResponseFromBackEnd$(response))
+            ).toPromise();
+        },
         ServiceClientSatellite(root, args, context) {
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceClientSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE"])
             .pipe(

@@ -47,6 +47,25 @@ class ClientCQRS {
     );
   }
 
+  /**
+   * Get the satellite clients data (Location, neighborhood, city, ...)
+   * @param {*} param0 
+   * @param {*} authToken 
+   */
+  getSatelliteClients$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Client",
+      "getSatelliteClients",
+      PERMISSION_DENIED,
+      ["OPERATOR"]
+    ).pipe(
+      mergeMap(roles => ClientDA.getSatelliteClients$(args.clienText)),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
   //#endregion
 
 }

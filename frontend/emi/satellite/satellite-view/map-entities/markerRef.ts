@@ -61,9 +61,12 @@ export class MarkerRef extends google.maps.Marker {
 
   contentString = MARKER_REF_ORIGINAL_INFO_WINDOW_CONTENT;
 
+
+
   infoWindow = new google.maps.InfoWindow({
-    content: this.contentString
+    content: ''
   });
+  
 
   /**
    * Historical route path of the vehicle
@@ -102,6 +105,10 @@ export class MarkerRef extends google.maps.Marker {
     this.point = point;
     this.lastModificationTimestamp = 0;
     this.updateLocationListener();
+  }
+
+  updateInfoWindowContent(contentString){
+    this.infoWindow.setContent(contentString);
   }
 
   updateLocationListener(){

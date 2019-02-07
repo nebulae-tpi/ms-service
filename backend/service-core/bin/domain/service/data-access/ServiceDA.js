@@ -39,6 +39,7 @@ class ServiceDA {
    * @returns {Observable}
    */
   static insertService$(service) {
+    console.log('service._id  => ', service._id );
     return defer(() => mongoDB.getHistoricalDbByYYMM(service._id.split('-').pop()).collection(CollectionName)
       .insertOne(service));
   }

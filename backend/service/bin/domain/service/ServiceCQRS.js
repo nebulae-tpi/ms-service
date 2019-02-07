@@ -208,7 +208,7 @@ class ServiceCQRS {
     }
 
     buildRouteArray(routes){
-      if(!routes){
+      if(!routes || routes.length == 0){
         return null;
       }
       const routesArray = [];

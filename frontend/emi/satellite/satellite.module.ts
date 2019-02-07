@@ -9,6 +9,7 @@ import { SatelliteServiceListComponent } from './satellite-view/satellite-servic
 import { SatelliteService } from './satellite.service';
 import { ToolbarService } from '../../toolbar/toolbar.service';
 import { DialogComponent } from './dialog/dialog.component';
+import { CancelServiceDialogComponent } from './dialog/cancel-service-dialog/cancel-service-dialog.component';
 import { SatelliteViewService } from './satellite-view/satellite-view.service';
 import { SatelliteServiceListService } from './satellite-view/satellite-service-list/satellite-service-list.service';
 
@@ -27,10 +28,11 @@ const routes: Routes = [
   ],
   declarations: [
     DialogComponent,
+    CancelServiceDialogComponent,
     SatelliteViewComponent,
     SatelliteServiceListComponent
   ],
-  entryComponents: [DialogComponent],
+  entryComponents: [DialogComponent, CancelServiceDialogComponent],
   providers: [ SatelliteService, SatelliteViewService, SatelliteServiceListService, DatePipe]
 })
 export class SatelliteModule {}

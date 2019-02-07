@@ -35,6 +35,18 @@ class ClientDA {
   }
 
     /**
+   * Gets the satellite clients by the client name
+   */
+  static getSatelliteClients$(clienText) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    const query = {
+      'generalInfo.name': { $regex: clienText, $options: "i" }, 
+    };
+    return defer(() => collection.find(query).limit(30));
+  }
+
+    /**
    * modifies the general info of the indicated Client 
    * @param {*} id  Client ID
    * @param {*} clientSatellite  Client info
