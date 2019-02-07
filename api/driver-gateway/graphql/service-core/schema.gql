@@ -16,6 +16,7 @@ type Block{
    endTime: BigInt
 }
 
+
 "Vehicle info"
 type Vehicle {
    "License plate"
