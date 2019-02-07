@@ -175,6 +175,7 @@ class ShiftDA {
   }
 
   static getShiftOnlineChangeList$(shiftId, pagination) {
+    console.log("PAGINATION", pagination);
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
     return defer(() => collection
       .find( { _id: shiftId } )
@@ -183,7 +184,7 @@ class ShiftDA {
     )
       .pipe(
         map(result => result ? result[0].onlineChanges : []),
-        tap(r => console.log("getShiftStateChangeList$", r) )
+        tap(r => console.log("getShiftOnlineChangeList$", r) )
       )
   }
 
