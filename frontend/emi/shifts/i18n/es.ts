@@ -2,7 +2,7 @@ export const locale = {
   lang: 'es',
   data: {
     SHIFT: {
-      HEADER_TITLE: 'SERVICIOS',
+      HEADER_TITLE: 'TURNOS',
       DETAIL_HEADER_NAME: 'Detalle del turno',
       SHIFT_TABLE_LIST: {
         TIMESTAMP: 'Fecha',
