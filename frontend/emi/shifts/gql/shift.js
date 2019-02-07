@@ -80,6 +80,38 @@ export const ServiceShiftsSize = gql`
   }
 `;
 
+
+export const ServiceShiftStateChangesList = gql`
+  query ServiceShiftStateChangesList( $id: String!, $paginationInput: ServiceShiftPaginationInput!) {
+    ServiceShiftStateChangesList(id: $id, paginationInput: $paginationInput) {
+      state
+      timestamp
+    }
+  }
+`;
+
+export const ServiceShiftStateChangesListSize = gql`
+  query ServiceShiftStateChangesListSize($id: String!) {
+    ServiceShiftStateChangesListSize(id: $id)
+  }
+`;
+
+export const ServiceShiftOnlineChangesList = gql`
+  query ServiceShiftOnlineChangesList( $id:String! $paginationInput: ServiceShiftPaginationInput!) {
+    ServiceShiftOnlineChangesList(id: $id, paginationInput: $paginationInput) {
+      online
+      timestamp
+    }
+  }
+`;
+
+export const ServiceShiftOnlineChangesListSize = gql`
+  query ServiceShiftOnlineChangesListSize($id: String!) {
+    ServiceShiftOnlineChangesListSize(id: $id)
+  }
+`;
+
+
 // SUBSCRIPTION
 export const ServiceServiceUpdatedSubscription = gql`
   subscription{

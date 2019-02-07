@@ -180,6 +180,87 @@ module.exports = {
                     mergeMap(response => getResponseFromBackEnd$(response))
                 ).toPromise();
         },
+
+        ServiceShiftStateChangesList(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'ServiceShiftStateChangesList', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Shift",
+                                "emigateway.graphql.query.serviceShiftStateChangesList",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceShiftStateChangesList")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
+        },
+        ServiceShiftStateChangesListSize(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'ServiceShiftStateChangesListSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Shift",
+                                "emigateway.graphql.query.serviceShiftStateChangesListSize",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceShiftStateChangesListSize")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
+        },
+        ServiceShiftOnlineChangesList(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'ServiceShiftOnlineChangesList', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Shift",
+                                "emigateway.graphql.query.serviceShiftOnlineChangesList",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceShiftOnlineChangesList")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
+        },
+        ServiceShiftOnlineChangesListSize(root, args, context) {
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-Service', 'ServiceShiftOnlineChangesListSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Shift",
+                                "emigateway.graphql.query.serviceShiftOnlineChangesListSize",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceShiftOnlineChangesListSize")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
+        },
     },
 
     //// MUTATIONS ///////

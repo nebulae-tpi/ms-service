@@ -93,7 +93,7 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadShift();
-    this.subscribeServiceUpdated();
+    // this.subscribeServiceUpdated();
   }
 
   loadShift(){
@@ -115,15 +115,15 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
     .subscribe(() => {}, e => console.log(e));
   }
 
-  subscribeServiceUpdated(){
-    this.shiftDetailService.subscribeServiceServiceUpdatedSubscription$()
-    .pipe(
-      map(subscription => subscription.data.ServiceServiceUpdatedSubscription),
-      takeUntil(this.ngUnsubscribe),
-      tap(shift => this.shift = shift)
-    )
-    .subscribe(() => {}, e => console.log(e), () => {} );
-  }
+  // subscribeServiceUpdated(){
+  //   this.shiftDetailService.subscribeServiceServiceUpdatedSubscription$()
+  //   .pipe(
+  //     map(subscription => subscription.data.ServiceServiceUpdatedSubscription),
+  //     takeUntil(this.ngUnsubscribe),
+  //     tap(shift => this.shift = shift)
+  //   )
+  //   .subscribe(() => {}, e => console.log(e), () => {} );
+  // }
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),

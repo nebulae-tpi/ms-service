@@ -188,6 +188,114 @@ class ClientCQRS {
     );
   }
 
+
+  getShiftStateChangesList$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Driver",
+      "getDriverListSize",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+    ).pipe(
+      mergeMap(roles => {
+        // const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        // //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
+        // const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        // const filterInput = args.filterInput;
+        // filterInput.businessId = businessId;
+
+        // return ShiftDA.getShiftSize$(filterInput);
+        return of([
+          {state: 'AVAILABLE', timestamp: Date.now()},
+          {state: 'NOT_AVAILABLE', timestamp: Date.now()},
+          {state: 'BUSY', timestamp: Date.now()},
+          {state: 'BLOCKED', timestamp: Date.now()},
+          {state: 'CLOSED', timestamp: Date.now()},
+        ]);
+      }),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
+
+  getShiftStateChangesListSize$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Driver",
+      "getDriverListSize",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+    ).pipe(
+      mergeMap(roles => {
+        // const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        // //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
+        // const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        // const filterInput = args.filterInput;
+        // filterInput.businessId = businessId;
+
+        // return ShiftDA.getShiftSize$(filterInput);
+        return of(15);
+      }),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
+  getShiftOnlineChangesList$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Driver",
+      "getDriverListSize",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+    ).pipe(
+      mergeMap(roles => {
+        // const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        // //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
+        // const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        // const filterInput = args.filterInput;
+        // filterInput.businessId = businessId;
+
+        // return ShiftDA.getShiftSize$(filterInput);
+        return of([
+          {online: true, timestamp: Date.now()},
+          {online: false, timestamp: Date.now()},
+          {online: true, timestamp: Date.now()},
+          {online: false, timestamp: Date.now()},
+          {online: true, timestamp: Date.now()},
+          {online: false, timestamp: Date.now()},
+          {online: true, timestamp: Date.now()},
+          {online: false, timestamp: Date.now()},
+        ]);
+      }),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
+  getShiftOnlineChangesListSize$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Driver",
+      "getDriverListSize",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+    ).pipe(
+      mergeMap(roles => {
+        // const isPlatformAdmin = roles["PLATFORM-ADMIN"];
+        // //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
+        // const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        // const filterInput = args.filterInput;
+        // filterInput.businessId = businessId;
+
+        // return ShiftDA.getShiftSize$(filterInput);
+        return of(28);
+      }),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
   //#endregion
 
 }

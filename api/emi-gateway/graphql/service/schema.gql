@@ -317,7 +317,14 @@ type Query {
   ServiceShiftsSize(filterInput: ServiceShiftFilterInput!): Int!
   "Get shift by its id"
   ServiceShift(id: String!): ServiceShift
-
+  "Get Shift changeStates List @param id: Shift id"
+  ServiceShiftStateChangesList(id: String!, paginationInput: ServiceShiftPaginationInput! ): [ServiceShiftStateChange]
+  "Get Shift changeStates List Size @param id: Shift id"
+  ServiceShiftStateChangesListSize(id: String!): Int!
+  "Get Shift changeStates List @param id: Shift id"
+  ServiceShiftOnlineChangesList(id: String!, paginationInput: ServiceShiftPaginationInput! ): [ServiceShiftOnlineChange]
+  "Get Shift changeStates List Size @param id: Shift id"
+  ServiceShiftOnlineChangesListSize(id: String!): Int!
 }
 
 type Subscription {
