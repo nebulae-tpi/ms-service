@@ -169,7 +169,7 @@ module.exports = {
                     return pubsub.asyncIterator("ServiceDriverVehicleAssignedSubscription");
                 },
                 (payload, variables, context, info) => {
-                    return true;
+                    return variables.driverId === payload.ServiceDriverVehicleAssignedSubscription.driverId;
                 }
             )
         }

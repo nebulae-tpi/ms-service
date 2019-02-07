@@ -93,7 +93,6 @@ export class VehicleAssignmentService {
   }
 
   assignVehicleToDriver$(driverId: string, vehicleLicensePlate: string) {
-    console.log('assignVehicleToDriver ==> ', driverId, vehicleLicensePlate);
     return this.gateway.apollo
       .mutate<any>({
         mutation: ServiceAssignVehicleToDriver,
@@ -106,7 +105,6 @@ export class VehicleAssignmentService {
   }
 
   unassignVehicleToDriver$(driverId: string, vehicleLicensePlate: string) {
-    console.log('assignVehicleToDriver ==> ', driverId, vehicleLicensePlate);
     return this.gateway.apollo
       .mutate<any>({
         mutation: ServiceUnassignVehicleToDriver,
@@ -132,10 +130,13 @@ export class VehicleAssignmentService {
 /**
  * Event triggered when a business is created, updated or deleted.
  */
-listenServiceDriverVehicleAssignedEvts$(): Observable<any> {
+listenServiceDriverVehicleAssignedEvts$(driverId: string): Observable<any> {
   return this.gateway.apollo
   .subscribe({
-    query: ServiceDriverVehicleAssignedSubscription
+    query: ServiceDriverVehicleAssignedSubscription,
+    variables: {
+      driverId: driverId
+    }
   });
 }
 

@@ -100,8 +100,8 @@ export const ServiceUnassignVehicleToDriver = gql `
 
 // SUBSCRIPTION
 export const ServiceDriverVehicleAssignedSubscription = gql`
-  subscription{
-    ServiceDriverVehicleAssignedSubscription{    
+  subscription($driverId: String){
+    ServiceDriverVehicleAssignedSubscription(driverId: $driverId){    
       _id
       businessId
       licensePlate
