@@ -122,6 +122,55 @@ class Service {
         );
     }
 
+
+
+    static queryHistoricalService$(user, expectNull = false) {
+        const query =
+            `query{
+                AssignedService{
+                  _id,
+                  timestamp,
+                  client{
+                    fullname,
+                    tip,
+                    tipType
+                  },
+                  pickUp{
+                    marker{
+                      lat,lng
+                    },
+                    polygon{
+                      lat,lng
+                    },
+                    city,zone,neighborhood,addressLine1,addressLine1,addressLine2,notes
+                  },
+                  dropOff{
+                    marker{
+                      lat,lng
+                    },
+                    polygon{
+                      lat,lng
+                    },
+                    city,zone,neighborhood,addressLine1,addressLine1,addressLine2,notes
+                  },
+                  verificationCode,
+                  requestedFeatures,
+                  paymentType,
+                  fareDiscount,
+                  fare,
+                  tip,
+                  route{lat,lng},
+                  state
+                }
+              }`;
+        return user.graphQL.executeQuery$(query).pipe(
+            catchError(error => Rx.throwError(new Error(`Failed to queryAssignedService, asError: << ${error} >>   JSON: ${JSON.stringify(error,null,2)}`))),
+            tap(({ OpenShift }) => {expectNull ? expect(OpenShift).to.be.undefined : expect(OpenShift).to.not.be.undefined;}),
+            map(({ OpenShift }) => OpenShift),
+            tap(OpenShift => console.log(`query OpenShift: ${OpenShift}`))
+        );
+    }
+
 }
 
 module.exports = Service;

@@ -62,7 +62,6 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
-
   },
 
   Mutation: {
