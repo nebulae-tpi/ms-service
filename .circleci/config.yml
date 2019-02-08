@@ -258,7 +258,7 @@ jobs:
             gitChanged backend/driver-app-link || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
       - persist_to_workspace:
           root: ~/nebulae/
-          paths:
+          paths: 
             - backend
 
 # ################ DEPLOYMENT ################ 
