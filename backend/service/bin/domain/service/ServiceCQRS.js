@@ -125,7 +125,7 @@ class ServiceCQRS {
   }
 
     /**  
-   * Gets the amount of the Service according to the filter
+   * Gets the amount of the Service according to the filter.
    *
    * @param {*} args args
    */
@@ -160,8 +160,6 @@ class ServiceCQRS {
      * @param Object service
      */
     formatServiceToGraphQLSchema(service) {
-
-      console.log('service.location => ', service.route);
       return {
         _id: service._id,
         businessId: service.businessId,
