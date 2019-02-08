@@ -222,6 +222,20 @@ class ServiceDA {
   }
 
 
+  /**
+   * Finds an open service by driver
+   */
+  static findOpenAssignedServiceByDriver$(driverId, projection = undefined) {
+    const explorePastMonth = Date.today().getDate() <= 2;
+    const query = { "state": { "$in": ["ASSIGNED","ARRIVED","ON_BOARD"]}, "driver.id": driverId };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
+      first(service => service, undefined)
+    );
+  }
+
 
 
 }

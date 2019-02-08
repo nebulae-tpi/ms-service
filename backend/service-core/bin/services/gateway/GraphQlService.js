@@ -207,6 +207,10 @@ class GraphQlService {
         aggregateType: "Service",
         messageType: "drivergateway.graphql.mutation.acceptServiceOffer"
       },   
+      {
+        aggregateType: "Service",
+        messageType: "drivergateway.graphql.query.AssignedService"
+      },   
     ];
   }
 
@@ -275,6 +279,10 @@ class GraphQlService {
       },            
       "drivergateway.graphql.mutation.acceptServiceOffer": {
         fn: ServiceCQRS.acceptServiceOffer$,
+        obj: ServiceCQRS
+      },            
+      "drivergateway.graphql.query.AssignedService": {
+        fn: ServiceCQRS.queryAssignedService$,
         obj: ServiceCQRS
       },            
     };

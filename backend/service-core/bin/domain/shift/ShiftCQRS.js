@@ -1,6 +1,7 @@
 "use strict";
 
 
+const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
 const { of, interval, forkJoin } = require("rxjs");
 const { mapTo, mergeMap, catchError, map, toArray, mergeMapTo, tap } = require('rxjs/operators');
@@ -37,12 +38,12 @@ class ShiftCQRS {
   queryOpenShift$({ root, args, jwt }, authToken) {
     const { driverId } = authToken;
 
-    console.log(`ShiftCQRS.queryOpenShift RQST: ${JSON.stringify({ driverId, })}`); //TODO: DELETE THIS LINE
+    ShiftCQRS.log(`ShiftCQRS.queryOpenShift RQST: ${JSON.stringify({ driverId, })}`); //TODO: DELETE THIS LINE
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "queryOpenShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)),
       map(shift => this.formatShitToGraphQLSchema(shift)),
-      tap(x => console.log(`ShiftCQRS.queryOpenShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ShiftCQRS.log(`ShiftCQRS.queryOpenShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -55,7 +56,7 @@ class ShiftCQRS {
     const vehiclePlate = args.vehiclePlate.toUpperCase();
     const { businessId, driverId } = authToken;
 
-    console.log(`ShiftCQRS.startShift RQST: ${JSON.stringify({ vehiclePlate, driverId, businessId })}`); //TODO: DELETE THIS LINE
+    ShiftCQRS.log(`ShiftCQRS.startShift RQST: ${JSON.stringify({ vehiclePlate, driverId, businessId })}`); //TODO: DELETE THIS LINE
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
@@ -69,7 +70,7 @@ class ShiftCQRS {
       map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, authToken)),// build shift with all needed proerties
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ShiftCQRS.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -84,7 +85,7 @@ class ShiftCQRS {
     const VALID_STATES = ["AVAILABLE", "NOT_AVAILABLE"];
     const { businessId, driverId } = authToken;
 
-    console.log(`ShiftCQRS.setShiftState RQST: ${JSON.stringify({ state, driverId, businessId })}`); //TODO: DELETE THIS LINE
+    ShiftCQRS.log(`ShiftCQRS.setShiftState RQST: ${JSON.stringify({ state, driverId, businessId })}`); //TODO: DELETE THIS LINE
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "setShiftState", PERMISSION_DENIED, ["DRIVER"]).pipe(
       tap(() => { if (VALID_STATES.indexOf(state) <= -1) throw ERROR_23027; }), //Invalid input state verification
@@ -96,7 +97,7 @@ class ShiftCQRS {
       //mergeMap(shift => ServiceDA.findOpeneServiceByShift$(shift._id).pipe(tap(service => { if (service) throw ERROR_23028; }), mapTo(shift))),// Open Service verfication
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(authToken, shift, state))), //Build and send ShiftStateChanged event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ShiftCQRS.setShiftState RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ShiftCQRS.log(`ShiftCQRS.setShiftState RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -108,7 +109,7 @@ class ShiftCQRS {
   stopShift$({ root, args, jwt }, authToken) {
     const { businessId, driverId } = authToken;
 
-    console.log(`ShiftCQRS.stopShift RQST: ${JSON.stringify({ driverId, businessId })}`); //TODO: DELETE THIS LINE
+    ShiftCQRS.log(`ShiftCQRS.stopShift RQST: ${JSON.stringify({ driverId, businessId })}`); //TODO: DELETE THIS LINE
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "stopShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)), // query driver's open shift
@@ -117,7 +118,7 @@ class ShiftCQRS {
       //mergeMap(shift => ServiceDA.findOpeneServiceByShift$(shift._id).pipe(tap(service => { if (service) throw ERROR_23021; }), mapTo(shift))),// Open Service verfication
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStoppedEsEvent(authToken, shift))), //Build and send ShiftStopped event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ShiftCQRS.stopShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ShiftCQRS.log(`ShiftCQRS.stopShift RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -251,6 +252,10 @@ class ShiftCQRS {
 
   //#endregion
 
+  static log(msg){
+    ServiceCQRS.log(`${dateFormat(new Date(), "isoDateTime")}: ${msg}`);
+  }
+
 }
 
 /**
@@ -259,7 +264,7 @@ class ShiftCQRS {
 module.exports = () => {
   if (!instance) {
     instance = new ShiftCQRS();
-    console.log(`${instance.constructor.name} Singleton created`);
+    ShiftCQRS.log(`${instance.constructor.name} Singleton created`);
   }
   return instance;
 };

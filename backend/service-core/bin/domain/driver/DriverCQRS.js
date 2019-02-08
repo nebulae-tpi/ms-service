@@ -22,6 +22,20 @@ const {
 const { DriverDA, VehicleDA } = require('./data-access')
 
 
+
+/*
+
+
+
+ShiftCQRS.queryOpenShift RQST: {"driverId":"30f61c65-ac23-47ec-9508-bc52790ee76c"}
+ShiftCQRS.queryOpenShift RESP: undefined
+DriverCQRS.queryDriverAssignedVehicles RQST: {"driverId":"30f61c65-ac23-47ec-9508-bc52790ee76c"}
+Fri Feb 08 2019 13:36:40 GMT+0000 (Coordinated Universal Time): TypeError: Cannot destructure property `assignedVehicles` of 'undefined' or 'null'.
+
+
+
+*/
+
 /**
  * Singleton instance
  */

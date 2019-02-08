@@ -1,6 +1,7 @@
 "use strict";
 
 
+const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
 const { of, interval, forkJoin, } = require("rxjs");
 const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first } = require('rxjs/operators');
@@ -53,7 +54,7 @@ class ServiceCQRS {
       type: "Point",
       coordinates: [args.location.lng, args.location.lat]
     }
-    console.log(`ServiceCQRS.acceptServiceOffer RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
@@ -81,7 +82,23 @@ class ServiceCQRS {
         { ...service, skipPersist: true },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err, true))
+    );
+  }
+
+  /**
+   * queries a driver open service
+   * @param {*} param0 
+   * @param {*} authToken 
+   */
+  queryAssignedService({ root, args, jwt }, authToken){
+    ServiceCQRS.log(`ServiceCQRS.queryAssignedService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryAssignedService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
+      mergeMapTo(ServiceDA.findById$(id)),
+      map(service => this.formatServiceToGraphQLSchema(service)),
+      tap(x => ServiceCQRS.log(`ServiceCQRS.queryAssignedService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -94,14 +111,14 @@ class ServiceCQRS {
    */
   queryService$({ root, args, jwt }, authToken) {
 
-    const { id } = args;
+    const { driverId } = authToken;
 
-    console.log(`ServiceCQRS.queryService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.queryService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
 
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryOpenShift", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
-      mergeMapTo(ServiceDA.findById$(id)),
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryService", PERMISSION_DENIED, ["DRIVER"]).pipe(
+      mergeMapTo(ServiceDA.findOpenAssignedServiceByDriver$(driverId)),
       map(service => this.formatServiceToGraphQLSchema(service)),
-      tap(x => console.log(`ServiceCQRS.queryService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.queryService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -114,13 +131,13 @@ class ServiceCQRS {
    */
   requestServices$({ root, args, jwt }, authToken) {
     const { id } = args;
-    console.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -131,7 +148,7 @@ class ServiceCQRS {
    * cancelService
    */
   cancelService$({ root, args, jwt }, authToken) {
-    console.log(`ServiceCQRS.cancelService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.cancelService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceCancellationRequestInput(request)),
@@ -145,7 +162,7 @@ class ServiceCQRS {
         { reason: request.reason, notes: request.notes },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ServiceCQRS.cancelService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.cancelService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -155,7 +172,7 @@ class ServiceCQRS {
    * assignService
    */
   assignService$({ root, args, jwt }, authToken) {
-    console.log(`ServiceCQRS.assignService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.assignService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "assignService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAssignRequestInput(request)),
@@ -178,7 +195,7 @@ class ServiceCQRS {
         { driver: request.driver, vehicle: request.vehicle },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ServiceCQRS.assignService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.assignService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -188,7 +205,7 @@ class ServiceCQRS {
    * reportServiceAsArrived
    */
   reportServiceAsArrived$({ root, args, jwt }, authToken) {
-    console.log(`ServiceCQRS.reportServiceAsArrived RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.reportServiceAsArrived RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsArrived", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mapTo(args),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
@@ -201,7 +218,7 @@ class ServiceCQRS {
         {},
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ServiceCQRS.reportServiceAsArrived RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.reportServiceAsArrived RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -211,10 +228,10 @@ class ServiceCQRS {
    * reportServicePickupETA
    */
   reportServicePickupETA$({ root, args, jwt }, authToken) {
-    console.log(`ServiceCQRS.reportServicePickupETA RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.reportServicePickupETA RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServicePickupETA", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
 
-      tap(x => console.log(`ServiceCQRS.reportServicePickupETA RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.reportServicePickupETA RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -224,7 +241,7 @@ class ServiceCQRS {
    * reportServiceAsPickedUp
    */
   reportServiceAsPickedUp$({ root, args, jwt }, authToken) {
-    console.log(`ServiceCQRS.reportServiceAsPickedUp RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.reportServiceAsPickedUp RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsPickedUp", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mapTo(args),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
@@ -237,7 +254,7 @@ class ServiceCQRS {
         {},
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ServiceCQRS.reportServiceAsPickedUp RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.reportServiceAsPickedUp RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -248,7 +265,7 @@ class ServiceCQRS {
    * reportServiceAsCompleted
    */
   reportServiceAsCompleted$({ root, args, jwt }, authToken) {
-    console.log(`ServiceCQRS.reportServiceAsCompleted RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+    ServiceCQRS.log(`ServiceCQRS.reportServiceAsCompleted RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsCompleted", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mapTo(args),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
@@ -261,7 +278,7 @@ class ServiceCQRS {
         {},
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      tap(x => console.log(`ServiceCQRS.reportServiceAsCompleted RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.reportServiceAsCompleted RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -423,6 +440,10 @@ class ServiceCQRS {
 
   //#endregion
 
+  static log(msg){
+    ServiceCQRS.log(`${dateFormat(new Date(), "isoDateTime")}: ${msg}`);
+  }
+
 }
 
 /**
@@ -431,7 +452,7 @@ class ServiceCQRS {
 module.exports = () => {
   if (!instance) {
     instance = new ServiceCQRS();
-    console.log(`${instance.constructor.name} Singleton created`);
+    ServiceCQRS.log(`${instance.constructor.name} Singleton created`);
   }
   return instance;
 };
