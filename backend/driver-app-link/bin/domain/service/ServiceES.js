@@ -59,8 +59,8 @@ class ServiceES {
                             dbService,
                             formattedService: {
                                 ...dbService,
-                                pickUp: this.formatPickUpDropOff(service.pickUp),
-                                dropOff: this.formatPickUpDropOff(service.dropOff),
+                                pickUp: this.formatPickUpDropOff(dbService.pickUp),
+                                dropOff: this.formatPickUpDropOff(dbService.dropOff),
                                 state: 'ASSIGNED' // the state might not be persisted yet
                             }
                         }
