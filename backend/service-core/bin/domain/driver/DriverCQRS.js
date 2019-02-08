@@ -56,7 +56,7 @@ class DriverCQRS {
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),
-      defaultIfEmpty( {assignedVehicles:[]} ),
+      first( v => v, [] ),
       map(  ({ assignedVehicles })  => { return (!assignedVehicles || assignedVehicles.length <= 0) ? [] : assignedVehicles ;}),
       first(),
       mergeMap(( assignedVehicles ) => from(assignedVehicles)),
