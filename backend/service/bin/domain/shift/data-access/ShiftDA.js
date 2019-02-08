@@ -173,6 +173,8 @@ class ShiftDA {
     )    
   }
 
+  
+
   static getShiftOnlineChangeList$(shiftId, pagination) {
     console.log("PAGINATION", pagination);
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
