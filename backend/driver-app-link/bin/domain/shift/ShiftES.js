@@ -26,7 +26,7 @@ class ShiftES {
      * process event and forwards the right data to the drivers
      * @param {Event} shiftStartedEvt
      */
-    handleShiftStarted$({ data }) {
+    handleShiftStarted$({ aid,data }) {
         console.log(`ShiftES: handleShiftStarted: ${JSON.stringify(data)} `); //TODO: DELETE LINE
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 }).pipe(
