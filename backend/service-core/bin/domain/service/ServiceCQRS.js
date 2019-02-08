@@ -4,7 +4,7 @@
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
 const { of, interval, forkJoin, } = require("rxjs");
-const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first } = require('rxjs/operators');
+const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first, toArray } = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
 const { Event } = require("@nebulae/event-store");
@@ -42,6 +42,9 @@ let instance;
 class ServiceCQRS {
   constructor() {
   }
+
+
+  //#region DRIVER-GATEWAY
 
   /**
    * Command to try to accept service offer
@@ -93,10 +96,11 @@ class ServiceCQRS {
    * @param {*} param0 
    * @param {*} authToken 
    */
-  queryAssignedService$({ root, args, jwt }, authToken){
+  queryAssignedService$({ root, args, jwt }, authToken) {
+    const { driverId } = args;
     ServiceCQRS.log(`ServiceCQRS.queryAssignedService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryAssignedService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
-      mergeMapTo(ServiceDA.findById$(id)),
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryAssignedService", PERMISSION_DENIED, ["DRIVER"]).pipe(
+      mergeMapTo(ServiceDA.findOpenAssignedServiceByDriver$(driverId)),
       map(service => this.formatServiceToGraphQLSchema(service)),
       tap(x => ServiceCQRS.log(`ServiceCQRS.queryAssignedService RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -123,6 +127,29 @@ class ServiceCQRS {
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
   }
+
+
+  /**  
+   * Queries and return a historical Service done by the driver
+   */
+  queryHistoricalDriverServices$({ root, args, jwt }, authToken) {
+
+    const { driverId } = authToken;
+    ServiceCQRS.log(`ServiceCQRS.queryHistoricalDriverServices RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryService", PERMISSION_DENIED, ["DRIVER"]).pipe(
+      mergeMapTo(ServiceDA.findHistoricalServiceByDriver$(driverId, 10)),
+      map(service => this.formatServiceToGraphQLSchema(service)),
+      tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalDriverServices RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      toArray(),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err, true))
+    );
+  }
+
+  //#endregion
+
+  //#region EMI-GATEWAY
 
   /**
    * Command to request a new Service
@@ -284,6 +311,7 @@ class ServiceCQRS {
     );
   }
 
+  //#endregion
 
   //#region REQUEST VALIDATIONS
 
@@ -293,7 +321,7 @@ class ServiceCQRS {
    * @param {*} service request input params
    */
   validateServiceRequestInput({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }) {
-    if (!client || !pickUp || !paymentType || !businessId ) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
+    if (!client || !pickUp || !paymentType || !businessId) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
     if (!client.fullname || client.fullname.trim().length > 50 || client.fullname.trim().length < 4) throw ERROR_23201; // invalid client name
     if (client.tip && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.type) == -1) throw ERROR_23202; // invalid tip type
     if (client.tip && (client.tip < 0 || client.tip > 10000)) throw ERROR_23203; // invalid tip amount
@@ -433,14 +461,14 @@ class ServiceCQRS {
   //#region GraphQL response formatters
 
   formatServiceToGraphQLSchema(service) {
-    return { ...service, route: undefined, id: service._id };
+    return !service ? undefined : { ...service, route: undefined, id: service._id };
   }
 
 
 
   //#endregion
 
-  static log(msg){
+  static log(msg) {
     console.log(`${dateFormat(new Date(), "isoDateTime")}: ${msg}`);
   }
 

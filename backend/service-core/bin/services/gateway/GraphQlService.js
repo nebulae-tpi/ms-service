@@ -211,6 +211,10 @@ class GraphQlService {
         aggregateType: "Service",
         messageType: "drivergateway.graphql.query.AssignedService"
       },   
+      {
+        aggregateType: "Service",
+        messageType: "drivergateway.graphql.query.HistoricalDriverServices"
+      },   
     ];
   }
 
@@ -283,6 +287,10 @@ class GraphQlService {
       },            
       "drivergateway.graphql.query.AssignedService": {
         fn: ServiceCQRS.queryAssignedService$,
+        obj: ServiceCQRS
+      },            
+      "drivergateway.graphql.query.HistoricalDriverServices": {
+        fn: ServiceCQRS.queryHistoricalDriverServices$,
         obj: ServiceCQRS
       },            
     };
