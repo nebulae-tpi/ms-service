@@ -452,7 +452,7 @@ class ServiceCQRS {
 module.exports = () => {
   if (!instance) {
     instance = new ServiceCQRS();
-    ServiceCQRS.log(`${instance.constructor.name} Singleton created`);
+    console.log(`${instance.constructor.name} Singleton created`);
   }
   return instance;
 };

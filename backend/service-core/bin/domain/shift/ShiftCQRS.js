@@ -264,7 +264,7 @@ class ShiftCQRS {
 module.exports = () => {
   if (!instance) {
     instance = new ShiftCQRS();
-    ShiftCQRS.log(`${instance.constructor.name} Singleton created`);
+    console.log(`${instance.constructor.name} Singleton created`);
   }
   return instance;
 };
