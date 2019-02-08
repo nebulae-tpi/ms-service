@@ -21,7 +21,6 @@ class ShiftDA {
     });
   }
 
-
   /**
    * Finds a shift by its ID
    * @param {*} _id 

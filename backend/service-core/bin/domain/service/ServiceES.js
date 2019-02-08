@@ -39,7 +39,6 @@ class ServiceES {
     handleServiceAssigned$({ aid, data }) {
         const { shiftId, driver, vehicle, skipPersist } = data;
 
-
         if (skipPersist) {
             return of({}).pipe(
                 mergeMap(service =>
