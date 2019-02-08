@@ -2,7 +2,7 @@
 
 
 const { of, interval, forkJoin, Observable } = require("rxjs");
-const { take, mergeMap, catchError, map, toArray, filter, delay, mergeMapTo } = require('rxjs/operators');
+const { take, mergeMap, catchError, map, tap, filter, delay, mergeMapTo } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -30,7 +30,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ aid, data }) {
-        const {pickUp} = data;
+        const { pickUp } = data;
         console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //TODO: DELETE LINE
         return ServiceDA.findOpenShifts$({ "driver.username": 1, "businessId": 1, "timestamp": 1 }).pipe(
             mergeMap(shift => driverAppLinkBroker.sendServiceEventToDrivers$(
@@ -45,36 +45,41 @@ class ServiceES {
      */
     handleServiceAssigned$({ aid, data }) {
         console.log(`ServiceES: handleServiceAssigned: ${JSON.stringify({ _id: aid, ...data })} `); //TODO: DELETE LINE
-        return of({}).pipe(
-            //delay(500),// wait a little bit to the registry to be updated
-            mergeMapTo(
-                ServiceDA.findById$(aid, {
-                    "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1,
-                    "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
-                    "driver.username": 1, "businessId": 1
-                })),
-            map(service => (
-                [
-                    service
-                    , {
-                        ...service,
-                        pickUp: this.formatPickUpDropOff(service.pickUp),
-                        dropOff: this.formatPickUpDropOff(service.dropOff),
-                        state: 'ASSIGNED' // the state might not be persisted yet
-                    }]
-            )),
-            mergeMap(([dbService, formattedService]) =>
-                forkJoin(
-                    //Send ServiceAssigned to the winner
-                    driverAppLinkBroker.sendServiceEventToDrivers$(
-                        dbService.businessId, dbService.driver.username, 'ServiceAssigned', formattedService),
-                    //Send ServiceOfferWithdraw to the losers
-                    driverAppLinkBroker.sendServiceEventToDrivers$(
-                        dbService.businessId, 'all', 'ServiceOfferWithdraw', { _id: formattedService._id }),
-                )
-            ),
+        return ServiceDA.findById$(
+            aid,
+            {
+                "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1,
+                "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
+                "driver.username": 1, "businessId": 1
+            }).pipe(
+                tap(x=> console.log(`=======111111======${JSON.stringify(x)}=========`)),
+                map(service =>
+                    (
+                        {
+                            service,
+                            formattedService: {
+                                ...service,
+                                pickUp: this.formatPickUpDropOff(service.pickUp),
+                                dropOff: this.formatPickUpDropOff(service.dropOff),
+                                state: 'ASSIGNED' // the state might not be persisted yet
+                            }
+                        }
+                    )
+                ),
+                tap(x=> console.log(`=======2222222222======${JSON.stringify(x)}=========`)),
+                mergeMap(({ dbService, formattedService }) =>
+                    forkJoin(
+                        //Send ServiceAssigned to the winner
+                        driverAppLinkBroker.sendServiceEventToDrivers$(
+                            dbService.businessId, dbService.driver.username, 'ServiceAssigned', formattedService),
+                        //Send ServiceOfferWithdraw to the losers
+                        driverAppLinkBroker.sendServiceEventToDrivers$(
+                            dbService.businessId, 'all', 'ServiceOfferWithdraw', { _id: formattedService._id }),
+                    ),
+                    tap(x=> console.log(`=======33333333333======${JSON.stringify(x)}=========`)),
+                ),
 
-        );
+            );
     }
 
     /**
