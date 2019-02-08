@@ -52,7 +52,7 @@ class ServiceES {
                 "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
                 "driver.username": 1, "businessId": 1
             }).pipe(
-                tap(x=> console.log(`=======111111======${JSON.stringify(x)}=========`)),
+                tap(x => console.log(`=======111111======${JSON.stringify(x)}=========`)),
                 map(dbService =>
                     (
                         {
@@ -66,18 +66,19 @@ class ServiceES {
                         }
                     )
                 ),
-                tap(x=> console.log(`=======2222222222======${JSON.stringify(x)}=========`)),
-                mergeMap(({ dbService, formattedService }) =>
-                    forkJoin(
+                tap(x => console.log(`=======2222222222======${JSON.stringify(x)}=========`)),
+                mergeMap(({ dbService, formattedService }) => {
+                    return forkJoin(
                         //Send ServiceAssigned to the winner
                         driverAppLinkBroker.sendServiceEventToDrivers$(
                             dbService.businessId, dbService.driver.username, 'ServiceAssigned', formattedService),
                         //Send ServiceOfferWithdraw to the losers
                         driverAppLinkBroker.sendServiceEventToDrivers$(
                             dbService.businessId, 'all', 'ServiceOfferWithdraw', { _id: formattedService._id }),
-                    ),
-                    tap(x=> console.log(`=======33333333333======${JSON.stringify(x)}=========`)),
-                ),
+                    );
+                }),
+                tap(x => console.log(`=======33333333333======${JSON.stringify(x)}=========`))
+
 
             );
     }
