@@ -35,7 +35,6 @@ class ShiftDA {
   }  
   
   static getShiftList$(filter, pagination) {
-    console.log('::::::::::::: getShiftList ', filter, pagination);
     const projection = { stateChanges: 0, onlineChanges: 0 };
     const query = {};
 
@@ -59,13 +58,12 @@ class ShiftDA {
                 const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
                 const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
                 const dateNow = new Date( new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
-                const monthsBeforedate1 = Crosscutting.monthDiff(date1, date2);
-                const monthsBeforedate2 = Crosscutting.monthDiff(date2, dateNow);
+                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) +1;
+                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2 ).length;
                 return of({
                   start: monthsBeforedate1,
-                  count: (monthsBeforedate1 - monthsBeforedate2) * -1
+                  count: monthsBeforedate2
                 });
-
               })
             )
           : of(Date.today().getDate() <= 2)
@@ -76,6 +74,7 @@ class ShiftDA {
               )
             )
         ),
+        tap(r => console.log(" getShiftList $$$$$$$$$$$$$$$$$", r, "$$$$$$$$$$$$$$$$")),
         mergeMap(({ start, count }) => range(start, count)),
         map(date => mongoDB.getHistoricalDb(date)),
         map(db => db.collection(COLLECTION_NAME)),
@@ -92,7 +91,6 @@ class ShiftDA {
 
 
   static getShiftListSize$(filter) {
-    console.log('::::::::::::: getShiftListSize ', filter);
     const query = {};
 
 
@@ -115,11 +113,11 @@ class ShiftDA {
                 const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
                 const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
                 const dateNow = new Date( new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
-                const monthsBeforedate1 = Crosscutting.monthDiff(date1, date2);
-                const monthsBeforedate2 = Crosscutting.monthDiff(date2, dateNow);
+                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) +1;
+                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2 ).length;
                 return of({
                   start: monthsBeforedate1,
-                  count: (monthsBeforedate1 - monthsBeforedate2) * -1
+                  count: monthsBeforedate2
                 });
 
               })
@@ -132,6 +130,7 @@ class ShiftDA {
               )
             )
         ),
+        tap(r => console.log(" getShiftListSize $$$$$$$$$$$$$$$$$", r, "$$$$$$$$$$$$$$$$")),
         mergeMap(({ start, count }) => range(start, count)),
         map(date => mongoDB.getHistoricalDb(date)),
         map(db => db.collection(COLLECTION_NAME)),
