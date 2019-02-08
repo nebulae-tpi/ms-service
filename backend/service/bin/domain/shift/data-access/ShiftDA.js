@@ -172,6 +172,7 @@ class ShiftDA {
       tap(r => console.log("getShiftStateChangeListSize$", r) )
     )    
   }
+  
 
   static getShiftOnlineChangeList$(shiftId, pagination) {
     console.log("PAGINATION", pagination);
