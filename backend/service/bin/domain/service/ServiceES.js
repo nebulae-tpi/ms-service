@@ -1,7 +1,7 @@
 'use strict'
 
 const {} = require("rxjs");
-const { tap, mergeMap, catchError, map, mapTo } = require('rxjs/operators');
+const { tap, mergeMap, catchError, map, mapTo, groupBy, debounceTime } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const ServiceDA = require('./data-access/ServiceDA');
 const  { forkJoin, of, interval, from, throwError, concat, Observable, Subject } = require('rxjs');
@@ -16,6 +16,7 @@ class ServiceES {
 
   constructor() {
       this.serviceUpdatedEventEmitter$ = new Subject();
+      this.startServiceUpdatedEmitter();
   }
 
   startServiceUpdatedEmitter(){
@@ -24,7 +25,11 @@ class ServiceES {
         groupBy(serviceEvent => serviceEvent.aid),
         mergeMap(group$ => group$.pipe(debounceTime(5000))),
         mergeMap(service => this.sendServiceUpdatedEvent$(service))
-    )
+    ).subscribe(
+      (result) => {},
+      (err) => { console.log(err) },
+      () => { }
+    );
   }
 
    /**
@@ -32,14 +37,14 @@ class ServiceES {
    * @param {*} service 
    */
   sendServiceUpdatedEvent$(serviceEvent){
+    console.log('sendServiceUpdatedEvent => ', serviceEvent);
     return of(serviceEvent)
     .pipe(
-      mergeMap(service => ServiceDA.getService$(service._id)),
-      mergeMap(service => broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service))
-    ).subscribe(
-      (result) => {},
-      (err) => { console.log(err) },
-      () => { }
+      mergeMap(service => ServiceDA.getService$(service.aid)),
+      mergeMap(service => {
+        console.log('ServiceServiceUpdatedSubscription => ', service);
+        return broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service);
+      })
     );
   }
 
@@ -54,7 +59,7 @@ class ServiceES {
       return of(serviceEvent)
       .pipe(
         tap(res => {
-          //console.log('serviceEvent => ', res[0])
+          console.log('serviceEvent => ', res)
           this.serviceUpdatedEventEmitter$.next(serviceEvent);
         }),
       );

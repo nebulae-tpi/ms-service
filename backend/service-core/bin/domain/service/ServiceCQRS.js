@@ -67,11 +67,11 @@ class ServiceCQRS {
           id: shift.vehicle.id
         },
         driver: {
-          fullname: shift.driver.driver,
+          fullname: shift.driver.fullname,
           documentId: shift.driver.documentId,
           id: shift.driver.id
         },
-      })),
+      })), 
       mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
       mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',

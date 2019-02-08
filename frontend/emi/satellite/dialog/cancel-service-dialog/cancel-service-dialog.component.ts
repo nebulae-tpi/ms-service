@@ -86,7 +86,7 @@ export class CancelServiceDialogComponent implements OnInit, OnDestroy {
           id: this.data.serviceId, 
           reason: this.cancelServiceForm.getRawValue().reason, 
           authorType: this.data.authorType, 
-          notes: ''
+          notes: this.cancelServiceForm.getRawValue().notes
         };
       }),
       mergeMap(serviceCoreCancelService => this.satelliteServiceListService.cancelServiceCoreCancelService$(serviceCoreCancelService)),

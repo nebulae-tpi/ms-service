@@ -39,15 +39,36 @@ class ServiceES {
     handleServiceAssigned$({ aid, data }) {
         const { shiftId, driver, vehicle, skipPersist } = data;
 
-        const sendEvt$ = mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceES.buildEventSourcingEvent(
-            'Shift',
-            shiftId,
-            'ShiftStateChanged',
-            { _id: shiftId, state: 'BUSY' }
-        ))).pipe(
-            mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
-        );
-        return skipPersist ? of({}).pipe(sendEvt$) : ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(sendEvt$);
+        if (skipPersist) {
+            return of({}).pipe(
+                mergeMap(service =>
+                    eventSourcing.eventStore.emitEvent$(
+                        ServiceES.buildEventSourcingEvent(
+                            'Shift',
+                            shiftId,
+                            'ShiftStateChanged',
+                            { _id: shiftId, state: 'BUSY' }
+                        )
+                    )
+                ),
+                mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
+            );
+        } else {
+            return ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(
+                mergeMap(service =>
+                    eventSourcing.eventStore.emitEvent$(
+                        ServiceES.buildEventSourcingEvent(
+                            'Shift',
+                            shiftId,
+                            'ShiftStateChanged',
+                            { _id: shiftId, state: 'BUSY' }
+                        )
+                    )
+                ),
+                mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
+            );
+        }
+
     }
 
     /**
@@ -107,7 +128,7 @@ class ServiceES {
             'ShiftStateChanged',
             { _id: shiftId, state: 'AVAILABLE' }
         ))).pipe(
-            mapTo(` - Sent ServicePickUpETAReported for service._id=${_id}: ${JSON.stringify(data)}`)
+            mapTo(` - Sent ShiftStateChanged for service._id=${_id}: ${JSON.stringify(data)}`)
         );
 
         //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE

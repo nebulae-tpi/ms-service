@@ -36,6 +36,10 @@ class ShiftES {
      */
     handleShiftStateChanged$({ aid, data }) {
         console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
+        
         return ShiftDA.updateShiftStateAndGetOnlineFlag$(aid, data.state).pipe(
             filter(shift => !shift.online),
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid))), //Build and send ShiftConnected event (event-sourcing)
@@ -48,6 +52,9 @@ class ShiftES {
      */
     handleShiftConnected$({ aid }) {
         console.log(`ShiftES.handleShiftConnected: ${JSON.stringify({ aid })}`); //TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         return ShiftDA.updateShiftOnlineFlag$(aid, true);
     }
 
@@ -57,6 +64,9 @@ class ShiftES {
      */
     handleShiftDisconnected$({ aid }) {
         console.log(`ShiftES.handleShiftDisconnected: ${JSON.stringify({ aid })}`); //TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         return ShiftDA.updateShiftOnlineFlag$(aid, false);
     }
 
@@ -66,6 +76,9 @@ class ShiftES {
      */
     handleShiftStopped$({ aid }) {
         console.log(`ShiftES.handleShiftStopped: ${JSON.stringify({ aid })}`); //TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         return ShiftDA.updateShiftState$(aid, 'CLOSED');
     }
 
@@ -75,6 +88,9 @@ class ShiftES {
      */
     handleShiftVehicleBlockRemoved$({ aid, data }) {
         console.log(`ShiftES.handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         return ShiftDA.updateOpenShiftVehicleBlock$(aid, false, data.blockKey).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
@@ -87,6 +103,10 @@ class ShiftES {
      */
     handleShiftVehicleBlockAdded$({ aid, data }) {
         console.log(`ShiftES.handleShiftVehicleBlockAdded: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         return ShiftDA.updateOpenShiftVehicleBlock$(aid, true, data.blockKey).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
@@ -99,6 +119,9 @@ class ShiftES {
     */
     handleShiftDriverBlockRemoved$({ aid, data }) {
         console.log(`ShiftES.handleShiftDriverBlockRemoved: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         return ShiftDA.updateOpenShiftDriverBlock$(aid, false, data.blockKey).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
@@ -111,6 +134,9 @@ class ShiftES {
      */
     handleShiftDriverBlockAdded$({ aid, data }) {
         console.log(`ShiftES.handleShiftDriverBlockAdded: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         return ShiftDA.updateOpenShiftDriverBlock$(aid, true, data.blockKey).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
@@ -123,6 +149,9 @@ class ShiftES {
      */
     handleShiftLocationReported$({ aid, data }) {
         if(aid === undefined) return of({});//TODO: DELETE THIS LINE
+
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+
         console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
         return ShiftDA.updateShiftLocation$(aid, data.location)
     }

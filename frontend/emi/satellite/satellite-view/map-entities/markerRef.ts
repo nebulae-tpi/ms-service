@@ -91,17 +91,8 @@ export class MarkerRef extends google.maps.Marker {
   constructor(id, point: Point, opts?: google.maps.MarkerOptions) {
     super(opts);
     this.id = id;
-    // const icon = {
-    //   url: "./assets/service-map-viewer/markers/icono-sucursal.png",
-    //   // anchor: new google.maps.Point(30, 30),
-    //   // scaledSize: new google.maps.Size(30, 30)
-    // };
     this.setClickable(false);
     this.setLabel(' ');
-    // this.setTitle('D-HUB');
-    //this.setDraggable(false);
-    // this.setIcon('./assets/devices-location/tpm_bus_30_30.png');
-    //this.setIcon(icon);
     this.point = point;
     this.lastModificationTimestamp = 0;
     this.updateLocationListener();
