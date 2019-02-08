@@ -31,7 +31,7 @@
 
           <mat-header-row *cdkHeaderRowDef="stateChangesDisplayedColumns"></mat-header-row>
 
-          <mat-row *cdkRowDef="let row; columns: stateChangesDisplayedColumns" class="selectedElement" (click)="selectState(row)"
+          <mat-row *cdkRowDef="let row; columns: stateChangesDisplayedColumns" class="item" (click)="selectState(row)"
             [ngClass]="{highlight: selectedService && selectedService._id == row._id}" matRipple>
           </mat-row>
         </mat-table>
@@ -77,7 +77,7 @@
 
           <mat-header-row *cdkHeaderRowDef="conectDisconectDisplayedColumns"></mat-header-row>
 
-          <mat-row *cdkRowDef="let row; columns: conectDisconectDisplayedColumns" class="selectedElement" (click)="selectState(row)"
+          <mat-row *cdkRowDef="let row; columns: conectDisconectDisplayedColumns" class="item" (click)="selectState(row)"
             [ngClass]="{highlight: selectedService && selectedService._id == row._id}" matRipple>
           </mat-row>
         </mat-table>
