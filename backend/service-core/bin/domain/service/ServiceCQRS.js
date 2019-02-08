@@ -93,7 +93,7 @@ class ServiceCQRS {
    * @param {*} param0 
    * @param {*} authToken 
    */
-  queryAssignedService({ root, args, jwt }, authToken){
+  queryAssignedService$({ root, args, jwt }, authToken){
     ServiceCQRS.log(`ServiceCQRS.queryAssignedService RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryAssignedService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mergeMapTo(ServiceDA.findById$(id)),
