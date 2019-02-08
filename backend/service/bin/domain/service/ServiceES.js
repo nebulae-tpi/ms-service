@@ -41,6 +41,7 @@ class ServiceES {
     return of(serviceEvent)
     .pipe(
       mergeMap(service => ServiceDA.getService$(service.aid)),
+      map(service => Crosscutting.formatServiceToGraphQLSchema(service)),
       mergeMap(service => {
         console.log('ServiceServiceUpdatedSubscription => ', service);
         return broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service);

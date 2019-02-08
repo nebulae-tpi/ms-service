@@ -8,6 +8,7 @@ const ServiceDA = require('./data-access/ServiceDA');
 const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
 const GraphqlResponseTools = require('../../tools/GraphqlResponseTools');
+const Crosscutting = require('../../tools/Crosscutting');
 const RoleValidator = require("../../tools/RoleValidator");
 const { take, mergeMap, catchError, map, toArray } = require('rxjs/operators');
 const {
@@ -47,7 +48,7 @@ class ServiceCQRS {
         const businessId = !isPlatformAdmin? (authToken.businessId || ''): null;
         return ServiceDA.getService$(args.id, businessId)
       }),
-      map(service => this.formatServiceToGraphQLSchema(service)),
+      map(service => Crosscutting.formatServiceToGraphQLSchema(service)),
       mergeMap(rawResponse => {
         console.log('rawResponse => ', rawResponse);
         return GraphqlResponseTools.buildSuccessResponse$(rawResponse);
@@ -155,120 +156,120 @@ class ServiceCQRS {
     );
   }
 
-      /**
-     * Fromats Service to the GraphQL schema 
-     * @param Object service
-     */
-    formatServiceToGraphQLSchema(service) {
-      return {
-        _id: service._id,
-        businessId: service.businessId,
-        shiftId: service.shiftId,
-        timestamp: service.timestamp,
-        requestedFeatures: service.requestedFeatures,
-        pickUp: this.buildPickUpAndDropOff(service.pickUp),
-        dropOff: this.buildPickUpAndDropOff(service.dropOff),
-        pickUpETA: service.pickUpETA,
-        pickUpETA: service.pickUpETA,
-        dropOffETA: service.dropOffETA,
-        verificationCode: service.verificationCode,
-        paymentType: service.paymentType,
-        fareDiscount: service.fareDiscount,
-        fare: service.fare,
-        state: service.state,
-        location: this.buildCoordinate(service.location),
-        stateChanges: this.buildStateChangesArray(service.stateChanges),
-        vehicle: service.vehicle,
-        driver: service.driver,
-        driver: service.driver,
-        tip: service.tip,
-        route: this.buildRouteArray(service.route ? service.route.coordinates: null),
-        lastModificationTimestamp: service.lastModificationTimestamp,
-        client: service.client
-      };
-    }
+    //   /**
+    //  * Fromats Service to the GraphQL schema 
+    //  * @param Object service
+    //  */
+    // formatServiceToGraphQLSchema(service) {
+    //   return {
+    //     _id: service._id,
+    //     businessId: service.businessId,
+    //     shiftId: service.shiftId,
+    //     timestamp: service.timestamp,
+    //     requestedFeatures: service.requestedFeatures,
+    //     pickUp: this.buildPickUpAndDropOff(service.pickUp),
+    //     dropOff: this.buildPickUpAndDropOff(service.dropOff),
+    //     pickUpETA: service.pickUpETA,
+    //     pickUpETA: service.pickUpETA,
+    //     dropOffETA: service.dropOffETA,
+    //     verificationCode: service.verificationCode,
+    //     paymentType: service.paymentType,
+    //     fareDiscount: service.fareDiscount,
+    //     fare: service.fare,
+    //     state: service.state,
+    //     location: this.buildCoordinate(service.location),
+    //     stateChanges: this.buildStateChangesArray(service.stateChanges),
+    //     vehicle: service.vehicle,
+    //     driver: service.driver,
+    //     driver: service.driver,
+    //     tip: service.tip,
+    //     route: this.buildRouteArray(service.route ? service.route.coordinates: null),
+    //     lastModificationTimestamp: service.lastModificationTimestamp,
+    //     client: service.client
+    //   };
+    // }
 
-    buildStateChangesArray(stateChanges){
-      if(!stateChanges){
-        return null;
-      }
-      const stateChangesArray = [];
+    // buildStateChangesArray(stateChanges){
+    //   if(!stateChanges){
+    //     return null;
+    //   }
+    //   const stateChangesArray = [];
 
-      stateChanges.forEach(stateChange => {
-        stateChangesArray.push({
-          state: stateChange.state,
-          timestamp: stateChange.timestamp,
-          location: this.buildCoordinate(stateChange.location),
-          notes: stateChange.notes,
-        });
-      });
-      return stateChangesArray;
-    }
+    //   stateChanges.forEach(stateChange => {
+    //     stateChangesArray.push({
+    //       state: stateChange.state,
+    //       timestamp: stateChange.timestamp,
+    //       location: this.buildCoordinate(stateChange.location),
+    //       notes: stateChange.notes,
+    //     });
+    //   });
+    //   return stateChangesArray;
+    // }
 
-    buildRouteArray(routes){
-      if(!routes || routes.length == 0){
-        return null;
-      }
-      const routesArray = [];
-      console.log('routes => ',routes);
-      routes.forEach(route => {
-        routesArray.push({
-          lat: route[1],
-          lng: route[0]
-        })
+    // buildRouteArray(routes){
+    //   if(!routes || routes.length == 0){
+    //     return null;
+    //   }
+    //   const routesArray = [];
+    //   console.log('routes => ',routes);
+    //   routes.forEach(route => {
+    //     routesArray.push({
+    //       lat: route[1],
+    //       lng: route[0]
+    //     })
 
-      });
-      return routesArray;
-    }
+    //   });
+    //   return routesArray;
+    // }
 
-    buildCoordinate(location){
-      if(!location){
-        return null;
-      }
+    // buildCoordinate(location){
+    //   if(!location){
+    //     return null;
+    //   }
 
-      return {
-        lat: location.coordinates[1],
-        lng: location.coordinates[0]
-      }
-    }
+    //   return {
+    //     lat: location.coordinates[1],
+    //     lng: location.coordinates[0]
+    //   }
+    // }
 
-    buildPickUpAndDropOff(pointLocation){
-      if(!pointLocation){
-        return null;
-      }
-      let marker = null;
-      let polygon = null;
+    // buildPickUpAndDropOff(pointLocation){
+    //   if(!pointLocation){
+    //     return null;
+    //   }
+    //   let marker = null;
+    //   let polygon = null;
   
-      if(pointLocation.marker){
-        marker = {
-          lat: pointLocation.marker.coordinates[1],
-          lng: pointLocation.marker.coordinates[0],
-        };
-      } 
+    //   if(pointLocation.marker){
+    //     marker = {
+    //       lat: pointLocation.marker.coordinates[1],
+    //       lng: pointLocation.marker.coordinates[0],
+    //     };
+    //   } 
   
-      if(pointLocation.polygon){
-        polygon = [];
-        pointLocation.polygon.coordinates[0].forEach(element => {
-          polygon.push({
-            lat: element[1],
-            lng: element[0],
-          });
-        });
-      } 
+    //   if(pointLocation.polygon){
+    //     polygon = [];
+    //     pointLocation.polygon.coordinates[0].forEach(element => {
+    //       polygon.push({
+    //         lat: element[1],
+    //         lng: element[0],
+    //       });
+    //     });
+    //   } 
       
-      const location = {
-        marker: marker,
-        polygon: polygon,
-        city: pointLocation.city,
-        zone: pointLocation.zone,
-        neighborhood: pointLocation.neighborhood,
-        addressLine1: pointLocation.addressLine1,
-        addressLine2: pointLocation.addressLine2,
-        notes: pointLocation.notes,
-      };
+    //   const location = {
+    //     marker: marker,
+    //     polygon: polygon,
+    //     city: pointLocation.city,
+    //     zone: pointLocation.zone,
+    //     neighborhood: pointLocation.neighborhood,
+    //     addressLine1: pointLocation.addressLine1,
+    //     addressLine2: pointLocation.addressLine2,
+    //     notes: pointLocation.notes,
+    //   };
   
-      return location;
-    }
+    //   return location;
+    // }
 
   //#endregion
 

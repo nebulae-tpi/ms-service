@@ -184,14 +184,13 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
         const marker = this.getMarkerFromArray(service._id);
         const lastServiceData = this.getServiceFromArray(service._id);
 
-        console.log('initServiceUpdater => ', (!lastServiceData || lastServiceData.lastModificationTimestamp < service.lastModificationTimestamp));
-        console.log('lastServiceData1 => ', lastServiceData.lastModificationTimestamp);
-        console.log('lastServiceData2 => ', service.lastModificationTimestamp);
-
+        console.log('lastServiceData => ', lastServiceData);
         // Check if the last service is older than the new one
         // If it is newer we have to update the info into the service list and the map
         if (!lastServiceData || lastServiceData.lastModificationTimestamp < service.lastModificationTimestamp) {
 
+          console.log('initServiceUpdater => ', (!lastServiceData || lastServiceData.lastModificationTimestamp < service.lastModificationTimestamp));
+          console.log('lastServiceData2 => ', service.lastModificationTimestamp);
           console.log('Closed service => ', service.closed);
 
           // Ignore the closed services that there are not on the map neither the array
