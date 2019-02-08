@@ -68,10 +68,11 @@ class ServiceCQRS {
         },
         driver: {
           fullname: shift.driver.fullname,
+          username: shift.driver.username,
           documentId: shift.driver.documentId,
           id: shift.driver.id
         },
-      })),   
+      })),
       mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
       mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
@@ -116,7 +117,7 @@ class ServiceCQRS {
     console.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]).pipe(
       mapTo(args),
-      tap(request => this.validateServiceRequestInput(request)),
+      tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       tap(x => console.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
@@ -274,8 +275,8 @@ class ServiceCQRS {
    * Verifies and validates all input data
    * @param {*} service request input params
    */
-  validateServiceRequestInput({ client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }) {
-    if (!client || !pickUp || !paymentType) throw ERROR_23200; // insuficient data, client, pickup and payment are mandatory
+  validateServiceRequestInput({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }) {
+    if (!client || !pickUp || !paymentType || !businessId ) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
     if (!client.fullname || client.fullname.trim().length > 50 || client.fullname.trim().length < 4) throw ERROR_23201; // invalid client name
     if (client.tip && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.type) == -1) throw ERROR_23202; // invalid tip type
     if (client.tip && (client.tip < 0 || client.tip > 10000)) throw ERROR_23203; // invalid tip amount
