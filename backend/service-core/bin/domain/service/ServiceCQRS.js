@@ -4,7 +4,7 @@
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
 const { of, interval, forkJoin, } = require("rxjs");
-const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first } = require('rxjs/operators');
+const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first, toArray } = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
 const { Event } = require("@nebulae/event-store");
@@ -42,6 +42,9 @@ let instance;
 class ServiceCQRS {
   constructor() {
   }
+
+
+  //#region DRIVER-GATEWAY
 
   /**
    * Command to try to accept service offer
@@ -124,6 +127,29 @@ class ServiceCQRS {
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
   }
+
+
+  /**  
+   * Queries and return a historical Service done by the driver
+   */
+  queryHistoricalDriverServices$({ root, args, jwt }, authToken) {
+
+    const { driverId } = authToken;
+    ServiceCQRS.log(`ServiceCQRS.queryHistoricalDriverServices RQST: ${JSON.stringify(args)}`); //TODO: DELETE THIS LINE
+
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryService", PERMISSION_DENIED, ["DRIVER"]).pipe(
+      mergeMapTo(ServiceDA.findHistoricalServiceByDriver$(driverId, 10)),
+      map(service => this.formatServiceToGraphQLSchema(service)),
+      tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalDriverServices RESP: ${JSON.stringify(x)}`)),//TODO: DELETE THIS LINE
+      toArray(),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err, true))
+    );
+  }
+
+  //#endregion
+
+  //#region EMI-GATEWAY
 
   /**
    * Command to request a new Service
@@ -285,6 +311,7 @@ class ServiceCQRS {
     );
   }
 
+  //#endregion
 
   //#region REQUEST VALIDATIONS
 
