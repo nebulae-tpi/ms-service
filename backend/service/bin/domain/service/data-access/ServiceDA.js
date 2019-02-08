@@ -83,7 +83,6 @@ class ServiceDA {
 
 
   static getServiceList$(filter, pagination) {
-    console.log('getServiceList ', filter);   
     const projection = {timestamp: 1, paymentType: 1, client: 1, driver: 1, vehicle: 1, state: 1, businessId: 1};
     const query = {};
 

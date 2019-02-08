@@ -19,7 +19,7 @@ const {
 
 const GraphQL = require('../../GraphQL');
 
-class Shift {
+class Service {
 
 
     constructor() {
@@ -50,11 +50,7 @@ class Shift {
                 }
             }`;
         return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => {
-                return (JSON.stringify(error.extensions.exception.message.code == 23020))
-                    ? Rx.of({ stopShift : {accepted:true} })
-                    : Rx.throwError(new Error(`Failed to stop shift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))
-            }),
+            catchError(error => Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
             tap(({ stopShift }) => expect(stopShift).to.not.be.undefined),
             tap(({ stopShift }) => expect(stopShift.accepted).to.be.true),
             map(({ stopShift }) => stopShift.accepted),
@@ -79,37 +75,48 @@ class Shift {
         );
     }
 
-    static queryOpenShift$(user) {
+    static queryAssignedService$(user, expectNull = false) {
         const query =
             `query{
-                OpenShift{
-                 state,
-                  vehicle{
-                    plate,
-                    blocks{
-                      key,
-                      notes,
-                      startTime,
-                      endTime
-                    },
-                    active
-                  },
-                  driver{
+                AssignedService{
+                  _id,
+                  timestamp,
+                  client{
                     fullname,
-                    username,
-                    active,
-                    blocks{
-                      key,
-                      notes,
-                      startTime,
-                      endTime
-                    }
-                  }
+                    tip,
+                    tipType
+                  },
+                  pickUp{
+                    marker{
+                      lat,lng
+                    },
+                    polygon{
+                      lat,lng
+                    },
+                    city,zone,neighborhood,addressLine1,addressLine1,addressLine2,notes
+                  },
+                  dropOff{
+                    marker{
+                      lat,lng
+                    },
+                    polygon{
+                      lat,lng
+                    },
+                    city,zone,neighborhood,addressLine1,addressLine1,addressLine2,notes
+                  },
+                  verificationCode,
+                  requestedFeatures,
+                  paymentType,
+                  fareDiscount,
+                  fare,
+                  tip,
+                  route{lat,lng},
+                  state
                 }
               }`;
         return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
-            tap(({ OpenShift }) => expect(OpenShift).to.not.be.undefined),
+            catchError(error => Rx.throwError(new Error(`Failed to queryAssignedService, asError: << ${error} >>   JSON: ${JSON.stringify(error,null,2)}`))),
+            tap(({ OpenShift }) => {expectNull ? expect(OpenShift).to.be.undefined : expect(OpenShift).to.not.be.undefined;}),
             map(({ OpenShift }) => OpenShift),
             tap(OpenShift => console.log(`query OpenShift: ${OpenShift}`))
         );
@@ -117,4 +124,4 @@ class Shift {
 
 }
 
-module.exports = Shift;
+module.exports = Service;

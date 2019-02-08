@@ -2,7 +2,7 @@
 
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
-const CollectionName = "Vehicle";
+const COLLECTION_NAME = "Vehicle";
 const { CustomError } = require("../tools/customError");
 const { map, tap } = require("rxjs/operators");
 const { of, Observable, defer } = require("rxjs");
@@ -25,7 +25,7 @@ class VehicleDA {
    * Gets an user by its username
    */
   static getVehicle$(id, businessId) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
 
     const query = {
       _id: id      
@@ -38,7 +38,7 @@ class VehicleDA {
   }
 
   static getVehicleList$(filter, pagination) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
 
     const query = {
     };
@@ -73,7 +73,7 @@ class VehicleDA {
   }
 
   static getVehicleSize$(filter) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
 
     const query = {
     };
@@ -106,7 +106,7 @@ class VehicleDA {
    * @param {*} driver driver to create
    */
   static createVehicle$(driver) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
     return defer(() => collection.insertOne(driver));
   }
 
@@ -116,7 +116,7 @@ class VehicleDA {
    * @param {*} VehicleGeneralInfo  New general information of the Vehicle
    */
   static updateVehicleInfo$(id, update) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
 
     return defer(()=>
         collection.findOneAndUpdate(
@@ -133,7 +133,7 @@ class VehicleDA {
   }
 
   static getDriverVehicles$(vehicleList){
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
     return defer(() => 
       collection.find(
         { "licensePlate": { $in: vehicleList } }
@@ -143,8 +143,24 @@ class VehicleDA {
   }
 
   static  getVehicleByPlate$(licensePlate){
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
     return defer(() => collection.findOne({licensePlate : licensePlate }))
+  }
+
+  static removeVehicleBlock$(vehicleId, blockKey){
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
+    return defer(() => collection.updateOne( 
+      { _id: vehicleId },
+      { $pull: { blocks: blockKey } }
+    ));
+  }
+
+  static insertVehicleBlock$(vehicleId, blockKey){
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
+    return defer(() => collection.updateOne( 
+      { _id: vehicleId },
+      { $addToSet: { blocks: blockKey } }
+    ))
   }
 
 }

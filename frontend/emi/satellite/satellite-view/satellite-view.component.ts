@@ -130,7 +130,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
     this.loadAliveServicesList();
     this.initServiceUpdater();
     this.subscribeServiceServiceUpdated();
-    // this.testerLocation();
+    //this.testerLocation();
   }
 
   ngAfterViewInit(): void {

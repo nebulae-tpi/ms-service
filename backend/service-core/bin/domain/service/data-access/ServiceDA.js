@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Service";
 const { ERROR_23104 } = require("../../../tools/customError");
-const { map, mergeMap, first, filter, catchError,tap } = require("rxjs/operators");
+const { map, mergeMap, first, filter, catchError, tap } = require("rxjs/operators");
 const { of, Observable, defer, throwError, range } = require("rxjs");
 
 class ServiceDA {
@@ -176,7 +176,7 @@ class ServiceDA {
           upsert: false,
           returnOriginal: false,
         }
-      )).pipe(        
+      )).pipe(
         map(result => result.value),
         first(),
         catchError(err => throwError(ERROR_23104)), // possible concurrent modification
@@ -227,12 +227,26 @@ class ServiceDA {
    */
   static findOpenAssignedServiceByDriver$(driverId, projection = undefined) {
     const explorePastMonth = Date.today().getDate() <= 2;
-    const query = { "state": { "$in": ["ASSIGNED","ARRIVED","ON_BOARD"]}, "driver.id": driverId };
+    const query = { "state": { "$in": ["ASSIGNED", "ARRIVED", "ON_BOARD"] }, "driver.id": driverId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
       first(service => service, undefined)
+    );
+  }
+
+
+  /**
+   * Finds an historical service by driver
+   */
+  static findHistoricalServiceByDriver$(driverId, limit, projection = undefined) {
+    const query = { "state": { "$nin": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "driver.id": driverId };
+    const bd = mongoDB.getHistoricalDb(); // for now we are quering onlyu current month
+    return defer(() =>
+      mongoDB.extractAllFromMongoCursor$(
+        bd.collection(CollectionName).find(query, process).sort({ timestamp: -1 }).limit(limit)
+      )
     );
   }
 

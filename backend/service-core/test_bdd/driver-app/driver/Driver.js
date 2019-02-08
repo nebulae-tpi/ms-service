@@ -20,17 +20,14 @@ const {
 const GraphQL = require('../../GraphQL');
 
 class Driver {
-
-    /**
-     * @param {GraphQL} graphQL 
-     */
-    constructor(graphQL) {
-        this.graphQL = graphQL;
+    
+    constructor() {
+        throw new Error('DO NOT INSTANCE!!!');
     }
 
 
 
-    queryDriverAssignedVehicles$() {
+    static queryDriverAssignedVehicles$(user) {
         const query =
             `query{
                 DriverAssignedVehicles{
@@ -41,12 +38,12 @@ class Driver {
                   active
                 }
               }`;
-        return this.graphQL.executeQuery$(query).pipe(
+        return user.graphQL.executeQuery$(query).pipe(
             catchError(error => Rx.throwError(new Error(`Failed to query DriverAssignedVehicles, Error: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
             tap(({ DriverAssignedVehicles }) => expect(DriverAssignedVehicles).to.not.be.undefined),
             tap(({ DriverAssignedVehicles }) => expect(DriverAssignedVehicles).to.not.be.empty),
             map(({ DriverAssignedVehicles }) => DriverAssignedVehicles),
-            tap(accepted => console.log(`startShift command send and ackwoneldged by server: ${accepted}`))
+            tap(accepted => console.log(`startShift command send and ackwoneldged by server: ${JSON.stringify(accepted)}`))
         );
     }
 
