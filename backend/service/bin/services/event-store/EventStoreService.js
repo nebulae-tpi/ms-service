@@ -146,6 +146,14 @@ class EventStoreService {
         fn: DriverES.handleDriverAuthDeleted$,
         obj: DriverES 
       },
+      VehicleAssigned: {
+        fn: DriverES.handleVehicleAssigned$,
+        obj: DriverES
+      },
+      VehicleUnassigned: {
+        fn: DriverES.handleVehicleUnassigned$,
+        obj: DriverES
+      },
       //VEHICLE
       VehicleCreated: {
         fn: VehicleES.handleVehicleCreated$,
@@ -162,15 +170,16 @@ class EventStoreService {
       VehicleFeaturesUpdated: {
         fn: VehicleES.handleVehicleFeaturesUpdated$,
         obj: VehicleES
+      },      
+      VehicleBlockRemoved: {
+        fn: VehicleES.handleVehicleBlockRemoved$,
+        obj: VehicleES
       },
-      VehicleAssigned: {
-        fn: DriverES.handleVehicleAssigned$,
-        obj: DriverES
+      VehicleBlockAdded: {
+        fn: VehicleES.handleVehicleBlockAdded$,
+        obj: VehicleES
       },
-      VehicleUnassigned: {
-        fn: DriverES.handleVehicleUnassigned$,
-        obj: DriverES
-      },
+
       //CLIENT
       ClientSatelliteEnabled: {
         fn: ClientES.handleClientSatelliteEnabled$,
@@ -239,6 +248,14 @@ class EventStoreService {
       {
         aggregateType: "Driver",
         eventType: "VehicleUnassigned"
+      },
+      {
+        aggregateType: "Vehicle",
+        eventType: "VehicleBlockRemoved"
+      },
+      {
+        aggregateType: "Vehicle",
+        eventType: "VehicleBlockAdded"
       },
       // CLIENT
       {

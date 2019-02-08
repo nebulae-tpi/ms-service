@@ -92,6 +92,29 @@ class VehicleES {
 
     }
 
+    handleVehicleBlockRemoved$(vehicleBlockRemovedEvt){
+        return of({vehicleId: vehicleBlockRemovedEvt.aid, blockKey: vehicleBlockRemovedEvt.data.blockKey })
+        .pipe(
+            mergeMap( ({vehicleId, blockKey}) => VehicleDA.removeVehicleBlock$(vehicleId, blockKey) )
+        )
+
+    }
+
+    handleVehicleBlockAdded$(vehicleBlockAddedEvt){
+        console.log("");
+        return of({
+            vehicleId: vehicleBlockAddedEvt.aid,
+            user: vehicleBlockAddedEvt.user,
+            ...vehicleBlockAddedEvt.data
+        })
+        .pipe(
+            mergeMap((vehicleId, blockKey ) => VehicleDA.insertVehicleBlock$(vehicleId, blockKey ) 
+            )
+        )
+
+    }
+
+
 }
 
 
