@@ -67,7 +67,7 @@ class ServiceCQRS {
           id: shift.vehicle.id
         },
         driver: {
-          fullname: shift.driver.driver,
+          fullname: shift.driver.fullname,
           documentId: shift.driver.documentId,
           id: shift.driver.id
         },

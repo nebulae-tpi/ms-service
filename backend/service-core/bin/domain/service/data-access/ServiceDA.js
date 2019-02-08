@@ -179,7 +179,6 @@ class ServiceDA {
       )).pipe(        
         map(result => result.value),
         first(),
-        tap(x => console.log(`=====DBRESP====${JSON.stringify(x)}==`)),
         catchError(err => throwError(ERROR_23104)), // possible concurrent modification
       );
   }
