@@ -441,7 +441,7 @@ class ServiceCQRS {
   //#endregion
 
   static log(msg){
-    ServiceCQRS.log(`${dateFormat(new Date(), "isoDateTime")}: ${msg}`);
+    console.log(`${dateFormat(new Date(), "isoDateTime")}: ${msg}`);
   }
 
 }
