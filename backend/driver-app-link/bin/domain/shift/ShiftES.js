@@ -131,7 +131,7 @@ class ShiftES {
     handleShiftLocationReported$({ aid, data }) {
         console.log(`ShiftES: handleShiftLocationReported: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
-        return of({});
+        return of({}); 
     }
 
 
