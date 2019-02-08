@@ -19,10 +19,9 @@ const {
 
 class GraphQL {
 
-    constructor(jwt) {
+    constructor(jwt,url) {
         this.jwt = jwt;
-        this.url = 'http://localhost:3000/api/driver-gateway/graphql/http';
-        //this.url = 'https://tpi-dev.nebulae.com.co/api/driver-gateway/graphql/http';        
+        this.url = url;
     }
 
     connect$() {
