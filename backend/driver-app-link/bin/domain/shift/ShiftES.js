@@ -28,6 +28,7 @@ class ShiftES {
      */
     handleShiftStarted$({ data }) {
         console.log(`ShiftES: handleShiftStarted: ${JSON.stringify(data)} `); //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 }).pipe(
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema(data)))
         );
@@ -39,6 +40,7 @@ class ShiftES {
      */
     handleShiftStateChanged$({ aid, data }) {
         console.log(`ShiftES: handleShiftStateChanged: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 }).pipe(
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, state: data.state }))
         );
@@ -68,6 +70,7 @@ class ShiftES {
      */
     handleShiftStopped$({ aid, data }) {
         console.log(`ShiftES: handleShiftStopped: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 }).pipe(
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, state: 'CLOSED' }))
         );
@@ -79,6 +82,7 @@ class ShiftES {
      */
     handleShiftVehicleBlockRemoved$({ aid, data }) {
         console.log(`ShiftES: handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, vehicle: 1 }).pipe(
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, vehicle }))
         );
@@ -90,6 +94,7 @@ class ShiftES {
      */
     handleShiftVehicleBlockAdded$({ aid, data }) {
         console.log(`ShiftES: handleShiftVehicleBlockAdded: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, vehicle: 1 }).pipe(
             mergeMap(({ businessId, vehicle, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, vehicle }))
         );
@@ -101,6 +106,7 @@ class ShiftES {
     */
     handleShiftDriverBlockRemoved$({ aid, data }) {
         console.log(`ShiftES: handleShiftDriverBlockRemoved: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { driver: 1, businessId: 1 }).pipe(
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, driver }))
         );
@@ -112,6 +118,7 @@ class ShiftES {
      */
     handleShiftDriverBlockAdded$({ aid, data }) {
         console.log(`ShiftES: handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, driver: 1 }).pipe(
             mergeMap(({ businessId, driver, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, driver }))
         );
@@ -123,6 +130,7 @@ class ShiftES {
      */
     handleShiftLocationReported$({ aid, data }) {
         console.log(`ShiftES: handleShiftLocationReported: ${JSON.stringify({ aid, data })} `);  //TODO: DELETE LINE
+        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         return of({});
     }
 
