@@ -82,6 +82,8 @@ input ServiceCoreClientInput {
     id: String
     "client username"
     username: String
+    "drivers document, this is the one who referred this client"
+    referrerDriverDocumentId: String
 }
 
 "Vehicle info"
