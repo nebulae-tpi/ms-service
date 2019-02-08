@@ -2,7 +2,7 @@
 
 
 const { of, interval, forkJoin, empty } = require("rxjs");
-const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
+const { mergeMapTo, tap, mergeMap, catchError, map, toArray,delay ,filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -29,9 +29,7 @@ class ShiftES {
     handleShiftStarted$({ aid,data }) {
         console.log(`ShiftES: handleShiftStarted: ${JSON.stringify(data)} `); //TODO: DELETE LINE
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
-        return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 }).pipe(
-            mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema(data)))
-        );
+        return driverAppLinkBroker.sendShiftEventToDrivers$(data.businessId, data.driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema(data));
     }
 
     /**
