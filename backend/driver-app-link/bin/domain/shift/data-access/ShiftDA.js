@@ -32,7 +32,7 @@ class ShiftDA {
         { _id },
         projection
       )
-    ).pipe(first(shift => shift, undefined));
+    ).pipe(filter(shift => shift));
   }
 
 }
