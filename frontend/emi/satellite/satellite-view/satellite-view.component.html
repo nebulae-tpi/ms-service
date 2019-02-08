@@ -49,7 +49,7 @@
           </span>
         </div>
 
-        
+
       </div>
       <!-- / SIDENAV HEADER -->
 
@@ -86,8 +86,27 @@
               {{'SATELLITE.REQUEST_VEHICLE_TITLE' | translate}}
             </div>
 
-            <div fxFlex="100">                    
-                <div fxLayout="column" fxLayoutAlign="space-between center" >                      
+            <div fxFlex="100" *ngIf="isOperator">
+              <div fxLayout="column" fxLayoutAlign="space-between center" >
+
+                <mat-form-field class="mt-12">
+                  <input matInput [formControl]="clientFilterCtrl" placeholder="{{ 'SATELLITE.SATELLITE_CLIENT_PLACEHOLDER' | translate }}" aria-label="satelliteClient" [matAutocomplete]="auto">
+
+                  <mat-autocomplete #auto="matAutocomplete" (optionSelected)='setSelectedClientSatellite($event.option.value)' [displayWith]="displayFn">
+                    <mat-option *ngFor="let satelliteClient of satelliteClientQueryFiltered$ | async" [value]="satelliteClient">
+                      <!-- <img style="vertical-align:middle;" aria-hidden src="./assets/devices-location/bus2.svg" height="20" /> -->
+                      <mat-icon>person_pin_circle</mat-icon>
+                      <!-- <span class="text-boxed text-uppercase">{{ satelliteClient._id }}</span> -->
+                      <span class="text-uppercase">{{ satelliteClient.generalInfo.name }}</span>
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+
+              </div>
+          </div>
+
+            <div fxFlex="100">
+                <div fxLayout="column" fxLayoutAlign="space-between center" >
                     <mat-slider
                       max="5"
                       min="1"
@@ -101,11 +120,13 @@
                         <mat-icon class="icon s-40 mr-16">local_taxi</mat-icon>
                         <span>{{requestForm.controls['taxisNumber'].value}}</span>
                     </div>
-                </div>                  
-              
-            </div>               
+                </div>
+
+            </div>
+
+
           </div>
-          
+
 
           <div fxLayout="row wrap"
           fxLayoutAlign="space-between center"
@@ -115,8 +136,8 @@
               <mat-divider></mat-divider>
             </div>
 
-            <div fxFlex="100">  
-                <div fxLayout="column" fxLayoutAlign="center start">                                     
+            <div fxFlex="100">
+                <div fxLayout="column" fxLayoutAlign="center start">
 
                     <mat-form-field>
                         <mat-select placeholder="{{'SATELLITE.PAYMENT_TYPE' | translate}}" formControlName="paymentType">
@@ -149,14 +170,14 @@
                               {{'SATELLITE.SERVICES.MIN_MAX_TIP' | translate}}
                           </mat-error>
                     </mat-form-field>
-                  
+
                 </div>
-                
-
-                    
 
 
-            
+
+
+
+
             </div>
           </div>
 
@@ -173,7 +194,7 @@
 
 
 
-          
+
 
 
 
@@ -186,8 +207,8 @@
               <mat-divider></mat-divider>
             </div>
 
-            <div fxFlex="100">  
-                <div fxLayout="column" fxLayoutAlign="center start">                   
+            <div fxFlex="100">
+                <div fxLayout="column" fxLayoutAlign="center start">
                   <mat-divider fxFlex="100"></mat-divider>
                   <div fxFlex="100" formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
                     <div fxFlex="100" class="ml-12" [formGroupName]="i" fxLayoutAlign="start start" >
@@ -196,16 +217,16 @@
                         </mat-checkbox>
                     </div>
                   </div>
-                </div> 
-            
+                </div>
+
             </div>
           </div>
 
 
 
-          
+
           <!-- <div fxFlex="100" class="mt-12 h3 secondary-text">{{'SATELLITE.FEATURES' | translate}}</div>
-          
+
           <div fxFlex="100" formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
             <div fxFlex="100" [formGroupName]="i" fxLayoutAlign="start start">
                 <mat-checkbox fxFlex="100" [formControlName]="'active'">
@@ -216,11 +237,11 @@
 
 
 
-              
+
           </div>
 
             </form>
-  
+
             <div class="p-24">
               <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" [disabled]="requestForm.invalid"
                 aria-label="Request taxi" (click)="requestService()">
@@ -238,16 +259,16 @@
 
     <!-- CENTER -->
     <div class="center">
-        
+
       <!-- CONTENT HEADER -->
       <div fxLayout="row" fxLayoutAlign="space-between center">
-        
+
         <div style="position: absolute; top: 60px; left: 10px; z-index: 99;">
           <button
-            mat-fab 
+            mat-fab
             class="sidenav-toggle"
             fuseMatSidenavToggler="carded-left-sidenav"
-            
+
             aria-label="Toggle Sidenav">
             <mat-icon>menu</mat-icon>
           </button>
@@ -267,4 +288,4 @@
     <!-- / CENTER -->
   </mat-sidenav-container>
 </div>
-<satellite-service-list [serviceList]="serviceList" (selectedServiceChange)="onSelectedService($event)"></satellite-service-list>
+<satellite-service-list [serviceList]="serviceList" [selectedService]="selectedService" (selectedServiceChange)="onSelectedService($event)"></satellite-service-list>

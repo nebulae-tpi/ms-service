@@ -7,8 +7,8 @@ import { GatewayService } from '../../../../api/gateway.service';
 import {
   ServiceServicesSatellite,
   ServiceClientSatellite,
+  ServiceClientSatellites,
   ServiceCoreRequestService,
-  ServiceCoreCancelService,
   ServiceServiceUpdatedSubscription
 } from '../gql/satellite';
 import * as moment from "moment";
@@ -68,6 +68,18 @@ export class SatelliteViewService {
       fetchPolicy: "network-only",
       errorPolicy: "all"
     });
+  }
+
+  getSatelliteClientsByFilter(clientText: String, limit: number): Observable<any> {
+    return this.gateway.apollo
+      .query<any>({
+        query: ServiceClientSatellites,
+        variables: {
+          clientText: clientText,
+          limit: limit
+        },
+        errorPolicy: 'all'
+      });
   }
 
   /**

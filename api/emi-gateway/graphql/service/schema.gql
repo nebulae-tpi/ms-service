@@ -82,7 +82,20 @@ type ServiceClientSatellite {
   "General info of the client"
   generalInfo: ServiceClientSatelliteGeneralInfo
   "Location of the client"
-  location: ServiceClientSatelliteLocation
+  location: ServiceClientSatelliteLocation,
+  "Client auth credential"
+  auth: ServiceClientAuth
+  "Client state"
+  state: String
+  "Business of the client"
+  businessId: String
+}
+
+type ServiceClientAuth {
+  "username"
+  username: String!
+  "User keycloak ID"
+  userKeycloakId: String!
 }
 
 type ServiceClientSatelliteGeneralInfo {
@@ -307,7 +320,7 @@ type Query {
   "Get client satellite data of the client satellite logged"
   ServiceClientSatellite: ServiceClientSatellite
   "Gets the client satellite by its name"
-  ServiceClientSatellites(clientName: String): [ServiceClientSatellite]
+  ServiceClientSatellites(clientText: String, limit: Int): [ServiceClientSatellite]
   "Get Services filtered"
   ServiceServices(filterInput: ServiceServiceFilterInput!, paginationInput: ServiceServicePaginationInput!): [ServiceService]
   "Get the amount of Services filtered "

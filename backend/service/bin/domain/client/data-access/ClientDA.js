@@ -37,13 +37,23 @@ class ClientDA {
     /**
    * Gets the satellite clients by the client name
    */
-  static getSatelliteClients$(clienText) {
+  static getSatelliteClients$(clienText, limit) {
     const collection = mongoDB.db.collection(CollectionName);
 
-    const query = {
-      'generalInfo.name': { $regex: clienText, $options: "i" }, 
-    };
-    return defer(() => collection.find(query).limit(30));
+    const query = {};
+    if(clienText){
+      filter['$or'] = [ { id: {$regex: clienText, $options: 'i'} }, { 'generalInfo.name': {$regex: filterText, $options: 'i'} } ];
+    }
+
+    //return defer(() => collection.find(query).limit((!limit || limit > 30) ? 30 : limit));
+
+
+    const cursor = collection
+    .find(query)
+    .limit(limit);
+
+  return mongoDB.extractAllFromMongoCursor$(cursor);
+
   }
 
     /**
@@ -58,7 +68,13 @@ class ClientDA {
         collection.findOneAndUpdate(
           { _id: id },
           {
-            $set: {generalInfo: clientSatellite.generalInfo, location: clientSatellite.location}
+            $set: {
+              generalInfo: clientSatellite.generalInfo, 
+              location: clientSatellite.location, 
+              businessId: clientSatellite.businessId, 
+              state: clientSatellite.state,
+              auth: clientSatellite.auth
+            }
           },
           {
             upsert: true,

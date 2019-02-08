@@ -1,3 +1,4 @@
+import { AfterViewInit } from '@angular/core';
 ////////// ANGULAR //////////
 import {
   Component,
@@ -32,7 +33,7 @@ import {
   take
 } from "rxjs/operators";
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest, range } from "rxjs";
+import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest, range, from, interval } from "rxjs";
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -74,13 +75,16 @@ import { ToolbarService } from "../../../toolbar/toolbar.service";
   styleUrls: ['./satellite-view.component.scss'],
   animations: fuseAnimations
 })
-export class SatelliteViewComponent implements OnInit, OnDestroy {
-  //Subject to unsubscribe 
+export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy {
+  //Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
   private serviceMarkerUpdater = new Subject();
 
   @ViewChild('gmap') gmapElement: any;
+
+  satelliteClientQueryFiltered$: Observable<any[]>;
+  clientSatelliteList = [];
 
   map: MapRef;
   bounds: google.maps.LatLngBounds;
@@ -97,10 +101,13 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   serviceList = [];
   selectedService = null;
 
-    //////// FORMS //////////
-  requestForm: FormGroup;
+  dateTest = null;
 
-  constructor(    
+  //////// FORMS //////////
+  requestForm: FormGroup;
+  clientFilterCtrl: FormControl;
+
+  constructor(
     private formBuilder: FormBuilder,
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
@@ -111,66 +118,122 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     private keycloakService: KeycloakService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog
-  ) {    
+  ) {
       this.translationLoader.loadTranslations(english, spanish);
   }
-    
+
 
   ngOnInit() {
     this.initMap(); // initialize the map element
-    this.buildRequestTaxiForm(); 
+    this.buildRequestTaxiForm();
     this.loadServiceClientSatellite();
-    this.loadAliveServicesList();   
+    this.loadAliveServicesList();
     this.initServiceUpdater();
     this.subscribeServiceServiceUpdated();
+    // this.testerLocation();
+  }
+
+  ngAfterViewInit(): void {
+    // outputs `I am span`
+    this.createQueryFilter();
+}
+
+  displayFn(satelliteClient) {
+    return satelliteClient ? satelliteClient.generalInfo.name : '';
+  }
+
+  createQueryFilter(){
+    this.clientFilterCtrl = new FormControl();
+    this.satelliteClientQueryFiltered$ =
+    this.clientFilterCtrl.valueChanges.pipe(
+        startWith(undefined),
+        debounceTime(500),
+        distinctUntilChanged(),
+        mergeMap((data: any) => {
+          let clientText = null;
+          if (typeof data === 'string'){
+            clientText = data;
+          }else if(data){
+            clientText = data.generalInfo.name;
+          }
+
+          return this.getAllSatelliteClientsFiltered(clientText, 30);
+        })
+      );
+  }
+
+  getAllSatelliteClientsFiltered(filterText: String, limit: number): Observable<any[]> {
+    return this.satelliteViewService
+      .getSatelliteClientsByFilter(filterText, limit)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter(resp => !resp.errors),
+        mergeMap(clientSatellites => {
+          this.clientSatelliteList = clientSatellites;
+          return from(clientSatellites.data.ServiceClientSatellites);
+        }),
+        toArray()
+      );
   }
 
   initServiceUpdater(){
     this.serviceMarkerUpdater.pipe(
       takeUntil(this.ngUnsubscribe)
     ).subscribe((service: any) => {
-      
       if(service){
         const marker = this.getMarkerFromArray(service._id);
         const lastServiceData = this.getServiceFromArray(service._id);
+
+        console.log('initServiceUpdater => ', (!lastServiceData || lastServiceData.lastModificationTimestamp < service.lastModificationTimestamp));
+        console.log('lastServiceData1 => ', lastServiceData.lastModificationTimestamp);
+        console.log('lastServiceData2 => ', service.lastModificationTimestamp);
 
         // Check if the last service is older than the new one
         // If it is newer we have to update the info into the service list and the map
         if (!lastServiceData || lastServiceData.lastModificationTimestamp < service.lastModificationTimestamp) {
 
+          console.log('Closed service => ', service.closed);
+
           // Ignore the closed services that there are not on the map neither the array
-          if(!lastServiceData && service.closed){
+          if (!lastServiceData && service.closed){
             return;
           }
 
-          // If the service does not exist on the array and it is not closed, 
-          //we have to add this service to the map and the service array.
-          if(!lastServiceData && !service.closed){
+          // If the service does not exist on the array and it is not closed,
+          // we have to add this service to the map and the service array.
+          if (!lastServiceData && !service.closed){
             this.serviceList.push(service);
             this.createServiceMarker(service);
           }else{
-            if(lastServiceData){
+            if (lastServiceData){
               // If the service was closed , we have to remove the service from the table and the map
-              if(service.closed){
+              if (service.closed){
+                console.log('Intentará cerrar');
                 this.removeServiceFromArray(service._id);
                 this.removeMarkerFromMap(marker);
-              }else{        
-                //Check if the icon should be updated
-                if(marker && lastServiceData.state !== service.state){
+              }else{
+
+                console.log('Check update icon => ', (marker && lastServiceData.state !== service.state));
+
+                // Check if the icon should be updated
+                if (marker && lastServiceData.state !== service.state){
                   const iconUrl = this.getServiceMarkerIcon(service);
                   marker.updateIcon(iconUrl);
                 }
 
-                //Check if the location should be updated
-                if(marker && service.location && (!lastServiceData.location || lastServiceData.location !== service.location)){
+                console.log('Check update location => ', marker && service.location && (!lastServiceData.location || lastServiceData.location !== service.location));
+
+                // Check if the location should be updated
+                if (marker && service.location && (!lastServiceData.location || lastServiceData.location !== service.location)){
+                  console.log('New location => ', service.location);
                   marker.sendNewLocation(service.location);
                 }
 
-                if(!marker){
+                if (!marker){
                   this.createServiceMarker(service);
                 }
 
-                //Update the service on the array
+                // Update the service on the array
                 this.updateServiceOnArray(service);
               }
 
@@ -181,6 +244,27 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     });
   }
 
+  getSatelliteClientFromArray(clientId){
+    const clientSatellite = this.clientSatelliteList.find(item => item._id === clientId);
+    return clientSatellite;
+  }
+
+  setSelectedClientSatellite(selectedSatelliteClient) {
+    console.log('selectedSatelliteClient => ', selectedSatelliteClient);
+    if (selectedSatelliteClient){
+      if (this.clientData){
+        this.removeMarkerFromMap(this.clientMarker, false);
+      }
+      this.clientData = selectedSatelliteClient;
+
+      if (!this.clientData.location || !this.clientData.location.lat || !this.clientData.location.lng){
+        this.showSnackBar('SATELLITE.SERVICES.CLIENT_LOCATION_MISSING');
+      }else{
+        this.createPickUpMarker(selectedSatelliteClient._id, this.clientData.location.lat, this.clientData.location.lng);
+      }
+    }
+  }
+
 
   /**
    * Update the service info on the array
@@ -188,9 +272,32 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
    */
   updateServiceOnArray(service){
     const index = this.serviceList.findIndex(item => item._id === service._id);
-    this.serviceList[index] = service;
+    // this.serviceList[index] = service;
+    this.updateServiceItem(this.serviceList[index], service);
   }
-  
+
+  updateServiceItem(serviceFromArray, newServiceData){
+    serviceFromArray.shiftId = newServiceData.shiftId;
+    serviceFromArray.requestedFeatures = newServiceData.requestedFeatures;
+    serviceFromArray.client = newServiceData.client;
+    serviceFromArray.pickUp = newServiceData.pickUp;
+    serviceFromArray.dropOff = newServiceData.dropOff;
+    serviceFromArray.verificationCode = newServiceData.verificationCode;
+    serviceFromArray.pickUpETA = newServiceData.pickUpETA;
+    serviceFromArray.dropOffpETA = newServiceData.dropOffpETA;
+    serviceFromArray.paymentType = newServiceData.paymentType;
+    serviceFromArray.fareDiscount = newServiceData.fareDiscount;
+    serviceFromArray.fare = newServiceData.fare;
+    serviceFromArray.tip = newServiceData.tip;
+    serviceFromArray.route = newServiceData.route;
+    serviceFromArray.state = newServiceData.state;
+    serviceFromArray.StateChanges = newServiceData.StateChanges;
+    serviceFromArray.location = newServiceData.location;
+    serviceFromArray.vehicle = newServiceData.vehicle;
+    serviceFromArray.driver = newServiceData.driver;
+    serviceFromArray.lastModificationTimestamp = newServiceData.lastModificationTimestamp;
+  }
+
   /**
    * Removes a service from the array according to its index
    * @param serviceId service id
@@ -205,18 +312,22 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   /**
    * Removes a marker from the marker array and the map
    * @param marker marker to remove
+   * @param boolean indicates if the marker must be removed from the marker array
    */
-  removeMarkerFromMap(marker) {
+  removeMarkerFromMap(marker, removeFromArray = true) {
     if(!marker){
       return;
     }
 
     marker.setMap(null);
-    const index = this.markers.findIndex(item => item.id === marker.id);
 
-    if(index > -1){
-      this.markers.splice(index, 1);
-    }    
+    if(removeFromArray){
+      const index = this.markers.findIndex(item => item.id === marker.id);
+
+      if(index > -1){
+        this.markers.splice(index, 1);
+      }
+    }
   }
 
 
@@ -224,13 +335,13 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
    * Indicates if the marker indicated exists in the array of markers
    * @param markerId marker id
    */
-  getMarkerFromArray(markerId){    
+  getMarkerFromArray(markerId){
     const markersFiltered = this.markers.find(marker => marker.id == markerId);
-    console.log('getMarkerFromArray => ', this.markers, markerId);
-    console.log('markersFiltered => ', markersFiltered);
+    // console.log('getMarkerFromArray => ', this.markers, markerId);
+    // console.log('markersFiltered => ', markersFiltered);
     return markersFiltered;
   }
-  
+
 
   initMap() {
     this.map = new MapRef(this.gmapElement.nativeElement, {
@@ -294,22 +405,14 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   loadServiceClientSatellite(){
     this.checkRoles$()
     .pipe(
-      filter(roles => roles.some(role => role === 'SATELLITE')),
+      filter(roles => roles.some(role => role === 'SATELLITE') && !roles.some(role => role === 'OPERATOR')),
       mergeMap(() => this.getServiceClientSatellite$()),
       takeUntil(this.ngUnsubscribe)
     ).subscribe(client => {
-      if(client){
-        this.clientData = client
-        console.log('loadServiceClientSatellite => ', this.clientData);
-
-        if(!this.clientData.location || !this.clientData.location.lat || !this.clientData.location.lng){
-          this.showSnackBar('SATELLITE.SERVICES.CLIENT_LOCATION_MISSING');
-        }else{
-          this.createPickUpMarker(client._id, this.clientData.location.lat, this.clientData.location.lng);     
-        }        
-      }else {
+      if (!client){
         console.log('Error => Not client data');
       }
+      this.setSelectedClientSatellite(client);
     });
   }
 
@@ -321,18 +424,18 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
         position: {
           lat: parseFloat(lat),
           lng: parseFloat(lng)
-        }, 
+        },
         map: this.map,
-        draggable: true
+        // draggable: true
       }
     );
     this.clientMarker = pickUpMarker;
-    this.clientMarker.updateIcon("./assets/satellite/icono-sucursal.svg");
+    this.clientMarker.updateIcon('./assets/satellite/icono-sucursal.svg');
     this.addMarkerToMap(pickUpMarker);
   }
 
   createServiceMarker(service){
-    if(!service || !service.location){
+    if (!service || !service.location){
       return;
     }
     const serviceMarker = new MarkerRef(
@@ -342,9 +445,10 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
         position: {
           lat: parseFloat(service.location.lat),
           lng: parseFloat(service.location.lng)
-        }, 
+        },
         map: this.map,
-        draggable: false
+        draggable: false,
+        clickable: true
       }
     );
 
@@ -357,24 +461,27 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
 
   getServiceMarkerIcon(service){
     let iconUrl = null;
-    switch(service.state){
+    switch (service.state){
       case 'ASSIGNED':
-        iconUrl = './assets/satellite/marker_orange.png'
+        iconUrl = './assets/satellite/marker_orange.png';
         break;
       case 'ARRIVED':
-        iconUrl = './assets/satellite/marker_blue.png'
+        iconUrl = './assets/satellite/marker_blue.png';
         break;
       case 'ON_BOARD':
-        iconUrl = './assets/satellite/marker_gray.png'
+        iconUrl = './assets/satellite/marker_gray.png';
         break;
       case 'CANCELLED_CLIENT':
-        iconUrl = './assets/satellite/marker_red.png'
+        iconUrl = './assets/satellite/marker_red.png';
         break;
       case 'CANCELLED_DRIVER':
-        iconUrl = './assets/satellite/marker_red.png'
+        iconUrl = './assets/satellite/marker_red.png';
+        break;
+      case 'CANCELLED_OPERATOR':
+        iconUrl = './assets/satellite/marker_red.png';
         break;
       case 'DONE':
-        iconUrl = './assets/satellite/marker_green.png'
+        iconUrl = './assets/satellite/marker_green.png';
         break;
       default:
         iconUrl = '';
@@ -413,8 +520,47 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
     .subscribe((service: any) => {
       console.log('subscribeServiceServiceUpdated =>', service);
       this.serviceMarkerUpdater.next(service);
-    })
+    });
   }
+
+  testerLocation() {
+    interval(5000)
+    .subscribe(() => {
+      const testArray = ['ASSIGNED', 'ON_BOARD', 'CANCELLED_CLIENT', 'CANCELLED_DRIVER', 'CANCELLED_OPERATOR', 'DONE'];
+
+      if (!this.serviceList || this.serviceList.length === 0){
+        return;
+      }
+
+      const service = JSON.parse(JSON.stringify(this.serviceList[0]));
+
+      service.location.lat = this.getRandomFloat(6.1601312, 6.1701312);
+      service.location.lng = this.getRandomFloat(-75.6158417, -75.5958417);
+      service.lastModificationTimestamp = new Date().getTime();
+      service.state = testArray[this.getRandomInt(0, 5)];
+
+      if (!this.dateTest){
+        this.dateTest = new Date();
+      }
+
+      if (new Date().getTime() > (this.dateTest.getTime() + 1 * 60 * 1000)){
+        service.closed = true;
+        console.log('SERVICIO CERRADO ********************************');
+      }
+
+      this.serviceMarkerUpdater.next(service);
+    });
+  }
+
+  getRandomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 
   /**
@@ -433,7 +579,9 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
           client: {
             fullname: this.clientData.generalInfo.name,
             tip: 0,
-            tipType: '' 
+            tipType: '',
+            id: this.clientData._id,
+            username: this.clientData.auth ? this.clientData.auth.username: null
           },
           pickUp: {
             marker: {
@@ -441,21 +589,21 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
               lng: this.clientMarker.getPosition().lng(),
               // lat: this.clientData.location.lat,clientMarker
               // lng: this.clientData.location.lng,
-            }, 
-            polygon: null, 
+            },
+            polygon: null,
             city: this.clientData.generalInfo.city,
             zone: this.clientData.generalInfo.zone,
             neighborhood: this.clientData.generalInfo.neighborhood,
             addressLine1: this.clientData.generalInfo.address,
             addressLine2: '',
             notes: requestServiceForm.reference
-          },          
+          },
           paymentType: requestServiceForm.paymentType, // ?
           requestedFeatures: features,
           dropOff: null,
-          fareDiscount: null, 
-          fare: null, 
-          tip: requestServiceForm.tip, 
+          fareDiscount: null,
+          fare: null,
+          tip: requestServiceForm.tip,
         };
       }),
       mergeMap(serviceCoreRequest=> this.satelliteViewService.createServiceCoreRequestService$(serviceCoreRequest)),
@@ -490,9 +638,10 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   }
 
   onSelectedService(service){
-    //this.selectedService = service;
-    const marker = this.getMarkerFromArray(service._id)
-    if(marker){
+    // this.selectedService = service;
+    console.log('onSelectedService => ', service._id);
+    const marker = this.getMarkerFromArray(service._id);
+    if (marker){
       this.onMarkerClick(marker, null);
     }
   }
@@ -515,9 +664,8 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
    * @param event Event
    */
   onMarkerClick(marker: MarkerRef, event) {
-
     console.log('onMarkerClick ', marker);
-
+    this.selectedService = this.getServiceFromArray(marker.id);
     this.selectedMarker = marker;
     this.markers.forEach(m => {
       m.infoWindow.close();
@@ -534,8 +682,8 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
    * get services from cache
    */
   getServiceFromArray(serviceId){
-    if(this.serviceList && this.serviceList.length > 0){
-      return this.serviceList.find(service => service._id == serviceId);
+    if (this.serviceList && this.serviceList.length > 0){
+      return this.serviceList.find(service => service._id === serviceId);
     }
     return null;
   }
@@ -553,11 +701,11 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
   buildServiceInfoWindowContent(service){
     console.log('buildServiceInfoWindowContent', service);
 
-    
-    const serviceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICE'); 
-    const licensePlateTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.LICENSE_PLATE');    
-    const serviceReferenceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.REFERENCE');  
-    
+
+    const serviceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICE');
+    const licensePlateTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.LICENSE_PLATE');
+    const serviceReferenceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.REFERENCE');
+
     const serviceInfoWindowContent = `<html>
       <body>
           <div id="serviceInfoWindow">
@@ -634,7 +782,7 @@ export class SatelliteViewComponent implements OnInit, OnDestroy {
       );
     });
   }
-  
+
   ngOnDestroy() {
     if(this.markers){
       this.markers.forEach(marker => {
