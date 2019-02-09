@@ -56,11 +56,9 @@ class ServiceES {
      * @param {*} serviceEvent service event
      */
     handleServiceEvents$(serviceEvent) {
-      console.log("handleServiceEvents => ", serviceEvent);
       return of(serviceEvent)
       .pipe(
         tap(res => {
-          console.log('serviceEvent => ', res)
           this.serviceUpdatedEventEmitter$.next(serviceEvent);
         }),
       );
