@@ -121,22 +121,21 @@ class ServiceES {
 
         const { location, timestamp } = data;
 
-
-        const sendEvt$ = mergeMap(shiftId => eventSourcing.eventStore.emitEvent$(ServiceES.buildEventSourcingEvent(
-            'Shift',
-            shiftId,
-            'ShiftStateChanged',
-            { _id: shiftId, state: 'AVAILABLE' }
-        ))).pipe(
-            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
-        );
-
         //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
         //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
         return ServiceDA.appendstate$(aid, 'DONE', location, timestamp).pipe(
             mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
             map(({ shiftId }) => shiftId),
-            sendEvt$
+            mergeMap(shiftId =>
+                eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Shift',
+                        shiftId,
+                        'ShiftStateChanged',
+                        { _id: shiftId, state: 'AVAILABLE' }
+                    )
+                )),
+            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
         );
 
 
