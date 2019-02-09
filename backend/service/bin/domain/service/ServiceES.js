@@ -51,6 +51,10 @@ class ServiceES {
 
   
 
+  handleServiceClosed$(ServiceClosedEvt){
+    return ServiceDA.closeService$(ServiceClosedEvt.aid)
+  }
+
     /**
      * Handles the service event
      * @param {*} serviceEvent service event
@@ -58,6 +62,7 @@ class ServiceES {
     handleServiceEvents$(serviceEvent) {
       return of(serviceEvent)
       .pipe(
+        
         tap(res => {
           this.serviceUpdatedEventEmitter$.next(serviceEvent);
         }),

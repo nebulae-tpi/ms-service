@@ -198,7 +198,7 @@ class EventStoreService {
       ServiceCancelledByDriver: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByClient: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
-      ServiceClosed: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+      ServiceClosed: { fn: ServiceES.handleServiceClosed$, obj: ServiceES },
       // CRONJOB
       PeriodicFiveMinutes: {
         fn: CronJobES.handlePeriodicFiveMinutes$,
