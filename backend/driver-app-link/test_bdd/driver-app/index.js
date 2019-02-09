@@ -22,6 +22,7 @@ const mqttBroker = new MqttBroker({ eventsTopic: 'Events', brokerUrl: 'mqtt://lo
 
 const KeyCloak = require('../KeyCloak');
 const GraphQL = require('../GraphQL');
+const DriverAppLinkBroker = require('../DriverAppLinkBroker');
 
 
 const Shift = require('./shift/Shift');
@@ -29,6 +30,18 @@ const Driver = require('./driver/Driver');
 
 const keyCloak = new KeyCloak();
 const graphQL = new GraphQL();
+/**
+ * {DriverAppLinkBroker}
+ */
+const appLinkBroker = new DriverAppLinkBroker(
+    {
+        url: 'tcp://localhost',
+        port: undefined,
+        clientId: 'mocha/chai',
+        user: '',
+        password: '',
+    }
+);
 
 /**
  * @type {Conversation}
@@ -77,7 +90,8 @@ describe('DriverApp workflows', function () {
                     mergeMap(jwtEvt => graphQL.connect$()),
                     mergeMap(() => graphQL.testConnection$())
                 ),
-                mqttBroker.start$()
+                mqttBroker.start$(),
+                appLinkBroker.start$()
             ).subscribe(...getRxDefaultSubscription('Prepare: SHIFT MANAGEMENT TEST', done));
         });
     });
@@ -87,7 +101,7 @@ describe('DriverApp workflows', function () {
         it('query DriverAssignedVehicles', function (done) {
             this.timeout(500);
             driver.queryDriverAssignedVehicles$().pipe(
-                map(vehicles => vehicles.filter(v => v.active && v.blocks.length <=0 )),
+                map(vehicles => vehicles.filter(v => v.active && v.blocks.length <= 0)),
                 tap(vehicles => expect(vehicles).to.not.be.empty),
                 tap(vehicles => selectedVehicle = vehicles[0])
             ).subscribe(...getRxDefaultSubscription('query DriverAssignedVehicles', done));
@@ -101,21 +115,37 @@ describe('DriverApp workflows', function () {
             this.timeout(500);
             shiftLogic.startShift$(selectedVehicle.plate).pipe(
                 delay(100),
-                mergeMapTo(shiftLogic.queryOpenShift$()),                
+                mergeMapTo(shiftLogic.queryOpenShift$()),
                 tap(shift => expect(shift.vehicle.plate).to.be.equal(selectedVehicle.plate)),
                 tap(shift => openShift = shift),
             ).subscribe(...getRxDefaultSubscription('started new shift', done));
         });
     });
 
-
     describe('Set Shift state', function () {
         const shiftLogic = new Shift(graphQL);
         it('Set Shift state to NOT_AVAILABLE', function (done) {
             this.timeout(500);
-            shiftLogic.setShiftState$("NOT_AVAILABLE").pipe(
+
+            Rx.forkJoin(
+                appLinkBroker.listenShiftEventsFromServer$(['ShiftStateChanged']).pipe(                    
+                    first(),
+                    mergeMap((evt) => console.log(`=============${JSON.stringify(evt)}=================`)),                    
+                ),
+                shiftLogic.setShiftState$("NOT_AVAILABLE").pipe(
+                    mergeMapTo(shiftLogic.queryOpenShift$()),
+                    tap(shift => expect(shift).to.be.not.null),
+                    tap(shift => expect(shift.state).to.be.eq('NOT_AVAILABLE')),
+                )
+            ).subscribe(...getRxDefaultSubscription('Set Shift state', done)); 
+        });
+
+
+        it('Set Shift state to AVAILABLE', function (done) {
+            this.timeout(500);
+            shiftLogic.setShiftState$("AVAILABLE").pipe(
                 delay(100),
-                mergeMapTo(shiftLogic.queryOpenShift$()),                
+                mergeMapTo(shiftLogic.queryOpenShift$()),
                 tap(shift => expect(shift).to.be.not.null),
                 tap(shift => expect(shift.state).to.be.eq('NOT_AVAILABLE')),
             ).subscribe(...getRxDefaultSubscription('Set Shift state', done));
@@ -128,7 +158,7 @@ describe('DriverApp workflows', function () {
             this.timeout(500);
             shiftLogic.stopShift$().pipe(
                 delay(100),
-                mergeMapTo(shiftLogic.queryOpenShift$()),                
+                mergeMapTo(shiftLogic.queryOpenShift$()),
                 tap(shift => expect(shift).to.be.null),
             ).subscribe(...getRxDefaultSubscription('Stop old shift', done));
         });

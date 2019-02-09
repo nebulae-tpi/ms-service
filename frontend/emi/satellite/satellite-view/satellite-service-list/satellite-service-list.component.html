@@ -21,7 +21,7 @@
     <fuse-widget [@animate]="{value:'*',params:{y:'100%'}}" (click)="selectService(service)" class="mb-8 sidenav-widget p-0 mat-elevation-z2" *ngFor="let service of serviceList">
 
         <!-- Front -->
-        <div class="fuse-widget-front" style="background: rgba(155, 156, 155, 0.212)">
+        <div class="fuse-widget-front" [ngClass]="{highlightWidget: selectedService && selectedService._id == service._id}">
 
             <div class="pl-4 pr-4 py-16" fxLayout="row" fxLayoutAlign="space-between center">
 
@@ -47,25 +47,25 @@
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.LICENSE_PLATE' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
                     <span class="value" *ngIf="service.vehicle">{{service.vehicle.licensePlate}}</span>
-                </div> 
+                </div>
 
                 <div class="h3 secondary-text">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.DRIVER' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
                     <span class="value" *ngIf="service.driver">{{service.driver.fullname}}</span>
-                </div> 
+                </div>
 
                 <div class="h3 secondary-text">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.STATE' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
                     <span class="value">{{'SATELLITE.SERVICES.STATES.' + service.state | translate}}</span>
-                </div> 
+                </div>
 
                 <div class="h3 secondary-text">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.REFERENCE' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
                     <span class="value" *ngIf="service.pickUp.notes">{{service.pickUp.notes}}</span>
-                </div> 
+                </div>
 
                 <div class="pt-4" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.requestedFeatures && service.requestedFeatures.length > 0">
                     <mat-icon class="m-0 mr-16">settings_applications</mat-icon>
@@ -76,13 +76,13 @@
                     <mat-list-item *ngFor="let requestedFeature of service.requestedFeatures">
                         <h5 mat-line>{{"SATELLITE.SERVICES.FEATURES." + requestedFeature | translate}}</h5>
                     </mat-list-item>
-                </mat-list>      
+                </mat-list>
 
-                
-                <!-- 
+
+                <!--
                     <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.dropOff.notes">
-                        
-                    </div>  
+
+                    </div>
                 -->
             </div>
         </div>

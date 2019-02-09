@@ -69,7 +69,7 @@
                 "icon": "explore",
                 "translate": {
                     "en": "Satellite",
-                    "es": "satélite"
+                    "es": "Satélite"
                 },
                 "navURL": "/satellite",
                 "path": "satellite",

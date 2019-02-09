@@ -66,12 +66,12 @@ class Shift {
     static setShiftState$(user, state) {
         const query =
             `mutation {
-                setShiftState( ${this.graphQL.convertObjectToInputArgs({ state })} ){
+                setShiftState( ${user.graphQL.convertObjectToInputArgs({ state })} ){
                     accepted
                 }
             }`;
         return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
+            catchError(error => Rx.throwError(new Error(`Failed to setShiftState, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
             tap(({ setShiftState }) => expect(setShiftState).to.not.be.undefined),
             tap(({ setShiftState }) => expect(setShiftState.accepted).to.be.true),
             map(({ setShiftState }) => setShiftState.accepted),

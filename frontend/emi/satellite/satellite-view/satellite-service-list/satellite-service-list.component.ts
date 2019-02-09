@@ -8,7 +8,7 @@ import {
   OnDestroy,
   ViewChild,
   ElementRef,
-  HostBinding, 
+  HostBinding,
   Renderer2,
   Input,
   Output
@@ -78,10 +78,13 @@ import { ToolbarService } from "../../../../toolbar/toolbar.service";
   animations: fuseAnimations
 })
 export class SatelliteServiceListComponent implements OnInit, OnDestroy {
-  //Subject to unsubscribe 
+  //Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
   @Input('serviceList') serviceList: any = [];
+
+  @Input('selectedService') selectedService = null;
+
 
   @Output() selectedServiceChange = new EventEmitter();
 
@@ -91,12 +94,10 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   @HostBinding('class.bar-closed') barClosed: boolean = true;
 
-  dateNow = Date.now();
-  items = [1, 2, 3, 4, 5, 6, 7, 8];
 
   public player: AnimationPlayer;
 
-  constructor( 
+  constructor(
     private formBuilder: FormBuilder,
     private translate: TranslateService,
     private snackBar: MatSnackBar,
@@ -112,7 +113,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
   ) {
     this.translationLoader.loadTranslations(english, spanish);
   }
-    
+
 
   ngOnInit()
   {
@@ -123,7 +124,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   closeBar()
   {
-    if(!this.barClosed){
+    if (!this.barClosed){
       console.log('closeBar ');
       this.player =
           this.animationBuilder
@@ -139,10 +140,10 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
       });
     }
   }
-  
+
   openBar()
   {
-    if(this.barClosed){    
+    if (this.barClosed){
       console.log('openBar ');
       this.barClosed = false;
 
@@ -159,27 +160,29 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
 
   /**
    * Set the selected service
-   * @param service 
+   * @param service
    */
   selectService(service){
     console.log('Selected service => ', service);
+    this.selectedService = service;
+    // this.selectedService2 = service;
     this.selectedServiceChange.emit(service);
   }
 
       /**
    * cancel a service
-   * @param service 
+   * @param service
    */
   cancelService(service){
     this.getRoles$()
     .pipe(
       mergeMap(roles => {
-        const authorType = roles.some(role => role === 'OPERATOR') ? 'OPERATOR': 'CLIENT';
+        const authorType = roles.some(role => role === 'OPERATOR') ? 'OPERATOR' : 'CLIENT';
         return this.dialog
         // Opens confirm dialog
         .open(CancelServiceDialogComponent, {data: { serviceId: service._id, authorType: authorType}})
         .afterClosed()
-        
+
       }),
       takeUntil(this.ngUnsubscribe)
     ).subscribe(result => {
@@ -257,7 +260,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
       );
     });
   }
-  
+
   ngOnDestroy() {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();

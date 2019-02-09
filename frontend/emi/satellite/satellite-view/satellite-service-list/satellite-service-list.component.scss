@@ -1,5 +1,9 @@
 @import "src/app/core/scss/fuse";
 
+.highlightWidget{
+  background: rgba(163, 163, 163, 0.89)
+}
+
 @keyframes rotating {
     from {
         transform: rotate(0deg);

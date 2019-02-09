@@ -111,6 +111,47 @@ export const ServiceClientSatellite = gql`
         lat
         lng
       }
+      auth {
+        userKeycloakId
+        username
+      }
+      location{
+        lat
+        lng
+      }
+      state
+      businessId
+    }
+  }
+`;
+
+export const ServiceClientSatellites = gql`
+  query ServiceClientSatellites($clientText: String, $limit: Int) {
+    ServiceClientSatellites(clientText: $clientText, limit: $limit) {
+      _id
+      generalInfo {
+        name
+        phone
+        address
+        city
+        neighborhood
+        email
+        referrerDriverDocumentId
+      }
+      location{
+        lat
+        lng
+      }
+      auth {
+        userKeycloakId
+        username
+      }
+      location{
+        lat
+        lng
+      }
+      state
+      businessId
     }
   }
 `;

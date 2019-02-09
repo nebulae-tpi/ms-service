@@ -53,6 +53,7 @@ class ClientCQRS {
    * @param {*} authToken 
    */
   getSatelliteClients$({ args }, authToken) {
+    console.log('getSatelliteClients => ', args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Client",
@@ -60,7 +61,11 @@ class ClientCQRS {
       PERMISSION_DENIED,
       ["OPERATOR"]
     ).pipe(
-      mergeMap(roles => ClientDA.getSatelliteClients$(args.clienText)),
+      mergeMap(roles => {
+        console.log('getSatelliteClients => ', args);
+        return ClientDA.getSatelliteClients$(args.clienText, args.limit);
+      }),
+      toArray(),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );

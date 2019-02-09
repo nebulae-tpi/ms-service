@@ -13,6 +13,7 @@ export const locale = {
       'FEATURES': 'Características',
       'NOTES': 'Notas',
       'SERVICE': 'Servicio',
+      'SATELLITE_CLIENT_PLACEHOLDER': 'Seleccione un cliente',
       'FEATURES_LIST': {
         'AC': 'Aire acondicionado',
         'TRUNK': 'Baúl',
@@ -21,6 +22,7 @@ export const locale = {
         'BIKE_RACK': 'Portabicicletas'
       },
       'SERVICES': {
+        'CLIENT_LOCATION_MISSING': 'El cliente no tiene una localización configurada',
         'ERROR_OPERATION': 'Error realizando operación, intente nuevamente.',
         'REQUEST_SERVICE_SUCCESS': 'Solicitud de servicio enviada exitosamente', 
         'CANCEL_SERVICE_SUCCESS': 'Cancelación de servicio enviada exitosamente', 
@@ -61,6 +63,7 @@ export const locale = {
           'DONE': 'Finalizado',
           'CANCELLED_DRIVER': 'Cancelado por conductor',
           'CANCELLED_CLIENT': 'Cancelado por cliente',
+          'CANCELLED_OPERATOR': 'Cancelado por operador',
         }
       }
     },

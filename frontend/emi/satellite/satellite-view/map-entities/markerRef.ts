@@ -66,7 +66,7 @@ export class MarkerRef extends google.maps.Marker {
   infoWindow = new google.maps.InfoWindow({
     content: ''
   });
-  
+
 
   /**
    * Historical route path of the vehicle
@@ -91,7 +91,7 @@ export class MarkerRef extends google.maps.Marker {
   constructor(id, point: Point, opts?: google.maps.MarkerOptions) {
     super(opts);
     this.id = id;
-    this.setClickable(false);
+    // this.setClickable(false);
     this.setLabel(' ');
     this.point = point;
     this.lastModificationTimestamp = 0;
@@ -146,7 +146,7 @@ export class MarkerRef extends google.maps.Marker {
     this.setIcon(icon);
   }
 
-  updateData( lng: number, lat: number, timeLocationReported: number) {
+  updateData(lat: number,  lng: number, timeLocationReported: number) {
 
     this.setVisibility(100);
     this.index = 0;
@@ -173,12 +173,12 @@ export class MarkerRef extends google.maps.Marker {
     endCallBack?
   ) {
     // The marker only can be moved if the time of the new location is greater than the time of the last location reported
-    if (this.lastModificationTimestamp < timeLocationReported) {
+    if (true) {
       if (initCallBack) {
         initCallBack(this);
       }
 
-      this.lastModificationTimestamp = timeLocationReported;
+      // this.lastModificationTimestamp = timeLocationReported;
       this.moveMarker(center, endCallBack);
     }
   }
