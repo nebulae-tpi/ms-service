@@ -61,7 +61,7 @@ class VehicleES {
                 line: newGeneralInfo.line,
                 model: newGeneralInfo.model,
             })),
-            mergemap(update => VehicleDA.updateVehicleInfo$(driverGeneralInfoUpdatedEvent.aid, update) ),
+            mergeMap(update => VehicleDA.updateVehicleInfo$(driverGeneralInfoUpdatedEvent.aid, update) ),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result))
         );
     }
