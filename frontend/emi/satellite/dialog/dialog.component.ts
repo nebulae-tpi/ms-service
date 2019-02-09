@@ -18,7 +18,6 @@ export class DialogComponent implements OnInit {
   }
 
   ngOnInit() {
-
   }
 
   pushButton(okButton: Boolean) {

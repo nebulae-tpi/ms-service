@@ -48,7 +48,7 @@ class ClientCQRS {
   }
 
   /**
-   * Get the satellite clients data (Location, neighborhood, city, ...)
+   * Get the satellite clients data (Location, neighborhood, city,...)
    * @param {*} args 
    * @param {*} authToken 
    */

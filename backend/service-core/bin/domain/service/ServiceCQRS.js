@@ -152,7 +152,7 @@ class ServiceCQRS {
   //#region EMI-GATEWAY
 
   /**
-   * Command to request a new Service
+   * Command to request a new Service.
    * @param {*} param0 
    * @param {*} authToken 
    */
