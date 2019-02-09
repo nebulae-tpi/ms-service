@@ -84,7 +84,7 @@ class VehicleES {
         .pipe(
             map(newFeatures => ({
                 fuelType: newFeatures.fuel,
-                features: newFeatures.others.filter(f => f.active).map(e => e.name)
+                features:  (!newFeatures ||!newFeatures.others ) ? [] :  newFeatures.others.filter(f => f.active).map(e => e.name)
             })),
             mergeMap(update => VehicleDA.updateVehicleInfo$(VehicleVehicleFeaturesUpdatedEvent.aid, update) ),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `VehicleVehicleUpdatedSubscription`, result))
