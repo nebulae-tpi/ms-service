@@ -78,6 +78,23 @@ class ServiceDA {
     );
   }
 
+
+  /**
+   * sets pick up ETA
+   * @returns {Observable}
+   */
+  static setPickUpETA$(_id, pickUpETA) {
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+        { _id },
+        {
+          $set: { pickUpETA }
+        },
+        { upsert: false }
+      )
+    );
+  }
+
   /**
    * appends state
    * @returns {Observable}

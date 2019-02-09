@@ -16,7 +16,8 @@ const ClientDA = require('./domain/client/data-access/ClientDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
-const shift = require('./domain/shift'); 
+const shift = require('./domain/shift');
+const Cronjob = require('./domain/cronjob');
 
 const start = () => {
     Rx.concat(
@@ -28,6 +29,7 @@ const start = () => {
         ServiceDA.start$(),
         ClientDA.start$(),
         shift.start$,
+        Cronjob.start$,
         graphQlService.start$()
     ).subscribe(
         (evt) => {

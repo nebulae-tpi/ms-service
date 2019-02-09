@@ -128,7 +128,7 @@ class ServiceES {
             'ShiftStateChanged',
             { _id: shiftId, state: 'AVAILABLE' }
         ))).pipe(
-            mapTo(` - Sent ShiftStateChanged for service._id=${_id}: ${JSON.stringify(data)}`)
+            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
         );
 
         //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
