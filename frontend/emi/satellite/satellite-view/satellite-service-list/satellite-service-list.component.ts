@@ -236,7 +236,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Shows a message snackbar on the bottom of the page
+   * Shows a message snackbar on the bottom of the page.
    * @param messageKey Key of the message to i18n
    * @param detailMessageKey Key of the detail message to i18n
    */
