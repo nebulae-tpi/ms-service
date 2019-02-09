@@ -199,21 +199,22 @@ describe('DriverApp workflows', function () {
             ).subscribe(...getRxDefaultSubscription('Sopping SHIFT: Stop Shift', done));
         });
 
-        // it('Service creation and offering', function (done) {
-        //     this.timeout(500);
-        //     Rx.forkJoin(
-        //         appLinkBroker.listenShiftEventsFromServer$(['ServiceOffered'], users.driver.username).pipe(
-        //             first((evt) => evt.t = 'ShiftStateChanged' && evt.data.state == 'AVAILABLE', undefined),
-        //             tap((evt) => expect(evt.data.state).to.be.eq('AVAILABLE')),
-        //         ),
-        //         Shift.setShiftState$(users.driver, "AVAILABLE").pipe(
-        //             delay(100),
-        //             mergeMap(() => Shift.queryOpenShift$(users.driver)),
-        //             tap(shift => expect(shift).to.be.not.null),
-        //             tap(shift => expect(shift.state).to.be.eq('AVAILABLE')),
-        //         )
-        //     ).subscribe(...getRxDefaultSubscription('Set Shift state', done));
-        // });
+        it('Service creation and offering', function (done) {
+            this.timeout(500);
+            Rx.forkJoin(
+                Service.listenShiftEventsFromServer$(['ServiceOffered'], users.driver.username).pipe(
+                    first((evt) => evt.t = 'ServiceOffered'),
+                    tap((evt) => expect(evt.data.state).to.be.eq('AVAILABLE')),
+                    tap((evt) => expect(evt.data.state).to.be.eq('AVAILABLE')),
+                ),
+                Shift.setShiftState$(users.driver, "AVAILABLE").pipe(
+                    delay(100),
+                    mergeMap(() => Shift.queryOpenShift$(users.driver)),
+                    tap(shift => expect(shift).to.be.not.null),
+                    tap(shift => expect(shift.state).to.be.eq('AVAILABLE')),
+                )
+            ).subscribe(...getRxDefaultSubscription('Set Shift state', done));
+        });
 
 
     
