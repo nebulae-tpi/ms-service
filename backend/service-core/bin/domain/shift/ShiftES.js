@@ -36,9 +36,7 @@ class ShiftES {
      */
     handleShiftStateChanged$({ aid, data }) {
         console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //TODO: DELETE THIS LINE
-
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
-
         
         return ShiftDA.updateShiftStateAndGetOnlineFlag$(aid, data.state).pipe(
             filter(shift => !shift.online),

@@ -198,7 +198,7 @@ class EventStoreService {
       ServiceCancelledByDriver: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByClient: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
-
+      ServiceClosed: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       // CRONJOB
       PeriodicFiveMinutes: {
         fn: CronJobES.handlePeriodicFiveMinutes$,
@@ -281,9 +281,8 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
       { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
-
+      { aggregateType: "Service", eventType: "ServiceClosed" },
       // CronJob
-
       { aggregateType: "CronJob", eventType: "PeriodicFiveMinutes" },
       { aggregateType: "CronJob", eventType: "ServiceCancelledByOperator" },
     ]

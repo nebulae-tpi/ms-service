@@ -711,6 +711,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
           <h2>${serviceTitle}</h2>
           <p> <strong>${licensePlateTitle}: </strong>${service.vehicle.licensePlate}</p>
           <p> <strong>${serviceReferenceTitle}: </strong>${service.pickUp.notes}</p>
+          
         </div>
       </body>
     </html>

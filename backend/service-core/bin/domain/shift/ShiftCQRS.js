@@ -185,7 +185,8 @@ class ShiftCQRS {
       eventType: 'ShiftStarted',
       eventTypeVersion: 1,
       user: authToken.preferred_username,
-      data: shift
+      data: shift,
+      online : true
     });
   }
 
