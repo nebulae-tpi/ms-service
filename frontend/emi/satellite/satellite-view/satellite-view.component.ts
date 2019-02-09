@@ -189,14 +189,9 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
         const marker = this.getMarkerFromArray(service._id);
         const lastServiceData = this.getServiceFromArray(service._id);
 
-        console.log('lastServiceData => ', lastServiceData);
         // Check if the last service is older than the new one
         // If it is newer we have to update the info into the service list and the map
         if (!lastServiceData || lastServiceData.lastModificationTimestamp < service.lastModificationTimestamp) {
-
-          console.log('initServiceUpdater => ', (!lastServiceData || lastServiceData.lastModificationTimestamp < service.lastModificationTimestamp));
-          console.log('lastServiceData2 => ', service.lastModificationTimestamp);
-          console.log('Closed service => ', service.closed);
 
           // Ignore the closed services that there are not on the map neither the array
           if (!lastServiceData && service.closed){
@@ -206,19 +201,31 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
           // If the service does not exist on the array and it is not closed,
           // we have to add this service to the map and the service array.
           if (!lastServiceData && !service.closed){
-            this.serviceList.push(service);
-            this.serviceList.sort((service1,service2) => (service1.timestamp > service2.timestamp) ? -1 : ((service2.timestamp > service1.timestamp) ? 1 : 0));
-            this.createServiceMarker(service);
+
+            if (!(this.isSatellite && (service.state === 'ON_BOARD' || service.state === 'DONE'))){
+              this.serviceList.push(service);
+              this.serviceList.sort((service1,service2) => (service1.timestamp > service2.timestamp) ? -1 : ((service2.timestamp > service1.timestamp) ? 1 : 0));
+              this.createServiceMarker(service);
+            }
           }else{
             if (lastServiceData){
               // If the service was closed , we have to remove the service from the table and the map
               if (service.closed){
-                console.log('Intentará cerrar');
                 this.removeServiceFromArray(service._id);
                 this.removeMarkerFromMap(marker);
               }else{
 
-                console.log('Check update icon => ', (marker && lastServiceData.state !== service.state));
+                if(this.isSatellite){
+
+                  if(service.state === 'ON_BOARD' || service.state === 'DONE'){
+                    this.removeServiceFromArray(service._id);
+                    this.removeMarkerFromMap(marker);
+                    console.log('Satellite => ');
+                    return;
+                  }                  
+                }
+
+                //console.log('Check update icon => ', (marker && lastServiceData.state !== service.state));
 
                 // Check if the icon should be updated
                 if (marker && lastServiceData.state !== service.state){
@@ -226,11 +233,11 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
                   marker.updateIcon(iconUrl);
                 }
 
-                console.log('Check update location => ', marker && service.location && (!lastServiceData.location || lastServiceData.location !== service.location));
+                //console.log('Check update location => ', marker && service.location && (!lastServiceData.location || lastServiceData.location !== service.location));
 
                 // Check if the location should be updated
                 if (marker && service.location && (!lastServiceData.location || lastServiceData.location !== service.location)){
-                  console.log('New location => ', service.location);
+                  //console.log('New location => ', service.location);
                   marker.sendNewLocation(service.location);
                 }
 
@@ -255,7 +262,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   setSelectedClientSatellite(selectedSatelliteClient) {
-    console.log('selectedSatelliteClient => ', selectedSatelliteClient);
+    //console.log('selectedSatelliteClient => ', selectedSatelliteClient);
     if (selectedSatelliteClient){
       if (this.clientData){
         this.removeMarkerFromMap(this.clientMarker, false);
@@ -398,11 +405,16 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(services => {
-      this.serviceList = services;
+      this.serviceList = services.filter(service => this.isOperator 
+        || this.isSatellite && service.state !== 'ON_BOARD' && service.state !== 'DONE');
+
       this.serviceList.sort((service1,service2) => (service1.timestamp > service2.timestamp) ? -1 : ((service2.timestamp > service1.timestamp) ? 1 : 0));
+
 
       if(this.serviceList && this.serviceList.length > 0){
         this.serviceList.forEach(service => {
+
+          
           this.createServiceMarker(service);
         })
       }
