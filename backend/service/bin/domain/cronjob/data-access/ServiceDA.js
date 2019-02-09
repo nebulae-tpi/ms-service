@@ -43,7 +43,7 @@ class ShiftDA {
           : of({ start: 0, count: 1 })
         ),
         mergeMap(({ start, count }) => range(start, count)),
-        map(date => mongoDB.getHistoricalDb(date)),
+        map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
         mergeMap(collection => {
           const cursor = collection.find(query, { projection });

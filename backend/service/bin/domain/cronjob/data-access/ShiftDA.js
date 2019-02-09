@@ -80,7 +80,7 @@ class ShiftDA {
         ),
         tap(r => console.log(" getShiftList $$$$$$$$$$$$$$$$$", r, "$$$$$$$$$$$$$$$$")),
         mergeMap(({ start, count }) => range(start, count)),
-        map(date => mongoDB.getHistoricalDb(date)),
+        map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
         mergeMap(collection => {
           const cursor = collection
@@ -136,7 +136,7 @@ class ShiftDA {
         ),
         tap(r => console.log(" getShiftListSize $$$$$$$$$$$$$$$$$", r, "$$$$$$$$$$$$$$$$")),
         mergeMap(({ start, count }) => range(start, count)),
-        map(date => mongoDB.getHistoricalDb(date)),
+        map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
         mergeMap(collection => collection.count(query) )
 
@@ -231,7 +231,7 @@ class ShiftDA {
           : of({ start: 0, count: 1 })
         ),
         mergeMap(({ start, count }) => range(start, count)),
-        map(date => mongoDB.getHistoricalDb(date)),
+        map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
         mergeMap(collection => {
           const cursor = collection
@@ -260,7 +260,7 @@ class ShiftDA {
           : of({ start: 0, count: 1 })
         ),
         mergeMap(({ start, count }) => range(start, count)),
-        map(date => mongoDB.getHistoricalDb(date)),
+        map(undefined => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
         mergeMap(collection => {
           const cursor = collection

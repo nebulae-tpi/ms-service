@@ -5,152 +5,68 @@
 
   <mat-sidenav-container>
     <!-- SIDENAV -->
-    <mat-sidenav
-      class="sidenav"
-      align="start"
-      mode="side"
-      opened="true"
-      fuseMatSidenavHelper="carded-left-sidenav"
-      mat-is-locked-open="gt-md"
-    >
+    <mat-sidenav class="sidenav" align="start" mode="side" opened="true" fuseMatSidenavHelper="carded-left-sidenav"
+      mat-is-locked-open="gt-md">
       <!-- SIDENAV HEADER -->
-      <div
-        fxLayout="column"
-        fxLayoutAlign="space-between start"
-        class="header p-24 pb-4"
-        ngClass="mat-accent-bg"
-        ngClass.gt-md="white-fg"
-      >
+      <div fxLayout="column" fxLayoutAlign="space-between start" class="header p-24 pb-4" ngClass="mat-accent-bg"
+        ngClass.gt-md="white-fg">
         <div class="logo" fxFlex fxLayout="row" fxLayoutAlign="start center">
-          <mat-icon
-            class="logo-icon s-32"
-            *fuseIfOnDom
-            [@animate]="{ value: '*', params: { delay: '50ms', scale: '0.2' } }"
-            >local_taxi</mat-icon
-          >
-          <span
-            class="logo-text"
-            *fuseIfOnDom
-            [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }"
-            >{{ "SERVICE.HEADER_TITLE" | translate }}</span
-          >
+          <mat-icon class="logo-icon s-32" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '50ms', scale: '0.2' } }">local_taxi</mat-icon>
+          <span class="logo-text" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }">{{
+            "SERVICE.HEADER_TITLE" | translate }}</span>
         </div>
 
-        <div
-          class="account"
-          fxFlex
-          fxFill
-          fxLayout="row"
-          fxLayoutAlign="space-between end"
-        >
-          <span
-            class="mat-title"
-            *fuseIfOnDom
-            [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }"
-            >{{ "SERVICE.SERVICE_FILTERS.FILTER_TITLE" | translate }}
+        <div class="account" fxFlex fxFill fxLayout="row" fxLayoutAlign="space-between end">
+          <span class="mat-title" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }">{{
+            "SERVICE.SERVICE_FILTERS.FILTER_TITLE" | translate }}
           </span>
         </div>
       </div>
       <!-- / SIDENAV HEADER -->
 
       <!-- SIDENAV CONTENT -->
-      <div
-        class="content"
-        fusePerfectScrollbar
-        *fuseIfOnDom
-        [@animate]="{ value: '*', params: { y: '50px' } }"
-      >
+      <div class="content" fusePerfectScrollbar *fuseIfOnDom [@animate]="{ value: '*', params: { y: '50px' } }">
         <div class="nav mt-20" fxLayout="column">
-          <form
-            fxLayout="column"
-            fxLayoutAlign="start"
-            fxFlex="100"
-            name="form"
-            [formGroup]="filterForm"
-          >
-            <div
-              fxLayout="column"
-              fxLayoutAlign="space-between center"
-              fxFlex="100"
-            >
+          <form fxLayout="column" fxLayoutAlign="start" fxFlex="100" name="form" [formGroup]="filterForm">
+            <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
 
-            <mat-form-field>
-              <input
-                matInput
-                [matDatepicker]="pickerInitDate"
-                placeholder="{{'SERVICE.SERVICE_FILTERS.INIT_TIMESTAMP' | translate}}"
-                formControlName="initTimestamp"/>
-              <mat-datepicker-toggle
-                matSuffix
-                [for]="pickerInitDate"
-              ></mat-datepicker-toggle>
-              <mat-datepicker
-                [twelveHour]="false"
-                type="datetime"
-                #pickerInitDate
-              ></mat-datepicker>
+            <mat-form-field *ngIf="filterForm.get('showClosedServices').value" >
+              <input matInput [matDatepicker]="pickerInitDate" placeholder="{{'SERVICE.SERVICE_FILTERS.INIT_TIMESTAMP' | translate}}"
+                formControlName="initTimestamp" />
+              <mat-datepicker-toggle matSuffix [for]="pickerInitDate"></mat-datepicker-toggle>
+              <mat-datepicker [twelveHour]="false" type="datetime" #pickerInitDate></mat-datepicker>
             </mat-form-field>
 
-            <mat-form-field>
-              <input
-                matInput
-                [matDatepicker]="pickerEndDate"
-                placeholder="{{'SERVICE.SERVICE_FILTERS.END_TIMESTAMP' | translate}}"
-                formControlName="endTimestamp"/>
-              <mat-datepicker-toggle
-                matSuffix
-                [for]="pickerEndDate"
-              ></mat-datepicker-toggle>
-              <mat-datepicker
-                [twelveHour]="false"
-                type="datetime"
-                #pickerEndDate
-              ></mat-datepicker>
-            </mat-form-field>            
-            
-            <mat-form-field>
-                <input
-                  matInput
-                  placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_DOCUMENT_ID' | translate}}"
-                  formControlName="driverDocumentId"
-                  id="driverDocumentId"
-                  maxlength="20"/>
-            </mat-form-field>
-
-            <mat-form-field>
-              <input
-                matInput
-                placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_FULLNAME' | translate}}"
-                formControlName="driverFullname"
-                id="driverFullname"
-                maxlength="20"/>
+            <mat-form-field *ngIf="filterForm.get('showClosedServices').value" >
+              <input matInput [matDatepicker]="pickerEndDate" placeholder="{{'SERVICE.SERVICE_FILTERS.END_TIMESTAMP' | translate}}"
+                formControlName="endTimestamp" />
+              <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
+              <mat-datepicker [twelveHour]="false" type="datetime" #pickerEndDate></mat-datepicker>
             </mat-form-field>
             
             <mat-form-field>
-              <input
-                matInput
-                placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_USERNAME' | translate}}"
-                formControlName="clientUsername"
-                id="clientUsername"
-                maxlength="20"/>
+              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_DOCUMENT_ID' | translate}}" formControlName="driverDocumentId"
+                id="driverDocumentId" maxlength="20" />
             </mat-form-field>
 
             <mat-form-field>
-              <input
-                matInput
-                placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_FULLNAME' | translate}}"
-                formControlName="clientFullname"
-                id="clientFullname"
-                maxlength="20"/>
+              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_FULLNAME' | translate}}" formControlName="driverFullname"
+                id="driverFullname" maxlength="20" />
+            </mat-form-field>
+            
+            <mat-form-field>
+              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_USERNAME' | translate}}" formControlName="clientUsername"
+                id="clientUsername" maxlength="20" />
             </mat-form-field>
 
             <mat-form-field>
-                <input
-                  matInput
-                  placeholder="{{'SERVICE.SERVICE_FILTERS.LICENSE_PLATE' | translate}}"
-                  formControlName="vehicleLicensePlate"
-                  id="vehicleLicensePlate"
-                  maxlength="20"/>
+              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_FULLNAME' | translate}}" formControlName="clientFullname"
+                id="clientFullname" maxlength="20" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.LICENSE_PLATE' | translate}}" formControlName="vehicleLicensePlate"
+                id="vehicleLicensePlate" maxlength="20" />
             </mat-form-field>
 
             <!-- <mat-form-field>
@@ -163,8 +79,7 @@
             </mat-form-field> -->
 
             <mat-form-field>
-              <mat-select placeholder="{{'SERVICE.SERVICE_FILTERS.STATES' | translate}}"
-               formControlName="states" multiple>
+              <mat-select placeholder="{{'SERVICE.SERVICE_FILTERS.STATES' | translate}}" formControlName="states" multiple>
                 <mat-option *ngFor="let state of stateList" [value]="state">
                   {{ "SERVICE.SERVICE_STATES."+state | translate}}
                 </mat-option>
@@ -174,28 +89,14 @@
             <mat-checkbox formControlName="showClosedServices">{{'SERVICE.SERVICE_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>
 
             
-              <button
-                fxFlex
-                mat-raised-button
-                mat-button
-                class="mat-accent compose-dialog-button"
-                aria-label="Filter"
-                (click)="resetFilter()"
-              >
+              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" aria-label="Filter" (click)="resetFilter()">
                 {{ "SERVICE.SERVICE_FILTERS.RESET_FILTER" | translate }}
               </button>
             </div>
           </form>
 
           <div class="p-24">
-            <button
-              fxFlex
-              mat-raised-button
-              mat-button
-              class="mat-accent compose-dialog-button"
-              aria-label="Filter"
-              (click)="resetFilter()"
-            >
+            <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" aria-label="Filter" (click)="resetFilter()">
               {{ "SERVICE.SERVICE_FILTERS.RESET_FILTER" | translate }}
             </button>
           </div>
@@ -209,32 +110,19 @@
     <div class="center">
       <!-- CONTENT HEADER -->
       <div class="header" fxLayout="row" fxLayoutAlign="space-between center">
-        <div
-          class="search-wrapper"
-          fxLayout="row"
-          fxLayoutAlign="start center">
-          <button
-            mat-button
-            class="mat-icon-button sidenav-toggle"
-            fuseMatSidenavToggler="carded-left-sidenav"
-            fxHide.gt-md
+        <div class="search-wrapper" fxLayout="row" fxLayoutAlign="start center">
+          <button mat-button class="mat-icon-button sidenav-toggle" fuseMatSidenavToggler="carded-left-sidenav" fxHide.gt-md
             aria-label="Toggle Sidenav">
             <mat-icon>menu</mat-icon>
           </button>
-
+      
         </div>
       </div>
       <!-- / CONTENT HEADER -->
 
       <!-- CONTENT CARD -->
       <div class="content-card mat-white-bg">
-        <mat-table
-          id="entity-table"
-          class="item-table"
-          #table
-          [dataSource]="dataSource"
-          fusePerfectScrollbar
-        >
+        <mat-table id="entity-table" class="item-table" #table [dataSource]="dataSource" fusePerfectScrollbar>
 
           <!-- Timestamp Column -->
           <ng-container cdkColumnDef="timestamp">
@@ -299,27 +187,12 @@
 
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
-          <mat-row
-            *cdkRowDef="let row; columns: displayedColumns"
-            class="selectedElement"
-            (click)="selectserviceRow(row)"
-            [ngClass]="{
-              highlight:
-              selectedService &&
-              selectedService._id == row._id
-            }"
-            [routerLink]="row._id"
-            matRipple
-          >
+          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="selectedElement" (click)="selectserviceRow(row)"
+            [ngClass]="{  highlight: selectedService && selectedService._id == row._id }"
+            [routerLink]="row._id" matRipple>
           </mat-row>
         </mat-table>
-        <mat-paginator
-          #paginator
-          [length]="tableSize"
-          [pageIndex]="tablePage"
-          [pageSize]="tableCount"
-          [pageSizeOptions]="[5, 10, 25, 100]"
-        >
+        <mat-paginator #paginator [length]="tableSize" [pageIndex]="tablePage" [pageSize]="tableCount" [pageSizeOptions]="[5, 10, 25, 100]">
         </mat-paginator>
       </div>
       <!-- / CONTENT CARD -->
