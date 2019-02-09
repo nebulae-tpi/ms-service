@@ -84,7 +84,7 @@ class ServiceCQRS {
       mergeMap(serviceList => {
         console.log('ServiceList => ', serviceList );
         return from(serviceList).pipe(
-          map(service => this.formatServiceToGraphQLSchema(service)),
+          map(service => Crosscutting.formatServiceToGraphQLSchema(service)),
           toArray()
         );
       }),
