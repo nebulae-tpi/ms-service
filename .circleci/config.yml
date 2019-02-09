@@ -1,5 +1,5 @@
 
-version: 2
+version: 2.1
 jobs:
   prepare:
     /home/nesas-ing/Projects/tpi: ~/nebulae/
@@ -310,11 +310,15 @@ jobs:
 
 
 workflows: 
-  version: 2
+  version: 2.1
   build-and-deploy:
     jobs:
       - prepare:
           context: TPI
+      - build-mbinit:
+          context: TPI
+          requires:
+            - prepare
       - build-frontend:
           context: TPI
           requires:
@@ -324,10 +328,6 @@ workflows:
           requires:
             - prepare
       - build-api-driver:
-          context: TPI
-          requires:
-            - prepare
-      - build-mbinit:
           context: TPI
           requires:
             - prepare
@@ -355,3 +355,54 @@ workflows:
             - build-backend-driver-app-link
             - build-backend-service
             - build-backend-service-core
+      - hold:
+          type: approval
+      - build-frontend:
+          context: TPI_PROD
+          name: build-frontend-prod
+          requires:
+            - prepare
+            - hold
+      - build-api-emi:
+          context: TPI_PROD
+          name: build-api-emi-prod
+          requires:
+            - prepare
+            - hold
+      - build-api-driver:
+          context: TPI_PROD
+          name: build-api-driver-prod
+          requires:
+            - prepare
+            - hold
+      - build-backend-service:
+          context: TPI_PROD
+          name: build-backend-service-prod
+          requires:
+            - prepare
+            - build-mbinit      
+            - hold
+      - build-backend-service-core:
+          context: TPI_PROD
+          name: build-backend-service-core-prod
+          requires:
+            - prepare
+            - build-mbinit      
+            - hold
+      - build-backend-driver-app-link:
+          context: TPI_PROD
+          name: build-backend-driver-app-link-prod
+          requires:
+            - prepare
+            - build-mbinit      
+            - hold
+      - deploy-dev:
+          context: TPI_PROD
+          name: deploy-dev-prod
+          requires:
+            - build-frontend-prod
+            - build-api-driver-prod          
+            - build-api-emi-prod            
+            - build-backend-driver-app-link-prod
+            - build-backend-service-prod
+            - build-backend-service-core-prod
