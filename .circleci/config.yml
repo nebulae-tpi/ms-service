@@ -2,7 +2,7 @@
 version: 2.1
 jobs:
   prepare:
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: circleci/node:9.9.0
         command: bash
@@ -18,7 +18,7 @@ jobs:
 # ################ FRONT END ################
 
   build-frontend:
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: circleci/node:9.9.0
         command: bash
@@ -72,7 +72,7 @@ jobs:
 # ################ API ################
 
   build-api-emi:    
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: circleci/node:10.15.1
         command: bash
@@ -112,7 +112,7 @@ jobs:
 
 
   build-api-driver:    
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: circleci/node:10.15.1
         command: bash
@@ -156,7 +156,7 @@ jobs:
 # ################ MBINIT ################ 
             
   build-mbinit:    
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: golang:1.9-alpine
         command: sh
@@ -180,7 +180,7 @@ jobs:
 # ################ BACK END ################ 
             
   build-backend-service:    
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: circleci/node:9.9.0
         command: bash
@@ -207,7 +207,7 @@ jobs:
             - backend
 
   build-backend-service-core:    
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: circleci/node:10.15.1
         command: bash
@@ -235,7 +235,7 @@ jobs:
 
 
   build-backend-driver-app-link:    
-    /home/nesas-ing/Projects/tpi: ~/nebulae/
+    working_directory: ~/nebulae/
     docker:
       - image: circleci/node:10.15.1
         command: bash
@@ -264,7 +264,7 @@ jobs:
 # ################ DEPLOYMENT ################ 
 
   deploy-dev:
-      /home/nesas-ing/Projects/tpi: ~/nebulae/
+      working_directory: ~/nebulae/
       docker:
         - image: google/cloud-sdk:latest
       steps:
