@@ -76,6 +76,9 @@ class MongoDB {
       observer.next(`Creating index for ${historicalDb}.Shift => { "location":  "2dsphere" }  `);
       await historicalDb.collection('Shift').createIndex({ "location": "2dsphere" }).catch((err) => console.log(`Failed to create index: ${err}`));
           
+      observer.next(`Creating index for ${historicalDb}.Service => { "location":  "2dsphere" }  `);
+      await historicalDb.collection('Service').createIndex({ "location": "2dsphere" }).catch((err) => console.log(`Failed to create index: ${err}`));
+          
       observer.next("All indexes created");
       observer.complete();
     });

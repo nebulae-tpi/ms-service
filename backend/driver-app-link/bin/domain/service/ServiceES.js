@@ -90,6 +90,7 @@ class ServiceES {
     handleServiceArrived$({ aid, data }) {
         console.log(`ServiceES: handleServiceArrived: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
+            filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'ARRIVED' })),
         );
@@ -103,6 +104,7 @@ class ServiceES {
     handleServicePassengerBoarded$({ aid, data }) {
         console.log(`ServiceES: handleServicePassengerBoarded: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
+            filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'ON_BOARD' })),
         );
@@ -116,6 +118,7 @@ class ServiceES {
     handleServiceCompleted$({ aid, data }) {
         console.log(`ServiceES: handleServiceCompleted: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
+            filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })),
         );
@@ -131,6 +134,7 @@ class ServiceES {
     handleServiceCancelledByDriver$({ aid, data }) {
         console.log(`ServiceES: handleServiceCancelledByDriver: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
+            filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'CANCELLED_DRIVER' })),
         );
@@ -144,6 +148,7 @@ class ServiceES {
     handleServiceCancelledByClient$({ aid, data }) {
         console.log(`ServiceES: handleServiceCancelledByClient: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
+            filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceCancelledByClient', { ...data, _id: service._id, state: 'CANCELLED_CLIENT' })),
         );
@@ -157,6 +162,7 @@ class ServiceES {
     handleServiceCancelledByOperator$({ aid, data }) {
         console.log(`ServiceES: handleServiceCancelledByOperator: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
+            filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
         );

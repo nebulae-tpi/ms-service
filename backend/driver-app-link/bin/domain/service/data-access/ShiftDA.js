@@ -38,6 +38,20 @@ class ShiftDA {
   }
 
 
+  // /**
+  //  * Finds all open shift// DELETE, JUST FOR TESTING
+  //  */
+  // static findNearOpenShifts$(location,projection = undefined) {
+  //   const explorePastMonth = Date.today().getDate() <= 2;
+  //   const query = { "state": "AVAILABLE" };
+  //   return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+  //     map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+  //     map(db => db.collection('Shift')),
+  //     mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
+  //   );
+  // }
+
+
 }
 /**
  * @returns {ShiftDA}
