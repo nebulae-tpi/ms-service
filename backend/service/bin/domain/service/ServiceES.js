@@ -47,12 +47,13 @@ class ServiceES {
         return broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service);
       })
     );
-  }
-
-  
+  }  
 
   handleServiceClosed$(ServiceClosedEvt){
     return ServiceDA.closeService$(ServiceClosedEvt.aid)
+    .pipe(
+      mergeMap(() => this.handleServiceEvents$(ServiceClosedEvt))
+    )
   }
 
     /**
