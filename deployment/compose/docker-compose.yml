@@ -4,8 +4,8 @@ services:
   broker-mqtt-service:
     image: eclipse-mosquitto
     ports:
-      - "9001:9001"
-      - "1883:1883"
+      - "0.0.0.0:9001:9001"
+      - "0.0.0.0:1883:1883"
     volumes:
       - tpi_broker_mqtt_data_service:/mosquitto/data
   store-mongo1:

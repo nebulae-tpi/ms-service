@@ -66,7 +66,10 @@ class ClientCQRS {
         return ClientDA.getSatelliteClients$(args.clienText, args.limit);
       }),
       toArray(),
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      mergeMap(rawResponse => {
+        console.log('rawResponse => ', rawResponse);
+        return GraphqlResponseTools.buildSuccessResponse$(rawResponse);
+      }),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );
   }

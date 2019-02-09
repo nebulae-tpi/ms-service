@@ -46,8 +46,6 @@ class ClientDA {
     }
 
     //return defer(() => collection.find(query).limit((!limit || limit > 30) ? 30 : limit));
-
-
     const cursor = collection
     .find(query)
     .limit(limit);

@@ -1,10 +1,11 @@
 'use strict'
 
 const {} = require("rxjs");
-const { tap, mergeMap, catchError, map, mapTo, groupBy, debounceTime } = require('rxjs/operators');
+const { tap, mergeMap, catchError, map, mapTo, groupBy, debounceTime, filter } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const ServiceDA = require('./data-access/ServiceDA');
 const  { forkJoin, of, interval, from, throwError, concat, Observable, Subject } = require('rxjs');
+const Crosscutting = require('../../tools/Crosscutting');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 
 /**
@@ -22,9 +23,13 @@ class ServiceES {
   startServiceUpdatedEmitter(){
     this.serviceUpdatedEventEmitter$
     .pipe(
-        groupBy(serviceEvent => serviceEvent.aid),
-        mergeMap(group$ => group$.pipe(debounceTime(5000))),
-        mergeMap(service => this.sendServiceUpdatedEvent$(service))
+        filter(serviceId => {
+          console.log('serviceId => ', serviceId);
+          return serviceId != null;
+        }),
+        groupBy(serviceId => serviceId),
+        mergeMap(group$ => group$.pipe(debounceTime(1000))),
+        mergeMap(serviceId => this.sendServiceUpdatedEvent$(serviceId))
     ).subscribe(
       (result) => {},
       (err) => { console.log(err) },
@@ -34,16 +39,14 @@ class ServiceES {
 
    /**
    * Sends an event with the service data updated.
-   * @param {*} service 
+   * @param {*} serviceId 
    */
-  sendServiceUpdatedEvent$(serviceEvent){
-    console.log('sendServiceUpdatedEvent => ', serviceEvent);
-    return of(serviceEvent)
+  sendServiceUpdatedEvent$(serviceId){
+    return of(serviceId)
     .pipe(
-      mergeMap(service => ServiceDA.getService$(service.aid)),
+      mergeMap(serviceId => ServiceDA.getService$(serviceId)),
       map(service => Crosscutting.formatServiceToGraphQLSchema(service)),
       mergeMap(service => {
-        console.log('ServiceServiceUpdatedSubscription => ', service);
         return broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service);
       })
     );
@@ -65,7 +68,21 @@ class ServiceES {
       .pipe(
         
         tap(res => {
-          this.serviceUpdatedEventEmitter$.next(serviceEvent);
+          this.serviceUpdatedEventEmitter$.next(serviceEvent.aid);
+        }),
+      );
+  }
+
+      /**
+     * Handles the shift event
+     * @param {*} shiftEvent shift event
+     */
+    handleShiftEvents$(shiftEvent) {
+      console.log('handleShiftEvents => ', shiftEvent);
+      return of(shiftEvent)
+      .pipe(        
+        tap(res => {
+          this.serviceUpdatedEventEmitter$.next(shiftEvent.data.serviceId);
         }),
       );
   }

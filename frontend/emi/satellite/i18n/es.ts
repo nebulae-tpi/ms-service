@@ -22,6 +22,9 @@ export const locale = {
         'BIKE_RACK': 'Portabicicletas'
       },
       'SERVICES': {
+        'MINUTES': 'Minutos',
+        'PICKUP_ETA': 'ETA',
+        'ADDRESS': 'Dirección',
         'CLIENT_LOCATION_MISSING': 'El cliente no tiene una localización configurada',
         'ERROR_OPERATION': 'Error realizando operación, intente nuevamente.',
         'REQUEST_SERVICE_SUCCESS': 'Solicitud de servicio enviada exitosamente', 
@@ -36,6 +39,8 @@ export const locale = {
         'SERVICE_PARAMS': 'Parámetros',
         'STATE': 'Estado',
         'REFERENCE': 'Referencia',
+        'ADDRESS1': 'Dirección 1',
+        'ADDRESS2': 'Dirección 2',
         'CANCEL_OPTIONS': {
           'IT_TAKES_TOO_MUCH_TIME': 'Demasiado tiempo', 
           'DOESNT_REQUIRED': 'Ya no se requiere',
@@ -82,6 +87,16 @@ export const locale = {
       23209: 'Valor de descuento de tarifa no válido',
       23210: 'Valor de tarifa no válido',
       23211: 'valor de propina no válido',
+      23220: 'Datos insuficientes. ID, tipo de autor y razón son obligatorios',
+      23221: 'Tipo de autor inválido',
+      23222: 'Ttipo de razón inválida',
+      23223: 'Servicio no encontrado',
+      23224: 'Servicio se encuentra cerrado/terminado, no se puede modificar',
+      23225: 'Datos insuficientes: se debe ingresar el id del servicio y un identificación de turno o un par conductor-vehículo',
+      23226: 'Placa inválida',
+      23227: 'Nombre de conductor inválido',
+      23228: 'Turno no encontrado',
+      23229: 'Turno se encuentra cerrado',
     }
   }
 };

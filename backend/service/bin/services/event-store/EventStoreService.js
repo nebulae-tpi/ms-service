@@ -199,6 +199,8 @@ class EventStoreService {
       ServiceCancelledByClient: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceClosed: { fn: ServiceES.handleServiceClosed$, obj: ServiceES },
+      // SHIFT
+      ShiftLocationReported: { fn: ServiceES.handleShiftEvents$, obj: ServiceES },
       // CRONJOB
       PeriodicFiveMinutes: {
         fn: CronJobES.handlePeriodicFiveMinutes$,
@@ -286,6 +288,8 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
       { aggregateType: "Service", eventType: "ServiceClosed" },
+      // SHIFT
+      { aggregateType: "Shift", eventType: "ShiftLocationReported" },
       // CronJob
       { aggregateType: "CronJob", eventType: "PeriodicFiveMinutes" },
       { aggregateType: "CronJob", eventType: "PeriodicFifteenMinutes" },

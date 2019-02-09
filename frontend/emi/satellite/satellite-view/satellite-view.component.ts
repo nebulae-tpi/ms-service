@@ -15,6 +15,7 @@ import {
   Validators,
   FormArray
 } from "@angular/forms";
+import { DatePipe } from '@angular/common';
 
 import { Router, ActivatedRoute } from "@angular/router";
 
@@ -108,6 +109,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   clientFilterCtrl: FormControl;
 
   constructor(
+    private datePipe: DatePipe,
     private formBuilder: FormBuilder,
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
@@ -122,6 +124,9 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
       this.translationLoader.loadTranslations(english, spanish);
   }
 
+  transformDate(date) {
+    return this.datePipe.transform(date, 'dd/MM/y HH:mm:ss');
+  }
 
   ngOnInit() {
     this.initMap(); // initialize the map element
@@ -202,6 +207,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
           // we have to add this service to the map and the service array.
           if (!lastServiceData && !service.closed){
             this.serviceList.push(service);
+            this.serviceList.sort((service1,service2) => (service1.timestamp > service2.timestamp) ? -1 : ((service2.timestamp > service1.timestamp) ? 1 : 0));
             this.createServiceMarker(service);
           }else{
             if (lastServiceData){
@@ -258,12 +264,19 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
 
       if (!this.clientData.location || !this.clientData.location.lat || !this.clientData.location.lng){
         this.showSnackBar('SATELLITE.SERVICES.CLIENT_LOCATION_MISSING');
-      }else{
+      }else{        
         this.createPickUpMarker(selectedSatelliteClient._id, this.clientData.location.lat, this.clientData.location.lng);
       }
     }
   }
 
+  /**
+   * Center map
+   * @param location 
+   */
+  centerMap(location) {
+    this.map.setCenter(location);
+  }
 
   /**
    * Update the service info on the array
@@ -386,6 +399,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
     )
     .subscribe(services => {
       this.serviceList = services;
+      this.serviceList.sort((service1,service2) => (service1.timestamp > service2.timestamp) ? -1 : ((service2.timestamp > service1.timestamp) ? 1 : 0));
 
       if(this.serviceList && this.serviceList.length > 0){
         this.serviceList.forEach(service => {
@@ -431,6 +445,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
     this.clientMarker = pickUpMarker;
     this.clientMarker.updateIcon('./assets/satellite/icono-sucursal.svg');
     this.addMarkerToMap(pickUpMarker);
+    this.centerMap(pickUpMarker.getPosition());
   }
 
   createServiceMarker(service){
@@ -571,7 +586,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
     return range(1, requestServiceForm.taxisNumber || 1)
     .pipe(
       map(requestNumber => {
-        console.log('Client marker position => ', this.clientMarker.getPosition());
+        console.log('Client marker position => ', this.clientMarker.getPosition(), this.clientData.generalInfo.zone);
         const features = requestServiceForm.features.filter(feature => feature.active).map(feature => feature.name);
 
         return {
@@ -580,7 +595,8 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
             tip: 0,
             tipType: '',
             id: this.clientData._id,
-            username: this.clientData.auth ? this.clientData.auth.username: null
+            username: this.clientData.auth ? this.clientData.auth.username: null,
+            referrerDriverDocumentId: this.clientData.generalInfo.referrerDriverDocumentId
           },
           pickUp: {
             marker: {
@@ -704,18 +720,36 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
     const serviceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICE');
     const licensePlateTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.LICENSE_PLATE');
     const serviceReferenceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.REFERENCE');
+    const addressTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.ADDRESS');
+    const stateTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.STATE');
 
-    const serviceInfoWindowContent = `<html>
+    const serviceTimestamp = new Date(service.timestamp);
+    const serviceState = this.translationLoader.getTranslate().instant('SATELLITE.SERVICES.STATES.'+ service.state);
+    let serviceInfoWindowContent = `<html>
       <body>
           <div id="serviceInfoWindow">
-          <h2>${serviceTitle}</h2>
-          <p> <strong>${licensePlateTitle}: </strong>${service.vehicle.licensePlate}</p>
-          <p> <strong>${serviceReferenceTitle}: </strong>${service.pickUp.notes}</p>
-          
-        </div>
-      </body>
-    </html>
+          <p> ${this.transformDate(serviceTimestamp)}</p>
+          <p> <strong>${stateTitle}: </strong>${serviceState}</p>
+          <p> <strong>${licensePlateTitle}: </strong>${service.vehicle.licensePlate}</p>          
     `;
+    
+    if(service.pickUp.notes){
+      serviceInfoWindowContent = serviceInfoWindowContent + 
+      `<p> <strong>${serviceReferenceTitle}: </strong>${service.pickUp.notes}</p>`;
+    }
+    
+    
+    serviceInfoWindowContent = serviceInfoWindowContent + 
+      ` <p> <strong>${addressTitle}: </strong>${service.pickUp.addressLine1} - ${service.pickUp.addressLine2}</p>`;
+
+    serviceInfoWindowContent = serviceInfoWindowContent 
+    + `</div>
+    </body>
+    </html>
+  `;
+
+
+
     return serviceInfoWindowContent;
   }
 

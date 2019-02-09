@@ -103,6 +103,7 @@ export const ServiceClientSatellite = gql`
         phone
         address
         city
+        zone
         neighborhood
         email
         referrerDriverDocumentId
@@ -134,6 +135,7 @@ export const ServiceClientSatellites = gql`
         phone
         address
         city
+        zone
         neighborhood
         email
         referrerDriverDocumentId

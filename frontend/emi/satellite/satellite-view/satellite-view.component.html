@@ -154,7 +154,7 @@
                           placeholder="{{'SATELLITE.REFERENCE' | translate}}"
                           formControlName="notes"
                           id="notes"
-                          maxlength="20"/>
+                          maxlength="40"/>
                     </mat-form-field>
 
                     <mat-form-field>
@@ -172,11 +172,6 @@
                     </mat-form-field>
 
                 </div>
-
-
-
-
-
 
             </div>
           </div>
@@ -243,7 +238,7 @@
             </form>
 
             <div class="p-24">
-              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" [disabled]="requestForm.invalid"
+              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" [disabled]="requestForm.invalid || !clientData"
                 aria-label="Request taxi" (click)="requestService()">
                 {{ "SATELLITE.REQUEST_TAXI" | translate }}
               </button>

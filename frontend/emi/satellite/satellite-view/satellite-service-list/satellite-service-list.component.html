@@ -27,7 +27,8 @@
 
                 <div class="h3 secondary-text">{{service.timestamp | date: "dd/MM/y HH:mm:ss"}}</div>
                 <div>
-                    <button mat-icon-button [matMenuTriggerFor]="moreMenu" aria-label="more">
+                    <button mat-icon-button [matMenuTriggerFor]="moreMenu" aria-label="more" 
+                    *ngIf="service.state != 'CANCELLED_DRIVER' && service.state != 'CANCELLED_CLIENT' && service.state != 'CANCELLED_OPERATOR' && service.state != 'ON_BOARD' && service.state != 'DONE'">
                         <mat-icon>more_vert</mat-icon>
                     </button>
 
@@ -35,7 +36,7 @@
                         <button mat-menu-item aria-label="Flip widget" (click)="cancelService(service)">
                             {{'SATELLITE.SERVICES.CANCEL_REQUEST' | translate}}
                         </button>
-                        <button mat-menu-item aria-label="Flip widget">
+                        <button mat-menu-item aria-label="Flip widget" *ngIf="false">
                             {{'SATELLITE.SERVICES.SEE_DETAIL' | translate}}
                         </button>
                     </mat-menu>
@@ -43,16 +44,16 @@
             </div>
 
             <div class="pl-8 p-4" fxLayout="column" fxLayoutAlign="start start">
-                 <div class="h3 secondary-text">
+                 <div class="h3 secondary-text" *ngIf="service.vehicle && service.vehicle.licensePlate">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.LICENSE_PLATE' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
-                    <span class="value" *ngIf="service.vehicle">{{service.vehicle.licensePlate}}</span>
+                    <span class="value" >{{service.vehicle.licensePlate}}</span>
                 </div>
 
-                <div class="h3 secondary-text">
+                <div class="h3 secondary-text" *ngIf="service.driver && service.driver.fullname">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.DRIVER' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
-                    <span class="value" *ngIf="service.driver">{{service.driver.fullname}}</span>
+                    <span class="value">{{service.driver.fullname}}</span>
                 </div>
 
                 <div class="h3 secondary-text">
@@ -61,10 +62,28 @@
                     <span class="value">{{'SATELLITE.SERVICES.STATES.' + service.state | translate}}</span>
                 </div>
 
-                <div class="h3 secondary-text">
+                <div class="h3 secondary-text" *ngIf="service.pickUp.addressLine1">
+                    <span class="title secondary-text">{{'SATELLITE.SERVICES.ADDRESS1' | translate}}: </span>
+                    <span>&nbsp;&nbsp;</span>
+                    <span class="value">{{service.pickUp.addressLine1}}</span>
+                </div>
+
+                <div class="h3 secondary-text" *ngIf="service.pickUp.addressLine2">
+                    <span class="title secondary-text">{{'SATELLITE.SERVICES.ADDRESS2' | translate}}: </span>
+                    <span>&nbsp;&nbsp;</span>
+                    <span class="value">{{service.pickUp.addressLine2}}</span>
+                </div>
+
+                <div class="h3 secondary-text" *ngIf="service.pickUp.notes">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.REFERENCE' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
-                    <span class="value" *ngIf="service.pickUp.notes">{{service.pickUp.notes}}</span>
+                    <span class="value">{{service.pickUp.notes}}</span>
+                </div>
+
+                <div class="h3 secondary-text" *ngIf="service.pickUpETA">
+                    <span class="title secondary-text">{{'SATELLITE.SERVICES.PICKUP_ETA' | translate}}: </span>
+                    <span>&nbsp;&nbsp;</span>
+                    <span class="value">{{((service.pickUpETA - service.timestamp)/60000) | number:'1.0-0'}} {{'SATELLITE.SERVICES.MINUTES' | translate}}</span>
                 </div>
 
                 <div class="pt-4" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.requestedFeatures && service.requestedFeatures.length > 0">

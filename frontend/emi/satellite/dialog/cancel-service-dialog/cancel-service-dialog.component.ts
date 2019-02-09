@@ -19,6 +19,8 @@ import { MatDialog, MatSnackBar, MatDialogRef, MAT_DIALOG_DATA } from '@angular/
 ///////// I18N //////////
 import { TranslateService } from '@ngx-translate/core';
 import { FuseTranslationLoaderService } from "../../../../../core/services/translation-loader.service";
+import { locale as english } from "../../i18n/en";
+import { locale as spanish } from "../../i18n/es";
 
 ///////// SERVICES ////////
 import { SatelliteServiceListService } from '../../satellite-view/satellite-service-list/satellite-service-list.service';
@@ -55,7 +57,7 @@ export class CancelServiceDialogComponent implements OnInit, OnDestroy {
     private satelliteServiceListService: SatelliteServiceListService,
     private translationLoader: FuseTranslationLoaderService
   ) {
-
+    this.translationLoader.loadTranslations(english, spanish);
   }
 
   ngOnInit() {
@@ -95,7 +97,7 @@ export class CancelServiceDialogComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     ).subscribe(
       (result: any) => {
-        if (result.accepted) {
+        if (result && result.accepted) {
           this.showSnackBar('SATELLITE.SERVICES.CANCEL_SERVICE_SUCCESS');
           this.closeDialog(true);
         }
@@ -116,7 +118,7 @@ export class CancelServiceDialogComponent implements OnInit, OnDestroy {
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
-      this.translationLoader.getTranslate().instant('SERVICE.CLOSE'), {
+      this.translationLoader.getTranslate().instant('SATELLITE.CLOSE'), {
          duration: 4000
     });
   }
@@ -135,6 +137,8 @@ export class CancelServiceDialogComponent implements OnInit, OnDestroy {
    * @param response
    */
   showSnackBarError(response) {
+    console.log('showSnackBarError => ', response);
+
     if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {
@@ -167,9 +171,11 @@ export class CancelServiceDialogComponent implements OnInit, OnDestroy {
       translationData.push(detailMessageKey);
     }
 
+    console.log('translationData => ', this.translationLoader.getTranslate().instant(messageKey), detailMessageKey);
     this.translate.get(translationData).subscribe(data => {
+      
       this.snackBar.open(
-        messageKey ? data[messageKey] : "",
+        messageKey ? this.translationLoader.getTranslate().instant(messageKey) : "",
         detailMessageKey ? data[detailMessageKey] : "",
         {
           duration: 2000

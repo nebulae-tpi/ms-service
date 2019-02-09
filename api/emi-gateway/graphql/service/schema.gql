@@ -107,6 +107,8 @@ type ServiceClientSatelliteGeneralInfo {
   address: String
   "Client city"
   city: String
+  "Client zone"
+  zone: String
   "Client email"
   email: String
   "Client neighborhood"
