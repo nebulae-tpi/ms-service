@@ -47,7 +47,7 @@ class DriverCQRS {
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
-        const businessId = !isPlatformAdmin? (authToken.businessId || ''): null;
+        const businessId = !isPlatformAdmin ? (authToken.businessId || '') : null;
         return DriverDA.getDriver$(args.id, businessId)
       }),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -66,12 +66,12 @@ class DriverCQRS {
       "Driver",
       "getDriverList",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
-        const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        const businessId = !isPlatformAdmin ? (authToken.businessId || '') : args.filterInput.businessId;
         const filterInput = args.filterInput;
         filterInput.businessId = businessId;
         return DriverDA.getDriverList$(filterInput, args.paginationInput);
@@ -82,23 +82,23 @@ class DriverCQRS {
     );
   }
 
-    /**  
-   * Gets the amount of the Driver according to the filter
-   *
-   * @param {*} args args
-   */
+  /**  
+ * Gets the amount of the Driver according to the filter
+ *
+ * @param {*} args args
+ */
   getDriverListSize$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",
       "getDriverListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
         //If an user does not have the role to get the Driver from other business, the query must be filtered with the businessId of the user
-        const businessId = !isPlatformAdmin? (authToken.businessId || ''): args.filterInput.businessId;
+        const businessId = !isPlatformAdmin ? (authToken.businessId || '') : args.filterInput.businessId;
         const filterInput = args.filterInput;
         filterInput.businessId = businessId;
 
@@ -109,7 +109,7 @@ class DriverCQRS {
     );
   }
 
-  assignVehicleToDriver$({ args }, authToken) {    
+  assignVehicleToDriver$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
@@ -119,7 +119,7 @@ class DriverCQRS {
     )
       .pipe(
         mergeMap(() => DriverHelper.validateVehicleAsignment$(args.driverId, args.vehiclePlate)),
-        mergeMap( () => eventSourcing.eventStore.emitEvent$(
+        mergeMap(() => eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: "VehicleAssigned",
             eventTypeVersion: 1,
@@ -127,7 +127,7 @@ class DriverCQRS {
             aggregateId: args.driverId,
             data: { vehicleLicensePlate: args.vehiclePlate },
             user: authToken.preferred_username
-          }))          
+          }))
         ),
         map(() => ({ code: 200, message: `${args.vehiclePlate} has been added to the driver with ID ${args.driverId}` })),
         mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -177,7 +177,7 @@ class DriverCQRS {
     ).pipe(
       mergeMap(() => DriverDA.getDriver$(args.driverId)),
       map(driver => driver.assignedVehicles),
-      mergeMap((vehicleLit => VehicleDA.getDriverVehicles$(vehicleLit) )),
+      mergeMap((vehicleLit => VehicleDA.getDriverVehicles$(vehicleLit))),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );
