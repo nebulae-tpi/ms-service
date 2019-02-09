@@ -45,6 +45,10 @@ class CronJobES {
     )
   }
 
+  handlePeriodicFifMinutes$(){
+    return of(null);
+  }
+
   /**
    * Gonna to search Shift that must to be disconnected and emits event for each found to disconnect it
    */

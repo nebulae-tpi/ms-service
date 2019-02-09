@@ -8,7 +8,11 @@ const { map, mergeMap, reduce, tap } = require("rxjs/operators");
 const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
 
+const SHIFT_DISCONNECT_THRESHOLD = 5*60*1000; // FIVE MINUTES
+const SHIFT_CLOSE_THRESHOLD = 60 * 60 * 1000 // ONE HOUR
+
 class ShiftDA {
+
   static start$(mongoDbInstance) {
     return Observable.create(observer => {
       if (mongoDbInstance) {
@@ -216,7 +220,7 @@ class ShiftDA {
       $and: [
         { state: { $ne: "CLOSED" } },
         { online: true },
-        { lastReceivedComm: { $lte: Date.now() - 5 * 60 * 1000 } }
+        { lastReceivedComm: { $lte: Date.now() - SHIFT_DISCONNECT_THRESHOLD } }
       ]
     };
 
@@ -245,7 +249,7 @@ class ShiftDA {
     const query = {
       $and: [
         { online: false },
-        { lastReceivedComm: { $lte: Date.now() - 60 * 60 * 1000 } }
+        { lastReceivedComm: { $lte: Date.now() - SHIFT_CLOSE_THRESHOLD } }
       ]
     };
 
