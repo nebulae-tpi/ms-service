@@ -32,7 +32,7 @@ class CronJobES {
 
       )
     )
-    .subscribe(() =>{}, e => console.log(e), () => {});
+    // .subscribe(() =>{}, e => console.log(e), () => {});
 
   }
 
@@ -40,7 +40,8 @@ class CronJobES {
     console.log("------- handlePeriodicFiveMinutes$ ----------"); 
     return forkJoin(
       this.checkDisconnectedShifts$(),
-      this.checkClosedShifts$()
+      this.checkClosedShifts$(),
+      this.checkServicesToClose$()
     )
   }
 
@@ -71,6 +72,7 @@ class CronJobES {
    * search the shift that must to be closed and emit an event for each item to close it
    */
   checkClosedShifts$(){
+    // console.log("---------- checkClosedShifts$ ------------- ");
     return ShiftDA.getShiftsToClose$()
       .pipe(
         tap(shift => console.log("SHIFT TO CLOSE => ", JSON.stringify(shift))),
@@ -88,7 +90,27 @@ class CronJobES {
         toArray(),
         tap(() => console.log("ALL SHIFTS WERE CLOSED"))
       )
+  }
 
+  checkServicesToClose$(){
+    // console.log("-------- checkServicesToClose$ ---------");
+    return ServiceDA.findServicesToClose$()
+    .pipe(
+      tap(service => console.log("SERVICE TO CLOSE => ", JSON.stringify(service))),
+      mergeMap(serviceToClose =>
+        eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: "ServiceClosed",
+            eventTypeVersion: 1,
+            aggregateType: "Service",
+            aggregateId: serviceToClose._id,
+            data: { ...serviceToClose },
+            user: "SYSTEM"
+          }))
+      ),
+      toArray(),
+      tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE CLOSED"))
+    )
   }
 }
 
