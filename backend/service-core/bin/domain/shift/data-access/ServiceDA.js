@@ -39,6 +39,24 @@ class ServiceDA {
   }
 
 
+  /**
+   * appends location
+   * @returns {Observable}
+   */
+  static appendLocation$(_id, location) {
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+        { _id },
+        {
+          $set: { location, lastModificationTimestamp: Date.now() },
+          $push: { "route.coordinates": location.coordinates }
+        },
+        { upsert: false }
+      )
+    );
+  }
+
+
 }
 /**
  * @returns {ShiftDA}

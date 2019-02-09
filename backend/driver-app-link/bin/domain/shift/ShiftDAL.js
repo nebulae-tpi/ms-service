@@ -3,6 +3,8 @@
 
 const { of, interval, Observable, empty, throwError } = require("rxjs");
 const { mergeMapTo, mapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
+const jsonwebtoken = require("jsonwebtoken");
+const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -31,6 +33,7 @@ class ShiftDAL {
     start$() {
         return Observable.create(obs => {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
+                map(evt => ({ authToken: jsonwebtoken.verify(evt.jwt, jwtPublicKey), ...evt })),
                 mergeMap(evt => Observable.create(evtObs => {
                     this.handlers[evt.t](evt).subscribe(
                         (handlerEvt) => { console.log(`ShiftDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`); },
@@ -57,8 +60,11 @@ class ShiftDAL {
      */
     handleShiftLocationReported$({ data }) {
         if(!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, data.location)).pipe(
-            mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data.location)}`)
+
+        const location = {type:"Point", coordinates: [data.location.lng,data.location.lat]};
+
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId)).pipe(
+            mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data)}`)
         );
     }
 
@@ -70,7 +76,7 @@ class ShiftDAL {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    static buildShiftLocationReportedEsEvent(aid, location) {
+    static buildShiftLocationReportedEsEvent(aid, location,serviceId) {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: aid,
@@ -78,7 +84,8 @@ class ShiftDAL {
             eventTypeVersion: 1,
             user: 'SYSTEM',
             data: {
-                location
+                location,
+                serviceId
             }
         });
     }

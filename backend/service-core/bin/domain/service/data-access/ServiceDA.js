@@ -160,7 +160,7 @@ class ServiceDA {
       state: 'REQUESTED',
     };
     // The shift is within the sent and actives offers
-    // find[`offers.${shiftId}.active`] = true;  //TODO: CRITICO> Habilitar
+    find[`offers.${shiftId}.active`] = true;
 
     const update = {
       $set: {
@@ -194,7 +194,8 @@ class ServiceDA {
           returnOriginal: false,
         }
       )).pipe(
-        map(result => result.value),
+        map(result => result.value),      
+        filter(v => v),
         first(),
         catchError(err => throwError(ERROR_23104)), // possible concurrent modification
       );
