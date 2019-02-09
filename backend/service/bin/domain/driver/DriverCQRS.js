@@ -51,7 +51,7 @@ class DriverCQRS {
         return DriverDA.getDriver$(args.id, businessId)
       }),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-      catchError(err => GraphqlResponseTools.handleError$(error))
+      catchError(error => GraphqlResponseTools.handleError$(error))
     );
   }
 
