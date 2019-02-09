@@ -19,6 +19,7 @@ const Rx = require('rxjs');
 const shift = require('./domain/shift');
 const Cronjob = require('./domain/cronjob');
 
+
 const start = () => {
     Rx.concat(
         eventSourcing.eventStore.start$(),

@@ -176,9 +176,9 @@ class DriverAppLinkBroker {
         );
         return of(dataBuffer)
             .pipe(
-                tap((db) => { console.log(`Sending to app-driver using ${topicName} : ${db}`); }), //TODO: DELETE LINE
+                tap((db) => { console.log(`Sending to app-driver using ${topicName} : ${db}`); }), //DEBUG: DELETE LINE
                 tap((db) => { this.mqttClient.publish(`${topicName}`, db, { qos: 1 }); }),
-                tap((db) => { console.log(`sent ${uuid}`); }),//TODO: DELETE LINE
+                tap((db) => { console.log(`sent ${uuid}`); }),//DEBUG: DELETE LINE
                 mapTo(uuid)
             );
     }

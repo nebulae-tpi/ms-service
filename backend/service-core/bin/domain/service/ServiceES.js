@@ -158,8 +158,24 @@ class ServiceES {
      */
     handleServiceCancelledByDriver$({ aid, data }) {
         const { reason, notes, location } = data;
-        return ServiceDA.setCancelState$(aid, 'CANCELLED_DRIVER', location, reason, notes);
+        //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
         //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
+        return  ServiceDA.setCancelState$(aid, 'CANCELLED_DRIVER', location, reason, notes).pipe(
+            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
+            map(({ shiftId }) => shiftId),
+            mergeMap(shiftId =>
+                eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Shift',
+                        shiftId,
+                        'ShiftStateChanged',
+                        { _id: shiftId, state: 'AVAILABLE' }
+                    )
+                )),
+            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
+        );
+
+
     }
 
 
@@ -170,8 +186,22 @@ class ServiceES {
      */
     handleServiceCancelledByClient$({ aid, data }) {
         const { reason, notes, location } = data;
-        return ServiceDA.setCancelState$(aid, 'CANCELLED_CLIENT', location, reason, notes);
+         //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
         //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
+        return  ServiceDA.setCancelState$(aid, 'CANCELLED_CLIENT', location, reason, notes).pipe(
+            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
+            map(({ shiftId }) => shiftId),
+            mergeMap(shiftId =>
+                eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Shift',
+                        shiftId,
+                        'ShiftStateChanged',
+                        { _id: shiftId, state: 'AVAILABLE' }
+                    )
+                )),
+            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
+        );
     }
 
     /**
@@ -181,8 +211,22 @@ class ServiceES {
      */
     handleServiceCancelledByOperator$({ aid, data }) {
         const { reason, notes, location } = data;
-        return ServiceDA.setCancelState$(aid, 'CANCELLED_OPERATOR', location, reason, notes);
+        //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
         //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
+        return  ServiceDA.setCancelState$(aid, 'CANCELLED_OPERATOR', location, reason, notes).pipe(
+            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
+            map(({ shiftId }) => shiftId),
+            mergeMap(shiftId =>
+                eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Shift',
+                        shiftId,
+                        'ShiftStateChanged',
+                        { _id: shiftId, state: 'AVAILABLE' }
+                    )
+                )),
+            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
+        );
     }
 
 

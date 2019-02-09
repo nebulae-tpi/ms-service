@@ -37,18 +37,18 @@ class ServiceDA {
     ).pipe(filter(val => val));
   }
 
-  /**
-   * Finds all open shift// DELETE, JUST FOR TESTING
-   */
-  static findOpenShifts$(projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
-    const query = { "state": "AVAILABLE" };
-    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
-      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
-      map(db => db.collection('Shift')),
-      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
+  static addShiftToActiveOffers$(_id,shiftId){
+    const update = {$set : {}};
+    update["$set"][`offers.${shiftId}.active`] = true;
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+        { _id },
+        update,
+        { upsert: false }
+      )
     );
   }
+
 
 }
 /**

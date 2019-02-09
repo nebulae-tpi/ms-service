@@ -67,7 +67,7 @@ class ServiceDAL {
      */
     handleServicePickUpETAReported$({ data, ts, authToken }) {
         const { _id, eta } = data;
-        console.log(`ServiceDAL: handleServicePickUpETAReported: ${JSON.stringify(data)} `); //TODO: DELETE LINE
+        console.log(`ServiceDAL: handleServicePickUpETAReported: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
 
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
@@ -86,7 +86,7 @@ class ServiceDAL {
      */
     handleServiceDropOffETAReported$({ data, ts, authToken }) {
         const { _id, eta } = data;
-        console.log(`ServiceDAL: ServiceDropOffETAReported: ${JSON.stringify(data)} `); //TODO: DELETE LINE
+        console.log(`ServiceDAL: ServiceDropOffETAReported: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
@@ -105,10 +105,10 @@ class ServiceDAL {
      */
     handleServiceVehicleArrived$({ data, authToken }) {
 
-        //TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
+        ////TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
 
         const { _id, timestamp, location } = data;
-        console.log(`ServiceDAL: handleServiceVehicleArrived: ${JSON.stringify(data)} `); //TODO: DELETE LINE
+        console.log(`ServiceDAL: handleServiceVehicleArrived: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
@@ -132,7 +132,7 @@ class ServiceDAL {
 
         //TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
         const { _id, timestamp, location } = data;
-        console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //TODO: DELETE LINE
+        console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
@@ -153,10 +153,10 @@ class ServiceDAL {
      */
     handleServiceCompleted$({ data, authToken }) {
 
-        //TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
+        ////TODO consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
 
         const { _id, timestamp, location } = data;
-        console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //TODO: DELETE LINE
+        console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
@@ -182,7 +182,7 @@ class ServiceDAL {
         //TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
 
         const { _id, timestamp, location, reason, notes } = data;
-        console.log(`ServiceDAL: handleServiceCancelledByDriver: ${JSON.stringify(data)} `); //TODO: DELETE LINE
+        console.log(`ServiceDAL: handleServiceCancelledByDriver: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',

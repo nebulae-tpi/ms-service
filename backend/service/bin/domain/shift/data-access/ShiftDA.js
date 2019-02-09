@@ -47,7 +47,12 @@ class ShiftDA {
     if (filter.initTimestamp && filter.endTimestamp) { }
     if (filter.showClosedShifts && filter.initTimestamp && filter.endTimestamp) {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp };
+      query["state"] = { $in : [ "AVAILABLE", "NOT_AVAILABLE", "BUSY", "BLOCKED", "CLOSED" ] };
+    }else{
+      query["state"] = { $in : [ "AVAILABLE", "NOT_AVAILABLE", "BUSY", "BLOCKED" ] }
     }
+
+    
 
     return of(query.timestamp)
       .pipe(

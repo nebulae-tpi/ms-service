@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, interval, forkJoin, empty } = require("rxjs");
+const { of, interval, forkJoin, empty,merge } = require("rxjs");
 const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
@@ -26,7 +26,7 @@ class ShiftES {
      * @param {Event} shiftStartedEvt
      */
     handleShiftStarted$({ data }) {
-        console.log(`ShiftES.handleShiftStarted: ${JSON.stringify({ data })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftStarted: ${JSON.stringify({ data })}`); //DEBUG: DELETE LINE
         return ShiftDA.insertShift$(data);
     }
 
@@ -35,7 +35,7 @@ class ShiftES {
      * @param {Event} shiftStateChangedEvt 
      */
     handleShiftStateChanged$({ aid, data }) {
-        console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
         
         return ShiftDA.updateShiftStateAndGetOnlineFlag$(aid, data.state).pipe(
@@ -49,7 +49,7 @@ class ShiftES {
      * @param {Event} shiftConnectedEvt
      */
     handleShiftConnected$({ aid }) {
-        console.log(`ShiftES.handleShiftConnected: ${JSON.stringify({ aid })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftConnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
 
@@ -61,7 +61,7 @@ class ShiftES {
      * @param {Event} shiftDisconnectedEvt
      */
     handleShiftDisconnected$({ aid }) {
-        console.log(`ShiftES.handleShiftDisconnected: ${JSON.stringify({ aid })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftDisconnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
 
@@ -73,7 +73,7 @@ class ShiftES {
      * @param {Event} shiftStoppedEvt
      */
     handleShiftStopped$({ aid }) {
-        console.log(`ShiftES.handleShiftStopped: ${JSON.stringify({ aid })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftStopped: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
 
@@ -85,7 +85,7 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockRemovedEvt
      */
     handleShiftVehicleBlockRemoved$({ aid, data }) {
-        console.log(`ShiftES.handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
 
@@ -100,7 +100,7 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockAddedEvt
      */
     handleShiftVehicleBlockAdded$({ aid, data }) {
-        console.log(`ShiftES.handleShiftVehicleBlockAdded: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftVehicleBlockAdded: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
 
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
@@ -116,7 +116,7 @@ class ShiftES {
     * @param {Event} shiftDriverBlockRemovedEvt
     */
     handleShiftDriverBlockRemoved$({ aid, data }) {
-        console.log(`ShiftES.handleShiftDriverBlockRemoved: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftDriverBlockRemoved: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
 
@@ -131,7 +131,7 @@ class ShiftES {
      * @param {Event} shiftDriverBlockAddedEvt
      */
     handleShiftDriverBlockAdded$({ aid, data }) {
-        console.log(`ShiftES.handleShiftDriverBlockAdded: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
+        console.log(`ShiftES.handleShiftDriverBlockAdded: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
 
@@ -146,12 +146,17 @@ class ShiftES {
      * @param {Event} shiftLocationReportedEvt
      */
     handleShiftLocationReported$({ aid, data }) {
-        if(aid === undefined) return of({});//TODO: DELETE THIS LINE
+        if(aid === undefined) return of({});//DEBUG: DELETE LINE
 
         if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        //TODO: CRITICO: agregar rutas en el service
+        console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
+         
 
-        console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid,data })}`); //TODO: DELETE THIS LINE
-        return ShiftDA.updateShiftLocation$(aid, data.location)
+        return merge(
+            ShiftDA.updateShiftLocation$(aid, data.location),
+            data.serviceId ? ServiceDA.appendLocation$(data.serviceId, data.location ) : of({})
+        );
     }
 
     /**
