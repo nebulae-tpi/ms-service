@@ -65,6 +65,8 @@ class MongoDB {
       observer.next(`Creating index for master.Driver => ({ lastname: 1})`);
       await this.db.collection('Driver').createIndex( { documentId: 1}, { unique: true} );
 
+      // TODO indexes for historical DBs
+
       observer.next("All indexes created");
       observer.complete();
     });

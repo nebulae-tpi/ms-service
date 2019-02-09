@@ -5,6 +5,7 @@ const { DriverES } = require("../../domain/driver");
 const { ClientES } = require("../../domain/client");
 const { VehicleES } = require("../../domain/vehicle");
 const { ServiceES } = require("../../domain/service");
+const { CronJobES } = require("../../domain/cronjob");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -197,6 +198,12 @@ class EventStoreService {
       ServiceCancelledByDriver: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByClient: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
+
+      // CRONJOB
+      PeriodicFiveMinutes: {
+        fn: CronJobES.handlePeriodicFiveMinutes$,
+        obj: CronJobES
+      }
     };
   }
 
@@ -274,6 +281,11 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
       { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
+
+      // CronJob
+
+      { aggregateType: "CronJob", eventType: "PeriodicFiveMinutes" },
+      { aggregateType: "CronJob", eventType: "ServiceCancelledByOperator" },
     ]
   }
 }
