@@ -281,15 +281,10 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
       { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
-<<<<<<< HEAD
       { aggregateType: "Service", eventType: "ServiceClosed" },
-=======
-
       // CronJob
-
       { aggregateType: "CronJob", eventType: "PeriodicFiveMinutes" },
       { aggregateType: "CronJob", eventType: "ServiceCancelledByOperator" },
->>>>>>> 23ad4775e2a285016c48122e5bdae0fd533d548d
     ]
   }
 }
