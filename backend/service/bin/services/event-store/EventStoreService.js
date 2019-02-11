@@ -290,9 +290,9 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceClosed" },
       // SHIFT
       { aggregateType: "Shift", eventType: "ShiftLocationReported" },
-      // CronJob
-      { aggregateType: "CronJob", eventType: "PeriodicFiveMinutes" },
-      { aggregateType: "CronJob", eventType: "PeriodicFifteenMinutes" },
+      // Cronjob
+      { aggregateType: "Cronjob", eventType: "PeriodicFiveMinutes" },
+      { aggregateType: "Cronjob", eventType: "PeriodicFifteenMinutes" },
     ]
   }
 }

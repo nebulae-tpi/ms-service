@@ -68,7 +68,7 @@ class CronJobES {
             }))
         ),
         toArray(),
-        tap(() => console.log("ALL SHIFTS WERE DISCONNECTED"))
+        tap(() => console.log("ALL SHIFTS THAT MATCH WITH THE CONDITIONS WERE DISCONNECTED"))
       )
   }
 
