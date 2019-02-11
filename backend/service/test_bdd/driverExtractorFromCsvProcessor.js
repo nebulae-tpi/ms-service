@@ -6,14 +6,14 @@ const expect = require("chai").expect;
 const fs = require('fs');   
 const es = require('event-stream');
 
-const FILE_PATH = './test_bdd/driverVsVehicles_data.csv';
+const FILE_PATH = './test_bdd/driverVsVehicles_1_data.csv';
 
-const KeyCloak = require('./Keycloak');
-const GraphQL = require('./GraphQl');
+const KeyCloak = require('./utils/Keycloak');
+const GraphQL = require('./utils/GraphQl');
 const graphQL = new GraphQL();
 const keyCloak = new KeyCloak();
 
-const DriverGraphQlHelper = require("./driverGraphQlHelper");
+const DriverGraphQlHelper = require("./utils/driverGraphQlHelper");
 const VehicleGraphQlHelper = require("./vehicleGraphQlHelper");
 
 const getRxDefaultSubscription = (evtText, done) => {
@@ -60,8 +60,8 @@ describe("BDD - MAIN TEST", function() {
 
         it("start service backend and its Database", function (done) {
             this.timeout(600000);
-            const DriverMapperHelper = require("./driverMapperHelper");
-            const BUSINESS_ID = "5d09e774-1f60-4df8-ac50-78ea00af9aa8";
+            const DriverMapperHelper = require("./utils/driverMapperHelper");
+            const BUSINESS_ID = "4ab03a09-9e34-40fe-9102-25cc6b5b2176";
 
             return defer(() => {
                 const that = this;
@@ -111,7 +111,7 @@ describe("BDD - MAIN TEST", function() {
                                                     of({vehicle, driver})
                                                 )),
                                                 // delay(2000),
-                                                mergeMap(([a,b, { vehicle, driver }]) =>
+                                                mergeMap(([a, b, { vehicle, driver }]) =>
                                                     VehicleGraphQlHelper.findByPlate$(graphQL, vehicle.licensePlate)                                                   
                                                     .pipe(
                                                         mergeMap(() => DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId) ),

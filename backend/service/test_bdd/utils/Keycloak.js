@@ -32,8 +32,8 @@ class KeyCloak {
         this.baseUrl = 'https://tpi-dev.nebulae.com.co/auth';
         this.realmName = 'TPI';
         this.client_id = 'EMI';
-        this.username = 'juan.santa';
-        this.password = '_________';       
+        this.username = 'juan.santa@nebulae.com.co';
+        this.password = '____________';       
     }
 
     logIn$() {

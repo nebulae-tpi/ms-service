@@ -127,10 +127,11 @@ class DriverGraphQlHelper {
                 input: {
                     username: driver.username,
                     password: driver.documentId,
-                    temporary: true
+                    temporary: false
                 }
             }
           }).pipe(
+              tap(({queryArgs}) => console.log("CREDENCIALES => ", queryArgs.input) ),
               mergeMap(({ responseFields, queryArgs }) =>
                   graphQlInstance.executeQuery$(
                       `mutation{DriverCreateDriverAuth(${graphQlInstance.convertObjectToInputArgs(queryArgs)}){${responseFields}}}`

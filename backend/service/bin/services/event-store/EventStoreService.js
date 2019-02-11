@@ -198,7 +198,7 @@ class EventStoreService {
       ServiceCancelledByDriver: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByClient: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
-      ServiceClosed: { fn: ServiceES.handleServiceClosed$, obj: ServiceES },
+      ServiceClosed: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       // SHIFT
       ShiftLocationReported: { fn: ServiceES.handleShiftEvents$, obj: ServiceES },
       // CRONJOB
