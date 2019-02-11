@@ -19,20 +19,10 @@ class CronJobES {
     of({})
     .pipe(
       delay(2000),
-      mergeMap(() => 
-        eventSourcing.eventStore.emitEvent$(
-          new Event({
-            eventType: "PeriodicFiveMinutes",
-            eventTypeVersion: 1,
-            aggregateType: "CronJob",
-            aggregateId: 1,
-            data: { },
-            user: "SYSTEM"
-          }))
-
-      )
+      mergeMap(() => this.generateEventStoreEvent$("PeriodicFiveMinutes", 1, "Cronjob", undefined, {}, "SYSTEM")),
+      mergeMap( event => eventSourcing.eventStore.emitEvent$(event))
     )
-    // .subscribe(() =>{}, e => console.log(e), () => {});
+    .subscribe(() =>{}, e => console.log(e), () => {});
 
   }
 
@@ -56,17 +46,8 @@ class CronJobES {
     return ShiftDA.getShiftsToDisconnect$()
       .pipe(
         tap(shift => console.log("SHIFT TO SET AS DISCONNECTED => ", JSON.stringify(shift))),
-        mergeMap(shiftToDisconnect =>
-          eventSourcing.eventStore.emitEvent$(
-            new Event({
-              eventType: "ShiftDisconnected",
-              eventTypeVersion: 1,
-              aggregateType: "Shift",
-              aggregateId: shiftToDisconnect._id,
-              data: { ...shiftToDisconnect },
-              user: "SYSTEM"
-            }))
-        ),
+        mergeMap(shift => this.generateEventStoreEvent$("ShiftDisconnected", 1, "Shift", shift._id, { ...shift }, "SYSTEM")),
+        mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
         tap(() => console.log("ALL SHIFTS THAT MATCH WITH THE CONDITIONS WERE DISCONNECTED"))
       )
@@ -80,17 +61,8 @@ class CronJobES {
     return ShiftDA.getShiftsToClose$()
       .pipe(
         tap(shift => console.log("SHIFT TO CLOSE => ", JSON.stringify(shift))),
-        mergeMap(shiftToClose =>
-          eventSourcing.eventStore.emitEvent$(
-            new Event({
-              eventType: "ShiftStateChanged",
-              eventTypeVersion: 1,
-              aggregateType: "Shift",
-              aggregateId: shiftToClose._id,
-              data: { ...shiftToClose, state: "CLOSED" },
-              user: "SYSTEM"
-            }))
-        ),
+        mergeMap(shift => this.generateEventStoreEvent$("ShiftStateChanged", 1, "Shift", shift._id, { ...shift, state: "CLOSED" }, "SYSTEM")),
+        mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
         tap(() => console.log("ALL SHIFTS WERE CLOSED"))
       )
@@ -101,21 +73,24 @@ class CronJobES {
     return ServiceDA.findServicesToClose$()
     .pipe(
       tap(service => console.log("SERVICE TO CLOSE => ", JSON.stringify(service))),
-      mergeMap(serviceToClose =>
-        eventSourcing.eventStore.emitEvent$(
-          new Event({
-            eventType: "ServiceClosed",
-            eventTypeVersion: 1,
-            aggregateType: "Service",
-            aggregateId: serviceToClose._id,
-            data: { ...serviceToClose },
-            user: "SYSTEM"
-          }))
-      ),
+      mergeMap(service => this.generateEventStoreEvent$("ServiceClosed", 1, "Service", service._id, {...service}, "SYSTEM")),
+      mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
       toArray(),
       tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE CLOSED"))
     )
   }
+
+  generateEventStoreEvent$(eventType, eventVersion, aggregateType, aggregateId, data, user ) {
+    return of(new Event({
+      eventType: eventType,
+      eventTypeVersion: eventVersion,
+      aggregateType: aggregateType,
+      aggregateId: aggregateId,
+      data: data,
+      user: user
+    }))
+  }
+
 }
 
 /**
