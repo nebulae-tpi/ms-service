@@ -16,14 +16,6 @@ let instance;
 class CronJobES {
   constructor() {
 
-    of({})
-    .pipe(
-      delay(2000),
-      mergeMap(() => this.generateEventStoreEvent$("PeriodicFiveMinutes", 1, "Cronjob", undefined, {}, "SYSTEM")),
-      mergeMap( event => eventSourcing.eventStore.emitEvent$(event))
-    )
-    .subscribe(() =>{}, e => console.log(e), () => {});
-
   }
 
   handlePeriodicFiveMinutes$() {   
