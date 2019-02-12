@@ -221,7 +221,6 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     this.maxEndDate = endOfMonth;
     // Reactive Filter Form
     this.filterForm = this.formBuilder.group({
-      showClosedShifts: [false],
       initTimestamp: [startOfMonth, [Validators.required]],
       endTimestamp: [endOfMonth, [Validators.required]],
       driverDocumentId: [null],
@@ -272,8 +271,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
               driverDocumentId: filterValue.driverDocumentId,
               driverFullname: filterValue.driverFullname,
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
-              states: filterValue.states,
-              showClosedShifts: filterValue.showClosedShifts
+              states: filterValue.states
             });
             this.onInitDateChange();
             this.onEndDateChange();
@@ -311,7 +309,6 @@ export class ShiftListComponent implements OnInit, OnDestroy {
           driverFullname: filterValue.driverFullname,
           vehicleLicensePlate: filterValue.vehicleLicensePlate,
           states: filterValue.states,
-          showClosedShifts: filterValue.showClosedShifts
         };
         console.log('paginator', paginator);
 

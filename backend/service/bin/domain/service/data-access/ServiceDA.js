@@ -126,59 +126,6 @@ class ServiceDA {
       query.closed = false;
     }
 
-
-    // return of(query.timestamp)
-    //   .pipe(
-    //     mergeMap(() => of({})
-    //         .pipe(
-    //           mergeMap(() => {
-    //             const date1 = new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-    //             const date2 = new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-    //             const dateNow = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-    //             const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) + 1;
-    //             const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2).length;
-    //             return of({
-    //               start: monthsBeforedate1,
-    //               count: monthsBeforedate2
-    //             });
-    //           })
-    //         )
-    //     ),
-    //     mergeMap(({ start, count }) => range(start, count)),
-    //     map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
-    //     map(db => db.collection(CollectionName)),
-    //     mergeMap(collection => {
-    //       const cursor = collection
-    //         .find(query, { projection })
-    //         .skip(pagination.count * pagination.page)
-    //         .limit(pagination.count)
-    //         .sort({ creationTimestamp: pagination.sort });
-
-    //       return mongoDB.extractAllFromMongoCursor$(cursor);
-    //     })
-    //   );
-
-
-
-    // const initDate = new Date(filter.initTimestamp);
-    // const endDate = new Date(filter.endTimestamp);
-
-    // return from(Crosscutting.getYearMonthArray(initDate, endDate))
-    // .pipe(
-    //   map(date => mongoDB.getHistoricalDb(date)),
-    //   map(db => db.collection(CollectionName)),
-    //   mergeMap(collection => {
-    //     const cursor = collection
-    //     .find(query, {projection})
-    //     .skip(pagination.count * pagination.page)
-    //     .limit(pagination.count)
-    //     .sort({ creationTimestamp: pagination.sort });
-
-    //     return mongoDB.extractAllFromMongoCursor$(cursor);
-    //   })
-    // );
-
-
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
 
@@ -191,7 +138,7 @@ class ServiceDA {
         .find(query, {projection})
         .skip(pagination.count * pagination.page)
         .limit(pagination.count)
-        .sort({ creationTimestamp: pagination.sort });
+        .sort({ timestamp: pagination.sort });
 
         return mongoDB.extractAllFromMongoCursor$(cursor);
       })
