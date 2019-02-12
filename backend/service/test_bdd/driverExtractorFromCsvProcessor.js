@@ -14,7 +14,7 @@ const graphQL = new GraphQL();
 const keyCloak = new KeyCloak();
 
 const DriverGraphQlHelper = require("./utils/driverGraphQlHelper");
-const VehicleGraphQlHelper = require("./vehicleGraphQlHelper");
+const VehicleGraphQlHelper = require("./utils/vehicleGraphQlHelper");
 
 const getRxDefaultSubscription = (evtText, done) => {
     return [
@@ -98,7 +98,7 @@ describe("BDD - MAIN TEST", function() {
                                                 // mergeMap(driverId => DriverGraphQlHelper.removeAuth$(graphQL, driverId)
                                                 //     .pipe(
                                                 //         delay(20),
-                                                //         catchError(e => of('ERROR'))
+                                                //         catchError(e => of('ERROR', JSON.stringify(e)))
 
                                                 //     )
                                                 // ),
@@ -106,16 +106,20 @@ describe("BDD - MAIN TEST", function() {
                                                 // TO INSER DRIVER, VEHICLES, ASSIGN VEHICLES AND  DRIVER AUTH
                                                
                                                 mergeMap(({driver, vehicle}) => forkJoin(
-                                                    DriverGraphQlHelper.createDriver$(graphQL, driver),
+                                                    DriverGraphQlHelper.createOrUpdateDriver$(graphQL, driver),
                                                     VehicleGraphQlHelper.createVehicle$(graphQL, vehicle),
                                                     of({vehicle, driver})
                                                 )),
                                                 // delay(2000),
-                                                mergeMap(([a, b, { vehicle, driver }]) =>
+                                                mergeMap(([ driverEdited, b, { vehicle, driver }]) =>
                                                     VehicleGraphQlHelper.findByPlate$(graphQL, vehicle.licensePlate)                                                   
                                                     .pipe(
-                                                        mergeMap(() => DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId) ),
-                                                        map( (driverId) => ({ driver: { ...driver, _id: driverId }, vehicle: vehicle  }))
+                                                        // tap(() => driverEdited ? console.log('DRIVER EDITED') : console.log('DRIVER CREATED')),
+                                                        mergeMap(() => driverEdited 
+                                                            ? of(driverEdited) 
+                                                            : DriverGraphQlHelper.finDriverId$(graphQL, driver.documentId) 
+                                                        ),
+                                                        map( driverId => ({ driver: { ...driver, _id: driverId }, vehicle: vehicle  }))
                                                     )
                                                 ),
                                                 mergeMap(({ vehicle, driver }) => forkJoin(                                                    
@@ -123,7 +127,7 @@ describe("BDD - MAIN TEST", function() {
                                                     DriverGraphQlHelper.createCredentials$(graphQL, driver)
                                                 )),
 
-                                                tap(() => console.log("========================================================================================= \n")),
+                                                 tap(() => console.log("========================================================================================= \n")),
                                                 // delay(2000)
 
                                             )
