@@ -67,7 +67,7 @@ class Service {
   static queryAssignedService$(user, expectNull = false) {
     const query =
       `query{
-                AssignedService{
+              AssignedService{
                   _id,
                   timestamp,
                   client{
@@ -113,10 +113,10 @@ class Service {
 
 
 
-  static queryHistoricalService$(user, expectNull = false) {
+  static queryHistoricalService$(user, args) {
     const query =
       `query{
-                AssignedService{
+              HistoricalDriverServices(${user.graphQL.convertObjectToInputArgs(args)}){
                   _id,
                   timestamp,
                   client{
@@ -153,10 +153,10 @@ class Service {
                 }
               }`;
     return user.graphQL.executeQuery$(query).pipe(
-      catchError(error => Rx.throwError(new Error(`Failed to queryAssignedService, asError: << ${error} >>   JSON: ${JSON.stringify(error, null, 2)}`))),
-      tap(({ OpenShift }) => { expectNull ? expect(OpenShift).to.be.undefined : expect(OpenShift).to.not.be.undefined; }),
-      map(({ OpenShift }) => OpenShift),
-      tap(OpenShift => console.log(`query OpenShift: ${OpenShift}`))
+      catchError(error => Rx.throwError(new Error(`Failed to queryHistoricalService, asError: << ${error} >>   JSON: ${JSON.stringify(error, null, 2)}`))),
+      tap(({ HistoricalDriverServices }) => { expect(HistoricalDriverServices).to.exist; }),
+      map(({ HistoricalDriverServices }) => HistoricalDriverServices),
+      tap(HistoricalDriverServices => console.log(`query HistoricalDriverServices: ${HistoricalDriverServices.length}`))
     );
   }
 

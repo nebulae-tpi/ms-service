@@ -137,7 +137,6 @@ describe('DriverApp workflows', function () {
 
 
     describe('Starting new SHIFT', function () {
-
         it('start Shift', function (done) {
             Rx.forkJoin(
                 appLinkBroker.listenShiftEventsFromServer$(['ShiftStateChanged'], users.driver.username).pipe(
@@ -222,7 +221,7 @@ describe('DriverApp workflows', function () {
     describe('Location + service', function () {
 
         const serviceRequest = {
-            client: { id: "1", tip: 1000, tipType: "CASH", username: "juansmolano", referrerDriverDocumentId: "123456", fullname: "Sebastian Molano" , offerMinDistance:300, offerMaxDistance:1000 },
+            client: { id: "1", tip: 1000, tipType: "CASH", username: "juansmolano", referrerDriverDocumentId: "123456", fullname: "Sebastian Molano", offerMinDistance: 300, offerMaxDistance: 1000 },
             pickUp: { city: "MEDELLIN", marker: { lat: 6.175307, lng: -75.592245 }, zone: "T1", neighborhood: "Primavera", addressLine1: "Cra 48 #48sur-75, int 131" },
             requestedFeatures: ["AC"],
             paymentType: "CASH",
@@ -428,7 +427,33 @@ describe('DriverApp workflows', function () {
                 .subscribe(...getRxDefaultSubscription('Service ServiceClientPickedUp', done));
         });
 
+
+
+        it('Query Service historial', function (done) {
+            const year = new Date().getFullYear();
+            const month = new Date().getMonth() + 1;
+            Service.queryHistoricalService$(users.driver, { year, month, page: 0, count: 20 }).pipe(
+                mergeMap(historicalServices => Rx.from(historicalServices)),
+                tap(histService => console.log(`Found Hist Serv: ${histService._id}`)),
+                filter(histService => histService._id === users.driver.service._id),
+                first(),
+                tap(({ _id, timestamp, pickUp, client }) => expect(_id).to.be.eq(users.driver.service._id)),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp).to.exist),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp.zone).to.not.be.empty),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp.neighborhood).to.eq(users.driver.serviceOffer.pickUp.neighborhood)),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp.city).to.eq(users.driver.serviceOffer.pickUp.city)),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp.zone).to.eq(users.driver.serviceOffer.pickUp.zone)),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp.marker).to.exist),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp.marker.lat).to.exist),
+                tap(({ _id, timestamp, pickUp }) => expect(pickUp.marker.lng).to.exist),
+                tap(({ _id, timestamp, pickUp }) => expect(timestamp).to.exist),
+            ).subscribe(...getRxDefaultSubscription('Service Service historial', done));
+        });
+
+
     });
+
+
 
 
 
