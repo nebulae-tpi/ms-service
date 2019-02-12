@@ -138,7 +138,12 @@ type Query{
    AssignedService: Service @requireAuth
 
    "Get the latest trips done by the driver"
-   HistoricalDriverServices: [Service] @requireAuth
+   HistoricalDriverServices(
+      year: Int
+      month: Int
+      page: Int,
+      count: Int
+    ): [Service] @requireAuth
 }
 
 type Mutation{

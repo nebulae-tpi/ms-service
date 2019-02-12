@@ -62,7 +62,7 @@ class ServiceCQRS {
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
       mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state: 1, driver: 1, vehicle: 1 })),
-      first(shift => shift, undefined),      
+      first(shift => shift, undefined),
       tap(shift => { if (!shift) { throw ERROR_23101; }; }),//  invalid shift
       map(shift => ({
         _id: shift._id,
@@ -135,10 +135,22 @@ class ServiceCQRS {
   queryHistoricalDriverServices$({ root, args, jwt }, authToken) {
 
     const { driverId } = authToken;
+    let { year, month, page, count } = args;
+
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+
+    year = (!year || year < 2019 || year > currentYear) ? currentYear : year;
+    month = (!month || month < 1 || month > 12) ? currentMonth : month;
+    page = (!page || page < 0 || page > 100) ? 0 : page;
+    count = (!count || count < 1 || count > 100) ? 20 : count;
+
     ServiceCQRS.log(`ServiceCQRS.queryHistoricalDriverServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryService", PERMISSION_DENIED, ["DRIVER"]).pipe(
-      mergeMapTo(ServiceDA.findHistoricalServiceByDriver$(driverId, 10)),
+      mergeMapTo(ServiceDA.findHistoricalServiceByDriver$(driverId, year, month, page, count, {
+        timestamp: 1, client: 1, pickUp: 1, dropOff: 1, verificationCode: 1, requestedFeatures: 1, paymentType: 1, fareDiscount: 1, fare: 1, tip: 1, route: 1, state: 1
+      })),
       map(service => this.formatServiceToGraphQLSchema(service)),
       tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalDriverServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       toArray(),
@@ -179,9 +191,9 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceCancellationRequestInput(request)),
-      mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state:1,closed:1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
+      mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
-      tap(({ service, request }) => { if (service.closed || ["ON_BOARD","DONE","CANCELLED_CLIENT","CANCELLED_OPERATOR","CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
+      tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
       mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
         request.id,
@@ -325,7 +337,7 @@ class ServiceCQRS {
 
     console.log('========================');
     console.log('========================');
-    console.log(JSON.stringify( { businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip } ));
+    console.log(JSON.stringify({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }));
     console.log('========================');
     console.log('========================');
 
@@ -431,7 +443,7 @@ class ServiceCQRS {
         tip: tip <= 0 ? undefined : tip,
         route: { type: "LineString", coordinates: [] },
         lastModificationTimestamp: Date.now(),
-        closed: false,        
+        closed: false,
       }
     });
   }
@@ -469,9 +481,9 @@ class ServiceCQRS {
   //#region GraphQL response formatters
 
   formatServiceToGraphQLSchema(service) {
-    const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : {lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1]};
+    const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
 
-    return !service ? undefined : { ...service, pickUp : {  ...service.pickUp, marker},route: undefined, id: service._id };
+    return !service ? undefined : { ...service, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
   }
 
 
