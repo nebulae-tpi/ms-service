@@ -1,5 +1,7 @@
 "use strict";
 
+require('datejs');
+
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
 const COLLECTION_NAME = "Shift";
@@ -253,7 +255,7 @@ class ShiftDA {
           : of({ start: 0, count: 1 })
         ),
         mergeMap(({ start, count }) => range(start, count)),
-        map(undefined => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+        map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
         mergeMap(collection => {
           const cursor = collection

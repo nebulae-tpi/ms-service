@@ -1,5 +1,7 @@
 "use strict";
 
+require('datejs'); 
+
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
 const CollectionName = "Service";
@@ -251,16 +253,16 @@ class ServiceDA {
     );
   }
 
-  static closeService$(ServiceId){
-    const collection = mongoDB.getHistoricalDbByYYMM(ServiceId.substring(ServiceId.length - 4)).collection(CollectionName);
-    return defer(() => collection.updateOne(
-      { _id: ServiceId },
-      {
-        $set: { state: "CLOSED" },
-        $unset: { location: 1 }
-      }
-    ))
-  }
+  // static closeService$(ServiceId){
+  //   const collection = mongoDB.getHistoricalDbByYYMM(ServiceId.substring(ServiceId.length - 4)).collection(CollectionName);
+  //   return defer(() => collection.updateOne(
+  //     { _id: ServiceId },
+  //     {
+  //       $set: { closed: true },
+  //       $unset: { location: 1 }
+  //     }
+  //   ))
+  // }
 
 }
 /**

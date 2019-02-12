@@ -51,13 +51,6 @@ class ServiceES {
     );
   }  
 
-  handleServiceClosed$(ServiceClosedEvt){
-    return ServiceDA.closeService$(ServiceClosedEvt.aid)
-    .pipe(
-      mergeMap(() => this.handleServiceEvents$(ServiceClosedEvt))
-    )
-  }
-
     /**
      * Handles the service event
      * @param {*} serviceEvent service event

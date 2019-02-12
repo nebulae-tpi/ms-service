@@ -1,5 +1,6 @@
 "use strict";
 
+require('datejs');
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
 const COLLECTION_NAME = "Shift";
