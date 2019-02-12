@@ -54,7 +54,7 @@
           <ng-container cdkColumnDef="licensePlate">
             <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE.LICENSE_PLATE" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let vehicle">
-              <p class="text-truncate"> {{ vehicle.licensePlate }} </p>
+              <p *ngIf="vehicle.licensePlate" class="text-truncate"> {{ vehicle.licensePlate | uppercase }} </p>
             </mat-cell>
           </ng-container>
 
@@ -70,7 +70,7 @@
           <ng-container cdkColumnDef="fuelType">
             <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE.FUEL_TYPE" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let vehicle">
-              <p class="text-truncate"> {{ 'DRIVER.VEHICLE.FUEL_TYPES.' + vehicle.fuelType | translate  }} </p>
+              <p *ngIf="vehicle.fuelType" class="text-truncate"> {{ 'DRIVER.VEHICLE.FUEL_TYPES.' + vehicle.fuelType | translate | uppercase }} </p>
             </mat-cell>
           </ng-container>
 
@@ -78,7 +78,7 @@
           <ng-container cdkColumnDef="brand">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{ "DRIVER.VEHICLE.BRAND" | translate }}</mat-header-cell>
             <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
-                <p class="text-truncate"> {{ vehicle.brand }} </p>
+                <p *ngIf="vehicle.brand" class="text-truncate"> {{ vehicle.brand | uppercase }} </p>
             </mat-cell>
           </ng-container>
 

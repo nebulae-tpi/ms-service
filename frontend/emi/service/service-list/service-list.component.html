@@ -135,7 +135,7 @@
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.CLIENT_NAME" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
                 <p class="text-truncate">
-                  {{ service.client.fullname}}
+                  {{ service.client.fullname | uppercase }}
                 </p>
               </mat-cell>
           </ng-container>

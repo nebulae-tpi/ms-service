@@ -90,7 +90,7 @@
           <ng-container cdkColumnDef="name">
             <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.NAME" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let driver">
-              <p class="text-truncate"> {{ driver.name }} </p>
+              <p *ngIf="driver.name" class="text-truncate"> {{ driver.name | uppercase }} </p>
             </mat-cell>
           </ng-container>
 
@@ -98,7 +98,7 @@
           <ng-container cdkColumnDef="lastname">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"DRIVER.LASTNAME" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let driver" fxHide fxShow.gt-xs>
-                <p class="text-truncate"> {{ driver.lastname }} </p>
+                <p *ngIf="driver.lastname" class="text-truncate"> {{ driver.lastname | uppercase }} </p>
             </mat-cell>
           </ng-container>
 
@@ -122,11 +122,7 @@
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
           <mat-row *cdkRowDef="let row; columns: displayedColumns" class="selectedElement" (click)="selectdriverRow(row)"
-            [ngClass]="{
-                  highlight:
-                  selectedDriver &&
-                  selectedDriver._id == row._id
-                }"
+            [ngClass]="{ highlight: selectedDriver && selectedDriver._id == row._id }"
             [routerLink]="row._id" matRipple>
           </mat-row>
         </mat-table>

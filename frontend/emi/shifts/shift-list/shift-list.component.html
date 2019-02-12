@@ -121,8 +121,8 @@
           <ng-container cdkColumnDef="driverUsername">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let shift">
-              <p class="text-truncate">
-                {{ shift.driver.username}}
+              <p *ngIf="shift.driver && shift.driver.username" class="text-truncate">
+                {{ shift.driver.username | uppercase }}
               </p>
             </mat-cell>
           </ng-container>
@@ -141,7 +141,7 @@
           <ng-container cdkColumnDef="licensePlate">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.LICENSE_PLATE" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let shift">
-              <p class="text-truncate"> {{ shift.vehicle.licensePlate }} </p>
+              <p *ngIf="shift.vehicle && shift.vehicle.licensePlate" class="text-truncate"> {{ shift.vehicle.licensePlate | uppercase }} </p>
             </mat-cell>
           </ng-container>
 
