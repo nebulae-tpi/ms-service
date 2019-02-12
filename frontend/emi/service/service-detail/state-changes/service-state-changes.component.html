@@ -1,0 +1,17 @@
+<div class="tab-content p-24" fusePerfectScrollbar>
+
+    <div class="w-100-p">
+          <mat-list *ngIf="service.stateChanges">
+              <h3 mat-subheader>{{"SERVICE.DETAILS.STATES" | translate}}</h3>
+              <mat-list-item *ngFor="let stateChange of service.stateChanges">
+
+                  <mat-icon mat-list-icon>arrow_right</mat-icon>
+                  <h4 mat-line>{{'SERVICE.DETAILS.STATE' | translate}}: {{'SERVICE.SERVICE_STATES.' +stateChange.state | translate}}</h4>
+                  <p mat-line> {{stateChange.timestamp | date: "dd/MM/y HH:mm:ss"}} </p>
+                  <p mat-line> {{stateChange.notes}} </p>
+                  <mat-divider></mat-divider>
+              </mat-list-item>
+          </mat-list>
+    </div>
+
+</div>

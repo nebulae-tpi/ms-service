@@ -65,8 +65,6 @@ class ServiceDA {
       query["client.id"] = clientId;
     }
 
-    console.log('getServiceSatelliteList => ', query);
-
     const explorePastMonth = Date.today().getDate() <= 2;
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1)
@@ -116,76 +114,35 @@ class ServiceDA {
       query["client.fullname"] = { $regex: filter.clientFullname, $options: "i" };
     }
 
-    if (filter.states) {
+    if (filter.states && filter.states.length > 0) {
       query["state"] = { $in: filter.states};
     }
 
-    if ( filter.showClosedServices && filter.initTimestamp && filter.endTimestamp) {
+    if (filter.initTimestamp && filter.endTimestamp) {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp};
     }
 
     if(!filter.showClosedServices){
-      query.open = true;
+      query.closed = false;
     }
 
+    const initDate = new Date(filter.initTimestamp);
+    const endDate = new Date(filter.endTimestamp);
 
-    return of(query.timestamp)
-      .pipe(
-        mergeMap(includeClosed => includeClosed
-          ? of({})
-            .pipe(
-              mergeMap(() => {
-                const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const dateNow = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) + 1;
-                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2).length;
-                return of({
-                  start: monthsBeforedate1,
-                  count: monthsBeforedate2
-                });
-              })
-            )
-          : of(Date.today().getDate() <= 2)
-            .pipe(
-              mergeMap(searchInBeforeMonth => searchInBeforeMonth
-                ? of({ start: -1, count: 2 })
-                : of({ start: 0, count: 1 })
-              )
-            )
-        ),
-        mergeMap(({ start, count }) => range(start, count)),
-        map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
-        map(db => db.collection(CollectionName)),
-        mergeMap(collection => {
-          const cursor = collection
-            .find(query, { projection })
-            .skip(pagination.count * pagination.page)
-            .limit(pagination.count)
-            .sort({ creationTimestamp: pagination.sort });
+    return of(initDate)
+    .pipe(
+      map(date => mongoDB.getHistoricalDb(date)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => {
+        const cursor = collection
+        .find(query, {projection})
+        .skip(pagination.count * pagination.page)
+        .limit(pagination.count)
+        .sort({ timestamp: pagination.sort });
 
-          return mongoDB.extractAllFromMongoCursor$(cursor);
-        })
-      );
-
-
-    // const initDate = new Date(filter.initTimestamp);
-    // const endDate = new Date(filter.endTimestamp);
-
-    // return from(Crosscutting.getYearMonthArray(initDate, endDate))
-    // .pipe(
-    //   map(date => mongoDB.getHistoricalDb(date)),
-    //   map(db => db.collection(CollectionName)),
-      // mergeMap(collection => {
-      //   const cursor = collection
-      //   .find(query, {projection})
-      //   .skip(pagination.count * pagination.page)
-      //   .limit(pagination.count)
-      //   .sort({ creationTimestamp: pagination.sort });
-
-      //   return mongoDB.extractAllFromMongoCursor$(cursor);
-      // })
-    // );
+        return mongoDB.extractAllFromMongoCursor$(cursor);
+      })
+    );
   }
 
   static getServiceSize$(filter) {
@@ -219,60 +176,28 @@ class ServiceDA {
       query["client.fullname"] = { $regex: filter.clientFullname, $options: "i" };
     }
 
-    if (filter.states) {
+    if (filter.states && filter.states.length > 0) {
       query["state"] = { $in: filter.states};
     }
 
-    if ( filter.showClosedServices && filter.initTimestamp && filter.endTimestamp) {
+    if (filter.initTimestamp && filter.endTimestamp) {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp};
     }
+
     if(!filter.showClosedServices){
-      query.open = true;
-    }
+      query.closed = false;
+    }    
+    
+    const initDate = new Date(filter.initTimestamp);
+    const endDate = new Date(filter.endTimestamp);
 
-    return of(query.timestamp)
-      .pipe(
-        mergeMap(includeClosed => includeClosed
-          ? of({})
-            .pipe(
-              mergeMap(() => {
-                const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const dateNow = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) + 1;
-                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2).length;
-                return of({
-                  start: monthsBeforedate1,
-                  count: monthsBeforedate2
-                });
-              })
-            )
-          : of(Date.today().getDate() <= 2)
-            .pipe(
-              mergeMap(searchInBeforeMonth => searchInBeforeMonth
-                ? of({ start: -1, count: 2 })
-                : of({ start: 0, count: 1 })
-              )
-            )
-        ),
-        mergeMap(({ start, count }) => range(start, count)),
-        map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
-        map(db => db.collection(CollectionName)),
-        mergeMap(collection => collection.count(query))
-      );
-
-  
-
-    // const initDate = new Date(filter.initTimestamp);
-    // const endDate = new Date(filter.endTimestamp);
-
-    // return from(Crosscutting.getYearMonthArray(initDate, endDate))
-    // .pipe(
-    //   map(date => mongoDB.getHistoricalDb(date)),
-    //   map(db => db.collection(CollectionName)),
-    //   mergeMap(collection => collection.count(query)),
-    //   reduce((acc, val) => acc + val)
-    // );
+    return of(initDate)
+    .pipe(
+      map(date => mongoDB.getHistoricalDb(date)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => collection.count(query)),
+      //reduce((acc, val) => acc + val)
+    );
   }
 
   // static closeService$(ServiceId){

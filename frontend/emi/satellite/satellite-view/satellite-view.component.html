@@ -97,7 +97,7 @@
                       <!-- <img style="vertical-align:middle;" aria-hidden src="./assets/devices-location/bus2.svg" height="20" /> -->
                       <mat-icon>person_pin_circle</mat-icon>
                       <!-- <span class="text-boxed text-uppercase">{{ satelliteClient._id }}</span> -->
-                      <span class="text-uppercase">{{ satelliteClient.generalInfo.name }}</span>
+                      <span class="text-uppercase">{{ satelliteClient.generalInfo ? satelliteClient.generalInfo.name: '' }}</span>
                     </mat-option>
                   </mat-autocomplete>
                 </mat-form-field>

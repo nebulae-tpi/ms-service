@@ -79,6 +79,24 @@ class Crosscutting{
     }
 
 
+    static monthDiff(date1, date2) {
+      const startDate = new Date(date1.toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+      const stopDate = new Date(date2.toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+      startDate.setHours(0,0,0,0);
+      startDate.setDate(1);
+
+      stopDate.setHours(0,0,0,0);
+      stopDate.setDate(1);
+
+
+      let Nomonths;
+      Nomonths= (stopDate.getFullYear() - startDate.getFullYear()) * 12;
+      Nomonths-= startDate.getMonth() + 1;
+      Nomonths+= stopDate.getMonth() +1; // we should add + 1 to get correct month number
+      return Nomonths <= 0 ? 0 : Nomonths;
+  }
+
+
           /**
      * Fromats Service to the GraphQL schema 
      * @param Object service

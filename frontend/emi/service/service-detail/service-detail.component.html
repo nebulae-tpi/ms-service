@@ -23,7 +23,7 @@
                 <span>{{'SERVICE.DETAIL_HEADER_NAME' | translate}}</span>
             </div>
 
-            <div class="subtitle secondary-text">              
+            <div class="subtitle secondary-text" *ngIf="service && service._id">              
               <span>ID: {{service._id}}</span>
             </div>
           </div>

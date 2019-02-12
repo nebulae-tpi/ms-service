@@ -37,21 +37,27 @@ class ClientDA {
     /**
    * Gets the satellite clients by the client name
    */
-  static getSatelliteClients$(clienText, limit) {
+  static getSatelliteClients$(clienText, limit, businessId, clientId) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {};
     if(clienText){
-      filter['$or'] = [ { id: {$regex: clienText, $options: 'i'} }, { 'generalInfo.name': {$regex: filterText, $options: 'i'} } ];
+      query['$or'] = [ { id: {$regex: clienText, $options: 'i'} }, { 'generalInfo.name': {$regex: filterText, $options: 'i'} } ];
     }
 
-    //return defer(() => collection.find(query).limit((!limit || limit > 30) ? 30 : limit));
+    if(businessId){
+      query.businessId = businessId;
+    }
+
+    if(clientId){
+      query.clientId = clientId;
+    }
+
     const cursor = collection
     .find(query)
     .limit(limit);
 
-  return mongoDB.extractAllFromMongoCursor$(cursor);
-
+    return mongoDB.extractAllFromMongoCursor$(cursor);
   }
 
     /**

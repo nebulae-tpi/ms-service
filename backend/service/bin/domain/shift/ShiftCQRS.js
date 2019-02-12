@@ -34,13 +34,12 @@ class ClientCQRS {
    * @param {*} args args
    */
   getShift$({ args }, authToken) {
-    console.log("getShift$({ args }, authToken)", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",
       "getDriver",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
       mergeMap(() => ShiftDA.getShiftById$(args.id) ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -59,7 +58,7 @@ class ClientCQRS {
       "Service",
       "getClientSatellite",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -87,7 +86,7 @@ class ClientCQRS {
       "Driver",
       "getDriverListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -104,13 +103,12 @@ class ClientCQRS {
 
 
   getShiftStateChangesList$({ args }, authToken) {
-    console.log("getShiftStateChangesList$", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",
       "getDriverListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
       mergeMap(roles => ShiftDA.getShiftStateChangeList$(args.id, args.paginationInput)),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -120,13 +118,12 @@ class ClientCQRS {
 
 
   getShiftStateChangesListSize$({ args }, authToken) {
-    console.log("getShiftStateChangesListSize", args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Driver",
       "getDriverListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
       mergeMap(roles => ShiftDA.getShiftStateChangeListSize$(args.id)),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -140,7 +137,7 @@ class ClientCQRS {
       "Driver",
       "getDriverListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
       mergeMap(roles => ShiftDA.getShiftOnlineChangeList$(args.id, args.paginationInput) ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -154,7 +151,7 @@ class ClientCQRS {
       "Driver",
       "getDriverListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
       mergeMap(roles =>  ShiftDA.getShiftOnlineChangeListSize$(args.id) ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),

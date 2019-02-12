@@ -24,7 +24,6 @@ class ServiceES {
     this.serviceUpdatedEventEmitter$
     .pipe(
         filter(serviceId => {
-          console.log('serviceId => ', serviceId);
           return serviceId != null;
         }),
         groupBy(serviceId => serviceId),
@@ -71,7 +70,7 @@ class ServiceES {
      * @param {*} shiftEvent shift event
      */
     handleShiftEvents$(shiftEvent) {
-      console.log('handleShiftEvents => ', shiftEvent);
+      //console.log('handleShiftEvents => ', shiftEvent);
       return of(shiftEvent)
       .pipe(        
         tap(res => {
