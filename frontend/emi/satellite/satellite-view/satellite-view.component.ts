@@ -283,6 +283,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   centerMap(location) {
     this.map.setCenter(location);
+    this.map.setZoom(19);
   }
 
   /**
@@ -405,6 +406,10 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(services => {
+      if(!services){
+        return;
+      }
+
       this.serviceList = services.filter(service => this.isOperator 
         || this.isSatellite && service.state !== 'ON_BOARD' && service.state !== 'DONE');
 

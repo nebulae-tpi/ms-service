@@ -42,7 +42,7 @@
 
       <div fxLayout="row wrap">
 
-        <div fxFlex="48" class="section pb-8 pt-20 mr-8">
+        <div fxFlex="100" class="section pb-8 pt-20 mr-8">
 
             <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
                 <mat-icon class="m-0 mr-16">place</mat-icon>
@@ -101,7 +101,7 @@
             </div>
       </div>
 
-      <div fxFlex="48" class="section pb-8 pt-20" *ngIf="service.dropOff">
+      <div fxFlex="100" class="section pb-8 pt-20" *ngIf="service.dropOff">
 
             <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
                 <mat-icon class="m-0 mr-16">place</mat-icon>
@@ -186,7 +186,7 @@
                           <span class="text-truncate">{{service.client.username}}</span>
                         </td>
                         <td>
-                          <span class="text-truncate">{{"SERVICE.DETAILS.TIP_TYPES."+service.client.tipType  | translate}}</span>
+                          <span class="text-truncate">{{service.client.tipType ? ("SERVICE.DETAILS.TIP_TYPES."+service.client.tipType  | translate): ''}}</span>
                         </td>
                         <td>
                             <span class="company text-truncate">{{service.client.tip | currency}}</span>
@@ -198,7 +198,7 @@
 
         <div class="pt-12 pb-12" fxLayout="row" fxLayout.xs="column">
 
-          <div fxFlex="100" fxLayoutAlign="start center">          
+          <div fxFlex="100" fxLayoutAlign="start center" *ngIf="service.driver">          
             <div fxFlex="100" fxLayout="column" class="driver mr-8">
                 <mat-icon class="m-0 mr-16">airline_seat_recline_normal</mat-icon>
                 <div class="h2 secondary-text">{{'SERVICE.DETAILS.DRIVER' | translate}}</div>
@@ -223,7 +223,7 @@
             </div>
           </div>
 
-        <div fxFlex="100" fxLayout="column" fxFlex.xs="100">
+        <div fxFlex="100" fxLayout="column" fxFlex.xs="100" *ngIf="service.vehicle">
             <div fxFlex="100" class="pb-4" fxLayout="row" fxLayoutAlign="start center">
                 <mat-icon class="m-0 mr-16">local_taxi</mat-icon>
                 <div class="h2 secondary-text">{{'SERVICE.DETAILS.VEHICLE' | translate}}</div>
@@ -251,12 +251,12 @@
       </div>
 
 
-      <div class="pb-4" fxLayout="row" fxLayoutAlign="start center">
+      <div class="pb-4" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.requestedFeatures && service.requestedFeatures.length > 0">
           <mat-icon class="m-0 mr-16">settings_applications</mat-icon>
           <div class="h2 secondary-text">{{"SERVICE.DETAILS.SERVICE_PARAMS" | translate}}</div>
       </div>
 
-      <div class="param pb-12">
+      <div class="param pb-12" *ngIf="service.requestedFeatures && service.requestedFeatures.length > 0">
           <mat-list role="list">
             <mat-list-item *ngFor="let requestedFeature of service.requestedFeatures">
                 <mat-icon mat-list-icon>arrow_right</mat-icon>

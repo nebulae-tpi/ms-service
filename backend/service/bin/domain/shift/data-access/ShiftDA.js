@@ -79,7 +79,6 @@ class ShiftDA {
               )
             )
         ),
-        tap(r => console.log(" getShiftList $$$$$$$$$$$$$$$$$", r, "$$$$$$$$$$$$$$$$")),
         mergeMap(({ start, count }) => range(start, count)),
         map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
@@ -135,7 +134,6 @@ class ShiftDA {
               )
             )
         ),
-        tap(r => console.log(" getShiftListSize $$$$$$$$$$$$$$$$$", r, "$$$$$$$$$$$$$$$$")),
         mergeMap(({ start, count }) => range(start, count)),
         map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
@@ -154,7 +152,6 @@ class ShiftDA {
     )
       .pipe(
         map(result => result ? result[0].stateChanges : []),
-        tap(r => console.log("getShiftStateChangeList$", r) )
       )
   }
 
@@ -173,15 +170,13 @@ class ShiftDA {
     .toArray()
     )
     .pipe(
-      map(result => result ? result[0].stateChangeListSize : 0 ),
-      tap(r => console.log("getShiftStateChangeListSize$", r) )
+      map(result => result ? result[0].stateChangeListSize : 0 )
     )    
   }
 
   
 
   static getShiftOnlineChangeList$(shiftId, pagination) {
-    console.log("PAGINATION", pagination);
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
     return defer(() => collection
       .find( { _id: shiftId } )
@@ -189,8 +184,7 @@ class ShiftDA {
       .toArray()
     )
       .pipe(
-        map(result => result ? result[0].onlineChanges : []),
-        tap(r => console.log("getShiftOnlineChangeList$", r) )
+        map(result => result ? result[0].onlineChanges : [])
       )
   }
 
@@ -210,7 +204,6 @@ class ShiftDA {
     )
     .pipe(
       map(result => result ? result[0].onlineChangesListSize : 0 ),
-      tap(r => console.log("getShiftOnlineChangeListSize$", r) )
     )    
   }
 

@@ -22,7 +22,6 @@ class VehicleES {
      * @param {*} businessCreatedEvent business created event
      */
     handleVehicleCreated$(vehicleCreatedEvent) {
-        console.log("##########  handleVehicleCreated$  #######################3");
         return of(vehicleCreatedEvent.data)
         .pipe(
             map(vehicle => ({
@@ -42,7 +41,6 @@ class VehicleES {
                     : []
 
             })),
-            tap(r => console.log(r)),
             mergeMap(vehicle => VehicleDA.createVehicle$(vehicle)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result.ops[0]))
         );
@@ -93,7 +91,6 @@ class VehicleES {
     }
 
     handleVehicleBlockRemoved$(vehicleBlockRemovedEvt){
-        console.log("handleVehicleBlockRemoved ==> ", vehicleBlockRemovedEvt.data );
         return of({vehicleId: vehicleBlockRemovedEvt.aid, blockKey: vehicleBlockRemovedEvt.data.blockKey })
         .pipe(
             mergeMap( ({vehicleId, blockKey}) => VehicleDA.removeVehicleBlock$(vehicleId, blockKey) )
@@ -102,7 +99,6 @@ class VehicleES {
     }
 
     handleVehicleBlockAdded$(vehicleBlockAddedEvt){
-        console.log("handleVehicleBlockAdded ==> ", vehicleBlockAddedEvt.data );
         return of({
             vehicleId: vehicleBlockAddedEvt.aid,
             user: vehicleBlockAddedEvt.user,

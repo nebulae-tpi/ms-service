@@ -53,14 +53,14 @@ export const locale = {
       SHIFT_FILTERS: {
         INIT_TIMESTAMP: 'Fecha inicial',
         END_TIMESTAMP: 'Fecha final',
-        VEHICLE_LICENSE_PLATE: 'PLaca de vehículo',
+        VEHICLE_LICENSE_PLATE: 'Placa de vehículo',
         DRIVER_NAME: 'Nombre conductor',
         DRIVER_DOCUMENT_ID: 'Documento ID conductor',
         DRIVER_FULLNAME: 'Nombre conductor',
         LICENSE_PLATE: 'Placa vehículo',
         PAYMENT_TYPE: 'Tipo pago',
         STATES: 'Estados',
-        SHOW_CLOSED: 'Incluir Cerrados',
+        SHOW_CLOSED: 'Mostrar Cerrados',
         FILTER_TITLE: 'Filtros',
         RESET_FILTER: 'Limpiar filtros'
       },

@@ -30,18 +30,18 @@
           <form fxLayout="column" fxLayoutAlign="start" fxFlex="100" name="form" [formGroup]="filterForm">
             <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
 
-            <mat-form-field *ngIf="filterForm.get('showClosedServices').value" >
+            <mat-form-field>
               <input matInput [matDatepicker]="pickerInitDate" placeholder="{{'SERVICE.SERVICE_FILTERS.INIT_TIMESTAMP' | translate}}"
-                formControlName="initTimestamp" />
+                formControlName="initTimestamp" [min]="minInitDate" [max]="maxInitDate" (dateChange)="onInitDateChange()"/>
               <mat-datepicker-toggle matSuffix [for]="pickerInitDate"></mat-datepicker-toggle>
-              <mat-datepicker [twelveHour]="false" type="datetime" #pickerInitDate></mat-datepicker>
+              <mat-datepicker #pickerInitDate></mat-datepicker>
             </mat-form-field>
 
-            <mat-form-field *ngIf="filterForm.get('showClosedServices').value" >
+            <mat-form-field>
               <input matInput [matDatepicker]="pickerEndDate" placeholder="{{'SERVICE.SERVICE_FILTERS.END_TIMESTAMP' | translate}}"
-                formControlName="endTimestamp" />
+                formControlName="endTimestamp" [min]="minEndDate" [max]="maxEndDate" (dateChange)="onEndDateChange()"/>
               <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
-              <mat-datepicker [twelveHour]="false" type="datetime" #pickerEndDate></mat-datepicker>
+              <mat-datepicker #pickerEndDate></mat-datepicker>
             </mat-form-field>
             
             <mat-form-field>
@@ -88,10 +88,6 @@
 
             <mat-checkbox formControlName="showClosedServices">{{'SERVICE.SERVICE_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>
 
-            
-              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" aria-label="Filter" (click)="resetFilter()">
-                {{ "SERVICE.SERVICE_FILTERS.RESET_FILTER" | translate }}
-              </button>
             </div>
           </form>
 
@@ -149,7 +145,7 @@
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
                 <p class="text-truncate">
-                  {{ service.driver.fullname}}
+                  {{ service.driver ? service.driver.fullname: ''}}
                 </p>
               </mat-cell>
           </ng-container>
@@ -159,7 +155,7 @@
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.LICENSE_PLATE" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
                 <p class="text-truncate">
-                  {{ service.vehicle.licensePlate}}
+                  {{ service.vehicle ? service.vehicle.licensePlate: ''}}
                 </p>
               </mat-cell>
           </ng-container>

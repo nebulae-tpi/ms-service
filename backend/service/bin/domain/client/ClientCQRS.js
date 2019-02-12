@@ -61,12 +61,17 @@ class ClientCQRS {
       ["OPERATOR"]
     ).pipe(
       mergeMap(roles => {
-        console.log('getSatelliteClients => ', args);
-        return ClientDA.getSatelliteClients$(args.clienText, args.limit);
+        const isOperator = roles["OPERATOR"];
+        const isSatellite = roles["SATELLITE"];
+
+        const businessId = authToken.businessId || '-1';
+        const clientId = !isOperator && isSatellite ? (authToken.clientId || '-1'): null;
+
+
+        return ClientDA.getSatelliteClients$(args.clienText, args.limit, businessId, clientId);
       }),
       toArray(),
       mergeMap(rawResponse => {
-        console.log('rawResponse => ', rawResponse);
         return GraphqlResponseTools.buildSuccessResponse$(rawResponse);
       }),
       catchError(err => GraphqlResponseTools.handleError$(err))

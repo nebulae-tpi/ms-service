@@ -29,24 +29,22 @@
       <div class="content" fusePerfectScrollbar *fuseIfOnDom [@animate]="{ value: '*', params: { y: '50px' } }">
         <div class="nav mt-20" fxLayout="column">
           <form fxLayout="column" fxLayoutAlign="start" fxFlex="100" name="form" [formGroup]="filterForm">
-            <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
-
-              <mat-checkbox class="mb-8" formControlName="showClosedShifts">{{'SHIFT.SHIFT_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>
+            <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">              
 
               <!-- INITIAL TIME -->
-              <mat-form-field *ngIf="filterForm.get('showClosedShifts').value">
+              <mat-form-field>
                 <input matInput [matDatepicker]="pickerInitDate" placeholder="{{'SHIFT.SHIFT_FILTERS.INIT_TIMESTAMP' | translate}}"
-                  formControlName="initTimestamp" />
+                  formControlName="initTimestamp" [min]="minInitDate" [max]="maxInitDate" (dateChange)="onInitDateChange()"/>
                 <mat-datepicker-toggle matSuffix [for]="pickerInitDate"></mat-datepicker-toggle>
-                <mat-datepicker [twelveHour]="false" type="datetime" #pickerInitDate></mat-datepicker>
+                <mat-datepicker #pickerInitDate></mat-datepicker>
               </mat-form-field>
 
               <!-- END TIME -->
-              <mat-form-field  *ngIf="filterForm.get('showClosedShifts').value">
+              <mat-form-field>
                 <input matInput [matDatepicker]="pickerEndDate" placeholder="{{'SHIFT.SHIFT_FILTERS.END_TIMESTAMP' | translate}}"
-                  formControlName="endTimestamp" />
+                  formControlName="endTimestamp" [min]="minEndDate" [max]="maxEndDate" (dateChange)="onEndDateChange()"/>
                 <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
-                <mat-datepicker [twelveHour]="false" type="datetime" #pickerEndDate></mat-datepicker>
+                <mat-datepicker #pickerEndDate></mat-datepicker>
               </mat-form-field>
 
               <!-- DRIVER DOCUMENT ID -->
@@ -77,15 +75,16 @@
                 </mat-select>
               </mat-form-field>
 
-              <!-- BUTTON TO CLEAR FILTER FIELDS -->
-              <button type="button" mat-raised-button mat-button class="mat-accent" (click)="resetFilter()">
-                {{ "SHIFT.SHIFT_FILTERS.RESET_FILTER" | translate }}
-              </button>
+              <mat-checkbox class="mb-8" formControlName="showClosedShifts">{{'SHIFT.SHIFT_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>              
 
             </div>
           </form>
 
           <div class="p-24">
+            <!-- BUTTON TO CLEAR FILTER FIELDS -->
+            <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" aria-label="Filter" (click)="resetFilter()">
+              {{ "SHIFT.SHIFT_FILTERS.RESET_FILTER" | translate }}
+            </button>
           </div>
         </div>
       </div>

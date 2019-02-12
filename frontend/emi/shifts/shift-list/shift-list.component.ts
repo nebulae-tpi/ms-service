@@ -89,7 +89,11 @@ export class ShiftListComponent implements OnInit, OnDestroy {
 
   //////// FORMS //////////
   filterForm: FormGroup;
-
+  
+  minInitDate: any = null;
+  maxInitDate: any = null;
+  maxEndDate: any = null;
+  minEndDate: any = null;
 
   /////// TABLE /////////
 
@@ -142,6 +146,35 @@ export class ShiftListComponent implements OnInit, OnDestroy {
 
   }
 
+  onInitDateChange() {
+    const start = this.filterForm.get("initTimestamp").value;
+    const end = this.filterForm.get("endTimestamp").value;
+
+    const startMonth = start.month();
+    const startYear = start.year();
+    const startMonthYear = startMonth + "-" + startYear;
+
+    const endMonth = end.month();
+    const endYear = end.year();
+    const endMonthYear = endMonth + "-" + endYear;
+
+    this.minEndDate = moment(start);
+    this.maxEndDate = moment(start.valueOf()).endOf("month");
+    if (startMonthYear != endMonthYear) {      
+      this.filterForm.patchValue({
+        endTimestamp: this.maxEndDate
+      });      
+    }
+    console.log('minEndDate => ', this.minEndDate);
+    console.log('maxEndDate => ', this.maxEndDate.format());
+    
+  }
+
+  onEndDateChange() {
+    const start = this.filterForm.get('initTimestamp').value;
+    this.minEndDate = moment(start);
+  }
+
   /**
    * Changes the internationalization of the dateTimePicker component
    */
@@ -179,8 +212,13 @@ export class ShiftListComponent implements OnInit, OnDestroy {
    * Builds filter form
    */
   buildFilterForm() {
-    const startOfMonth = moment().startOf('month');
-    const endOfMonth = moment().endOf('day');
+    this.minInitDate =moment('2019-01-01').startOf("month");
+    this.maxInitDate = moment().add(1, "months").endOf("day");
+
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("day");    
+    this.minEndDate = startOfMonth;
+    this.maxEndDate = endOfMonth;
     // Reactive Filter Form
     this.filterForm = this.formBuilder.group({
       showClosedShifts: [false],
@@ -237,6 +275,8 @@ export class ShiftListComponent implements OnInit, OnDestroy {
               states: filterValue.states,
               showClosedShifts: filterValue.showClosedShifts
             });
+            this.onInitDateChange();
+            this.onEndDateChange();
           }
 
           if (paginator) {
@@ -340,6 +380,13 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     this.paginator.pageIndex = 0;
     this.tablePage = 0;
     this.tableCount = 10;
+
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("day");
+    this.filterForm.patchValue({
+      initTimestamp: startOfMonth,
+      endTimestamp: endOfMonth
+    });
   }
 
   /**

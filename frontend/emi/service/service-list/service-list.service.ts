@@ -6,7 +6,8 @@ import {
 import { GatewayService } from '../../../../api/gateway.service';
 import {
   ServiceServices,
-  ServiceServicesSize
+  ServiceServicesSize,
+  ServiceServiceUpdatedSubscription
 } from '../gql/service';
 import * as moment from 'moment';
 
@@ -89,5 +90,15 @@ export class ServiceListService {
   updatePaginatorData(paginatorData){
     this._paginatorSubject$.next(paginatorData);
   }
+
+  /**
+ * Event triggered when a business is created, updated or deleted.
+ */
+subscribeServiceServiceUpdatedSubscription$(): Observable<any> {
+  return this.gateway.apollo
+  .subscribe({
+    query: ServiceServiceUpdatedSubscription
+  });
+}
 
 }

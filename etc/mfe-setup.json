@@ -110,15 +110,12 @@
                 "path": "service",
                 "loadChildren": "./main/content/service/service.module#ServiceModule",
                 "priority": 1000,
-                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"],
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"],
                 "default" : false
             }            
         ],
         "preBuildCommands": [
             "npm install @types/googlemaps --save"
-        ],
-        "indexHeadAmends": [
-            "<script src='https://maps.googleapis.com/maps/api/js?key=AIzaSyByGMKwZIYXqcPONjNSX-KHJ9kbP5tBu5I&libraries=places' async defer></script>"
         ],
         "environmentVars": {
         }
@@ -150,7 +147,7 @@
                 "path": "shifts",
                 "loadChildren": "./main/content/shifts/shifts.module#ShiftsModule",
                 "priority": 1000,
-                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER"],
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"],
                 "default" : false
             }            
         ],

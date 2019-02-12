@@ -60,7 +60,7 @@ export const locale = {
         LICENSE_PLATE: 'Vehicle License plate',
         PAYMENT_TYPE: 'Payment type',
         STATES: 'Estados',
-        SHOW_CLOSED: 'Include closed',
+        SHOW_CLOSED: 'Show closed',
         FILTER_TITLE: 'Filters',
         RESET_FILTER: 'Clean filters'
       },
