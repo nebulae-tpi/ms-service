@@ -37,11 +37,13 @@ class ShiftCQRS {
    */
   queryOpenShift$({ root, args, jwt }, authToken) {
     const { driverId } = authToken;
-
+    
+    const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
+    
     ShiftCQRS.log(`ShiftCQRS.queryOpenShift RQST: ${JSON.stringify({ driverId, })}`); //DEBUG: DELETE LINE
 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "queryOpenShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
-      mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)),
+      mergeMapTo(ShiftDA.findOpenShiftByDriverAndIdentifier$(driverId, deviceIdentifier)),
       map(shift => this.formatShitToGraphQLSchema(shift)),
       tap(x => ShiftCQRS.log(`ShiftCQRS.queryOpenShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -54,6 +56,7 @@ class ShiftCQRS {
    */
   startShift$({ root, args, jwt }, authToken) {
     const vehiclePlate = args.vehiclePlate.toUpperCase();
+    const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
     const { businessId, driverId } = authToken;
 
     ShiftCQRS.log(`ShiftCQRS.startShift RQST: ${JSON.stringify({ vehiclePlate, driverId, businessId })}`); //DEBUG: DELETE LINE
@@ -66,7 +69,7 @@ class ShiftCQRS {
       tap(([vehicle, driver]) => { if (!vehicle) throw ERROR_23015; if (!driver) throw ERROR_23016 }), // Driver or Vehicle not found verfication
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
       tap(([vehicle, driver]) => { if (driver.assignedVehicles.map(p => p.toUpperCase()).indexOf(vehicle.licensePlate.toUpperCase()) <= -1) throw ERROR_23014; }),// vehicle not assigned to driver verification
-      map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, authToken)),// build shift with all needed proerties
+      map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, deviceIdentifier,authToken)),// build shift with all needed proerties
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       tap(x => ShiftCQRS.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
@@ -131,7 +134,7 @@ class ShiftCQRS {
    * @param {*} vehicle 
    * @param {*} driver 
    */
-  buildShift(businessId, vehicle, driver, authToken) {
+  buildShift(businessId, vehicle, driver,deviceIdentifier, authToken) {
     const vehicleBlocked = (vehicle.blocks && vehicle.blocks.length > 0);
     const driverBlocked = (driver.blocks && driver.blocks.length > 0);
     const state = (vehicleBlocked || driverBlocked) ? 'BLOCKED' : 'AVAILABLE';
@@ -159,6 +162,7 @@ class ShiftCQRS {
         "languages": driver.languages,
         "phone": driver.phone,
         "username": authToken.preferred_username,
+        deviceIdentifier
       },
       "vehicle": {
         "id": vehicle._id,

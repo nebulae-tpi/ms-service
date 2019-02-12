@@ -26,10 +26,10 @@ class Shift {
         throw new Error('DO NOT INSTANCE!!!');
     }
 
-    static startShift$(user, vehiclePlate) {
+    static startShift$(user, vehiclePlate, deviceIdentifier) {
         const query =
             `mutation {
-                startShift( ${user.graphQL.convertObjectToInputArgs({ vehiclePlate })} ){
+                startShift( ${user.graphQL.convertObjectToInputArgs({ vehiclePlate, deviceIdentifier })} ){
                     accepted
                 }
             }`;
@@ -82,10 +82,10 @@ class Shift {
         );
     }
 
-    static queryOpenShift$(user) {
+    static queryOpenShift$(user,args) {
         const query =
             `query{
-                OpenShift{
+                OpenShift( ${user.graphQL.convertObjectToInputArgs(args)} ){
                  state,
                   vehicle{
                     plate,

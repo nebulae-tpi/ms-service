@@ -122,7 +122,7 @@ describe('DriverApp workflows', function () {
         });
 
         it('query open shift before start', function (done) {
-            Shift.queryOpenShift$(users.driver).pipe(
+            Shift.queryOpenShift$(users.driver,{deviceIdentifier : 'mocha'}).pipe(
                 tap(shift => expect(shift).to.be.null),
             ).subscribe(...getRxDefaultSubscription('NO SHIFT: query open shift before start', done));
         });
@@ -145,10 +145,20 @@ describe('DriverApp workflows', function () {
                     tap((evt) => expect(evt.data.driver.username).to.exist),
                     tap((evt) => users.driver.shift = evt.data),
                 ),
-                Shift.startShift$(users.driver, users.driver.vehicle.plate).pipe(
+                Shift.startShift$(users.driver, users.driver.vehicle.plate, 'mocha').pipe(
                     delay(200),
-                    mergeMap(() => Shift.queryOpenShift$(users.driver)),
-                    tap(shift => expect(shift.state).to.be.eq('AVAILABLE'))
+                    mergeMap(() => Shift.queryOpenShift$(users.driver,  { deviceIdentifier: 'mocha' })),
+                    tap(shift => expect(shift.state).to.be.eq('AVAILABLE')),
+
+                    //Query OpenShift with other device                    
+                    mergeMap(() => Shift.queryOpenShift$(users.driver,  { deviceIdentifier: 'mocha2' })),
+                    tap(shift => expect(shift).to.be.null),
+
+                    // //try to start a new shift having one open
+                    // mergeMap(() => Shift.startShift$(users.driver, users.driver.vehicle.plate, 'mocha')).pipe(
+                        
+                    // )
+
                 )
             ).subscribe(...getRxDefaultSubscription('Starting SHIFT: Stop Shift', done));
         });
@@ -189,7 +199,7 @@ describe('DriverApp workflows', function () {
                 ),
                 Shift.setShiftState$(users.driver, "NOT_AVAILABLE").pipe(
                     delay(100),
-                    mergeMap(() => Shift.queryOpenShift$(users.driver)),
+                    mergeMap(() => Shift.queryOpenShift$(users.driver, { deviceIdentifier: 'mocha' })),
                     tap(shift => expect(shift).to.be.not.null),
                     tap(shift => expect(shift.state).to.be.eq('NOT_AVAILABLE')),
                 )
@@ -205,7 +215,7 @@ describe('DriverApp workflows', function () {
                 ),
                 Shift.setShiftState$(users.driver, "AVAILABLE").pipe(
                     delay(100),
-                    mergeMap(() => Shift.queryOpenShift$(users.driver)),
+                    mergeMap(() => Shift.queryOpenShift$(users.driver, { deviceIdentifier: 'mocha' })),
                     tap(shift => expect(shift).to.be.not.null),
                     tap(shift => expect(shift.state).to.be.eq('AVAILABLE')),
                     delay(100)

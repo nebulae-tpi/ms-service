@@ -132,7 +132,10 @@ type Query{
    DriverAssignedVehicles: [Vehicle] @requireAuth
 
    "Get driver's currently open shift"
-   OpenShift: Shift @requireAuth
+   OpenShift(
+      "Device Identifier"
+      deviceIdentifier: String
+   ): Shift @requireAuth
 
    "Get shift's currenty assigned service"
    AssignedService: Service @requireAuth
@@ -151,6 +154,8 @@ type Mutation{
    startShift(
       "Vehicle's plate to use"
       vehiclePlate: String
+      "Device Identifier"
+      deviceIdentifier: String
    ): CommandAck @requireAuth
 
    "Stop currently open shift"

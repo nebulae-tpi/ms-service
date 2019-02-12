@@ -27,6 +27,21 @@ class ShiftDA {
   /**
    * Finds an open shift by driver
    */
+  static findOpenShiftByDriverAndIdentifier$(driverId, deviceIdentifier, projection = undefined) {
+    const explorePastMonth = Date.today().getDate() <= 2;
+    const query = { "state": { "$ne": "CLOSED" }, "driver.id": driverId, "driver.deviceIdentifier": deviceIdentifier };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
+      first(shift => shift, undefined)
+    );
+  }
+
+
+  /**
+   * Finds an open shift by driver
+   */
   static findOpenShiftByDriver$(driverId, projection = undefined) {
     const explorePastMonth = Date.today().getDate() <= 2;
     const query = { "state": { "$ne": "CLOSED" }, "driver.id": driverId };
