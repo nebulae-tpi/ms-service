@@ -25,7 +25,7 @@ class VehicleGraphQlHelper {
                     others: vehicle.features
                 },
                 blockings: [],                
-                businessId: "q1w2-e3r4-t5y6-u7i8-o9p0"
+                businessId: vehicle.businessId
               }
             }
           })
@@ -41,13 +41,13 @@ class VehicleGraphQlHelper {
                 catchError(error => {
                     // lICENSE PLATE ALREADY USED
                     if(error.message.code == 22010){  
-                        console.log(`############## ${vehicle.licensePlate} lICENSE PLATE ALREADY IN DATABASE  ######################`);
+                        // console.log(`############## ${vehicle.licensePlate} lICENSE PLATE ALREADY IN DATABASE  ######################`);
                         return of(null);
                     }else{
-                        return throwError(error)
+                        return of(null);
                     }
                 }),
-                tap(() => console.log("VEHICLE CREATED"))
+                // tap(() => console.log("VEHICLE CREATED"))
             );
 
 
@@ -89,7 +89,7 @@ class VehicleGraphQlHelper {
                         return of({})
                         .pipe(
                             tap(() => console.log("waiting for vehicle creation")),
-                            delay(500),
+                            delay(200),
                             mergeMap(() => this.findByPlate$(graphQlInstance, licensePlate))
                         )  
 
@@ -97,10 +97,11 @@ class VehicleGraphQlHelper {
                         return throwError(error)
                     }
                 }),
-                tap(r => console.log("VEHICLUCO ENCONTRADO  ==> ", r))
+                // tap(r => console.log("VEHICLUCO ENCONTRADO  ==> ", r))
             );
 
     }
+
 }
 /**
  * @returns {VehicleGraphQlHelper}

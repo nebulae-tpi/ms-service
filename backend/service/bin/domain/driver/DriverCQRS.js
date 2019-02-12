@@ -42,7 +42,7 @@ class DriverCQRS {
       "Driver",
       "getDriver",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -173,7 +173,7 @@ class DriverCQRS {
       "Service",
       "getDriverVehicles",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
     ).pipe(
       mergeMap(() => DriverDA.getDriver$(args.driverId)),
       map(driver => driver.assignedVehicles),

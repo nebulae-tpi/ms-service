@@ -50,7 +50,7 @@ class DriverES {
      * @param {*} driverGeneralInfoUpdatedEvent driver created event
      */
     handleDriverGeneralInfoUpdated$(driverGeneralInfoUpdatedEvent) {
-        return of(driverGeneralInfoUpdatedEvent.data)
+        return of(driverGeneralInfoUpdatedEvent.data.generalInfo)
         .pipe(
             map(newGeneralInfo => ({
                 name: newGeneralInfo.name,
@@ -58,7 +58,7 @@ class DriverES {
                 documentType: newGeneralInfo.documentType,
                 documentId: newGeneralInfo.document,
                 pmr: newGeneralInfo.pmr,
-                languages: newGeneralInfo.languages,
+                languages: newGeneralInfo.languages ? newGeneralInfo.languages.filter(l => l.active).map(i => i.name) : [],
                 phone: newGeneralInfo.phone
             })),
             mergeMap(newInfo => DriverDA.updateDriverGeneralInfo$(driverGeneralInfoUpdatedEvent.aid, newInfo)),
@@ -71,7 +71,7 @@ class DriverES {
      * @param {*} DriverStateUpdatedEvent events that indicates the new state of the driver
      */
     handleDriverStateUpdated$(DriverStateUpdatedEvent) {          
-        return DriverDA.updateDriverState$(DriverStateUpdatedEvent.aid, DriverStateUpdatedEvent.data)
+        return DriverDA.updateDriverState$(DriverStateUpdatedEvent.aid, DriverStateUpdatedEvent.data.state)
         .pipe(
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result))
         );
