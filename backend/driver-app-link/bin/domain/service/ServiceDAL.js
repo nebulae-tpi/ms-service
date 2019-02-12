@@ -1,8 +1,8 @@
 'use strict'
 
 
-const { of, interval, Observable, empty, throwError } = require("rxjs");
-const { mergeMapTo, tap, mergeMap, catchError, map, mapTo, toArray, filter } = require('rxjs/operators');
+const { of, iif, Observable, empty, throwError } = require("rxjs");
+const { mergeMapTo, tap, mergeMap, catchError, map, mapTo, first, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -11,8 +11,9 @@ const eventSourcing = require("../../tools/EventSourcing")();
 const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLinkBroker")();
 const jsonwebtoken = require("jsonwebtoken");
 const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
+const { ERROR_23003, ERROR_23223, ERROR_23230 } = require('../../tools/customError');
 
-const { ServiceDA } = require('./data-access')
+const { ServiceDA } = require('./data-access');
 
 /**
  * Singleton instance
@@ -38,11 +39,20 @@ class ServiceDAL {
     start$() {
         return Observable.create(obs => {
             this.subscription = driverAppLinkBroker.listenServiceEventsFromDrivers$().pipe(
-                map(evt => ({ authToken: jsonwebtoken.verify(evt.jwt, jwtPublicKey), ...evt })),
                 mergeMap(evt => Observable.create(evtObs => {
-                    this.handlers[evt.t](evt).subscribe(
+                    of(evt).pipe(
+                        map(e => ({ authToken: jsonwebtoken.verify(e.jwt, jwtPublicKey), ...e })),
+                        catchError(error =>
+                            throwError(ERROR_23003(error.toString()))
+                        ),
+                        mergeMap(e => this.handlers[e.t](e)),
+                    ).subscribe(
                         (handlerEvt) => { console.log(`ServiceDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`); },
-                        (handlerErr) => { console.error(`ServiceDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`); ServiceDAL.logError(handlerErr); },
+                        async (handlerErr) => {
+                            console.error(`ServiceDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`);
+                            ServiceDAL.logError(handlerErr);
+                            await driverAppLinkBroker.sendErrorEventToDrivers$(evt.topic.split('/')[0], evt.att.un, 'Error', { code: handlerErr.code, msg: handlerErr.message, rejectedEventType: evt.t, rejectedMessageId: evt.id }).toPromise();
+                        },
                         () => console.log(`ServiceDAL.handlerCompleted[${evt.t}]`),
                     );
                     evtObs.complete();
@@ -104,12 +114,12 @@ class ServiceDAL {
      * @param {*} ServiceDropOffETAReported
      */
     handleServiceVehicleArrived$({ data, authToken }) {
-
-        ////TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
-
         const { _id, timestamp, location } = data;
         console.log(`ServiceDAL: handleServiceVehicleArrived: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
-        return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
+        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
+            first(s => s, undefined),
+            tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
+            tap((service) => { if (service.state !== 'ASSIGNED') throw ERROR_23230; }),// Service state not allowed
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
                 _id,
@@ -129,11 +139,12 @@ class ServiceDAL {
      * @param {*} ServiceDropOffETAReported
      */
     handleServiceClientPickedUp$({ data, authToken }) {
-
-        //TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
         const { _id, timestamp, location } = data;
         console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
-        return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
+        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
+            first(s => s, undefined),
+            tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
+            tap((service) => { if (service.state !== 'ARRIVED') throw ERROR_23230; }),// Service state not allowed
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
                 _id,
@@ -152,12 +163,12 @@ class ServiceDAL {
      * @param {*} ServiceDropOffETAReported
      */
     handleServiceCompleted$({ data, authToken }) {
-
-        ////TODO consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
-
         const { _id, timestamp, location } = data;
         console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
-        return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
+        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
+            first(s => s, undefined),
+            tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
+            tap((service) => { if (service.state !== 'ON_BOARD') throw ERROR_23230; }),// Service state not allowed
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
                 _id,
@@ -177,13 +188,12 @@ class ServiceDAL {
      * @param {*} ServiceDropOffETAReported
      */
     handleServiceCancelledByDriver$({ data, authToken }) {
-
-
-        //TODO: consultar estado del service y verificar si si se peude cambiar el estado, de lo contrario se manda al driver el ServiceStateChanged con la info actual
-
         const { _id, timestamp, location, reason, notes } = data;
         console.log(`ServiceDAL: handleServiceCancelledByDriver: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
-        return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
+        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
+            first(s => s, undefined),
+            tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
+            tap((service) => { if (!['ASSIGNED', 'ARRIVED', 'ON_BOARD'].includes(service.state)) throw ERROR_23230; }),// Service state not allowed
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
                 _id,
@@ -191,7 +201,7 @@ class ServiceDAL {
                 {
                     location: { type: 'Point', coordinates: [location.lng, location.lat] },
                     timestamp,
-                    reason, 
+                    reason,
                     notes
                 },
                 authToken))), //Build and send event (event-sourcing)

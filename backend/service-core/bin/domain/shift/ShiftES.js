@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, interval, forkJoin, empty,merge } = require("rxjs");
+const { of, interval, forkJoin, empty, merge } = require("rxjs");
 const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
@@ -34,13 +34,14 @@ class ShiftES {
      * Persists the shift state changes on the materialized view according to the received data from the event store.
      * @param {Event} shiftStateChangedEvt 
      */
-    handleShiftStateChanged$({ aid, data }) {
+    handleShiftStateChanged$({ aid, data, user }) {
         console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
-        
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
+
         return ShiftDA.updateShiftStateAndGetOnlineFlag$(aid, data.state).pipe(
             filter(shift => !shift.online),
-            mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid))), //Build and send ShiftConnected event (event-sourcing)
+            filter(shift => ["AVAILABLE", "NO_AVAILABLE", "BUSY"].includes(data.state)),//filter by the only states that can asure the device is online
+            mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
     }
 
@@ -51,7 +52,7 @@ class ShiftES {
     handleShiftConnected$({ aid }) {
         console.log(`ShiftES.handleShiftConnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateShiftOnlineFlag$(aid, true);
     }
@@ -63,7 +64,7 @@ class ShiftES {
     handleShiftDisconnected$({ aid }) {
         console.log(`ShiftES.handleShiftDisconnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateShiftOnlineFlag$(aid, false);
     }
@@ -75,7 +76,7 @@ class ShiftES {
     handleShiftStopped$({ aid }) {
         console.log(`ShiftES.handleShiftStopped: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateShiftState$(aid, 'CLOSED');
     }
@@ -84,14 +85,14 @@ class ShiftES {
      * remove a vehicle block from a Shift 
      * @param {Event} shiftVehicleBlockRemovedEvt
      */
-    handleShiftVehicleBlockRemoved$({ aid, data }) {
-        console.log(`ShiftES.handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
+    handleShiftVehicleBlockRemoved$({ aid, data, user }) {
+        console.log(`ShiftES.handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateOpenShiftVehicleBlock$(aid, false, data.blockKey).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
@@ -99,15 +100,15 @@ class ShiftES {
      * adds a vehicle block from a Shift 
      * @param {Event} shiftVehicleBlockAddedEvt
      */
-    handleShiftVehicleBlockAdded$({ aid, data }) {
-        console.log(`ShiftES.handleShiftVehicleBlockAdded: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
+    handleShiftVehicleBlockAdded$({ aid, data, user }) {
+        console.log(`ShiftES.handleShiftVehicleBlockAdded: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateOpenShiftVehicleBlock$(aid, true, data.blockKey).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
@@ -115,14 +116,14 @@ class ShiftES {
     * remove a vehicle block from a Shift 
     * @param {Event} shiftDriverBlockRemovedEvt
     */
-    handleShiftDriverBlockRemoved$({ aid, data }) {
-        console.log(`ShiftES.handleShiftDriverBlockRemoved: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
+    handleShiftDriverBlockRemoved$({ aid, data, user }) {
+        console.log(`ShiftES.handleShiftDriverBlockRemoved: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateOpenShiftDriverBlock$(aid, false, data.blockKey).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
@@ -130,14 +131,14 @@ class ShiftES {
      * adds a vehicle block from a Shift 
      * @param {Event} shiftDriverBlockAddedEvt
      */
-    handleShiftDriverBlockAdded$({ aid, data }) {
-        console.log(`ShiftES.handleShiftDriverBlockAdded: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
+    handleShiftDriverBlockAdded$({ aid, data, user }) {
+        console.log(`ShiftES.handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateOpenShiftDriverBlock$(aid, true, data.blockKey).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift))
+            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
@@ -146,16 +147,13 @@ class ShiftES {
      * @param {Event} shiftLocationReportedEvt
      */
     handleShiftLocationReported$({ aid, data }) {
-        if(aid === undefined) return of({});//DEBUG: DELETE LINE
+        if (aid === undefined) return of({});//DEBUG: DELETE LINE
 
-        if(!aid){ console.log(`WARNING:   not aid detected`); return of({})}
-        //TODO: CRITICO: agregar rutas en el service
-        console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid,data })}`); //DEBUG: DELETE LINE
-         
-
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
+        console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
         return merge(
             ShiftDA.updateShiftLocation$(aid, data.location),
-            data.serviceId ? ServiceDA.appendLocation$(data.serviceId, data.location ) : of({})
+            data.serviceId ? ServiceDA.appendLocation$(data.serviceId, data.location) : of({})
         );
     }
 
@@ -163,15 +161,15 @@ class ShiftES {
      * Verifies if the shift should be blocked or unblocked and emits the ShiftStateChanged event if neccesary
      * @param {*} shift 
      */
-    blockOrUnblockShiftStateIfNeeded$(shift) {
+    blockOrUnblockShiftStateIfNeeded$(shift, user) {
         const shouldBeBlocked = shift.vehicle.blocks.length > 0 || shift.driver.blocks.length > 0;
         const isCurrentlyBlocked = shift.state === 'BLOCKED';
         return (isCurrentlyBlocked === shouldBeBlocked)
             ? empty()
             : (!shouldBeBlocked)
-                ? eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(shift._id, 'AVAILABLE', shift.businessId, shift.driver.username))
+                ? eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(shift._id, 'AVAILABLE', shift.businessId, shift.driver.username, user))
                 : (shift.state !== 'BUSY')
-                    ? eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(shift._id, 'BLOCKED', shift.businessId, shift.driver.username))
+                    ? eventSourcing.eventStore.emitEvent$(this.buildShiftStateChangedEsEvent(shift._id, 'BLOCKED', shift.businessId, shift.driver.username, user))
                     : empty();
     }
 
@@ -183,13 +181,13 @@ class ShiftES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftConnectedEsEvent(shiftId) {
+    buildShiftConnectedEsEvent(shiftId, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
-            aid: shiftId,
+            aggregateId: shiftId,
             eventType: 'ShiftConnected',
             eventTypeVersion: 1,
-            user: 'SYSTEM',
+            user,
             data: {}
         });
     }
@@ -199,13 +197,13 @@ class ShiftES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftStateChangedEsEvent(shiftId, state, businessId, driverUsername) {
+    buildShiftStateChangedEsEvent(shiftId, state, businessId, driverUsername, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
-            aid: shiftId,
+            aggregateId: shiftId,
             eventType: 'ShiftStateChanged',
             eventTypeVersion: 1,
-            user: 'SYSTEM',
+            user,
             data: {
                 businessId, driverUsername, state
             }

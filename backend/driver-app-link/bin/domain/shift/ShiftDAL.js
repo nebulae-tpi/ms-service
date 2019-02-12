@@ -11,6 +11,7 @@ const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLinkBroker")();
+const { ERROR_23003 } = require('../../tools/customError');
 
 const { ShiftDA } = require('./data-access')
 
@@ -33,11 +34,20 @@ class ShiftDAL {
     start$() {
         return Observable.create(obs => {
             this.subscription = driverAppLinkBroker.listenShiftEventsFromDrivers$().pipe(
-                map(evt => ({ authToken: jsonwebtoken.verify(evt.jwt, jwtPublicKey), ...evt })),
                 mergeMap(evt => Observable.create(evtObs => {
-                    this.handlers[evt.t](evt).subscribe(
+                    of(evt).pipe(
+                        map(e => ({ authToken: jsonwebtoken.verify(e.jwt, jwtPublicKey), ...e })),
+                        catchError(error =>
+                            throwError(ERROR_23003(error.toString()))
+                        ),
+                        mergeMap(e => this.handlers[e.t](e)),
+                    ).subscribe(
                         (handlerEvt) => { console.log(`ShiftDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`); },
-                        (handlerErr) => { console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`); ShiftDAL.logError(handlerErr); },
+                        async (handlerErr) => {
+                            console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`);
+                            ShiftDAL.logError(handlerErr);
+                            await driverAppLinkBroker.sendErrorEventToDrivers$(evt.topic.split('/')[0], evt.att.un, 'Error', { code: handlerErr.code, msg: handlerErr.message, rejectedEventType: evt.t, rejectedMessageId: evt.id }).toPromise();
+                        },
                         () => console.log(`ShiftDAL.handlerCompleted[${evt.t}]`),
                     );
                     evtObs.complete();
@@ -58,12 +68,12 @@ class ShiftDAL {
      * process event and forwards the right data to the drivers
      * @param {Event} shiftStartedEvt
      */
-    handleShiftLocationReported$({ data }) {
+    handleShiftLocationReported$({ data ,authToken}) {
         if(!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
 
         const location = {type:"Point", coordinates: [data.location.lng,data.location.lat]};
 
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId)).pipe(
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId,authToken)).pipe(
             mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data)}`)
         );
     }
@@ -76,13 +86,13 @@ class ShiftDAL {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    static buildShiftLocationReportedEsEvent(aid, location,serviceId) {
+    static buildShiftLocationReportedEsEvent(aid, location,serviceId, authToken) {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: aid,
             eventType: 'ShiftLocationReported',
             eventTypeVersion: 1,
-            user: 'SYSTEM',
+            user: authToken.preferred_username,
             data: {
                 location,
                 serviceId

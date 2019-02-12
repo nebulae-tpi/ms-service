@@ -4,17 +4,17 @@ const expect = require('chai').expect
 const uuidv4 = require('uuid/v4');
 const Rx = require('rxjs');
 const {
-    tap,
-    switchMap,
-    delay,
-    filter,
-    map,
-    first,
-    mapTo,
-    mergeMap,
-    concatMap,
-    catchError,
-    last
+  tap,
+  switchMap,
+  delay,
+  filter,
+  map,
+  first,
+  mapTo,
+  mergeMap,
+  concatMap,
+  catchError,
+  last
 } = require('rxjs/operators');
 
 const GraphQL = require('../../GraphQL');
@@ -22,62 +22,51 @@ const GraphQL = require('../../GraphQL');
 class Service {
 
 
-    constructor() {
-        throw new Error('DO NOT INSTANCE!!!');
-    }
+  constructor() {
+    throw new Error('DO NOT INSTANCE!!!');
+  }
 
-    static startShift$(user, vehiclePlate) {
-        const query =
-            `mutation {
-                startShift( ${user.graphQL.convertObjectToInputArgs({ vehiclePlate })} ){
-                    accepted
-                }
-            }`;
-        return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
-            tap(({ startShift }) => expect(startShift).to.not.be.undefined),
-            tap(({ startShift }) => expect(startShift.accepted).to.be.true),
-            map(({ startShift }) => startShift.accepted),
-            tap(accepted => console.log(`startShift command send and ackwoneldged by server: ${accepted}`))
-        );
-    }
-
-    static stopShift$(user) {
-        const query =
-            `mutation {
-                stopShift{
-                    accepted
-                }
-            }`;
-        return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
-            tap(({ stopShift }) => expect(stopShift).to.not.be.undefined),
-            tap(({ stopShift }) => expect(stopShift.accepted).to.be.true),
-            map(({ stopShift }) => stopShift.accepted),
-            tap(accepted => console.log(`stopShift command send and ackwoneldged by server: ${accepted}`))
-        );
-    }
+  static requestService$(user, args) {
+    const query =
+      `mutation {
+              ServiceCoreRequestService(${user.graphQL.convertObjectToInputArgs(args)}
+              ) {
+                accepted
+              }
+            }
+            `;
+    return user.graphQL.executeQuery$(query).pipe(
+      catchError(error => Rx.throwError(new Error(`Failed to ServiceCoreRequestService, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
+      tap(({ ServiceCoreRequestService }) => expect(ServiceCoreRequestService).to.not.be.undefined),
+      tap(({ ServiceCoreRequestService }) => expect(ServiceCoreRequestService.accepted).to.be.true),
+      map(({ ServiceCoreRequestService }) => ServiceCoreRequestService),
+      tap(accepted => console.log(`ServiceCoreRequestService command send and ackwoneldged by server: ${accepted}`))
+    );
+  }
 
 
-    static setShiftState$(user, state) {
-        const query =
-            `mutation {
-                setShiftState( ${this.graphQL.convertObjectToInputArgs({ state })} ){
-                    accepted
-                }
-            }`;
-        return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
-            tap(({ setShiftState }) => expect(setShiftState).to.not.be.undefined),
-            tap(({ setShiftState }) => expect(setShiftState.accepted).to.be.true),
-            map(({ setShiftState }) => setShiftState.accepted),
-            tap(accepted => console.log(`setShiftState command send and ackwoneldged by server: ${accepted}`))
-        );
-    }
+  static acceptServiceOffer$(user, args) {
+    const query =
+      `mutation {
+        acceptServiceOffer(${user.graphQL.convertObjectToInputArgs(args)}
+              ) {
+                accepted
+              }
+            }
+            `;
+    return user.graphQL.executeQuery$(query).pipe(
+      catchError(error => Rx.throwError(new Error(`Failed to acceptServiceOffer, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
+      tap(({ acceptServiceOffer }) => expect(acceptServiceOffer).to.not.be.undefined),
+      tap(({ acceptServiceOffer }) => expect(acceptServiceOffer.accepted).to.be.true),
+      map(({ acceptServiceOffer }) => acceptServiceOffer),
+      tap(accepted => console.log(`acceptServiceOffer command send and ackwoneldged by server: ${accepted}`))
+    );
+  }
 
-    static queryAssignedService$(user, expectNull = false) {
-        const query =
-            `query{
+
+  static queryAssignedService$(user, expectNull = false) {
+    const query =
+      `query{
                 AssignedService{
                   _id,
                   timestamp,
@@ -114,19 +103,19 @@ class Service {
                   state
                 }
               }`;
-        return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to queryAssignedService, asError: << ${error} >>   JSON: ${JSON.stringify(error,null,2)}`))),
-            tap(({ OpenShift }) => {expectNull ? expect(OpenShift).to.be.undefined : expect(OpenShift).to.not.be.undefined;}),
-            map(({ OpenShift }) => OpenShift),
-            tap(OpenShift => console.log(`query OpenShift: ${OpenShift}`))
-        );
-    }
+    return user.graphQL.executeQuery$(query).pipe(
+      catchError(error => Rx.throwError(new Error(`Failed to queryAssignedService, asError: << ${error} >>   JSON: ${JSON.stringify(error, null, 2)}`))),
+      tap(({ AssignedService }) => { expectNull ? expect(AssignedService).to.not.exist : expect(AssignedService).to.exist; }),
+      map(({ AssignedService }) => AssignedService),
+      tap(AssignedService => console.log(`query AssignedService: ${AssignedService}`))
+    );
+  }
 
 
 
-    static queryHistoricalService$(user, expectNull = false) {
-        const query =
-            `query{
+  static queryHistoricalService$(user, expectNull = false) {
+    const query =
+      `query{
                 AssignedService{
                   _id,
                   timestamp,
@@ -163,13 +152,13 @@ class Service {
                   state
                 }
               }`;
-        return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to queryAssignedService, asError: << ${error} >>   JSON: ${JSON.stringify(error,null,2)}`))),
-            tap(({ OpenShift }) => {expectNull ? expect(OpenShift).to.be.undefined : expect(OpenShift).to.not.be.undefined;}),
-            map(({ OpenShift }) => OpenShift),
-            tap(OpenShift => console.log(`query OpenShift: ${OpenShift}`))
-        );
-    }
+    return user.graphQL.executeQuery$(query).pipe(
+      catchError(error => Rx.throwError(new Error(`Failed to queryAssignedService, asError: << ${error} >>   JSON: ${JSON.stringify(error, null, 2)}`))),
+      tap(({ OpenShift }) => { expectNull ? expect(OpenShift).to.be.undefined : expect(OpenShift).to.not.be.undefined; }),
+      map(({ OpenShift }) => OpenShift),
+      tap(OpenShift => console.log(`query OpenShift: ${OpenShift}`))
+    );
+  }
 
 }
 

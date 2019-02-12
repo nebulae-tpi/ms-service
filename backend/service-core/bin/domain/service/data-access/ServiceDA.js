@@ -95,6 +95,10 @@ class ServiceDA {
     );
   }
 
+
+
+
+
   /**
    * appends state
    * @returns {Observable}
@@ -106,11 +110,8 @@ class ServiceDA {
         {
           $set: { state, lastModificationTimestamp: Date.now() },
           $push: {
-            "stateChanges": {
-              state,
-              timestamp,
-              location,
-            }
+            "stateChanges": { state, timestamp, location, },
+            "route.coordinates": location.coordinates
           }
         },
         { upsert: false }
@@ -119,30 +120,50 @@ class ServiceDA {
   }
 
   /**
-   * set cancel state
+   * appends state
    * @returns {Observable}
    */
-  static setCancelState$(_id, state, location, reason, notes) {
+  static appendstateAndReturnService$(_id, state, location, timestamp, projection = undefined) {
     return defer(
-      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
         {
           $set: { state, lastModificationTimestamp: Date.now() },
           $push: {
-            "stateChanges": {
-              state,
-              timestamp: Date.now(),
-              location,
-              reason,
-              notes
-            }
+            "stateChanges": { state, timestamp, location },
+            "route.coordinates": location.coordinates
           }
         },
-        { upsert: false }
+        { upsert: false, projection }
       )
+    ).pipe(
+      map(result => result.value),
+      filter(v => v)
     );
   }
 
+  /**
+   * set cancel state
+   * @returns {Observable}
+   */
+  static setCancelStateAndReturnService$(_id, state, location, reason, notes, timestamp) {
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
+        { _id },
+        {
+          $set: { state, lastModificationTimestamp: timestamp },
+          $push: {
+            "stateChanges": { state, timestamp, location, reason, notes },
+            "route.coordinates": location.coordinates
+          }
+        },
+        { upsert: false, projection }
+      )
+    ).pipe(
+      map(result => result.value),
+      filter(v => v)
+    );
+  }
 
 
 
@@ -194,7 +215,7 @@ class ServiceDA {
           returnOriginal: false,
         }
       )).pipe(
-        map(result => result.value),      
+        map(result => result.value),
         filter(v => v),
         first(),
         catchError(err => throwError(ERROR_23104)), // possible concurrent modification
@@ -267,6 +288,25 @@ class ServiceDA {
       )
     );
   }
+
+
+  /**
+   * set the service to closed and removes the current location to save index space
+   * @param {*} _id 
+   */
+  static closeService$(_id) {
+    const collection = mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName);
+    return defer(() => collection.updateOne(
+      { _id },
+      {
+        $set: { closed: true },
+        $unset: { location: 1 }
+      }
+    ));
+  }
+
+
+
 
 
 

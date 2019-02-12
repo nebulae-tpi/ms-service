@@ -57,9 +57,6 @@ class ShiftCQRS {
     const { businessId, driverId } = authToken;
 
     ShiftCQRS.log(`ShiftCQRS.startShift RQST: ${JSON.stringify({ vehiclePlate, driverId, businessId })}`); //DEBUG: DELETE LINE
-
-    //TODO: CRITICO: verificar bloqueos
-
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
       mergeMapTo(ShiftDA.findOpenShiftByVehiclePlate$(vehiclePlate).pipe(tap(shift => { if (shift) throw ERROR_23011; }))),  // Vehicle has an open shift verification

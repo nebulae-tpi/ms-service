@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, interval, forkJoin, Observable } = require("rxjs");
+const { of, iif, forkJoin, Observable } = require("rxjs");
 const { mapTo, mergeMap, mergeMapTo, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
@@ -9,7 +9,7 @@ const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 
-const { ServiceDA } = require('./data-access')
+const { ServiceDA, ShiftDA } = require('./data-access')
 
 /**
  * Singleton instance
@@ -36,39 +36,22 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceAssigned$({ aid, data }) {
+    handleServiceAssigned$({ aid, data, user }) {
         const { shiftId, driver, vehicle, skipPersist } = data;
-
-        if (skipPersist) {
-            return of({}).pipe(
-                mergeMap(service =>
-                    eventSourcing.eventStore.emitEvent$(
-                        ServiceES.buildEventSourcingEvent(
-                            'Shift',
-                            shiftId,
-                            'ShiftStateChanged',
-                            { _id: shiftId, state: 'BUSY' }
-                        )
+        return iif(() => skipPersist, of({}), ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)).pipe(
+            mergeMap(persistResult =>
+                eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Shift',
+                        shiftId,
+                        'ShiftStateChanged',
+                        { _id: shiftId, state: 'BUSY' },
+                        user
                     )
-                ),
-                mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
-            );
-        } else {
-            return ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle).pipe(
-                mergeMap(service =>
-                    eventSourcing.eventStore.emitEvent$(
-                        ServiceES.buildEventSourcingEvent(
-                            'Shift',
-                            shiftId,
-                            'ShiftStateChanged',
-                            { _id: shiftId, state: 'BUSY' }
-                        )
-                    )
-                ),
-                mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: ${JSON.stringify(data)}`)
-            );
-        }
-
+                )
+            ),
+            mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: state: BUSY`)
+        );
     }
 
     /**
@@ -116,29 +99,32 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceCompleted$({ aid, data }) {
-
-
+    handleServiceCompleted$({ aid, data, user }) {
         const { location, timestamp } = data;
-
-        //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
-        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
-        return ServiceDA.appendstate$(aid, 'DONE', location, timestamp).pipe(
-            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
-            map(({ shiftId }) => shiftId),
-            mergeMap(shiftId =>
+        return ServiceDA.appendstateAndReturnService$(aid, 'DONE', location, timestamp, { shiftId: 1 }).pipe(
+            mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
+            mergeMap(shift =>
                 eventSourcing.eventStore.emitEvent$(
                     ServiceES.buildEventSourcingEvent(
                         'Shift',
-                        shiftId,
+                        shift._id,
                         'ShiftStateChanged',
-                        { _id: shiftId, state: 'AVAILABLE' }
+                        { state: ((shift.driver.blocks && shift.driver.blocks.length > 0) || (shift.vehicle.blocks && shift.vehicle.blocks.length > 0)) ? 'BLOCKED' : 'AVAILABLE' },
+                        user
                     )
-                )),
-            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
+                ).pipe(
+                    map(evt => ` - Sent ShiftStateChanged for service._id=${shift._id}: ${JSON.stringify(evt)}`)
+                )
+            ),
         );
+    }
 
-
+    /**
+     * Handles EventSourcing Event ServiceClosed
+     * @param {*} ServiceClosedEvt 
+     */
+    handleServiceClosed$({ aid }) {
+        return ServiceDA.closeService$(aid);
     }
 
     /**
@@ -151,82 +137,55 @@ class ServiceES {
         return ServiceDA.setPickUpETA$(aid, eta);
     }
 
-    /**
-     * Handles EventSourcing Event ServiceCancelledByDriver
-     * @param {Event} evt 
-     * @returns {Observable}
-     */
-    handleServiceCancelledByDriver$({ aid, data }) {
-        const { reason, notes, location } = data;
-        //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
-        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
-        return  ServiceDA.setCancelState$(aid, 'CANCELLED_DRIVER', location, reason, notes).pipe(
-            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
-            map(({ shiftId }) => shiftId),
-            mergeMap(shiftId =>
-                eventSourcing.eventStore.emitEvent$(
-                    ServiceES.buildEventSourcingEvent(
-                        'Shift',
-                        shiftId,
-                        'ShiftStateChanged',
-                        { _id: shiftId, state: 'AVAILABLE' }
-                    )
-                )),
-            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
-        );
-
-
-    }
-
-
-    /**
-     * Handles EventSourcing Event ServiceCancelledByClient
-     * @param {Event} evt 
-     * @returns {Observable}
-     */
-    handleServiceCancelledByClient$({ aid, data }) {
-        const { reason, notes, location } = data;
-         //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
-        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
-        return  ServiceDA.setCancelState$(aid, 'CANCELLED_CLIENT', location, reason, notes).pipe(
-            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
-            map(({ shiftId }) => shiftId),
-            mergeMap(shiftId =>
-                eventSourcing.eventStore.emitEvent$(
-                    ServiceES.buildEventSourcingEvent(
-                        'Shift',
-                        shiftId,
-                        'ShiftStateChanged',
-                        { _id: shiftId, state: 'AVAILABLE' }
-                    )
-                )),
-            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
-        );
-    }
 
     /**
      * Handles EventSourcing Event ServiceCancelledByOperator
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceCancelledByOperator$({ aid, data }) {
+    handleServiceCancelledByOperator$({ aid, data, user }) {
         const { reason, notes, location } = data;
-        //MEJORAR ESTO; SE ESTA CONSULTANDO DOBLE
-        //TODO: CRITICAL: EVALUAR SI PASA A AVAILABLE O BLOCKED
-        return  ServiceDA.setCancelState$(aid, 'CANCELLED_OPERATOR', location, reason, notes).pipe(
-            mergeMapTo(ServiceDA.findById$(aid, { shiftId: 1 })),
-            map(({ shiftId }) => shiftId),
-            mergeMap(shiftId =>
+        return this.handleCancellation$(aid, "CANCELLED_OPERATOR", reason, notes, location, Date.now(), user);
+    }
+
+    /**
+     * Handles EventSourcing Event ServiceCancelledByClient
+     * @param {Event} evt 
+     * @returns {Observable}
+     */
+    handleServiceCancelledByClient$({ aid, data, user }) {
+        const { reason, notes, location } = data;
+        return this.handleCancellation$(aid, "CANCELLED_CLIENT", reason, notes, location, Date.now(), user);
+    }
+
+    /**
+     * Handles EventSourcing Event ServiceCancelledByDriver
+     * @param {Event} evt 
+     * @returns {Observable}
+     */
+    handleServiceCancelledByDriver$({ aid, data, user }) {
+        const { reason, notes, location } = data;
+        return this.handleCancellation$(aid, "CANCELLED_DRIVER", reason, notes, location, Date.now(), user)
+    }
+
+    handleCancellation$(serviceId, cancelStateType, reason, notes, location, timestamp, user) {
+        return ServiceDA.setCancelStateAndReturnService$(serviceId, cancelStateType, location, reason, notes, timestamp, { shiftId: 1 }).pipe(
+            mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
+            mergeMap(shift =>
                 eventSourcing.eventStore.emitEvent$(
                     ServiceES.buildEventSourcingEvent(
                         'Shift',
-                        shiftId,
+                        shift._id,
                         'ShiftStateChanged',
-                        { _id: shiftId, state: 'AVAILABLE' }
+                        { state: ((shift.driver.blocks && shift.driver.blocks.length > 0) || (shift.vehicle.blocks && shift.vehicle.blocks.length > 0)) ? 'BLOCKED' : 'AVAILABLE' },
+                        user
                     )
-                )),
-            mapTo(` - Sent ShiftStateChanged for service._id=${aid}: ${JSON.stringify(data)}`)
+                ).pipe(
+                    map(evt => ` - Sent ShiftStateChanged for service._id=${shift._id}: ${JSON.stringify(evt)}`)
+                )
+            ),
         );
+
     }
 
 
@@ -243,13 +202,13 @@ class ServiceES {
      * @param {*} data defaults to {}
      * @param {*} eventTypeVersion defaults to 1
     */
-    static buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, eventTypeVersion = 1) {
+    static buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, user = "SYSTEM", eventTypeVersion = 1) {
         return new Event({
             aggregateType,
             aggregateId,
             eventType,
             eventTypeVersion,
-            user: 'SYSTEM',
+            user,
             data
         });
     }

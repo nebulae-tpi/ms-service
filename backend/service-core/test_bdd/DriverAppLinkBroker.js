@@ -8,6 +8,7 @@ const mqtt = require('mqtt');
 
 const INCOMING_SHIFT_MSG_TOPIC = "+/driver-app/shift/#";
 const INCOMING_SERVICE_MSG_TOPIC = "+/driver-app/service/#";
+const INCOMING_ERRORS_MSG_TOPIC = "+/driver-app/errors/#";
 /**
  * Singleton instance
  */
@@ -28,6 +29,7 @@ class DriverAppLinkBroker {
         this.listeningTopics = [
             INCOMING_SERVICE_MSG_TOPIC,
             INCOMING_SHIFT_MSG_TOPIC,
+            INCOMING_ERRORS_MSG_TOPIC
         ];
         /**
          * Rx Subject for incoming messages
@@ -78,7 +80,7 @@ class DriverAppLinkBroker {
      */
     sendShiftEventToDrivers$(businessId, driverUserName, eventType, event) {
         const topic = `${businessId}/driver-app/shift/${driverUserName}`;
-        return this.publish$(topic, eventType, event);
+        return this.publish$(topic, eventType, undefined, 'server', event);
     }
 
     /**
@@ -91,7 +93,34 @@ class DriverAppLinkBroker {
      */
     sendServiceEventToDrivers$(businessId, driverUserName, eventType, event) {
         const topic = `${businessId}/driver-app/service/${driverUserName}`;
-        return this.publish$(topic, eventType, event);
+        return this.publish$(topic, eventType, undefined, 'server', event);
+    }
+
+
+
+    /**
+     * Sends an event to a driver on the service topic
+     * @param {*} businessId 
+     * @param {*} eventType 
+     * @param {*} event 
+     * @returns {Observable}
+     */
+    sendServiceEventToServer$(businessId, eventType, jwt, username, event) {
+        const topic = `${businessId}/driver-app/service/server`;
+        return this.publish$(topic, eventType, jwt, username, event);
+    }
+
+
+    /**
+     * Sends an event to a driver on the shift topic
+     * @param {*} businessId 
+     * @param {*} eventType 
+     * @param {*} event 
+     * @returns {Observable}
+     */
+    sendShiftEventToServer$(businessId, eventType, jwt, username, event) {
+        const topic = `${businessId}/driver-app/shift/server`;
+        return this.publish$(topic, eventType, jwt, username, event);
     }
 
     /**
@@ -118,17 +147,26 @@ class DriverAppLinkBroker {
      * @param {Array} types 
      * @returns {Observable}
      */
-    listenServiceEventsFromServer$(types = [],driverUserNama) {
+    listenServiceEventsFromServer$(types = [], driverUserNama) {
         return this.getMessageListener$(`service/${driverUserNama}`, types);
     }
 
-
-     /**
-     * Listen and emit all the messages from the drivers on the shift topic
+    /**
+     * Listen and emit all the messages from the drivers on the errors topic
      * @param {Array} types 
      * @returns {Observable}
      */
-    listenShiftEventsFromServer$(types = [],driverUserNama) {
+    listenErrorsEventsFromServer$(types = [], driverUserNama) {
+        return this.getMessageListener$(`errors/${driverUserNama}`, types);
+    }
+
+
+    /**
+    * Listen and emit all the messages from the drivers on the shift topic
+    * @param {Array} types 
+    * @returns {Observable}
+    */
+    listenShiftEventsFromServer$(types = [], driverUserNama) {
         return this.getMessageListener$(`shift/${driverUserNama}`, types);
     }
 
@@ -158,7 +196,7 @@ class DriverAppLinkBroker {
      * @param {Object} data 
      * @param {Object} ops {correlationId} 
      */
-    publish$(topicName, type, data, { correlationId } = {}) {
+    publish$(topicName, type, jwt, username, data, { correlationId } = {}) {
         const uuid = uuidv4();
         const dataBuffer = JSON.stringify(
             {
@@ -170,8 +208,10 @@ class DriverAppLinkBroker {
                 att: {
                     sId: this.senderId, //Sender Id
                     cId: correlationId,// Correlation Id
-                    rt: undefined // replyTo Topic
-                }
+                    rt: undefined, // replyTo Topic,
+                    un: username
+                },
+                jwt
             }
         );
         return of(dataBuffer)

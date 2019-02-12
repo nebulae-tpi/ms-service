@@ -461,7 +461,7 @@ class ServiceCQRS {
   //#region GraphQL response formatters
 
   formatServiceToGraphQLSchema(service) {
-    const marker = (!service.pickUp || !service.pickUp.marker) ? undefined : {lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1]};
+    const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : {lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1]};
 
     return !service ? undefined : { ...service, pickUp : {  ...service.pickUp, marker},route: undefined, id: service._id };
   }

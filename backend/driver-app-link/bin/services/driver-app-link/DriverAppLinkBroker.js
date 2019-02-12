@@ -48,7 +48,7 @@ class DriverAppLinkBroker {
             obs.next(`DriverAppLinkBroker Mqtt connected: ${this.url}:${this.port} { clientId:${this.clientId}, username:${this.user} }`);
             this.mqttClient.on('message', (topic, message) => {
                 const msg = JSON.parse(message);
-                if (msg && msg.att && msg.att.sId && msg.t && msg.data) {
+                if (msg && msg.att && msg.att.sId && msg.att.un && msg.t && msg.data) {
                     // message is Buffer
                     this.incomingMessages$.next({
                         topic: topic,
@@ -91,6 +91,20 @@ class DriverAppLinkBroker {
      */
     sendServiceEventToDrivers$(businessId, driverUserName, eventType, event) {
         const topic = `${businessId}/driver-app/service/${driverUserName}`;
+        return this.publish$(topic, eventType, event);
+    }
+
+
+    /**
+     * Sends an event to a driver on the errors topic
+     * @param {*} businessId 
+     * @param {*} driverUserName 
+     * @param {*} eventType 
+     * @param {*} event 
+     * @returns {Observable}
+     */
+    sendErrorEventToDrivers$(businessId, driverUserName, eventType, event) {
+        const topic = `${businessId}/driver-app/errors/${driverUserName}`;
         return this.publish$(topic, eventType, event);
     }
 
