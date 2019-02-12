@@ -333,14 +333,6 @@ class ServiceCQRS {
    * @param {*} service request input params
    */
   validateServiceRequestInput({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }) {
-
-
-    console.log('========================');
-    console.log('========================');
-    console.log(JSON.stringify({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }));
-    console.log('========================');
-    console.log('========================');
-
     if (!client || !pickUp || !paymentType || !businessId) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
     if (!client.fullname || client.fullname.trim().length > 50 || client.fullname.trim().length < 4) throw ERROR_23201; // invalid client name
     if (client.tipType && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.tipType) == -1) throw ERROR_23202; // invalid tip type

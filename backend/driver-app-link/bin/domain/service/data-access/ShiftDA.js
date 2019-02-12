@@ -37,6 +37,31 @@ class ShiftDA {
     );
   }
 
+  static findServiceOfferCandidates$(businessId, location, maxDistance = 3000, minDistance = 0, projection = undefined) {
+    const explorePastMonth = Date.today().getDate() <= 1;
+
+    const query = {
+      businessId,
+      state: "AVAILABLE",
+      online: true,
+      location: {
+        $near: {
+          $geometry: location,
+          $maxDistance: maxDistance,
+          $minDistance: minDistance
+        }
+      }
+    };
+
+    console.log(JSON.stringify(query));
+
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection('Shift')),
+      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
+    );
+  }
+
 
   // /**
   //  * Finds all open shift// DELETE, JUST FOR TESTING

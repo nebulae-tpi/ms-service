@@ -26,7 +26,7 @@ class Shift {
         throw new Error('DO NOT INSTANCE!!!');
     }
 
-    static startShift$(user, vehiclePlate, deviceIdentifier) {
+    static startShift$(user, vehiclePlate, deviceIdentifier, expectError = false) {
         const query =
             `mutation {
                 startShift( ${user.graphQL.convertObjectToInputArgs({ vehiclePlate, deviceIdentifier })} ){
@@ -34,7 +34,13 @@ class Shift {
                 }
             }`;
         return user.graphQL.executeQuery$(query).pipe(
-            catchError(error => Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))),
+            catchError(error => {
+                if (expectError) {
+                    return Rx.empty();
+                }
+                Rx.throwError(new Error(`Failed to startShift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))
+            }
+            ),
             tap(({ startShift }) => expect(startShift).to.not.be.undefined),
             tap(({ startShift }) => expect(startShift.accepted).to.be.true),
             map(({ startShift }) => startShift.accepted),
@@ -82,7 +88,7 @@ class Shift {
         );
     }
 
-    static queryOpenShift$(user,args) {
+    static queryOpenShift$(user, args) {
         const query =
             `query{
                 OpenShift( ${user.graphQL.convertObjectToInputArgs(args)} ){

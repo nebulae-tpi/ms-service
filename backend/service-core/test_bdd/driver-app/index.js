@@ -122,7 +122,7 @@ describe('DriverApp workflows', function () {
         });
 
         it('query open shift before start', function (done) {
-            Shift.queryOpenShift$(users.driver,{deviceIdentifier : 'mocha'}).pipe(
+            Shift.queryOpenShift$(users.driver, { deviceIdentifier: 'mocha' }).pipe(
                 tap(shift => expect(shift).to.be.null),
             ).subscribe(...getRxDefaultSubscription('NO SHIFT: query open shift before start', done));
         });
@@ -147,17 +147,16 @@ describe('DriverApp workflows', function () {
                 ),
                 Shift.startShift$(users.driver, users.driver.vehicle.plate, 'mocha').pipe(
                     delay(200),
-                    mergeMap(() => Shift.queryOpenShift$(users.driver,  { deviceIdentifier: 'mocha' })),
+                    mergeMap(() => Shift.queryOpenShift$(users.driver, { deviceIdentifier: 'mocha' })),
                     tap(shift => expect(shift.state).to.be.eq('AVAILABLE')),
 
                     //Query OpenShift with other device                    
-                    mergeMap(() => Shift.queryOpenShift$(users.driver,  { deviceIdentifier: 'mocha2' })),
+                    mergeMap(() => Shift.queryOpenShift$(users.driver, { deviceIdentifier: 'mocha2' })),
                     tap(shift => expect(shift).to.be.null),
 
-                    // //try to start a new shift having one open
-                    // mergeMap(() => Shift.startShift$(users.driver, users.driver.vehicle.plate, 'mocha')).pipe(
-                        
-                    // )
+                    //try to start a new shift having one open
+                    mergeMap(() => Shift.startShift$(users.driver, users.driver.vehicle.plate, 'mocha', true)),
+                    tap(x => expect(x).to.not.exist)
 
                 )
             ).subscribe(...getRxDefaultSubscription('Starting SHIFT: Stop Shift', done));
@@ -223,6 +222,7 @@ describe('DriverApp workflows', function () {
             ).subscribe(...getRxDefaultSubscription('Set Shift state', done));
         });
 
+
     });
 
 
@@ -231,8 +231,8 @@ describe('DriverApp workflows', function () {
     describe('Location + service', function () {
 
         const serviceRequest = {
-            client: { id: "1", tip: 1000, tipType: "CASH", username: "juansmolano", referrerDriverDocumentId: "123456", fullname: "Sebastian Molano", offerMinDistance: 300, offerMaxDistance: 1000 },
-            pickUp: { city: "MEDELLIN", marker: { lat: 6.175307, lng: -75.592245 }, zone: "T1", neighborhood: "Primavera", addressLine1: "Cra 48 #48sur-75, int 131" },
+            client: { id: "1", tip: 1000, tipType: "CASH", username: "juansmolano", referrerDriverDocumentId: "123456", fullname: "Sebastian Molano", offerMinDistance: 100, offerMaxDistance: 2500 },
+            pickUp: { city: "ENVIGADO", marker: { lat: 6.172257, lng: -75.593177 }, zone: "T1", neighborhood: "Primavera", addressLine1: "Carrera 47A #38b Sur-21" },
             requestedFeatures: ["AC"],
             paymentType: "CASH",
             tip: 1200,
@@ -244,6 +244,20 @@ describe('DriverApp workflows', function () {
             Service.queryAssignedService$(users.driver, true).pipe(
                 tap(service => expect(service).to.not.exist)
             ).subscribe(...getRxDefaultSubscription('Sopping SHIFT: Stop Shift', done));
+        });
+
+        it('locating shift in a proper range', function (done) {
+            this.timeout(500);
+            const location = { lat: 6.164602, lng: -75.601532 };
+            const eventType = 'ShiftLocationReported';
+            const businessId = users.driver.businessId;
+            const shiftId = users.driver.shift._id;
+
+            return appLinkBroker.sendShiftEventToServer$(businessId, eventType, users.driver.jwt, users.driver.username, {
+                _id: shiftId,
+                timestamp: Date.now(),
+                location
+            }).subscribe(...getRxDefaultSubscription('locating shift in a proper range', done));
         });
 
         it('Service creation and offering', function (done) {
@@ -258,7 +272,8 @@ describe('DriverApp workflows', function () {
                     tap(({ _id, timestamp, pickUp }) => expect(pickUp.zone).to.exist),
                     tap(({ _id, timestamp, pickUp }) => expect(pickUp.neighborhood).to.exist),
                     tap(({ _id, timestamp, pickUp }) => expect(pickUp.city).to.exist),
-                    tap(service => users.driver.serviceOffer = service)
+                    tap(service => users.driver.serviceOffer = service),
+                    delay(500)
                 ),
                 Service.requestService$(users.satellite, serviceRequest).pipe(
                     delay(100),
@@ -286,7 +301,7 @@ describe('DriverApp workflows', function () {
                     tap(({ _id, timestamp, pickUp }) => expect(pickUp.marker.lng).to.exist),
                     tap(service => users.driver.service = service)
                 ),
-                Service.acceptServiceOffer$(users.driver, { shiftId: users.driver.shift._id, serviceId: users.driver.serviceOffer._id, location: { lat: 6.175300, lng: -75.592200 } }).pipe(
+                Service.acceptServiceOffer$(users.driver, { shiftId: users.driver.shift._id, serviceId: users.driver.serviceOffer._id, location: { lat: 6.172257, lng: -75.593177 } }).pipe(
                     tap(({ accepted }) => expect(accepted).to.be.true),
                     delay(200),
                     mergeMap(() => Service.queryAssignedService$(users.driver)),
@@ -348,7 +363,7 @@ describe('DriverApp workflows', function () {
 
         it('Send Shift location to uptade service', function (done) {
             this.timeout(500);
-            const location = users.driver.service.location;
+            const location = { lat: 6.164602, lng: -75.601532 };
             const eventType = 'ShiftLocationReported';
             const businessId = users.driver.businessId;
             const shiftId = users.driver.shift._id;

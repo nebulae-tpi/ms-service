@@ -2,7 +2,7 @@
 
 
 const { of, interval, forkJoin, Observable } = require("rxjs");
-const { take, mergeMap, catchError, map, tap, filter, delay, mergeMapTo } = require('rxjs/operators');
+const { take, mergeMap, catchError, map, tap, filter, delay, mapTo } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -28,16 +28,35 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ aid, data }) {
-        const { pickUp } = data;
         console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
-        return ShiftDA.findOpenShifts$({ "driver.username": 1, "businessId": 1, "timestamp": 1 }).pipe(
-            mergeMap(shift => forkJoin
-                (
-                    ServiceDA.addShiftToActiveOffers$(aid, shift._id),
-                    driverAppLinkBroker.sendServiceEventToDrivers$(
-                        shift.businessId, shift.driver.username, 'ServiceOffered', { _id: aid, timestamp: Date.now(), pickUp: { ...pickUp, location: undefined } })
-                ),
-            )
+
+        const { pickUp, client, businessId, timestamp } = data;
+
+        const maxDistance = client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
+        const minDistance = client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
+        const clientLocation = pickUp.marker;
+        const priorityDriver = client.referrerDriverDocumentId;
+        const projection = { "driver.username": 1, "driver.documentID": 1, "businessId": 1, "timestamp": 1 };
+
+
+        console.log(`===== OFFERING ${JSON.stringify({ maxDistance, minDistance, clientLocation, priorityDriver, client })}==========`);
+
+        if (!clientLocation || clientLocation.type !== 'Point'
+            || !clientLocation.coordinates || clientLocation.coordinates.length !== 2
+            || clientLocation.coordinates[0] === 0 || clientLocation.coordinates[1] === 0) {
+            console.error(`WARNING: ServiceES.handleServiceRequested: received an offer with an invalid client location ${JSON.stringify({ aid, ...data })} `);
+            return of({});
+        }
+
+        return ShiftDA.findServiceOfferCandidates$(businessId, clientLocation, maxDistance, minDistance, projection).pipe(
+            tap(shift => console.log(`===== OFFERING ${aid} To shift ${shift._id}==========`)),
+            delay(200),
+            mergeMap(shift => ServiceDA.addShiftToActiveOffers$(aid, shift._id).pipe(mapTo(shift))),
+            mergeMap(shift => driverAppLinkBroker.sendServiceEventToDrivers$(
+                shift.businessId,
+                shift.driver.username,
+                'ServiceOffered', { _id: aid, timestamp: Date.now(), pickUp: { ...pickUp, location: undefined } }
+            ))
         );
     }
 

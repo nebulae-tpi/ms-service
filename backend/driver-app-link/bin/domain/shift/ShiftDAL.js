@@ -70,8 +70,12 @@ class ShiftDAL {
      */
     handleShiftLocationReported$({ data ,authToken}) {
         if(!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
+        if(!data.location.lng || !data.location.lat) throw new Error(`Driver-app sent ShiftLocationReported without valid location:  ${JSON.stringify(data)}`);
+
+
 
         const location = {type:"Point", coordinates: [data.location.lng,data.location.lat]};
+
 
         return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId,authToken)).pipe(
             mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data)}`)
