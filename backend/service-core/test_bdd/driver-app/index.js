@@ -222,10 +222,13 @@ describe('DriverApp workflows', function () {
     describe('Location + service', function () {
 
         const serviceRequest = {
-            client: { id: "1", tip: 1000, tipType: "ON_SITE", username: "juansmolano", referrerDriverDocumentId: "123456", fullname: "Sebastian Molano" },
+            client: { id: "1", tip: 1000, tipType: "CASH", username: "juansmolano", referrerDriverDocumentId: "123456", fullname: "Sebastian Molano" , offerMinDistance:300, offerMaxDistance:1000 },
             pickUp: { city: "MEDELLIN", marker: { lat: 6.175307, lng: -75.592245 }, zone: "T1", neighborhood: "Primavera", addressLine1: "Cra 48 #48sur-75, int 131" },
             requestedFeatures: ["AC"],
-            paymentType: "CASH"
+            paymentType: "CASH",
+            tip: 1200,
+            fareDiscount: 0.01,
+            fare: 15000,
         };
 
         it('NO SERVICE: query assigned service', function (done) {

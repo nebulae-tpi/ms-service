@@ -321,9 +321,17 @@ class ServiceCQRS {
    * @param {*} service request input params
    */
   validateServiceRequestInput({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }) {
+
+
+    console.log('========================');
+    console.log('========================');
+    console.log(JSON.stringify( { businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip } ));
+    console.log('========================');
+    console.log('========================');
+
     if (!client || !pickUp || !paymentType || !businessId) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
     if (!client.fullname || client.fullname.trim().length > 50 || client.fullname.trim().length < 4) throw ERROR_23201; // invalid client name
-    if (client.tip && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.type) == -1) throw ERROR_23202; // invalid tip type
+    if (client.tipType && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.tipType) == -1) throw ERROR_23202; // invalid tip type
     if (client.tip && (client.tip < 0 || client.tip > 10000)) throw ERROR_23203; // invalid tip amount
     if (!pickUp.marker && !pickUp.polygon) throw ERROR_23204; // pickUp location undefined
     if (!pickUp.addressLine1) throw ERROR_23205; //  pickup address not specified
