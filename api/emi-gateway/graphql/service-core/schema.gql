@@ -35,9 +35,9 @@ type ServiceCoreService{
     "Applicable fare discount"
     fareDiscount: Float
     "pre calculated fare"
-    fare: BigInt
+    fare: Int
     "Tip given to the driver"
-    tip: BigInt
+    tip: Int
     "Exact route taken by the driver"
     route: [ServiceCorePoint]   
     "current service state: REQUESTED,ASSIGNED,ARRIVED,ON_BOARD,DONE,CANCELLED_CLIENT,CANCELLED_DRIVER,"
@@ -65,25 +65,35 @@ type ServiceCoreClient {
     "user name"
     username: String
     "Tip given to the client. Eg. satellites"
-    tip: BigInt,
+    tip: Int,
     "Tiping type"
-    tipType: String    
+    tipType: String,
+    "drivers document, this is the one who referred this client"
+    referrerDriverDocumentId: String
+    "custom offer min distance in radious"
+    offerMinDistance: Int
+    "custom offer max distance in radious"
+    offerMaxDistance: Int
 }
 
 "Client info"
 input ServiceCoreClientInput {    
-    "Full name"
-    fullname: String!
-    "Tip given to the client. Eg. satellites"
-    tip: BigInt!
-    "Tiping type"
-    tipType: String! 
-    "client id"
+    "Client ID"
     id: String
-    "client username"
+    "Full name"
+    fullname: String
+    "user name"
     username: String
+    "Tip given to the client. Eg. satellites"
+    tip: Int,
+    "Tiping type"
+    tipType: String,
     "drivers document, this is the one who referred this client"
     referrerDriverDocumentId: String
+    "custom offer min distance in radious"
+    offerMinDistance: Int
+    "custom offer max distance in radious"
+    offerMaxDistance: Int
 }
 
 "Vehicle info"
@@ -213,9 +223,9 @@ type Mutation{
         "Applicable fare discount"
         fareDiscount: Float
         "pre calculated fare"
-        fare: BigInt 
+        fare: Int 
         "Tip given to the driver"
-        tip: BigInt
+        tip: Int
     ): ServiceCoreCommandAck
 
     "Cancel a requested service"

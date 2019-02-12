@@ -51,13 +51,16 @@ class Shift {
             }`;
         return user.graphQL.executeQuery$(query).pipe(
             catchError(error => {
-                return (JSON.stringify(error.extensions.exception.message.code == 23020))
-                    ? Rx.of({ stopShift : {accepted:true} })
-                    : Rx.throwError(new Error(`Failed to stop shift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`))
+                console.log(JSON.stringify(error, null, 1));
+
+                if (error.extensions.exception.message.code !== 23020) {
+                    throw new Error(`Failed to stop shift, asError: << ${error} >>   JSON: ${JSON.stringify(error)}`);
+                }
+                return Rx.of({ stopShift: { accepted: true } });
             }),
             tap(({ stopShift }) => expect(stopShift).to.not.be.undefined),
             tap(({ stopShift }) => expect(stopShift.accepted).to.be.true),
-            map(({ stopShift }) => stopShift.accepted),
+            map(({ stopShift }) => stopShift),
             tap(accepted => console.log(`stopShift command send and ackwoneldged by server: ${accepted}`))
         );
     }

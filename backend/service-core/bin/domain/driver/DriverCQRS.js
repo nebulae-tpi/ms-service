@@ -59,7 +59,7 @@ class DriverCQRS {
       first( v => v, [] ),
       map(  ({ assignedVehicles })  => { return (!assignedVehicles || assignedVehicles.length <= 0) ? [] : assignedVehicles ;}),
       first(),
-      mergeMap(( assignedVehicles ) => from(assignedVehicles)),
+      mergeMap(( assignedVehicles ) => from(assignedVehicles.map(p => p.toUpperCase()))),
       mergeMap(licensePlate => VehicleDA.findByLicensePlate$(licensePlate).pipe(filter(v => v))),
       map(vehicle => ({ plate: vehicle.licensePlate, blocks: vehicle.blocks, active: vehicle.active })),
       toArray(),

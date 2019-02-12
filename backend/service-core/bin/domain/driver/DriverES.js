@@ -25,11 +25,11 @@ class DriverES {
      * in case the Driver has an open shift, then updates the block array
      * @param {Event} driverBlockRemovedEvt
      */
-    handleDriverBlockRemoved$({ aid, data }) {
+    handleDriverBlockRemoved$({ aid, data, user }) {
         return ShiftDA.findOpenShiftByDriver$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftDriverBlockRemovedEsEvent(_id, data.blockKey))), //Build and send ShiftDriverBlockRemoved event (event-sourcing)
+                this.buildShiftDriverBlockRemovedEsEvent(_id, data.blockKey,user))), //Build and send ShiftDriverBlockRemoved event (event-sourcing)
         );
     }
 
@@ -37,11 +37,11 @@ class DriverES {
      * in case the Driver has an open shift, then updates the block array
      * @param {Event} driverBlockAddedEvt
      */
-    handleDriverBlockAdded$({ aid, data }) {
+    handleDriverBlockAdded$({ aid, data, user }) {
         return ShiftDA.findOpenShiftByDriver$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftDriverBlockAddedEsEvent(_id, data.blockKey))), //Build and send ShiftDriverBlockAdded event (event-sourcing)
+                this.buildShiftDriverBlockAddedEsEvent(_id, data.blockKey,user))), //Build and send ShiftDriverBlockAdded event (event-sourcing)
         );
     }
     //#region Object builders
@@ -51,13 +51,13 @@ class DriverES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftDriverBlockAddedEsEvent(shiftId, blockKey) {
+    buildShiftDriverBlockAddedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
-            aid: shiftId,
+            aggregateId: shiftId,
             eventType: 'ShiftDriverBlockAdded',
             eventTypeVersion: 1,
-            user: 'SYSTEM',
+            user,
             data: { blockKey }
         });
     }
@@ -66,13 +66,13 @@ class DriverES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftDriverBlockRemovedEsEvent(shiftId, blockKey) {
+    buildShiftDriverBlockRemovedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
-            aid: shiftId,
+            aggregateId: shiftId,
             eventType: 'ShiftDriverBlockRemoved',
             eventTypeVersion: 1,
-            user: 'SYSTEM',
+            user,
             data: { blockKey }
         });
     }

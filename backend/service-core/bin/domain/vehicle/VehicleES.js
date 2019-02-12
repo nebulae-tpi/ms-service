@@ -25,11 +25,11 @@ class VehicleES {
      * in case the vehicle has an open shift, then updates the block array
      * @param {Event} vehicleBlockRemovedEvt
      */
-    handleVehicleBlockRemoved$({ aid, data }) {
+    handleVehicleBlockRemoved$({ aid, data, user }) {
         return ShiftDA.findOpenShiftByVehicleId$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftVehicleBlockRemovedEsEvent(_id, data.blockKey))), //Build and send ShiftVehicleBlockRemoved event (event-sourcing)
+                this.buildShiftVehicleBlockRemovedEsEvent(_id, data.blockKey, user))), //Build and send ShiftVehicleBlockRemoved event (event-sourcing)
         );
     }
 
@@ -37,11 +37,11 @@ class VehicleES {
      * in case the vehicle has an open shift, then updates the block array
      * @param {Event} vehicleBlockAddedEvt
      */
-    handleVehicleBlockAdded$({ aid, data }) {
+    handleVehicleBlockAdded$({ aid, data, user }) {
         return ShiftDA.findOpenShiftByVehicleId$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftVehicleBlockAddedEsEvent(_id, data.blockKey))), //Build and send ShiftVehicleBlockAdded event (event-sourcing)
+                this.buildShiftVehicleBlockAddedEsEvent(_id, data.blockKey, user))), //Build and send ShiftVehicleBlockAdded event (event-sourcing)
         );
     }
 
@@ -52,13 +52,13 @@ class VehicleES {
       * @param {*} shiftId 
       * @returns {Event}
       */
-    buildShiftVehicleBlockAddedEsEvent(shiftId, blockKey) {
+    buildShiftVehicleBlockAddedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
-            aid: shiftId,
+            aggregateId: shiftId,
             eventType: 'ShiftVehicleBlockAdded',
             eventTypeVersion: 1,
-            user: 'SYSTEM',
+            user,
             data: { blockKey }
         });
     }
@@ -67,13 +67,13 @@ class VehicleES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftVehicleBlockRemovedEsEvent(shiftId, blockKey) {
+    buildShiftVehicleBlockRemovedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
-            aid: shiftId,
+            aggregateId: shiftId,
             eventType: 'ShiftVehicleBlockRemoved',
             eventTypeVersion: 1,
-            user: 'SYSTEM',
+            user,
             data: { blockKey }
         });
     }
