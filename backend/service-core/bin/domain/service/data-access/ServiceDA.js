@@ -146,7 +146,7 @@ class ServiceDA {
    * set cancel state
    * @returns {Observable}
    */
-  static setCancelStateAndReturnService$(_id, state, location, reason, notes, timestamp) {
+  static setCancelStateAndReturnService$(_id, state, location, reason, notes, timestamp, projection = undefined) {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
