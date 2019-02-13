@@ -151,7 +151,7 @@ class VehicleDA {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return defer(() => collection.updateOne( 
       { _id: vehicleId },
-      { $pull: { key: blockObj.key } }
+      { $pull: { blocks : { key: blockObj.key }} }
     ));
   }
 
