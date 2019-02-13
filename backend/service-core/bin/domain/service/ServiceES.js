@@ -170,6 +170,7 @@ class ServiceES {
 
     handleCancellation$(serviceId, cancelStateType, reason, notes, location, timestamp, user) {
         return ServiceDA.setCancelStateAndReturnService$(serviceId, cancelStateType, location, reason, notes, timestamp, { shiftId: 1 }).pipe(
+            filter(({ shiftId }) => shiftId),
             mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
             mergeMap(shift =>
                 eventSourcing.eventStore.emitEvent$(
