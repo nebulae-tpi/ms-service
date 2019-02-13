@@ -92,7 +92,7 @@ class ShiftES {
 
         return ShiftDA.updateOpenShiftVehicleBlock$(aid, false, data.block).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
+            mergeMap(shift => this.blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
@@ -108,7 +108,7 @@ class ShiftES {
 
         return ShiftDA.updateOpenShiftVehicleBlock$(aid, true, data.block).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
+            mergeMap(shift => this.blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
@@ -123,7 +123,7 @@ class ShiftES {
 
         return ShiftDA.updateOpenShiftDriverBlock$(aid, false, data.block).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
+            mergeMap(shift => this.blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
@@ -138,7 +138,7 @@ class ShiftES {
 
         return ShiftDA.updateOpenShiftDriverBlock$(aid, true, data.block).pipe(
             filter(shift => shift),
-            mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
+            mergeMap(shift => this.blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
     }
 
