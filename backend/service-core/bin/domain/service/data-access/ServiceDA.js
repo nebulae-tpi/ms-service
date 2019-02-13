@@ -71,7 +71,7 @@ class ServiceDA {
         { _id },
         {
           $set: { location, lastModificationTimestamp: Date.now() },
-          $push: { "route.coordinates": location.coordinates }
+          $push: (!location || !location.coordinates) ? undefined : { "route.coordinates": location.coordinates }
         },
         { upsert: false }
       )
@@ -104,16 +104,19 @@ class ServiceDA {
    * @returns {Observable}
    */
   static appendstate$(_id, state, location, timestamp) {
+    const update = {
+      $set: { state, lastModificationTimestamp: Date.now() },
+      $push: {
+        "stateChanges": { state, timestamp, location, },
+      }
+    };
+    if (location && location.coordinates) {
+      update['$push']["route.coordinates"] = location.coordinates;
+    }
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
-        {
-          $set: { state, lastModificationTimestamp: Date.now() },
-          $push: {
-            "stateChanges": { state, timestamp, location, },
-            "route.coordinates": location.coordinates
-          }
-        },
+        update,
         { upsert: false }
       )
     );
@@ -124,16 +127,19 @@ class ServiceDA {
    * @returns {Observable}
    */
   static appendstateAndReturnService$(_id, state, location, timestamp, projection = undefined) {
+    const update = {
+      $set: { state, lastModificationTimestamp: Date.now() },
+      $push: {
+        "stateChanges": { state, timestamp, location },
+      }
+    };
+    if (location && location.coordinates) {
+      update['$push']["route.coordinates"] = location.coordinates;
+    }
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        {
-          $set: { state, lastModificationTimestamp: Date.now() },
-          $push: {
-            "stateChanges": { state, timestamp, location },
-            "route.coordinates": !location ? undefined : location.coordinates
-          }
-        },
+        update,
         { upsert: false, projection }
       )
     ).pipe(
@@ -147,16 +153,19 @@ class ServiceDA {
    * @returns {Observable}
    */
   static setCancelStateAndReturnService$(_id, state, location, reason, notes, timestamp, projection = undefined) {
+    const update = {
+      $set: { state, lastModificationTimestamp: timestamp },
+      $push: {
+        "stateChanges": { state, timestamp, location, reason, notes },
+      }
+    };
+    if (location && location.coordinates) {
+      update['$push']["route.coordinates"] = location.coordinates;
+    }
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        {
-          $set: { state, lastModificationTimestamp: timestamp },
-          $push: {
-            "stateChanges": { state, timestamp, location, reason, notes },
-            "route.coordinates": !location ? undefined : location.coordinates
-          }
-        },
+        update,
         { upsert: false, projection }
       )
     ).pipe(
