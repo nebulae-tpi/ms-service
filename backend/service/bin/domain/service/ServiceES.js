@@ -48,7 +48,7 @@ class ServiceES {
         ServiceDA.getService$(serviceId)
         .pipe(
           filter(service => service),
-          map(service => Crosscutting.formatServiceToGraphQLSchema(null)),          
+          map(service => Crosscutting.formatServiceToGraphQLSchema(service)),          
           mergeMap(service => broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)),
           catchError(error => {
             console.log('An error ocurred while a service updated event was being processed: ', error);
