@@ -606,7 +606,6 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
     return range(1, requestServiceForm.taxisNumber || 1)
     .pipe(
       map(requestNumber => {
-        console.log('Client marker position => ', this.clientMarker.getPosition(), this.clientData.generalInfo.zone);
         const features = requestServiceForm.features.filter(feature => feature.active).map(feature => feature.name);
 
         return {
