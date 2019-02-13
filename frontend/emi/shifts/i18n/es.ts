@@ -23,7 +23,8 @@ export const locale = {
         LANGUAGES_TITLE: 'Idiomas',
         BLOCKS_TITLE: 'Bloqueos',
         LANGUAGES: {
-          EN: 'Inglés'
+          EN: 'Inglés',
+          english: 'Inglés'
         },
         DOCUMENT_ID: 'Documento',
         PHONE: 'Teléfono',
