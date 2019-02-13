@@ -91,10 +91,11 @@ class VehicleES {
 
     }
 
-    handleVehicleBlockRemoved$(vehicleBlockRemovedEvt){
+    handleVehicleBlockRemoved$(vehicleBlockRemovedEvt){        
         return of({vehicleId: vehicleBlockRemovedEvt.aid, blockKey: vehicleBlockRemovedEvt.data.blockKey })
         .pipe(
-            mergeMap( ({vehicleId, blockKey}) => VehicleDA.removeVehicleBlock$(vehicleId, blockKey) )
+            tap( obj => console.log("handleVehicleBlockRemoved$", obj )),
+            mergeMap( ({ vehicleId, blockKey }) => VehicleDA.removeVehicleBlock$(vehicleId, blockKey) )
         )
 
     }
@@ -106,8 +107,8 @@ class VehicleES {
             ...vehicleBlockAddedEvt.data
         })
         .pipe(
-            mergeMap((vehicleId, blockKey ) => VehicleDA.insertVehicleBlock$(vehicleId, blockKey ) 
-            )
+            tap(obj => console.log("handleVehicleBlockAdded$", obj) ),
+            mergeMap(({vehicleId, blockKey}) => VehicleDA.insertVehicleBlock$(vehicleId, blockKey ))
         )
 
     }
