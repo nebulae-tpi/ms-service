@@ -131,7 +131,7 @@ class ServiceDA {
           $set: { state, lastModificationTimestamp: Date.now() },
           $push: {
             "stateChanges": { state, timestamp, location },
-            "route.coordinates": location.coordinates
+            "route.coordinates": !location ? undefined : location.coordinates
           }
         },
         { upsert: false, projection }
@@ -154,7 +154,7 @@ class ServiceDA {
           $set: { state, lastModificationTimestamp: timestamp },
           $push: {
             "stateChanges": { state, timestamp, location, reason, notes },
-            "route.coordinates": location.coordinates
+            "route.coordinates": !location ? undefined : location.coordinates
           }
         },
         { upsert: false, projection }
@@ -279,13 +279,13 @@ class ServiceDA {
   /**
    * Finds an historical service by driver
    */
-  static findHistoricalServiceByDriver$(driverId, year,month,page,count, projection = undefined) {
-    const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0'+month.toString()}`;
+  static findHistoricalServiceByDriver$(driverId, year, month, page, count, projection = undefined) {
+    const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
     const query = { "state": { "$nin": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "driver.id": driverId };
     const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
     return defer(() =>
       mongoDB.extractAllFromMongoCursor$(
-        bd.collection(CollectionName).find(query, process).sort({ timestamp: -1 }).skip(page*count).limit(count)
+        bd.collection(CollectionName).find(query, process).sort({ timestamp: -1 }).skip(page * count).limit(count)
       )
     );
   }
