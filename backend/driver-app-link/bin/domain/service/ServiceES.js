@@ -23,7 +23,7 @@ class ServiceES {
     }
 
     /**
-     * Handles EventSourcing Event ServiceRequested
+     * Handles EventSourcing Event ServiceRequested.
      * @param {Event} evt 
      * @returns {Observable}
      */

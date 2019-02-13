@@ -21,9 +21,16 @@ class ClientES {
      * @param {*} clientSatelliteEnabled 
      */
     handleClientSatelliteEnabled$(clientSatelliteEnabled){
+        console.log('handleClientSatelliteEnabled => ', clientSatelliteEnabled);
         return of(clientSatelliteEnabled)
         .pipe(
-            mergeMap(clientSatelliteEnabled => ClientDA.updateClientSatellite$(clientSatelliteEnabled.aid, clientSatelliteEnabled.data) )
+            mergeMap(clientSatelliteEnabled => {
+                if(clientSatelliteEnabled.data.satelliteInfo){
+                    return ClientDA.updateClientSatellite$(clientSatelliteEnabled.aid, clientSatelliteEnabled.data)
+                }else{
+                    return of(clientSatelliteEnabled);
+                }
+            } )
         )
     }
 

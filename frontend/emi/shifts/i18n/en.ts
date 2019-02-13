@@ -3,15 +3,15 @@ export const locale = {
   data: {
     SHIFT: {
       HEADER_TITLE: 'SHIFTS',
-      DETAIL_HEADER_NAME: 'Shift detail',
+      DETAIL_HEADER_NAME: 'Shift Detail',
       SHIFT_TABLE_LIST: {
         TIMESTAMP: 'Date',
-        CLIENT_NAME: 'Client name',
-        DRIVER_NAME: 'Driver name',
-        LICENSE_PLATE: 'License plate',
-        DRIVER_DOCUMENT: 'Driver document ID',
-        VEHICLE_MODEL: 'Vehicle model',
-        LAST_COMMUNICATION: 'Last communication established'
+        CLIENT_NAME: 'Client Name',
+        DRIVER_NAME: 'Driver Name',
+        LICENSE_PLATE: 'License Plate',
+        DRIVER_DOCUMENT: 'Driver Document ID',
+        VEHICLE_MODEL: 'Vehicle Model',
+        LAST_COMMUNICATION: 'Last Communication Established'
       },
       DRIVER_DETAIL: {
         ID: 'ID',
@@ -27,7 +27,7 @@ export const locale = {
         },
         DOCUMENT_ID: 'Document',
         PHONE: 'Phone',
-        USERNAME: 'User name'
+        USERNAME: 'User Name'
       },
       VEHICLE_DETAIL: {
         ID: 'ID',
@@ -51,55 +51,55 @@ export const locale = {
         OFFLINE: 'Offline'
       },
       SHIFT_FILTERS: {
-        INIT_TIMESTAMP: 'Initial date',
-        END_TIMESTAMP: 'Final date',
-        VEHICLE_LICENSE_PLATE: 'Vehicle license plate',
-        DRIVER_NAME: 'Driver name',
-        DRIVER_DOCUMENT_ID: 'Driver document id',
-        DRIVER_FULLNAME: 'Driver name',
-        LICENSE_PLATE: 'Vehicle License plate',
-        PAYMENT_TYPE: 'Payment type',
+        INIT_TIMESTAMP: 'Initial Date',
+        END_TIMESTAMP: 'Final Date',
+        VEHICLE_LICENSE_PLATE: 'Vehicle License Plate',
+        DRIVER_NAME: 'Driver Name',
+        DRIVER_DOCUMENT_ID: 'Driver Document Id',
+        DRIVER_FULLNAME: 'Driver Name',
+        LICENSE_PLATE: 'Vehicle License Plate',
+        PAYMENT_TYPE: 'Payment Type',
         STATES: 'Estados',
-        SHOW_CLOSED: 'Show closed',
+        SHOW_CLOSED: 'Show Closed',
         FILTER_TITLE: 'Filters',
-        RESET_FILTER: 'Clean filters'
+        RESET_FILTER: 'Clean Filters'
       },
       SHIFT_STATES: {
         AVAILABLE: 'Available',
-        NOT_AVAILABLE: 'Not available',
+        NOT_AVAILABLE: 'Not Available',
         BUSY: 'Busy',
         BLOCKED: 'Blocked',
         CLOSED: 'Closed'
       },
       DETAILS: {
-        GENERAL_INFO: 'General info',
+        GENERAL_INFO: 'General Info',
         TABS: {
-          DRIVER_INFO: 'Driver info',
-          STATE_CHANGES: 'State changes',
-          VEHICLE_INFO: 'Vehicle info'
+          DRIVER_INFO: 'Driver Info',
+          STATE_CHANGES: 'State Changes',
+          VEHICLE_INFO: 'Vehicle Info'
         },
         CLIENT: 'Client',
         DRIVER: 'Driver',
         VEHICLE: 'Vehicle',
         DATE: 'Date',
         STATE: 'State',
-        STATES: 'Service state',
-        CLIENT_FULLNAME: 'Client name',
-        CLIENT_USERNAME: 'Client username',
-        CLIENT_TIP: 'Client tip',
-        CLIENT_TIP_TYPE: 'Tip type',
-        DRIVER_DOCUMENT_ID: 'Driver document id',
-        DRIVER_FULLNAME: 'Driver name',
-        VEHICLE_LICENSE_PLATE: 'Vehicle license plate',
-        PAYMENT_TYPE: 'Payment type',
+        STATES: 'Service State',
+        CLIENT_FULLNAME: 'Client Name',
+        CLIENT_USERNAME: 'Client Username',
+        CLIENT_TIP: 'Client Tip',
+        CLIENT_TIP_TYPE: 'Tip Type',
+        DRIVER_DOCUMENT_ID: 'Driver Document Id',
+        DRIVER_FULLNAME: 'Driver Name',
+        VEHICLE_LICENSE_PLATE: 'Vehicle License Plate',
+        PAYMENT_TYPE: 'Payment Type',
         FARE: 'Fare',
-        FARE_DISCOUNT: 'Fare discount',
-        SHIFT_PARAMS: 'Service params',
-        PICKED_UP: 'Pick up place',
-        DROP_OFF: 'Drop off place',
+        FARE_DISCOUNT: 'Fare Discount',
+        SHIFT_PARAMS: 'Service Params',
+        PICKED_UP: 'Pick up Place',
+        DROP_OFF: 'Drop off Place',
         CITY: 'City',
         ZONE: 'Zone',
-        NEIGHBORHOOD: 'Neigjborhood',
+        NEIGHBORHOOD: 'Neighborhood',
         ADDRESSLINE1: 'Address 1',
         ADDRESSLINE2: 'Address 2',
         NOTES: 'Notes',
@@ -111,7 +111,8 @@ export const locale = {
           BIKE_RACK: 'Bike Rack'
         },
         TIP_TYPES: {
-          ON_SITE: 'On site'
+          'CASH': 'Cash',
+          'VIRTUAL_WALLET': 'Virtual wallet'
         }
       }
     },

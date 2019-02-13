@@ -83,6 +83,8 @@ type ServiceClientSatellite {
   generalInfo: ServiceClientSatelliteGeneralInfo
   "Location of the client"
   location: ServiceClientSatelliteLocation,
+  "Satellite"
+  satelliteInfo: ServiceClientSatelliteInfo,
   "Client auth credential"
   auth: ServiceClientAuth
   "Client state"
@@ -104,7 +106,9 @@ type ServiceClientSatelliteGeneralInfo {
   "Client phone"
   phone: BigInt
   "Client address"
-  address: String
+  addressLine1: String
+  "Client address"
+  addressLine2: String
   "Client city"
   city: String
   "Client zone"
@@ -115,6 +119,21 @@ type ServiceClientSatelliteGeneralInfo {
   neighborhood: String
   "Referrer driver document id"
   referrerDriverDocumentId: String
+  "Client location notes"
+  notes: String
+}
+
+type ServiceClientSatelliteInfo {
+  "Referrer driver document id"
+  referrerDriverDocumentId: String!,
+  "Tipping type"
+  tipType: String
+  "Tip given to the client. Eg. satellites"
+  tip: Int
+  "Minimum broadcasting radius"
+  offerMinDistance: Int
+  "Maximum broadcasting radius"
+  offerMaxDistance: Int
 }
 
 type ServiceClientSatelliteLocation {

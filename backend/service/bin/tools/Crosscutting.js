@@ -153,7 +153,7 @@ class Crosscutting{
           return null;
         }
         const routesArray = [];
-        console.log('routes => ',routes);
+        //console.log('routes => ',routes);
         routes.forEach(route => {
           routesArray.push({
             lat: route[1],

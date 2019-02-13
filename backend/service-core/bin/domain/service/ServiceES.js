@@ -120,7 +120,7 @@ class ServiceES {
     }
 
     /**
-     * Handles EventSourcing Event ServiceClosed
+     * Handles EventSourcing Event ServiceClosed.
      * @param {*} ServiceClosedEvt 
      */
     handleServiceClosed$({ aid }) {

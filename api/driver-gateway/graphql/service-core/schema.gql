@@ -77,7 +77,7 @@ input PointInput {
    lng: Float
 }
 
-"Location info"
+"Location info."
 type Location {
    "Accurate location, Exact marker point: Lat,Lng"
    marker: Point

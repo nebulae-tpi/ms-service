@@ -38,7 +38,7 @@
                 "navURL": "/driver-vehicle-assignment",
                 "path": "driver-vehicle-assignment",
                 "loadChildren": "./main/content/driver-vehicle-assignment/driver-vehicle-assignment.module#DriverVehicleAssignmentModule",
-                "priority": 1000,
+                "priority": 900,
                 "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"],
                 "default" : false
             }            
