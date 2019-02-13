@@ -147,19 +147,19 @@ class VehicleDA {
     return defer(() => collection.findOne({licensePlate : licensePlate }))
   }
 
-  static removeVehicleBlock$(vehicleId, blockKey){
+  static removeVehicleBlock$(vehicleId, blockObj){
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return defer(() => collection.updateOne( 
       { _id: vehicleId },
-      { $pull: { blocks: blockKey } }
+      { $pull: { key: blockObj.key } }
     ));
   }
 
-  static insertVehicleBlock$(vehicleId, blockKey){
+  static insertVehicleBlock$(vehicleId, blockObj){
     const collection = mongoDB.db.collection(COLLECTION_NAME);
     return defer(() => collection.updateOne( 
       { _id: vehicleId },
-      { $addToSet: { blocks: blockKey } }
+      { $addToSet: { blocks: blockObj } }
     ))
   }
 
