@@ -2,6 +2,7 @@ export const locale = {
   lang: 'en',
   data: {
     'SATELLITE': {
+      'ERROR_OPERATION': 'Error operation',
       'CLOSE': 'Close',
       'REQUEST_VEHICLE_TITLE': 'Request service',
       'OTHERS': 'Others',
