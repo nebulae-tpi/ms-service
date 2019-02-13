@@ -28,7 +28,7 @@ class ServiceES {
         }),
         groupBy(serviceId => serviceId),
         mergeMap(group$ => group$.pipe(debounceTime(1000))),
-        mergeMap(serviceId => this.sendServiceUpdatedEvent$(serviceId))
+        mergeMap(serviceId => this.sendServiceUpdatedEvent$(serviceId)),
     ).subscribe(
       (result) => {},
       (err) => { console.log(err) },
@@ -43,11 +43,19 @@ class ServiceES {
   sendServiceUpdatedEvent$(serviceId){
     return of(serviceId)
     .pipe(
-      mergeMap(serviceId => ServiceDA.getService$(serviceId)),
-      map(service => Crosscutting.formatServiceToGraphQLSchema(service)),
-      mergeMap(service => {
-        return broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service);
-      })
+      mergeMap(serviceId => 
+        // Error isolation: If an error ocurrs, it is not going to affect the stream
+        ServiceDA.getService$(serviceId)
+        .pipe(
+          filter(service => service),
+          map(service => Crosscutting.formatServiceToGraphQLSchema(null)),          
+          mergeMap(service => broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)),
+          catchError(error => {
+            console.log('An error ocurred while a service updated event was being processed: ', error);
+            return of('Error: ', error)
+          }),
+        )
+      )
     );
   }  
 

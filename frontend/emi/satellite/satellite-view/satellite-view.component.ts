@@ -615,7 +615,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
             username: this.clientData.auth ? this.clientData.auth.username: null,
             tip: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.tip: 0,
             tipType: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.tipType: '',                        
-            referrerDriverDocumentId: this.clientData.satelliteInfo.referrerDriverDocumentId,
+            referrerDriverDocumentId: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.referrerDriverDocumentId: null,
             offerMinDistance: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.offerMinDistance: null,
             offerMaxDistance: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.offerMaxDistance: null,
           },
