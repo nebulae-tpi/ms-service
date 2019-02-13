@@ -25,7 +25,7 @@
       <input readonly="true" matInput name="username" formControlName="username" maxlength="40" placeholder="{{'SHIFT.DRIVER_DETAIL.USERNAME' | translate}}">
     </mat-form-field>
 
-    <div class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+    <div *ngIf="shift.driver.blocks && shift.driver.blocks.length > 0" class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
         <div class="pb-8 pt-8"> {{ 'SHIFT.DRIVER_DETAIL.BLOCKS_TITLE' | translate }} </div>
         <mat-chip-list>
             <mat-chip *ngFor="let block of shift.driver.blocks" color="primary" selected>{{ block }}</mat-chip>

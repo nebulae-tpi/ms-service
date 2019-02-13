@@ -17,7 +17,7 @@
         <input readonly="true" matInput name="line" formControlName="line" maxlength="40" placeholder="{{'SHIFT.VEHICLE_DETAIL.LINE' | translate}}">
       </mat-form-field>
 
-      <div class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <div *ngIf="shift.vehicle.blocks && shift.vehicle.blocks.length > 0" class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
           <div class="pb-8 pt-8"> {{ 'SHIFT.VEHICLE_DETAIL.BLOCKS_TITLE' | translate }} </div>
           <mat-chip-list>
               <mat-chip *ngFor="let block of shift.vehicle.blocks" color="primary" selected>{{ block }}</mat-chip>

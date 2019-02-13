@@ -78,6 +78,7 @@ class VehicleES {
     }
 
     handleVehicleFeaturesUpdated$(VehicleVehicleFeaturesUpdatedEvent){
+        console.log("VehicleVehicleFeaturesUpdatedEvent. data", VehicleVehicleFeaturesUpdatedEvent. data);
         return of(VehicleVehicleFeaturesUpdatedEvent.data.features)
         .pipe(
             map(newFeatures => ({
