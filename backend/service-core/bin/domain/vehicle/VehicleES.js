@@ -29,7 +29,7 @@ class VehicleES {
         return ShiftDA.findOpenShiftByVehicleId$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftVehicleBlockRemovedEsEvent(_id, data.blockKey, user))), //Build and send ShiftVehicleBlockRemoved event (event-sourcing)
+                this.buildShiftVehicleBlockRemovedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))), //Build and send ShiftVehicleBlockRemoved event (event-sourcing)
         );
     }
 
@@ -41,7 +41,7 @@ class VehicleES {
         return ShiftDA.findOpenShiftByVehicleId$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftVehicleBlockAddedEsEvent(_id, data.blockKey, user))), //Build and send ShiftVehicleBlockAdded event (event-sourcing)
+                this.buildShiftVehicleBlockAddedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))), //Build and send ShiftVehicleBlockAdded event (event-sourcing)
         );
     }
 
@@ -52,14 +52,14 @@ class VehicleES {
       * @param {*} shiftId 
       * @returns {Event}
       */
-    buildShiftVehicleBlockAddedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
+    buildShiftVehicleBlockAddedEsEvent(shiftId, block, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: shiftId,
             eventType: 'ShiftVehicleBlockAdded',
             eventTypeVersion: 1,
             user,
-            data: { blockKey }
+            data:{ block}
         });
     }
     /**
@@ -67,14 +67,14 @@ class VehicleES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftVehicleBlockRemovedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
+    buildShiftVehicleBlockRemovedEsEvent(shiftId, block, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: shiftId,
             eventType: 'ShiftVehicleBlockRemoved',
             eventTypeVersion: 1,
             user,
-            data: { blockKey }
+            data: {block}
         });
     }
 

@@ -476,6 +476,15 @@ describe('DriverApp workflows', function () {
         });
 
 
+        it('Query EMPTY Service historial', function (done) {
+            const year = new Date().getFullYear();
+            const month = 1;
+            Service.queryHistoricalService$(users.driver, { year, month, page: 0, count: 20 }).pipe(                
+                tap(( serv ) => expect(serv).to.be.empty),
+            ).subscribe(...getRxDefaultSubscription('Service Service historial', done));
+        });
+
+
     });
 
 

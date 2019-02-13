@@ -29,7 +29,7 @@ class DriverES {
         return ShiftDA.findOpenShiftByDriver$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftDriverBlockRemovedEsEvent(_id, data.blockKey,user))), //Build and send ShiftDriverBlockRemoved event (event-sourcing)
+                this.buildShiftDriverBlockRemovedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))), //Build and send ShiftDriverBlockRemoved event (event-sourcing)
         );
     }
 
@@ -41,7 +41,7 @@ class DriverES {
         return ShiftDA.findOpenShiftByDriver$(aid, { _id: 1 }).pipe(
             filter(shift => shift),
             mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftDriverBlockAddedEsEvent(_id, data.blockKey,user))), //Build and send ShiftDriverBlockAdded event (event-sourcing)
+                this.buildShiftDriverBlockAddedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))), //Build and send ShiftDriverBlockAdded event (event-sourcing)
         );
     }
     //#region Object builders
@@ -51,14 +51,14 @@ class DriverES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftDriverBlockAddedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
+    buildShiftDriverBlockAddedEsEvent(shiftId, block, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: shiftId,
             eventType: 'ShiftDriverBlockAdded',
             eventTypeVersion: 1,
             user,
-            data: { blockKey }
+            data: {block}
         });
     }
     /**
@@ -66,14 +66,14 @@ class DriverES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildShiftDriverBlockRemovedEsEvent(shiftId, blockKey, user = 'SYSTEM') {
+    buildShiftDriverBlockRemovedEsEvent(shiftId, block, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: shiftId,
             eventType: 'ShiftDriverBlockRemoved',
             eventTypeVersion: 1,
             user,
-            data: { blockKey }
+            data: {block}
         });
     }
 

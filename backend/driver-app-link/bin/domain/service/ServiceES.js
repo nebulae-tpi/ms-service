@@ -1,8 +1,8 @@
 'use strict'
 
 
-const { of, interval, forkJoin, Observable } = require("rxjs");
-const { take, mergeMap, catchError, map, tap, filter, delay, mapTo } = require('rxjs/operators');
+const { of, timer, forkJoin, Observable, iif, from, empty } = require("rxjs");
+const { toArray, mergeMap, map, tap, filter, delay, mapTo, switchMap } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -22,8 +22,8 @@ class ServiceES {
     constructor() {
     }
 
-    /**
-     * Handles EventSourcing Event ServiceRequested
+        /**
+     * Handles EventSourcing Event ServiceRequested.
      * @param {Event} evt 
      * @returns {Observable}
      */
@@ -57,6 +57,120 @@ class ServiceES {
                 shift.driver.username,
                 'ServiceOffered', { _id: aid, timestamp: Date.now(), pickUp: { ...pickUp, location: undefined } }
             ))
+        );
+    }
+
+    /**
+     * Handles EventSourcing Event ServiceRequested
+     * @param {Event} evt 
+     * @returns {Observable}
+     */
+    // handleServiceRequested$({ aid, data }) {
+    //     console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+
+    //     return Observable.create(obs => {
+    //         const { pickUp, client, businessId, timestamp } = data;
+
+    //         const maxDistance = client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
+    //         const minDistance = client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
+    //         const clientLocation = pickUp.marker;
+    //         const priorityDriver = client.referrerDriverDocumentId;
+    //         const offerTotalSpan = parseInt(process.env.SERVICE_OFFER_TOTAL_SPAN);
+    //         const offerSearchSpan = parseInt(process.env.SERVICE_OFFER_SEARCH_SPAN);
+    //         const offerShiftSpan = parseInt(process.env.SERVICE_OFFER_SHIFT_SPAN);
+
+    //         console.log(`===== WILL OFFER ${JSON.stringify({ maxDistance, minDistance, clientLocation, priorityDriver, client })}==========`);
+
+    //         if (!clientLocation || clientLocation.type !== 'Point'
+    //             || !clientLocation.coordinates || clientLocation.coordinates.length !== 2
+    //             || clientLocation.coordinates[0] === 0 || clientLocation.coordinates[1] === 0) {
+    //             console.error(`WARNING: ServiceES.handleServiceRequested: received an offer with an invalid client location ${JSON.stringify({ aid, ...data })} `);
+    //             return of({});
+    //         }
+
+    //         timer(200, offerTotalSpan).pipe(
+    //             switchMap(firstTime =>
+    //                 iif(() => !firstTime,
+    //                     this.searchAndOfferService$({ serviceId: aid, maxDistance, minDistance, clientLocation, priorityDriver, offerSearchSpan, offerShiftSpan, pickUp }),
+    //                     this.onServiceTotalSpanCompleted$(aid)
+    //                 )
+    //             )
+    //         ).subscribe(
+    //             (evt) => { console.log(`ServiceES.handleServiceRequested.obs.evt:[${evt.t}]: ${JSON.stringify(evt)}`); },
+    //              (handlerErr) => {
+    //                 console.error(`ServiceES.handleServiceRequested.obs.error[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`);
+    //                 ServiceES.logError(handlerErr);
+    //             },
+    //             () => console.log(`ServiceES.handleServiceRequested.obs.completed[${aid}]`),
+    //         );
+    //         obs.next(`ServiceES: handleServiceRequested: subscription for service ${aid} started`);
+    //         obs.complete();
+    //     });
+
+
+    // }
+
+    searchAndOfferService$({ serviceId, maxDistance, minDistance, clientLocation, priorityDriver, offerSearchSpan, offerShiftSpan, pickUp }) {
+
+        return timer(0, offerSearchSpan).pipe(
+            tap(x => {
+                console.log('+++++++++++');
+                console.log('+++++++++++');
+                console.log('+++++++++++');
+            }),
+            tap(x => console.log(` =================> searchAndOfferService ${x}  `)),
+            switchMap(i => ServiceDA.findById$(serviceId, { "businessId": 1, "timestamp": 1, "offers": 1 })),
+            mergeMap(service => ShiftDA.findServiceOfferCandidates$(service.businessId, clientLocation, maxDistance, minDistance, { "driver.username": 1, "businessId": 1, "driver.documentId": 1 }).pipe(toArray(), map(shifts => ({ shifts, service })))),
+            map(({ service, shifts }) => this.sortAndFilterShifts(service, shifts, priorityDriver)),
+            mergeMap(shifts => from(shifts)),
+
+            mergeMap(shift => {
+                const delayVal = shift.first ? 0 : offerShiftSpan;
+                return of(shift).pipe(
+                    delay(delayVal),
+                    mergeMap(() => ServiceDA.addShiftToActiveOffers$(serviceId, shift._id)),
+                    mergeMap(() => driverAppLinkBroker.sendServiceEventToDrivers$(
+                        shift.businessId,
+                        shift.driver.username,
+                        'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...pickUp, location: undefined } }
+                    ))
+                )
+            }),
+        );
+    }
+
+    sortAndFilterShifts(service, shifts, priorityDriver = undefined) {
+        const shiftsToIgnore = service.offers ? Object.keys(service.offers) : [];
+        let filteredShifts = shifts.filter(s => !shiftsToIgnore.includes(s._id));
+
+        console.log("!!!!!!!!!!!!!!!!");
+        console.log("!!!!!!!!!!!!!!!!");
+        console.log(JSON.stringify(filteredShifts));
+        console.log("!!!!!!!!!!!!!!!!");
+        console.log("!!!!!!!!!!!!!!!!");
+
+        const priorityShift = !priorityDriver ? undefined : filteredShifts.filter(s => s.driver.documentId === priorityDriver)[0];
+        if (priorityShift) {
+            filteredShifts = filteredShifts.filter(s => s.driver.documentId !== priorityDriver);
+            filteredShifts.unshift(priorityShift);
+        }
+        if (filteredShifts.length > 0) {
+            filteredShifts[0].first = true;
+        }
+        console.log(` Shift Candidates : ${filteredShifts.map(s => s._id + " / " + s.driver.username)} `);
+        return filteredShifts;
+    }
+
+    onServiceTotalSpanCompleted$(serviceId) {
+
+        return of(`INFO: Total offer span exceded for service ${serviceId}`).pipe(
+            tap(x => {
+                console.log('^^^^^^^^^^^^^^');
+                console.log('^^^^^^^^^^^^^^');
+                console.log('^^^^^^^^^^^^^^');
+                console.log('^^^^^^^^^^^^^^');
+            }),
+            mergeMap(x => empty())
         );
     }
 
@@ -250,6 +364,28 @@ class ServiceES {
     }
 
     //#endregion
+
+
+    /**
+     * Logs an error at the console.error printing only the message and the stack related to the project source code
+     * @param {Error} error 
+     */
+    static logError(error) {
+        if (!error.stack) {
+            console.error(error);
+            return;
+        }
+        try {
+            const stackLines = error.stack.split('\n');
+            console.error(
+                new Date().toString() + ': ' + stackLines[0] + '\n' + stackLines.filter(line => line.includes('driver-app-link/bin')).join('\n') + '\n'
+            );
+        }
+        catch (e) {
+            console.error(e);
+            console.error(error);
+        }
+    }
 }
 
 /**

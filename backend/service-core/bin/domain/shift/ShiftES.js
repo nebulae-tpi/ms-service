@@ -90,7 +90,7 @@ class ShiftES {
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
-        return ShiftDA.updateOpenShiftVehicleBlock$(aid, false, data.blockKey).pipe(
+        return ShiftDA.updateOpenShiftVehicleBlock$(aid, false, data.block).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
@@ -106,7 +106,7 @@ class ShiftES {
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
-        return ShiftDA.updateOpenShiftVehicleBlock$(aid, true, data.blockKey).pipe(
+        return ShiftDA.updateOpenShiftVehicleBlock$(aid, true, data.block).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
@@ -121,7 +121,7 @@ class ShiftES {
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
-        return ShiftDA.updateOpenShiftDriverBlock$(aid, false, data.blockKey).pipe(
+        return ShiftDA.updateOpenShiftDriverBlock$(aid, false, data.block).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );
@@ -136,7 +136,7 @@ class ShiftES {
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
-        return ShiftDA.updateOpenShiftDriverBlock$(aid, true, data.blockKey).pipe(
+        return ShiftDA.updateOpenShiftDriverBlock$(aid, true, data.block).pipe(
             filter(shift => shift),
             mergeMap(shift => blockOrUnblockShiftStateIfNeeded$(shift, user))
         );

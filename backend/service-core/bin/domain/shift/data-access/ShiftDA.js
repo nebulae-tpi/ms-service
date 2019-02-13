@@ -160,8 +160,8 @@ class ShiftDA {
    * @param {boolean} blockAdded true=adding, false=removing
    * @param {string} blockKey block key to remove/add
    */
-  static updateOpenShiftVehicleBlock$(_id, blockAdded, blockKey) {
-    const update = blockAdded ? { $push: { "vehicle.blocks": blockKey } } : { $pull: { "vehicle.blocks": blockKey } };
+  static updateOpenShiftVehicleBlock$(_id, blockAdded, block) {
+    const update = blockAdded ? { $push: { "vehicle.blocks": block } } : { $pull: { "vehicle.blocks": { key: block.key } } };
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
@@ -180,8 +180,8 @@ class ShiftDA {
    * @param {boolean} blockAdded true=adding, false=removing
    * @param {string} blockKey block key to remove/add
    */
-  static updateOpenShiftDriverBlock$(_id, blockAdded, blockKey) {
-    const update = blockAdded ? { $push: { "driver.blocks": blockKey } } : { $pull: { "driver.blocks": blockKey } };
+  static updateOpenShiftDriverBlock$(_id, blockAdded, block) {
+    const update = blockAdded ? { $push: { "driver.blocks": block } } : { $pull: { "driver.blocks": { key: block.key } } };
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
