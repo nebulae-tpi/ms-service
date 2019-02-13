@@ -271,9 +271,13 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
 
       if (!this.clientData.location || !this.clientData.location.lat || !this.clientData.location.lng){
         this.showSnackBar('SATELLITE.SERVICES.CLIENT_LOCATION_MISSING');
-      }else{        
+      } else {      
         this.createPickUpMarker(selectedSatelliteClient._id, this.clientData.location.lat, this.clientData.location.lng);
       }
+
+      this.requestForm.patchValue({
+        notes: this.clientData.generalInfo.notes
+      });
     }
   }
 
@@ -599,21 +603,21 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   requestService(){
     const requestServiceForm = this.requestForm.getRawValue();
-
     return range(1, requestServiceForm.taxisNumber || 1)
     .pipe(
       map(requestNumber => {
-        console.log('Client marker position => ', this.clientMarker.getPosition(), this.clientData.generalInfo.zone);
         const features = requestServiceForm.features.filter(feature => feature.active).map(feature => feature.name);
 
         return {
           client: {
-            fullname: this.clientData.generalInfo.name,
-            tip: 0,
-            tipType: '',
             id: this.clientData._id,
+            fullname: this.clientData.generalInfo.name,
             username: this.clientData.auth ? this.clientData.auth.username: null,
-            referrerDriverDocumentId: this.clientData.generalInfo.referrerDriverDocumentId
+            tip: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.tip: 0,
+            tipType: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.tipType: '',                        
+            referrerDriverDocumentId: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.referrerDriverDocumentId: null,
+            offerMinDistance: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.offerMinDistance: null,
+            offerMaxDistance: this.clientData.satelliteInfo ? this.clientData.satelliteInfo.offerMaxDistance: null,
           },
           pickUp: {
             marker: {
@@ -626,9 +630,9 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
             city: this.clientData.generalInfo.city,
             zone: this.clientData.generalInfo.zone,
             neighborhood: this.clientData.generalInfo.neighborhood,
-            addressLine1: this.clientData.generalInfo.address,
-            addressLine2: '',
-            notes: requestServiceForm.reference
+            addressLine1: this.clientData.generalInfo.addressLine1,
+            addressLine2: this.clientData.generalInfo.addressLine2,
+            notes: requestServiceForm.notes
           },
           paymentType: requestServiceForm.paymentType, // ?
           requestedFeatures: features,

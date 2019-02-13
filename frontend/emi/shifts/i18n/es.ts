@@ -3,31 +3,32 @@ export const locale = {
   data: {
     SHIFT: {
       HEADER_TITLE: 'TURNOS',
-      DETAIL_HEADER_NAME: 'Detalle del turno',
+      DETAIL_HEADER_NAME: 'Detalle del Turno',
       SHIFT_TABLE_LIST: {
         TIMESTAMP: 'Fecha',
-        CLIENT_NAME: 'Nombre cliente',
-        DRIVER_NAME: 'Nombre conductor',
-        LICENSE_PLATE: 'Placa vehículo',
-        DRIVER_DOCUMENT: 'Cédula de conductor',
+        CLIENT_NAME: 'Nombre Cliente',
+        DRIVER_NAME: 'Nombre Conductor',
+        LICENSE_PLATE: 'Placa Vehículo',
+        DRIVER_DOCUMENT: 'Cédula de Conductor',
         VEHICLE_MODEL: 'Modelo',
-        LAST_COMMUNICATION: 'Última conexión establecida'
+        LAST_COMMUNICATION: 'Última Conexión Establecida'
       },
       DRIVER_DETAIL: {
         ID: 'ID',
         FULL_NAME: 'Nombre',
-        DOC_TYPE: 'Tipo de documento',
+        DOC_TYPE: 'Tipo de Documento',
         DOC_TYPES: {
           CC: 'Cédula de Ciudadanía'
         },
         LANGUAGES_TITLE: 'Idiomas',
         BLOCKS_TITLE: 'Bloqueos',
         LANGUAGES: {
-          EN: 'Inglés'
+          EN: 'Inglés',
+          english: 'Inglés'
         },
         DOCUMENT_ID: 'Documento',
         PHONE: 'Teléfono',
-        USERNAME: 'Nombre de usuario'
+        USERNAME: 'Nombre de Usuario'
       },
       VEHICLE_DETAIL: {
         ID: 'ID',
@@ -37,10 +38,10 @@ export const locale = {
         BLOCKS_TITLE: 'Bloqueos',
         FEATURES_TITLE: 'Características',
         FEATURES: {
-          AC: 'Aire acondicionado',
+          AC: 'Aire Acondicionado',
           TRUNK: 'Baúl',
-          ROOF_RACK: 'Parrilla de techo',
-          PETS: 'Permite mascotas',
+          ROOF_RACK: 'Parrilla de Techo',
+          PETS: 'Permite Mascotas',
           BIKE_RACK: 'Portabicicletas'
         }
       },
@@ -51,52 +52,52 @@ export const locale = {
         OFFLINE: 'Desconectado'
       },
       SHIFT_FILTERS: {
-        INIT_TIMESTAMP: 'Fecha inicial',
-        END_TIMESTAMP: 'Fecha final',
-        VEHICLE_LICENSE_PLATE: 'Placa de vehículo',
-        DRIVER_NAME: 'Nombre conductor',
-        DRIVER_DOCUMENT_ID: 'Documento ID conductor',
-        DRIVER_FULLNAME: 'Nombre conductor',
-        LICENSE_PLATE: 'Placa vehículo',
-        PAYMENT_TYPE: 'Tipo pago',
+        INIT_TIMESTAMP: 'Fecha Inicial',
+        END_TIMESTAMP: 'Fecha Final',
+        VEHICLE_LICENSE_PLATE: 'Placa de Vehículo',
+        DRIVER_NAME: 'Nombre Conductor',
+        DRIVER_DOCUMENT_ID: 'Documento ID Conductor',
+        DRIVER_FULLNAME: 'Nombre Conductor',
+        LICENSE_PLATE: 'Placa Vehículo',
+        PAYMENT_TYPE: 'Tipo Pago',
         STATES: 'Estados',
         SHOW_CLOSED: 'Mostrar Cerrados',
         FILTER_TITLE: 'Filtros',
-        RESET_FILTER: 'Limpiar filtros'
+        RESET_FILTER: 'Limpiar Filtros'
       },
       SHIFT_STATES: {
         AVAILABLE: 'Disponible',
-        NOT_AVAILABLE: 'No disponible',
+        NOT_AVAILABLE: 'No Disponible',
         BUSY: 'Ocupado',
         BLOCKED: 'Bloqueado',
         CLOSED: 'Cerrado'
       },
       DETAILS: {
-        GENERAL_INFO: 'Información general',
+        GENERAL_INFO: 'Información General',
         TABS: {
-          DRIVER_INFO: 'Información de conductor',
-          STATE_CHANGES: 'Cambios de estado',
-          VEHICLE_INFO: 'Información de vehículo'
+          DRIVER_INFO: 'Información de Conductor',
+          STATE_CHANGES: 'Cambios de Estado',
+          VEHICLE_INFO: 'Información de Vehículo'
         },
         CLIENT: 'Cliente',
         DRIVER: 'Conductor',
         VEHICLE: 'Vehículo',
         DATE: 'Fecha',
         STATE: 'Estado',
-        STATES: 'Estados del servicio',
-        CLIENT_FULLNAME: 'Nombre cliente',
-        CLIENT_USERNAME: 'Nombre de usuario',
-        CLIENT_TIP: 'Propina cliente',
-        CLIENT_TIP_TYPE: 'Tipo propina',
-        DRIVER_DOCUMENT_ID: 'Documento identificación conductor',
-        DRIVER_FULLNAME: 'Nombre conductor',
+        STATES: 'Estados del Servicio',
+        CLIENT_FULLNAME: 'Nombre Cliente',
+        CLIENT_USERNAME: 'Nombre de Usuario',
+        CLIENT_TIP: 'Propina Cliente',
+        CLIENT_TIP_TYPE: 'Tipo Propina',
+        DRIVER_DOCUMENT_ID: 'Documento Identificación Conductor',
+        DRIVER_FULLNAME: 'Nombre Conductor',
         VEHICLE_LICENSE_PLATE: 'Licencia',
-        PAYMENT_TYPE: 'Tipo pago',
+        PAYMENT_TYPE: 'Tipo Pago',
         FARE: 'Tarifa',
         FARE_DISCOUNT: 'Descuento',
-        SHIFT_PARAMS: 'Parámetros del servicio',
-        PICKED_UP: 'Lugar de recogida',
-        DROP_OFF: 'Lugar de destino',
+        SHIFT_PARAMS: 'Parámetros del Servicio',
+        PICKED_UP: 'Lugar de Recogida',
+        DROP_OFF: 'Lugar de Destino',
         CITY: 'Ciudad',
         ZONE: 'Zona',
         NEIGHBORHOOD: 'Barrio',
@@ -104,14 +105,15 @@ export const locale = {
         ADDRESSLINE2: 'Dirección 2',
         NOTES: 'Notas',
         FEATURES: {
-          AC: 'Aire acondicionado',
+          AC: 'Aire Acondicionado',
           TRUNK: 'Baúl',
-          ROOF_RACK: 'Parrilla de techo',
-          PETS: 'Permite mascotas',
+          ROOF_RACK: 'Parrilla de Techo',
+          PETS: 'Permite Mascotas',
           BIKE_RACK: 'Portabicicletas'
         },
         TIP_TYPES: {
-          ON_SITE: 'Propina en sitio'
+          'CASH': 'Efectivo',
+          'VIRTUAL_WALLET': 'Billetera Virtual'
         }
       }
     },

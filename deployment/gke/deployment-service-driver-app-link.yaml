@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: nebulaetpi/service.backend.driverapplink:2.2.1 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: nebulaetpi/service.backend.driverapplink:2.2.2 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -91,15 +91,15 @@ spec:
              key: DRIVER_APP_MQTT_SERVER_PASSWORD
         # SERVICE OFFER SPANS CONFIG
         - name: SERVICE_OFFER_MAX_DISTANCE
-          value: 3000
+          value: "3000"
         - name: SERVICE_OFFER_MIN_DISTANCE
-          value: 0
+          value: "0"
         - name: SERVICE_OFFER_TOTAL_SPAN
-          value: 60000
+          value: "60000"
         - name: SERVICE_OFFER_SEARCH_SPAN
-          value: 20000
+          value: "20000"
         - name: SERVICE_OFFER_SHIFT_SPAN
-          value: 3000
+          value: "3000"
 
         
       volumes:

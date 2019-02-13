@@ -74,6 +74,7 @@ class ClientDA {
           {
             $set: {
               generalInfo: clientSatellite.generalInfo, 
+              satelliteInfo: clientSatellite.satelliteInfo, 
               location: clientSatellite.location, 
               businessId: clientSatellite.businessId, 
               state: clientSatellite.state,

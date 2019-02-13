@@ -98,7 +98,7 @@ input PaginationInput {
 
 
 type Query {
-  "Get Drivers filtered "
+  "Get Drivers filtered."
   ServiceDrivers(filterInput: ServiceVehicleAssignmentFilterInput!, paginationInput: PaginationInput!): [ServiceDriver]
   "Get the amount of Drivers filtered "
   ServiceDriversSize(filterInput: ServiceVehicleAssignmentFilterInput!): Int!

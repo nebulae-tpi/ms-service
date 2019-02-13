@@ -78,7 +78,8 @@ class VehicleES {
     }
 
     handleVehicleFeaturesUpdated$(VehicleVehicleFeaturesUpdatedEvent){
-        return of(VehicleVehicleFeaturesUpdatedEvent.data)
+        console.log("VehicleVehicleFeaturesUpdatedEvent. data", VehicleVehicleFeaturesUpdatedEvent. data);
+        return of(VehicleVehicleFeaturesUpdatedEvent.data.features)
         .pipe(
             map(newFeatures => ({
                 fuelType: newFeatures.fuel,

@@ -207,7 +207,7 @@ type Query{
     ServiceCoreService(id: String): [ServiceCoreService]
 }
 
-type Mutation{
+type Mutation {
     "Request a new service"
     ServiceCoreRequestService(
         "client info"

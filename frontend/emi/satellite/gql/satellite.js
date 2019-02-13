@@ -101,12 +101,21 @@ export const ServiceClientSatellite = gql`
       generalInfo {
         name
         phone
-        address
+        addressLine1
+        addressLine2
         city
         zone
         neighborhood
         email
         referrerDriverDocumentId
+        notes
+      }
+      satelliteInfo{
+        referrerDriverDocumentId
+        tipType
+        tip
+        offerMinDistance
+        offerMaxDistance
       }
       location{
         lat
@@ -133,12 +142,21 @@ export const ServiceClientSatellites = gql`
       generalInfo {
         name
         phone
-        address
+        addressLine1
+        addressLine2
         city
         zone
         neighborhood
         email
         referrerDriverDocumentId
+        notes
+      }
+      satelliteInfo{
+        referrerDriverDocumentId
+        tipType
+        tip
+        offerMinDistance
+        offerMaxDistance
       }
       location{
         lat
@@ -160,7 +178,7 @@ export const ServiceClientSatellites = gql`
 
 // MUTATIONS 
 export const ServiceCoreRequestService = gql `
-  mutation ServiceCoreRequestService($client: ServiceCoreClientInput!, $pickUp: ServiceCoreLocationInput!, $paymentType: String!, $requestedFeatures: [String], $dropOff: ServiceCoreLocationInput, $fareDiscount: Float, $fare: BigInt, $tip: BigInt){
+  mutation ServiceCoreRequestService($client: ServiceCoreClientInput!, $pickUp: ServiceCoreLocationInput!, $paymentType: String!, $requestedFeatures: [String], $dropOff: ServiceCoreLocationInput, $fareDiscount: Float, $fare: Int, $tip: Int){
     ServiceCoreRequestService(client: $client, pickUp: $pickUp, paymentType: $paymentType, requestedFeatures: $requestedFeatures, dropOff: $dropOff, fareDiscount: $fareDiscount, fare: $fare, tip: $tip){
       accepted
     }
