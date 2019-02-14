@@ -151,7 +151,7 @@ class ServiceCQRS {
       mergeMapTo(ServiceDA.findHistoricalServiceByDriver$(driverId, year, month, page, count, {
         timestamp: 1, client: 1, pickUp: 1, dropOff: 1, verificationCode: 1, requestedFeatures: 1, paymentType: 1, fareDiscount: 1, fare: 1, tip: 1, route: 1, state: 1
       })),
-      map(service => this.formatServiceToGraphQLSchema(service)),      
+      map(service => this.formatServiceToGraphQLSchema(service)),
       toArray(),
       first(arr => arr, []),
       tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalDriverServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINEs
@@ -476,7 +476,7 @@ class ServiceCQRS {
   formatServiceToGraphQLSchema(service) {
     const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
 
-    return !service ? undefined : { ...service, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+    return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
   }
 
 
