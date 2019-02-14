@@ -44,8 +44,11 @@ class ShiftDA {
       businessId,
       state: "AVAILABLE",
       online: true,
-      'vehicle.features': { $all: requestedFeatures },
+      
     };
+    if(requestedFeatures.length > 0){
+      query['vehicle.features'] = { $all: requestedFeatures };
+    }
     for (let i = 0, len = ignoredShiftsIds.length; i < len; i++) {
       query[`offer.shifts.${ignoredShiftsIds[i]}`] = { $exists: false };
     }
