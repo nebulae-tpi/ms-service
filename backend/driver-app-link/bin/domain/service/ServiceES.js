@@ -133,7 +133,7 @@ class ServiceES {
                         obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
                     }
                 }
-                shifts = shifts.filter(s => s.dist.calculated > service.offer.params.minDistance);
+                shifts = shifts.filter(s => s.referred || (s.dist.calculated > service.offer.params.minDistance));
                 obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
                 const offerSearchThreshold = offerSearchSpan + Date.now();
