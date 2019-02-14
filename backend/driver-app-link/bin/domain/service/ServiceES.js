@@ -128,7 +128,7 @@ class ServiceES {
                 if (service.client && service.client.referrerDriverDocumentId) {
                     const priorityShift = shifts.filter(sh => sh.driver.documentId === service.client.referrerDriverDocumentId)[0];
                     if (priorityShift) {
-                        shifts = shifts.filter(s => s.driver.documentId !== priorityDriver);
+                        shifts = shifts.filter(s => s.driver.documentId !== priorityShift.driver.documentId);
                         shifts.unshift({ ...priorityShift, referred: true });
                         obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
                     }
