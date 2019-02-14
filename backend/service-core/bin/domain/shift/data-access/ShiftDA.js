@@ -138,6 +138,27 @@ class ShiftDA {
     );
   }
 
+
+  /**
+   * Updates the shift state and returns the original document with only the online flag
+   * @param {string} _id 
+   * @param {*} location 
+   */
+  static updateShiftLocationAndGetOnlineFlag$(_id, location) {
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
+        { _id },
+        { $set: { lastReceivedComm: Date.now(), location } },
+        {
+          projection: { online: 1 },
+          upsert: false,
+          returnOriginal: true
+        }
+      )
+    ).pipe(map(result => result && result.value ? result.value : undefined));
+  }
+
+
   /**
    * Updates the shift state
    * @param {string} _id 

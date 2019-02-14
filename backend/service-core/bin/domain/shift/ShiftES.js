@@ -146,15 +146,17 @@ class ShiftES {
      * updates shift current location
      * @param {Event} shiftLocationReportedEvt
      */
-    handleShiftLocationReported$({ aid, data }) {
+    handleShiftLocationReported$({ aid, data, user }) {
         if (aid === undefined) return of({});//DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
         console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
-        return merge(
-            ShiftDA.updateShiftLocation$(aid, data.location),
-            data.serviceId ? ServiceDA.appendLocation$(data.serviceId, data.location) : of({})
+
+        return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
+            filter(shift => !shift.online),
+            mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
+
     }
 
     /**
