@@ -244,6 +244,7 @@ class ShiftDA {
     const query = {
       $and: [
         { online: false },
+        { state: { $ne: "CLOSED" } },
         { lastReceivedComm: { $lte: Date.now() - SHIFT_CLOSE_THRESHOLD } }
       ]
     };
