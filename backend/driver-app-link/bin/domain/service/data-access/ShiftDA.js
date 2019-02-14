@@ -50,37 +50,31 @@ class ShiftDA {
       query[`offer.shifts.${ignoredShiftsIds[i]}`] = { $exists: false };
     }
 
+    const aggregateQuery = [{
+      $geoNear: {
+        near: location,
+        distanceField: "dist.calculated",
+        maxDistance: maxDistance,
+        minDistance: minDistance,
+        query,
+        includeLocs: "dist.location",
+        num: 20,
+        spherical: true
+      }
+    }]
 
 
-    console.log(JSON.stringify(query));
+
+    console.log(JSON.stringify(aggregateQuery));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection('Shift')),
       mergeMap(collection =>
         defer(() =>
-          //mongoDB.extractAllFromMongoCursor$(
-          // collection.aggregate([
-          //   { $match: {} }
-          //   , {
-          //     $group:
-          //       { _id: '$a', total: { $sum: '$a' } }
-          //   }
-          // ]).toArray,
-
+    
           collection.aggregate(
-            [{
-              $geoNear: {
-                near: location,
-                distanceField: "dist.calculated",
-                maxDistance: maxDistance,
-                minDistance: minDistance,
-                query,
-                includeLocs: "dist.location",
-                num: 20,
-                spherical: true
-              }
-            }]
+            aggregateQuery
           ).toArray()
           //)
         )
