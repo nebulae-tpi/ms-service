@@ -195,6 +195,8 @@ describe('DriverApp workflows', function () {
                 appLinkBroker.listenShiftEventsFromServer$(['ShiftStateChanged'], users.driver.username).pipe(
                     first((evt) => evt.t = 'ShiftStateChanged' && evt.data.state == 'NOT_AVAILABLE', undefined),
                     tap((evt) => expect(evt.data.state).to.be.eq('NOT_AVAILABLE')),
+                    tap((evt) => expect(evt.data.driver).to.exist),
+                    tap((evt) => expect(evt.data.vehicle).to.exist),
                 ),
                 Shift.setShiftState$(users.driver, "NOT_AVAILABLE").pipe(
                     delay(100),
@@ -211,6 +213,8 @@ describe('DriverApp workflows', function () {
                 appLinkBroker.listenShiftEventsFromServer$(['ShiftStateChanged'], users.driver.username).pipe(
                     first((evt) => evt.t = 'ShiftStateChanged' && evt.data.state == 'AVAILABLE', undefined),
                     tap((evt) => expect(evt.data.state).to.be.eq('AVAILABLE')),
+                    tap((evt) => expect(evt.data.driver).to.exist),
+                    tap((evt) => expect(evt.data.vehicle).to.exist),
                 ),
                 Shift.setShiftState$(users.driver, "AVAILABLE").pipe(
                     delay(100),
@@ -273,7 +277,7 @@ describe('DriverApp workflows', function () {
                     tap(({ _id, timestamp, pickUp }) => expect(pickUp.neighborhood).to.exist),
                     tap(({ _id, timestamp, pickUp }) => expect(pickUp.city).to.exist),
                     tap(service => users.driver.serviceOffer = service),
-                    delay(500)
+                    //delay(500)
                 ),
                 Service.requestService$(users.satellite, serviceRequest).pipe(
                     delay(100),

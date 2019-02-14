@@ -37,15 +37,38 @@ class ServiceDA {
     ).pipe(filter(val => val));
   }
 
-  static addShiftToActiveOffers$(_id,shiftId){
-    const update = {$set : {}};
-    update["$set"][`offers.${shiftId}.active`] = true;
+  static addShiftToActiveOffers$(_id, shiftId, distance, referred = false) {
+    const update = { $set: {} };
+    update["$set"][`offer.shifts.${shiftId}`] = { active: true, offerTs: Date.now(), distance, referred };
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
         update,
         { upsert: false }
       )
+    );
+  }
+
+  static updateOfferParamsAndfindById$(_id, fieldsToSet = undefined, fieldsToIncrement = undefined, projection = undefined) {
+    const update = {};
+    if(fieldsToSet){
+      update['$set'] = fieldsToSet;
+    }
+    if(fieldsToIncrement){
+      update['$inc'] = fieldsToIncrement;
+    }
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
+        { _id },
+        update,
+        {
+          projection,
+          upsert: false,
+          returnOriginal: false
+        }
+      )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
     );
   }
 

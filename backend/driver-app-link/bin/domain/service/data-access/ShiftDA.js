@@ -5,7 +5,7 @@ let mongoDB = undefined;
 const CollectionName = "Shift";
 const { CustomError } = require("../../../tools/customError");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
-const { map, mergeMap, first, filter } = require("rxjs/operators");
+const { map, mergeMap, tap, filter } = require("rxjs/operators");
 
 class ShiftDA {
 
@@ -37,28 +37,57 @@ class ShiftDA {
     );
   }
 
-  static findServiceOfferCandidates$(businessId, location, maxDistance = 3000, minDistance = 0, projection = undefined) {
+  static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined) {
     const explorePastMonth = Date.today().getDate() <= 1;
 
     const query = {
       businessId,
       state: "AVAILABLE",
       online: true,
-      location: {
-        $near: {
-          $geometry: location,
-          $maxDistance: maxDistance,
-          $minDistance: minDistance
-        }
-      }
+      'vehicle.features': { $all: requestedFeatures },
     };
+    for (let i = 0, len = ignoredShiftsIds.length; i < len; i++) {
+      query[`offer.shifts.${ignoredShiftsIds[i]}`] = { $exists: false };
+    }
+
+
 
     console.log(JSON.stringify(query));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection('Shift')),
-      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
+      mergeMap(collection =>
+        defer(() =>
+          //mongoDB.extractAllFromMongoCursor$(
+          // collection.aggregate([
+          //   { $match: {} }
+          //   , {
+          //     $group:
+          //       { _id: '$a', total: { $sum: '$a' } }
+          //   }
+          // ]).toArray,
+
+          collection.aggregate(
+            [{
+              $geoNear: {
+                near: location,
+                distanceField: "dist.calculated",
+                maxDistance: maxDistance,
+                minDistance: minDistance,
+                query,
+                includeLocs: "dist.location",
+                num: 20,
+                spherical: true
+              }
+            }]
+          ).toArray()
+          //)
+        )
+      ),
+      tap(x => console.log('==========================')),
+      tap(x => console.log(JSON.stringify(x))),
+      tap(x => console.log('==========================')),
     );
   }
 

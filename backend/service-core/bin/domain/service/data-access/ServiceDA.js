@@ -190,7 +190,7 @@ class ServiceDA {
       state: 'REQUESTED',
     };
     // The shift is within the sent and actives offers
-    find[`offers.${shiftId}.active`] = true;
+    find[`offer.shifts.${shiftId}.active`] = true;
 
     const update = {
       $set: {
