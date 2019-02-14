@@ -39,8 +39,9 @@ class ShiftES {
     handleShiftStateChanged$({ aid, data }) {
         console.log(`ShiftES: handleShiftStateChanged: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 }).pipe(
-            mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, state: data.state }))
+        return ShiftDA.findById$(aid, { businessId: 1, driver: 1, vehicle: 1, state: 1 }).pipe(
+            filter(shift => shift.driver && shift.vehicle),
+            mergeMap((shift) => driverAppLinkBroker.sendShiftEventToDrivers$(shift.businessId, shift.driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema({ ...shift, ...data })))
         );
     }
 
