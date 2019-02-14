@@ -11,7 +11,7 @@ const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
 
 const SHIFT_DISCONNECT_THRESHOLD = 5*60*1000; // FIVE MINUTES
-const SHIFT_CLOSE_THRESHOLD = 12 * 60 * 60 * 1000 // Twelve HOUR
+const SHIFT_CLOSE_THRESHOLD = 12 * 60 * 60 * 1000 // TWELVE HOUR
 
 class ShiftDA {
 
