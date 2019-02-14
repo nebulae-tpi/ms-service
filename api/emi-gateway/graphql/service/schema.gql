@@ -253,13 +253,20 @@ type ServiceShiftDriver {
   username: String
 }
 
+type ServiceShiftVehicleBlock {
+  key: String!
+  notes: String
+  startTime: BigInt
+  endTime: BigInt
+}
+
 type ServiceShiftVehicle {
   "Vehicle id"
   id: String
   "VehicleLicense Plate"
   licensePlate: String
   "Vehicle blocks"
-  blocks: [String]
+  blocks: [ServiceShiftVehicleBlock]
   "Vehicle features"
   features: [String]
   "Vehicle brand"

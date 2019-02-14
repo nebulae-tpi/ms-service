@@ -36,6 +36,9 @@ export const locale = {
         MODEL: 'Model',
         LINE: 'Line',
         BLOCKS_TITLE: 'Blocks',
+        BLOCKS: {
+          PICO_Y_PLACA: 'License plate ending restriction'
+        },
         FEATURES_TITLE: 'Features',
         FEATURES: {
           AC: 'Air Conditioning',

@@ -36,6 +36,9 @@ export const locale = {
         MODEL: 'Modelo',
         LINE: 'Línea',
         BLOCKS_TITLE: 'Bloqueos',
+        BLOCKS: {
+          PICO_Y_PLACA: 'Pico y Placa'
+        },
         FEATURES_TITLE: 'Características',
         FEATURES: {
           AC: 'Aire Acondicionado',

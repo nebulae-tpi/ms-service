@@ -29,7 +29,9 @@ export const ServiceShift = gql`
       vehicle {
         id
         licensePlate
-        blocks
+        blocks {
+          key
+        }
         features
         brand
         line
@@ -48,28 +50,28 @@ export const ServiceShifts = gql`
       state
       online
       lastReceivedComm
-      location {
-        type
-        coordinates
-      }
+      # location {
+      #   type
+      #   coordinates
+      # }
       driver {
         id
         fullname
         blocks
-        documentType
+        # documentType
         documentId
-        pmr
-        languages
-        phone
+        # pmr
+        # languages
+        # phone
         username
       }
       vehicle {
         id
         licensePlate
-        blocks
-        features
-        brand
-        line
+        # blocks
+        # features
+        # brand
+        # line
         model
       }
     }
