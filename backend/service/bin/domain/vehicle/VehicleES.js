@@ -1,9 +1,10 @@
 'use strict'
 
 const {of} = require("rxjs");
-const { tap, mergeMap, catchError, map, mapTo } = require('rxjs/operators');
+const { tap, mergeMap, catchError, map, mapTo, delay } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const VehicleDA = require('../../data/VehicleDA');
+const DriverDA = require('../../data/DriverDA');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 
 /**
@@ -50,8 +51,8 @@ class VehicleES {
      * Update the general info on the materialized view according to the received data from the event store.
      * @param {*} driverGeneralInfoUpdatedEvent driver created event
      */
-    handleVehicleGeneralInfoUpdated$(driverGeneralInfoUpdatedEvent) {  
-        return of(driverGeneralInfoUpdatedEvent.data)
+    handleVehicleGeneralInfoUpdated$(vehicleGeneralInfoUpdated) {  
+        return of(vehicleGeneralInfoUpdated.data.generalInfo)
         .pipe(
             map(newGeneralInfo => ({
                 licensePlate: newGeneralInfo.licensePlate,
@@ -59,7 +60,12 @@ class VehicleES {
                 line: newGeneralInfo.line,
                 model: newGeneralInfo.model,
             })),
-            mergeMap(update => VehicleDA.updateVehicleInfo$(driverGeneralInfoUpdatedEvent.aid, update) ),
+            mergeMap(update => VehicleDA.updateVehicleInfo$(vehicleGeneralInfoUpdated.aid, update)),
+            mergeMap(oldVehicle => oldVehicle.licensePlate != vehicleGeneralInfoUpdated.data.generalInfo.licensePlate
+                ? DriverDA.unassignVehicleFromAllDrivers$(oldVehicle.licensePlate)
+                : of({result: "PLATE NOT CHANGED"})
+            ),
+            tap(r => console.log(r.result)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result))
         );
     }
@@ -69,7 +75,7 @@ class VehicleES {
      * @param {*} VehicleStateUpdatedEvent events that indicates the new state of the driver
      */
     handleVehicleStateUpdated$(VehicleStateUpdatedEvent) {          
-        return of(VehicleStateUpdatedEvent.data)
+        return of(VehicleStateUpdatedEvent.data.state)
         .pipe(
             map(newState => ({ active: newState })),
             mergeMap(update => VehicleDA.updateVehicleInfo$( VehicleStateUpdatedEvent.aid, update)),

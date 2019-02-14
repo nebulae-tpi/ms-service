@@ -117,14 +117,13 @@ class VehicleDA {
    */
   static updateVehicleInfo$(id, update) {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
-
-    return defer(()=>
+    return defer(() =>
         collection.findOneAndUpdate(
           { _id: id },
           {
             $set: { ...update }
           },{
-            returnOriginal: false
+            returnOriginal: true
           }
         )
     ).pipe(

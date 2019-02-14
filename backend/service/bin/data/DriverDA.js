@@ -179,6 +179,15 @@ class DriverDA {
     ))
   }
 
+  static unassignVehicleFromAllDrivers$(licensePlate){
+    console.log("unassignVehicleFromAllDrivers$", licensePlate);
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.updateMany(
+      { assignedVehicles: { $in: [licensePlate] } },
+      { $pull: { assignedVehicles: licensePlate } }
+    ))
+  }
+
 }
 /**
  * @returns {DriverDA}
