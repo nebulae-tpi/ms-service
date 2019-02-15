@@ -133,7 +133,7 @@ class ServiceES {
                         obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
                     }
                 }
-                
+
                 shifts = shifts.filter(s => s.referred || (s.dist.calculated > service.offer.params.minDistance));
                 obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
@@ -147,7 +147,7 @@ class ServiceES {
                         await driverAppLinkBroker.sendServiceEventToDrivers$(
                             shift.businessId,
                             shift.driver.username,
-                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...service.pickUp, location: undefined } }
+                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...service.pickUp, location: undefined }, expirationTime : offerTotalThreshold }
                         ).toPromise();
                         //re-eval service state\/
                         await timer(offerShiftSpan).toPromise();

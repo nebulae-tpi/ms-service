@@ -310,7 +310,7 @@ class ServiceDA {
       { _id },
       {
         $set: { closed: true },
-        $unset: { location: 1 }
+        $unset: { location: "" }
       }
     ));
   }

@@ -10,8 +10,8 @@ const { map, mergeMap, reduce, tap } = require("rxjs/operators");
 const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
 
-const SHIFT_DISCONNECT_THRESHOLD = 5 * 60 * 1000; // FIVE MINUTES
-const SHIFT_CLOSE_THRESHOLD =  60 * 60 * 1000 // TWELVE HOUR
+const SHIFT_DISCONNECT_THRESHOLD = parseInt(process.env.SHIFT_DISCONNECT_THRESHOLD) || 5 * 60 * 1000; // FIVE MINUTES
+const SHIFT_CLOSE_THRESHOLD =  parseInt(process.env.SHIFT_CLOSE_THRESHOLD) || 60 * 60 * 1000; // TWELVE HOUR
 
 class ShiftDA {
 
@@ -38,8 +38,8 @@ class ShiftDA {
       { _id: id },
       { projection: { stateChanges: 0, onlineChanges: 0 } }
     ));
-  }  
-  
+  }
+
   static getShiftList$(filter, pagination) {
     const projection = { stateChanges: 0, onlineChanges: 0 };
     const query = {};
@@ -62,10 +62,10 @@ class ShiftDA {
             .pipe(
               mergeMap(() => {
                 const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
-                const dateNow = new Date( new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
-                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) +1;
-                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2 ).length;
+                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+                const dateNow = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) + 1;
+                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2).length;
                 return of({
                   start: monthsBeforedate1,
                   count: monthsBeforedate2
@@ -116,10 +116,10 @@ class ShiftDA {
             .pipe(
               mergeMap(() => {
                 const date1 = new Date(new Date(filter.initTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
-                const dateNow = new Date( new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }) );
-                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) +1;
-                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2 ).length;
+                const date2 = new Date(new Date(filter.endTimestamp).toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+                const dateNow = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+                const monthsBeforedate1 = (Crosscutting.getYearMonthArray(date1, dateNow).length * -1) + 1;
+                const monthsBeforedate2 = Crosscutting.getYearMonthArray(date1, date2).length;
                 return of({
                   start: monthsBeforedate1,
                   count: monthsBeforedate2
@@ -138,16 +138,16 @@ class ShiftDA {
         mergeMap(({ start, count }) => range(start, count)),
         map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
         map(db => db.collection(COLLECTION_NAME)),
-        mergeMap(collection => collection.count(query) )
+        mergeMap(collection => collection.count(query))
 
-        );
+      );
   }
 
 
   static getShiftStateChangeList$(shiftId, pagination) {
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
     return defer(() => collection
-      .find( { _id: shiftId } )
+      .find({ _id: shiftId })
       .project({ _id: 1, stateChanges: { $slice: [pagination.count * pagination.page, pagination.count] } })
       .toArray()
     )
@@ -156,31 +156,31 @@ class ShiftDA {
       )
   }
 
-  static getShiftStateChangeListSize$(shiftId){
+  static getShiftStateChangeListSize$(shiftId) {
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
 
     return defer(() => collection.aggregate([
-      { $match : { _id : shiftId } },
-      {        
+      { $match: { _id: shiftId } },
+      {
         $project: {
-          _id: 1,          
+          _id: 1,
           stateChangeListSize: { $cond: { if: { $isArray: "$stateChanges" }, then: { $size: "$stateChanges" }, else: -1 } }
         }
       }
     ])
-    .toArray()
+      .toArray()
     )
-    .pipe(
-      map(result => result ? result[0].stateChangeListSize : 0 ),
-    )    
+      .pipe(
+        map(result => result ? result[0].stateChangeListSize : 0),
+      )
   }
 
-  
+
 
   static getShiftOnlineChangeList$(shiftId, pagination) {
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
     return defer(() => collection
-      .find( { _id: shiftId } )
+      .find({ _id: shiftId })
       .project({ _id: 1, onlineChanges: { $slice: [pagination.count * pagination.page, pagination.count] } })
       .toArray()
     )
@@ -189,23 +189,23 @@ class ShiftDA {
       )
   }
 
-  static getShiftOnlineChangeListSize$(shiftId){
+  static getShiftOnlineChangeListSize$(shiftId) {
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
 
     return defer(() => collection.aggregate([
-      { $match : { _id : shiftId } },
-      {        
+      { $match: { _id: shiftId } },
+      {
         $project: {
-          _id: 1,          
+          _id: 1,
           onlineChangesListSize: { $cond: { if: { $isArray: "$onlineChanges" }, then: { $size: "$onlineChanges" }, else: -1 } }
         }
       }
     ])
-    .toArray()
+      .toArray()
     )
-    .pipe(
-      map(result => result ? result[0].onlineChangesListSize : 0 ),
-    )    
+      .pipe(
+        map(result => result ? result[0].onlineChangesListSize : 0),
+      )
   }
 
 
@@ -231,14 +231,14 @@ class ShiftDA {
         mergeMap(collection => {
           const cursor = collection
             .find(query, { projection });
-           
+
 
           return mongoDB.extractAllFromMongoCursor$(cursor);
         })
       );
   }
 
-  static getShiftsToClose$(){
+  static getShiftsToClose$() {
 
     const projection = { _id: 1, businessId: 1, "driver.id": 1, "vehicle.id": 1, "vehicle.licensePlate": 1 };
     const query = {

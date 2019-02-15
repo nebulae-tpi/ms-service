@@ -202,12 +202,16 @@ class EventStoreService {
       // SHIFT
       ShiftLocationReported: { fn: ServiceES.handleShiftEvents$, obj: ServiceES },
       // CRONJOB
+      PeriodicOneMinute: {
+        fn: CronJobES.handlePeriodicOneMinute$,
+        obj: CronJobES
+      },
       PeriodicFiveMinutes: {
         fn: CronJobES.handlePeriodicFiveMinutes$,
         obj: CronJobES
       },
       PeriodicFifteenMinutes: {
-        fn: CronJobES.handlePeriodicFifMinutes$,
+        fn: CronJobES.handlePeriodicFifteenMinutes$,
         obj: CronJobES
       }
     };
@@ -291,6 +295,7 @@ class EventStoreService {
       // SHIFT
       { aggregateType: "Shift", eventType: "ShiftLocationReported" },
       // Cronjob
+      { aggregateType: "Cronjob", eventType: "PeriodicOneMinute" },
       { aggregateType: "Cronjob", eventType: "PeriodicFiveMinutes" },
       { aggregateType: "Cronjob", eventType: "PeriodicFifteenMinutes" },
     ]

@@ -23,20 +23,6 @@ class ShiftDA {
   }
 
 
-
-  /**
-   * Finds all open shift// DELETE, JUST FOR TESTING
-   */
-  static findOpenShifts$(projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
-    const query = { "state": "AVAILABLE" };
-    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
-      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
-      map(db => db.collection('Shift')),
-      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
-    );
-  }
-
   static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined) {
     const explorePastMonth = Date.today().getDate() <= 1;
 
@@ -68,7 +54,7 @@ class ShiftDA {
 
 
 
-    console.log(JSON.stringify(aggregateQuery));
+    //console.log(JSON.stringify(aggregateQuery));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
@@ -82,9 +68,6 @@ class ShiftDA {
           //)
         )
       ),
-      tap(x => console.log('==========================')),
-      tap(x => console.log(JSON.stringify(x))),
-      tap(x => console.log('==========================')),
     );
   }
 

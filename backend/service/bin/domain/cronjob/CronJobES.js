@@ -18,17 +18,31 @@ class CronJobES {
 
   }
 
-  handlePeriodicFiveMinutes$() {   
-    console.log("------- handlePeriodicFiveMinutes$ ----------"); 
+  handlePeriodicOneMinute$() {
+    console.log("------- handlePeriodicOneMinute$ ----------");
     return forkJoin(
       this.checkDisconnectedShifts$(),
-      this.checkClosedShifts$(),
+      //this.checkClosedShifts$(),
+      //this.checkServicesToClose$()
+    )
+  }
+
+  handlePeriodicFiveMinutes$() {
+    console.log("------- handlePeriodicFiveMinutes$ ----------");
+    return forkJoin(
+      //this.checkDisconnectedShifts$(),
+      //this.checkClosedShifts$(),
       this.checkServicesToClose$()
     )
   }
 
-  handlePeriodicFifMinutes$(){
-    return of(null);
+  handlePeriodicFifteenMinutes$() {
+    console.log("------- handlePeriodicFifteenMinutes$ ----------");
+    return forkJoin(
+      //this.checkDisconnectedShifts$(),
+      this.checkClosedShifts$(),
+      //this.checkServicesToClose$()
+    )
   }
 
   /**
@@ -48,7 +62,7 @@ class CronJobES {
   /**
    * search the shift that must to be closed and emit an event for each item to close it
    */
-  checkClosedShifts$(){
+  checkClosedShifts$() {
     // console.log("---------- checkClosedShifts$ ------------- ");
     return ShiftDA.getShiftsToClose$()
       .pipe(
@@ -60,19 +74,19 @@ class CronJobES {
       )
   }
 
-  checkServicesToClose$(){
+  checkServicesToClose$() {
     // console.log("-------- checkServicesToClose$ ---------");
     return ServiceDA.findServicesToClose$()
-    .pipe(
-      tap(service => console.log("SERVICE TO CLOSE => ", JSON.stringify(service))),
-      mergeMap(service => this.generateEventStoreEvent$("ServiceClosed", 1, "Service", service._id, {...service}, "SYSTEM")),
-      mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
-      toArray(),
-      tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE CLOSED"))
-    )
+      .pipe(
+        tap(service => console.log("SERVICE TO CLOSE => ", JSON.stringify(service))),
+        mergeMap(service => this.generateEventStoreEvent$("ServiceClosed", 1, "Service", service._id, { ...service }, "SYSTEM")),
+        mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
+        toArray(),
+        tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE CLOSED"))
+      )
   }
 
-  generateEventStoreEvent$(eventType, eventVersion, aggregateType, aggregateId, data, user ) {
+  generateEventStoreEvent$(eventType, eventVersion, aggregateType, aggregateId, data, user) {
     return of(new Event({
       eventType: eventType,
       eventTypeVersion: eventVersion,

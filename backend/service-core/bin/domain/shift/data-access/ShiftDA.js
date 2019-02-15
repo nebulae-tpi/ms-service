@@ -164,11 +164,15 @@ class ShiftDA {
    * @param {string} _id 
    * @param {string} online 
    */
-  static updateShiftState$(_id, state) {
+  static updateShiftStateAndUnsetLocation$(_id, state) {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
-        { $set: { state }, $push: { stateChanges: { state, timestamp: Date.now() } } },
+        {
+          $set: { state },
+          $push: { stateChanges: { state, timestamp: Date.now() } },
+          $unset: { location: "" }
+        },
         { upsert: false }
       )
     );

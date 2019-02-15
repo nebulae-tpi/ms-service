@@ -9,7 +9,7 @@ const { CustomError } = require("../../../tools/customError");
 const { map, mergeMap, reduce, tap } = require("rxjs/operators");
 const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
-const SERVICE_CLOSED_THRESHOLD = 5*60*1000; // FIVE MINUTES
+const SERVICE_CLOSED_THRESHOLD = parseInt(process.env.SERVICE_CLOSED_THRESHOLD) || 5*60*1000; // FIVE MINUTES
 const STATES_TO_CLOSE_SERVICE = ["DONE", "CANCELLED_DRIVER", "CANCELLED_CLIENT", "CANCELLED_OPERATOR"];
 
 class ShiftDA {

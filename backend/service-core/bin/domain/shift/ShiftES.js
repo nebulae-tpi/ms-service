@@ -78,7 +78,7 @@ class ShiftES {
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
-        return ShiftDA.updateShiftState$(aid, 'CLOSED');
+        return ShiftDA.updateShiftStateAndUnsetLocation$(aid, 'CLOSED');
     }
 
     /**
