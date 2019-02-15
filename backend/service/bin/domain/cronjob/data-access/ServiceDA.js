@@ -34,6 +34,7 @@ class ShiftDA {
     const query = {
       $and: [
         { state: { $in: STATES_TO_CLOSE_SERVICE } },
+        { closed: false },
         { lastModificationTimestamp: { $lte: Date.now() - SERVICE_CLOSED_THRESHOLD } }
       ]
     };
