@@ -98,7 +98,8 @@ class GraphQL {
             } else if (val instanceof Object) {
                 return ` ${key}: { ${this.convertObjectToInputArgs(val)} }`;
             }else{
-                console.log(`[[[[[[[[[[[[[[[[${typeof val}]]]]]]]]]]]]]]]]`);
+                console.log("OBJECT : ", JSON.stringify(obj));
+                console.log(`[[[[[[[[[[[[[[[[ ${key}:${val} --- ${typeof val}]]]]]]]]]]]]]]]]`);
             }
         }).join(',');
 

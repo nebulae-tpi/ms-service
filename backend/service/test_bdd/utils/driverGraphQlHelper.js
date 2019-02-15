@@ -50,6 +50,9 @@ class DriverGraphQlHelper {
                 console.log("##################  EMAIL ALREADY USED  ##########################");
                 console.log(driver.email);
                 console.log("##################################################################");
+                if(driver.email == `${driver.documentId}@autogen.com` ){
+                  return of(null);
+                }
                 driver.email = `${driver.documentId}@autogen.com`;
                 return this.createDriver$(graphQlInstance, driver);
             }
@@ -63,7 +66,7 @@ class DriverGraphQlHelper {
             }
         }),
 
-        // tap(r => console.log("DRIVER CREATED")),
+        tap(r => console.log("DRIVER CREATED")),
         mergeMap(() => of(null) )
     );
   }
@@ -98,7 +101,7 @@ class DriverGraphQlHelper {
             // console.log("###############", JSON.stringify(error), "###############");
             return of(null)
           }),  
-          // tap(r => console.log("DRIVER GENERAL INFO UPDATED"))
+          tap(r => console.log("DRIVER GENERAL INFO UPDATED")),
           mergeMap(() => of(driverId) )
       );
 
@@ -134,7 +137,7 @@ class DriverGraphQlHelper {
             )
           )
       ),
-      // tap(r => console.log("DRIVER ENCONTRADO ==> ", r))
+      tap(r => console.log("DRIVER ENCONTRADO ==> ", r))
     );
   }
 
