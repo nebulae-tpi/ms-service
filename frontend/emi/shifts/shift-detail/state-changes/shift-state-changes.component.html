@@ -10,11 +10,11 @@
             <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.STATE_CHANGES.TIMESTAMP" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let state">
               <div fxHide fxShow.gt-xs class="text-truncate">
-                {{ shift.timestamp | date: "dd/MM/y HH:mm:ss"}}
+                {{ state.timestamp | date: "dd/MM/y HH:mm:ss"}}
               </div>
               <div fxShow fxHide.gt-xs class="text-truncate">
-                <div>{{  shift.timestamp | date: "dd/MM/yy" }}</div>
-                <div>{{  shift.timestamp | date: "HH:mm:ss" }}</div>
+                <div>{{  state.timestamp | date: "dd/MM/yy" }}</div>
+                <div>{{  state.timestamp | date: "HH:mm:ss" }}</div>
               </div>
             </mat-cell>
           </ng-container>
@@ -50,11 +50,11 @@
             <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.STATE_CHANGES.TIMESTAMP" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let state">
               <div fxHide fxShow.gt-xs class="text-truncate">
-                {{ shift.timestamp | date: "dd/MM/y HH:mm:ss"}}
+                {{ state.timestamp | date: "dd/MM/y HH:mm:ss"}}
               </div>
               <div fxShow fxHide.gt-xs class="text-truncate">
-                <div>{{ shift.timestamp | date: "dd/MM/yy" }}</div>
-                <div>{{ shift.timestamp | date: "HH:mm:ss" }}</div>
+                <div>{{ state.timestamp | date: "dd/MM/yy" }}</div>
+                <div>{{ state.timestamp | date: "HH:mm:ss" }}</div>
               </div>
             </mat-cell>
           </ng-container>
