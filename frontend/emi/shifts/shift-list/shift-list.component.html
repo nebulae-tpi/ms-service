@@ -145,11 +145,11 @@
             </mat-cell>
           </ng-container>
 
-          <!--  Vehicle Model Column -->
+          <!--  SHIFT STATE COLUMN -->
           <ng-container cdkColumnDef="vehicleModel">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.VEHICLE_MODEL" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.SHIFT_STATE" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let shift">
-              <p class="text-truncate"> {{ shift.vehicle.model | translate}} </p>
+              <p class="text-truncate"> {{ 'SHIFT.SHIFT_STATES.' + shift.state | translate}} </p>
             </mat-cell>
           </ng-container>
 
@@ -158,7 +158,7 @@
           <ng-container cdkColumnDef="lastReceivedComm">
               <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.LAST_COMMUNICATION" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let shift">
-                <p class="text-truncate"> {{ shift.lastReceivedComm | date: "dd/MM/y HH:mm:ss" }} </p>
+                <p  [ngClass]="{'red-color': !shift.online, 'green-color': shift.online }"> {{ shift.lastReceivedComm | date: "dd/MM/y HH:mm:ss" }} </p>
               </mat-cell>
             </ng-container>
 

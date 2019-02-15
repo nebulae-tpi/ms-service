@@ -10,7 +10,7 @@ export const locale = {
         DRIVER_NAME: 'Nombre Conductor',
         LICENSE_PLATE: 'Placa Vehículo',
         DRIVER_DOCUMENT: 'Cédula de Conductor',
-        VEHICLE_MODEL: 'Modelo',
+        SHIFT_STATE: 'Estado',
         LAST_COMMUNICATION: 'Última Conexión Establecida'
       },
       DRIVER_DETAIL: {
