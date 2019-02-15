@@ -123,7 +123,9 @@ class ServiceES {
                     { "driver": 1 }
                 ).toPromise();
 
+                shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
                 obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
+                
 
                 if (service.client && service.client.referrerDriverDocumentId) {
                     const priorityShift = shifts.filter(sh => sh.driver.documentId === service.client.referrerDriverDocumentId)[0];
