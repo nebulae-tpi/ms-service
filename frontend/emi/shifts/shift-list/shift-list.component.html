@@ -119,7 +119,7 @@
 
           <!--  Driver username Column -->
           <ng-container cdkColumnDef="driverUsername">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.DRIVER_USERNAME" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let shift">
               <p *ngIf="shift.driver && shift.driver.username" class="text-truncate">
                 {{ shift.driver.username | uppercase }}

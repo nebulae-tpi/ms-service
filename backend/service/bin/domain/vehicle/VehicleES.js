@@ -65,7 +65,7 @@ class VehicleES {
                 ? DriverDA.unassignVehicleFromAllDrivers$(oldVehicle.licensePlate)
                 : of({result: "PLATE NOT CHANGED"})
             ),
-            tap(r => console.log(r.result)),
+            //tap(r => console.log(r.result)),
             mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result))
         );
     }
@@ -84,7 +84,7 @@ class VehicleES {
     }
 
     handleVehicleFeaturesUpdated$(VehicleVehicleFeaturesUpdatedEvent){
-        console.log("VehicleVehicleFeaturesUpdatedEvent. data", VehicleVehicleFeaturesUpdatedEvent. data);
+        //console.log("VehicleVehicleFeaturesUpdatedEvent. data", VehicleVehicleFeaturesUpdatedEvent. data);
         return of(VehicleVehicleFeaturesUpdatedEvent.data.features)
         .pipe(
             map(newFeatures => ({
@@ -100,7 +100,7 @@ class VehicleES {
     handleVehicleBlockRemoved$(vehicleBlockRemovedEvt){        
         return of({vehicleId: vehicleBlockRemovedEvt.aid, ...vehicleBlockRemovedEvt.data })
         .pipe(
-            tap( obj => console.log("handleVehicleBlockRemoved$", obj )),
+            //tap( obj => console.log("handleVehicleBlockRemoved$", obj )),
             mergeMap( ({ vehicleId, blockKey, notes }) => VehicleDA.removeVehicleBlock$(vehicleId, { key: blockKey, notes }) )
         )
 
@@ -113,7 +113,7 @@ class VehicleES {
             ...vehicleBlockAddedEvt.data
         })
         .pipe(
-            tap(obj => console.log("handleVehicleBlockAdded$", obj) ),
+            //tap(obj => console.log("handleVehicleBlockAdded$", obj) ),
             mergeMap(({vehicleId, blockKey, notes, endTime, startTime }) => VehicleDA.insertVehicleBlock$(vehicleId, { key: blockKey, notes, startTime, endTime } ))
         )
 

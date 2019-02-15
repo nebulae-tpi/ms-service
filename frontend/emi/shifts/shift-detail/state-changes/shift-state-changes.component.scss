@@ -1,6 +1,8 @@
 @import "src/app/core/scss/fuse";
 
-
+.mat-table.adaptativeTable{
+  height: 50vh;
+}
 
 .item-table {
     flex: 1 1 auto;
