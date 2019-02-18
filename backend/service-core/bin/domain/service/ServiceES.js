@@ -168,6 +168,16 @@ class ServiceES {
         return this.handleCancellation$(aid, "CANCELLED_DRIVER", reason, notes, location, Date.now(), user)
     }
 
+    /**
+     * Handles EventSourcing Event ServiceCancelledBySystem
+     * @param {Event} evt 
+     * @returns {Observable}
+     */
+    handleServiceCancelledBySystem$({ aid, data, user }) {
+        const { reason, notes } = data;
+        return this.handleCancellation$(aid, "CANCELLED_SYSTEM", reason, notes, undefined, Date.now(), user)
+    }
+
     handleCancellation$(serviceId, cancelStateType, reason, notes, location, timestamp, user) {
         return ServiceDA.setCancelStateAndReturnService$(serviceId, cancelStateType, location, reason, notes, timestamp, { shiftId: 1 }).pipe(
             filter(({ shiftId }) => shiftId),
