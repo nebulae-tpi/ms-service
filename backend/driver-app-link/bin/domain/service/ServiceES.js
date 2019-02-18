@@ -23,45 +23,6 @@ class ServiceES {
     constructor() {
     }
 
-    // /**
-    //  * Handles EventSourcing Event ServiceRequested.
-    //  * @param {Event} evt 
-    //  * @returns {Observable}
-    //  */
-    // handleServiceRequested$({ aid, data }) {
-    //     console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
-
-    //     const { pickUp, client, businessId, timestamp } = data;
-
-    //     const maxDistance = client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
-    //     const minDistance = client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
-    //     const clientLocation = pickUp.marker;
-    //     const priorityDriver = client.referrerDriverDocumentId;
-    //     const projection = { "driver.username": 1, "driver.documentID": 1, "businessId": 1, "timestamp": 1 };
-
-
-    //     console.log(`===== OFFERING ${JSON.stringify({ maxDistance, minDistance, clientLocation, priorityDriver, client })}==========`);
-
-    //     if (!clientLocation || clientLocation.type !== 'Point'
-    //         || !clientLocation.coordinates || clientLocation.coordinates.length !== 2
-    //         || clientLocation.coordinates[0] === 0 || clientLocation.coordinates[1] === 0) {
-    //         console.error(`WARNING: ServiceES.handleServiceRequested: received an offer with an invalid client location ${JSON.stringify({ aid, ...data })} `);
-    //         return of({});
-    //     }
-
-    //     return ShiftDA.findServiceOfferCandidates$(businessId, clientLocation, maxDistance, minDistance, projection).pipe(
-    //         tap(shift => console.log(`===== OFFERING ${aid} To shift ${shift._id}==========`)),
-    //         delay(200),
-    //         mergeMap(shift => ServiceDA.addShiftToActiveOffers$(aid, shift._id).pipe(mapTo(shift))),
-    //         mergeMap(shift => driverAppLinkBroker.sendServiceEventToDrivers$(
-    //             shift.businessId,
-    //             shift.driver.username,
-    //             'ServiceOffered', { _id: aid, timestamp: Date.now(), pickUp: { ...pickUp, location: undefined } }
-    //         ))
-    //     );
-    // }
-
-
     /**
      * Handles EventSourcing Event ServiceRequested.
      * @param {Event} evt 
@@ -110,6 +71,7 @@ class ServiceES {
             obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+            let needToBeCancelledBySystem = true;
             while (needToOffer) {
 
                 //find available shifts
@@ -125,7 +87,7 @@ class ServiceES {
 
                 shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
                 obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
-                
+
 
                 if (service.client && service.client.referrerDriverDocumentId) {
                     const priorityShift = shifts.filter(sh => sh.driver.documentId === service.client.referrerDriverDocumentId)[0];
@@ -149,28 +111,43 @@ class ServiceES {
                         await driverAppLinkBroker.sendServiceEventToDrivers$(
                             shift.businessId,
                             shift.driver.username,
-                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...service.pickUp, location: undefined }, expirationTime : offerTotalThreshold }
+                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...service.pickUp, location: undefined }, expirationTime: offerTotalThreshold }
                         ).toPromise();
                         //re-eval service state\/
                         await timer(offerShiftSpan).toPromise();
                         service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.searchCount": 1 }).toPromise();
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
                     }
                 } else {
                     if (service.offer.params.minDistance !== 0) {
                         obs.next(`no shifts found on searched area, will remove minDistance on next search`);
                         service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, { "offer.params.minDistance": 0 }, { "offer.searchCount": 1 }).toPromise();
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+                        needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
                     } else {
                         //re-eval service state
                         await timer(offerShiftSpan).toPromise();
                         service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.searchCount": 1 }).toPromise();
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
                     }
                 }
 
+            }
+            if (needToBeCancelledBySystem) {
+                await eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Service',
+                        serviceId,
+                        'ServiceCancelledBySystem',
+                        { reason: 'DRIVERS_NOT_AVAILABLE', notes: "" },
+                        'SYSTEM'
+                    )
+                ).toPromise();
             }
             obs.complete();
         });
@@ -369,6 +346,25 @@ class ServiceES {
 
     //#endregion
 
+    /**
+     * Generates an EventSourcing Event
+     * @param {*} aggregateType 
+     * @param {*} aggregateId defaults to generated DateBased Uuid
+     * @param {*} eventType 
+     * @param {*} data defaults to {}
+     * @param {*} authToken 
+     * @param {*} eventTypeVersion defaults to 1
+    */
+    static buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, user, eventTypeVersion = 1) {
+        return new Event({
+            aggregateType,
+            aggregateId,
+            eventType,
+            eventTypeVersion,
+            user,
+            data
+        });
+    }
 
     /**
      * Logs an error at the console.error printing only the message and the stack related to the project source code
