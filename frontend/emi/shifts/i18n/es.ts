@@ -2,6 +2,8 @@ export const locale = {
   lang: 'es',
   data: {
     SHIFT: {
+      CLOSE_SHIFT: 'Cerrar Turno',
+      SHIFT_CLOSED: 'El Turno Ha Sido Cerrado',
       HEADER_TITLE: 'TURNOS',
       DETAIL_HEADER_NAME: 'Detalle del Turno',
       SHIFT_TABLE_LIST: {
@@ -12,7 +14,8 @@ export const locale = {
         LICENSE_PLATE: 'Placa Vehículo',
         DRIVER_DOCUMENT: 'Cédula de Conductor',
         SHIFT_STATE: 'Estado',
-        LAST_COMMUNICATION: 'Última Conexión Establecida'
+        LAST_COMMUNICATION: 'Última Conexión Establecida',
+        ACTIONS: 'Acciones'
       },
       DRIVER_DETAIL: {
         ID: 'ID',

@@ -2,6 +2,8 @@ export const locale = {
   lang: 'en',
   data: {
     SHIFT: {
+      CLOSE_SHIFT: 'Close Shift',
+      SHIFT_CLOSED: 'The Shift Has Been Closed',
       HEADER_TITLE: 'SHIFTS',
       DETAIL_HEADER_NAME: 'Shift Detail',
       SHIFT_TABLE_LIST: {
@@ -12,7 +14,8 @@ export const locale = {
         LICENSE_PLATE: 'License Plate',
         DRIVER_DOCUMENT: 'Driver Document ID',
         SHIFT_STATE: 'State',
-        LAST_COMMUNICATION: 'Last Communication Established'
+        LAST_COMMUNICATION: 'Last Communication Established',
+        ACTIONS: 'Actions'
       },
       DRIVER_DETAIL: {
         ID: 'ID',

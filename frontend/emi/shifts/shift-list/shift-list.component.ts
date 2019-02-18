@@ -89,7 +89,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
 
   //////// FORMS //////////
   filterForm: FormGroup;
-  
+
   minInitDate: any = null;
   maxInitDate: any = null;
   maxEndDate: any = null;
@@ -112,7 +112,8 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       'driverDocumentId',
       'licensePlate',
       'vehicleModel',
-      'lastReceivedComm'
+      'lastReceivedComm',
+      'actions'
     ];
 
   /////// OTHERS ///////
@@ -147,27 +148,27 @@ export class ShiftListComponent implements OnInit, OnDestroy {
   }
 
   onInitDateChange() {
-    const start = this.filterForm.get("initTimestamp").value;
-    const end = this.filterForm.get("endTimestamp").value;
+    const start = this.filterForm.get('initTimestamp').value;
+    const end = this.filterForm.get('endTimestamp').value;
 
     const startMonth = start.month();
     const startYear = start.year();
-    const startMonthYear = startMonth + "-" + startYear;
+    const startMonthYear = startMonth + '-' + startYear;
 
     const endMonth = end.month();
     const endYear = end.year();
-    const endMonthYear = endMonth + "-" + endYear;
+    const endMonthYear = endMonth + '-' + endYear;
 
     this.minEndDate = moment(start);
-    this.maxEndDate = moment(start.valueOf()).endOf("month");
-    if (startMonthYear != endMonthYear) {      
+    this.maxEndDate = moment(start.valueOf()).endOf('month');
+    if (startMonthYear !== endMonthYear) {
       this.filterForm.patchValue({
         endTimestamp: this.maxEndDate
-      });      
+      });
     }
     console.log('minEndDate => ', this.minEndDate);
     console.log('maxEndDate => ', this.maxEndDate.format());
-    
+
   }
 
   onEndDateChange() {
@@ -212,11 +213,11 @@ export class ShiftListComponent implements OnInit, OnDestroy {
    * Builds filter form
    */
   buildFilterForm() {
-    this.minInitDate =moment('2019-01-01').startOf("month");
-    this.maxInitDate = moment().add(1, "months").endOf("day");
+    this.minInitDate = moment('2019-01-01').startOf('month');
+    this.maxInitDate = moment().add(1, 'months').endOf('day');
 
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("day");    
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth = moment().endOf('day');
     this.minEndDate = startOfMonth;
     this.maxEndDate = endOfMonth;
     // Reactive Filter Form
@@ -378,12 +379,28 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     this.tablePage = 0;
     this.tableCount = 10;
 
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("day");
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth = moment().endOf('day');
     this.filterForm.patchValue({
       initTimestamp: startOfMonth,
       endTimestamp: endOfMonth
     });
+  }
+
+  closeShift(shiftId: any){
+
+    this.shiftListservice.closeService$(shiftId)
+      .pipe(
+        map(r => !r.errors ? r.data : null),
+        tap(response => {
+          if (response && response.ServiceShiftClose && response.ServiceShiftClose.code === 200) {
+            this.showMessageSnackbar(this.translate.instant('SHIFT.SHIFT_CLOSED'));
+            this.dataSource.data.find((s: any) => s._id === shiftId)['state'] = 'CLOSED';
+          }
+        })
+      )
+      .subscribe(() => { }, e => console.log(e), () => { });
+
   }
 
   /**
@@ -460,7 +477,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
         messageKey ? data[messageKey] : '',
         detailMessageKey ? data[detailMessageKey] : '',
         {
-          duration: 2000
+          duration: 4000
         }
       );
     });

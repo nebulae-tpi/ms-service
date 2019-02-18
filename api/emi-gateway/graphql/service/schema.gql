@@ -371,6 +371,11 @@ type Query {
   ServiceShiftOnlineChangesListSize(id: String!): Int!
 }
 
+type Mutation {
+  "Close Shift"
+  ServiceShiftClose(id: String!): CommandResponse
+}
+
 type Subscription {
   "This events is triggered when a Service is created or updated"
   ServiceServiceUpdatedSubscription: ServiceService  
