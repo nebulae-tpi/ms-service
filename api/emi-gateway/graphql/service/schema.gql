@@ -341,7 +341,7 @@ type ServiceShift {
 }
 
 type Query {
-  ## CLIENT SATELLITE
+  ## CLIENT SATELLITE.
   "Get client satellite data of the client satellite logged"
   ServiceClientSatellite: ServiceClientSatellite
   "Gets the client satellite by its name"

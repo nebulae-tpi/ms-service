@@ -40,7 +40,6 @@ class ClientDA {
   static getSatelliteClients$(clientText, limit, businessId, clientId) {
     const collection = mongoDB.db.collection(CollectionName);
 
-    console.log('clientText => ', clientText);
     const query = {};
     if(clientText){
       query['generalInfo.name'] = {$regex: '^'+clientText, $options: 'i'};

@@ -49,7 +49,6 @@ class ServiceDA {
    * get services from the satellite
    */
   static getServiceSatelliteList$(businessId, clientId) {
-    console.log('businessId, clientId => ', businessId, clientId);
     const projection = {};
 
     // const states = ['REQUEST', 'ASSIGNED', 'ARRIVED'];

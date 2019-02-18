@@ -53,7 +53,6 @@ class ClientCQRS {
    * @param {*} authToken 
    */
   getSatelliteClients$({ args }, authToken) {
-    console.log('getSatelliteClients ?> ', args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Client",

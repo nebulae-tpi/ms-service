@@ -9,7 +9,7 @@ export const locale = {
       'REQUEST_TAXI': 'Solicitar Vehículos',
       'VEHICLES_NUMBER': 'Número Vehículos',
       'REFERENCE': 'Referencia',
-      'PAYMENT_TYPE': 'Tipo pago',
+      'PAYMENT_TYPE': 'Tipo Pago',
       'TIP': 'Propina Conductor',
       'FEATURES': 'Características',
       'NOTES': 'Notas',
