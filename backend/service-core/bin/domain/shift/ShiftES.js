@@ -26,7 +26,6 @@ class ShiftES {
      * @param {Event} shiftStartedEvt
      */
     handleShiftStarted$({ data }) {
-        console.log(`ShiftES.handleShiftStarted: ${JSON.stringify({ data })}`); //DEBUG: DELETE LINE
         return ShiftDA.insertShift$(data);
     }
 

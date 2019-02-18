@@ -121,7 +121,7 @@ class ServiceCQRS {
     );
   }
 
-    /**  
+  /**  
    * Gets the amount of the Service according to the filter.
    *
    * @param {*} args args

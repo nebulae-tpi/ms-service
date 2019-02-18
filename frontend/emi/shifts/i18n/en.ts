@@ -8,6 +8,7 @@ export const locale = {
         TIMESTAMP: 'Date',
         CLIENT_NAME: 'Client Name',
         DRIVER_NAME: 'Driver Name',
+        DRIVER_USERNAME: 'Driver Username',
         LICENSE_PLATE: 'License Plate',
         DRIVER_DOCUMENT: 'Driver Document ID',
         SHIFT_STATE: 'State',

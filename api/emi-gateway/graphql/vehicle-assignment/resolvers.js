@@ -33,7 +33,7 @@ module.exports = {
     //// QUERY ///////
     Query: {
         ServiceDrivers(root, args, context) {
-            console.log("Query.ServiceDrivers", args);
+            //console.log("Query.ServiceDrivers", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles, 'ms-Service', 'ServiceDrivers',
                 PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
@@ -54,7 +54,7 @@ module.exports = {
             ).toPromise();
         },
         ServiceDriversSize(root, args, context) {
-            console.log("Query.ServiceDriversSize", args);
+            //console.log("Query.ServiceDriversSize", args);
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceDriversSize', PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
@@ -74,7 +74,7 @@ module.exports = {
             ).toPromise();
         },
         ServiceDriver(root, args, context) {
-            console.log("Query.ServiceDriversSize", args);
+            //console.log("Query.ServiceDriversSize", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-'+'Service', 'ServiceDriver',
@@ -96,7 +96,7 @@ module.exports = {
             ).toPromise();
         },
         ServiceDriverVehicleList(root, args, context) {
-            console.log("ServiceDriverVehicleList", args);
+            // console.log("ServiceDriverVehicleList", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles, 'ms-Service', 'ServiceDriverVehicleList',
                 PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN" ]
@@ -122,7 +122,7 @@ module.exports = {
     //// MUTATIONS ///////
     Mutation: {
         ServiceAssignVehicleToDriver(root, args, context) {
-            console.log("ServiceAssignVehicleToDriver", args);
+            // console.log("ServiceAssignVehicleToDriver", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'assignVehicleToDriver',

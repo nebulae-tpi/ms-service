@@ -8,6 +8,7 @@ export const locale = {
         TIMESTAMP: 'Fecha',
         CLIENT_NAME: 'Nombre Cliente',
         DRIVER_NAME: 'Nombre Conductor',
+        DRIVER_USERNAME: 'Nombre Usuario Conductor',
         LICENSE_PLATE: 'Placa Vehículo',
         DRIVER_DOCUMENT: 'Cédula de Conductor',
         SHIFT_STATE: 'Estado',

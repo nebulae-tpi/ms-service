@@ -39,7 +39,6 @@ class ServiceDA {
    * @returns {Observable}
    */
   static insertService$(service) {
-    console.log('service._id  => ', service._id);
     return defer(() => mongoDB.getHistoricalDbByYYMM(service._id.split('-').pop()).collection(CollectionName)
       .insertOne(service));
   }
@@ -210,9 +209,6 @@ class ServiceDA {
         "route.coordinates": location.coordinates
       }
     };
-
-    console.log(JSON.stringify(find));
-    console.log(JSON.stringify(update));
 
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
