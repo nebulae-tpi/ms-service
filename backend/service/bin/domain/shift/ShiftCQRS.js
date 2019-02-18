@@ -36,8 +36,8 @@ class ClientCQRS {
   getShift$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriver",
+      "Shift",
+      "getShift",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -55,8 +55,8 @@ class ClientCQRS {
   getShiftList$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Service",
-      "getClientSatellite",
+      "Shift",
+      "getShiftList",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -83,8 +83,8 @@ class ClientCQRS {
   getShiftListSize$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftListSize",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -105,8 +105,8 @@ class ClientCQRS {
   getShiftStateChangesList$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftStateChangesList",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -120,8 +120,8 @@ class ClientCQRS {
   getShiftStateChangesListSize$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftStateChangesListSize",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -134,8 +134,8 @@ class ClientCQRS {
   getShiftOnlineChangesList$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftOnlineChangesList",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -148,8 +148,8 @@ class ClientCQRS {
   getShiftOnlineChangesListSize$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftOnlineChangesListSize",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -158,7 +158,34 @@ class ClientCQRS {
       catchError(err => GraphqlResponseTools.handleError$(err))
     );
   }
+
+  closeShift$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Shift",
+      "closeShift",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+    ).pipe(
+      mergeMap(() => ShiftDA.getShiftById$(args.id)),     
+      mergeMap(shift => this.generateEventStoreEvent$("ShiftStateChanged", 1, "Shift", shift._id, { ...shift, state: "CLOSED" }, authToken.preferred_username)),
+      map(() => ({ code: 200, message: `Shift with ID ${args.id} has been closed` })),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
   //#endregion
+
+  generateEventStoreEvent$(eventType, eventVersion, aggregateType, aggregateId, data, user) {
+    return of(new Event({
+      eventType: eventType,
+      eventTypeVersion: eventVersion,
+      aggregateType: aggregateType,
+      aggregateId: aggregateId,
+      data: data,
+      user: user
+    }))
+  }
 
 }
 

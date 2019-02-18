@@ -273,12 +273,31 @@ module.exports = {
                 ).toPromise();
         },
     },
-
-
     
     //// MUTATIONS ///////
-    // Mutation: {
-    // },
+    Mutation: {
+        ServiceShiftClose(root, args, context) {
+            return RoleValidator.checkPermissions$(
+              context.authToken.realm_access.roles,
+              "Shift", "ServiceShiftClose",
+              PERMISSION_DENIED_ERROR_CODE,
+              "Permission denied",
+              ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
+            )
+            .pipe(
+                mergeMap(() =>
+                  context.broker.forwardAndGetReply$(
+                    "Shift",
+                    "emigateway.graphql.mutation.serviceShiftClose",
+                    { root, args, jwt: context.encodedToken },
+                    2000
+                  )
+                ),
+                catchError(err => handleError$(err, "serviceShiftClose")),
+                mergeMap(response => getResponseFromBackEnd$(response))
+            ).toPromise();
+        }
+    },
 
     //// SUBSCRIPTIONS ///////
     Subscription: {

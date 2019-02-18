@@ -36,6 +36,8 @@ export const locale = {
         'DONE': 'Done',
         'CANCELLED_DRIVER': 'Cancelled by Driver',
         'CANCELLED_CLIENT': 'Cancelled by Client',
+        'CANCELLED_OPERATOR': 'Cancelled by Operator',
+        'CANCELLED_SYSTEM': 'Cancelled by System'
       },
       SERVICE_PAYMENT_TYPE: {
         'CASH': 'Cash',
