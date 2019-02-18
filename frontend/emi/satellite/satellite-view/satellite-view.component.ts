@@ -265,7 +265,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   setSelectedClientSatellite(selectedSatelliteClient) {
     //console.log('selectedSatelliteClient => ', selectedSatelliteClient);
     if (selectedSatelliteClient){
-      if (this.clientData){
+      if (this.clientMarker){
         this.removeMarkerFromMap(this.clientMarker, false);
       }
       this.clientData = selectedSatelliteClient;
@@ -400,6 +400,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
         );
       }
     });
+    console.log('buildRequestTaxiForm');
   }
 
   /**
@@ -461,7 +462,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
           lng: parseFloat(lng)
         },
         map: this.map,
-        // draggable: true
+        clickable: false
       }
     );
     this.clientMarker = pickUpMarker;
@@ -650,6 +651,9 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
       (result: any) => {
         if (result.data && result.data.ServiceCoreRequestService && result.data.ServiceCoreRequestService.accepted) {
           this.showSnackBar('SATELLITE.SERVICES.REQUEST_SERVICE_SUCCESS');
+          this.buildRequestTaxiForm();
+          this.clientFilterCtrl.reset();
+          this.clientData = null;
         }
       },
       error => {
@@ -736,7 +740,10 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   buildServiceInfoWindowContent(service){
-    console.log('buildServiceInfoWindowContent', service);
+    //console.log('buildServiceInfoWindowContent', service);
+    if(!service){
+      return;
+    }
 
 
     const serviceTitle = this.translationLoader.getTranslate().instant('SATELLITE.SERVICE');
