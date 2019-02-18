@@ -214,7 +214,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
   }
 
     /**
-   * Shows an error snackbar
+   * Shows an error snackbar.
    * @param response
    */
   showSnackBarError(response) {

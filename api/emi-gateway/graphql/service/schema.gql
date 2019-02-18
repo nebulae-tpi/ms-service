@@ -221,7 +221,7 @@ input ServiceServicePaginationInput {
 
 
 
-##  SHIFT SEGMENT  ##
+##  SHIFT SEGMENT ##
 
 input ServiceShiftPaginationInput {
   "Page"

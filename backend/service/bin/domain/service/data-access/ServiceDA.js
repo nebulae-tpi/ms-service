@@ -50,7 +50,6 @@ class ServiceDA {
    */
   static getServiceSatelliteList$(businessId, clientId) {
     const projection = {};
-
     // const states = ['REQUEST', 'ASSIGNED', 'ARRIVED'];
     // query["state"] = { $in: states};        
     const query = {
