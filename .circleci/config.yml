@@ -305,8 +305,7 @@ jobs:
         - run:
             name: Deploy BackEnds 
             command: |
-              test "$ENVIRONMENT" = "prod" && for xi in $(ls ~/nebulae/repo/deployment/gke/*.y*ml); do sed -i s/nebulaetpi/nebulaetpiprod/ $xi ; done
-              for xi in $(ls ~/nebulae/repo/deployment/gke/*.y*ml); do sed -i s/nebulae-tpi-229423/$GKE_PROJECT_DEV/ $xi ; done
+              for xi in $(ls ~/nebulae/repo/deployment/gke/*.y*ml); do sed -i s/DOCKERHUB/$DOCKERHUB_NAMESPACE/ $xi ; done
               kubectl apply -f ~/nebulae/repo/deployment/gke/
 
 
@@ -325,29 +324,53 @@ workflows:
           context: TPI
           requires:
             - prepare
+          filters:
+            branches:
+              only:
+                - develop
       - build-api-emi:
           context: TPI
           requires:
             - prepare
+          filters:
+            branches:
+              only:
+                - develop
       - build-api-driver:
           context: TPI
           requires:
             - prepare
+          filters:
+            branches:
+              only:
+                - develop
       - build-backend-service:
           context: TPI
           requires:
             - prepare
             - build-mbinit      
+          filters:
+            branches:
+              only:
+                - develop
       - build-backend-service-core:
           context: TPI
           requires:
             - prepare
             - build-mbinit      
+          filters:
+            branches:
+              only:
+                - develop
       - build-backend-driver-app-link:
           context: TPI
           requires:
             - prepare
             - build-mbinit      
+          filters:
+            branches:
+              only:
+                - develop
       - deploy-dev:
           context: TPI
           requires:
@@ -357,47 +380,67 @@ workflows:
             - build-backend-driver-app-link
             - build-backend-service
             - build-backend-service-core
-      - hold:
-          type: approval
+          filters:
+            branches:
+              only:
+                - develop
       - build-frontend:
           context: TPI_PROD
           name: build-frontend-prod
           requires:
             - prepare
-            - hold
+          filters:
+            branches:
+              only:
+                - master
       - build-api-emi:
           context: TPI_PROD
           name: build-api-emi-prod
           requires:
             - prepare
-            - hold
+          filters:
+            branches:
+              only:
+                - master
       - build-api-driver:
           context: TPI_PROD
           name: build-api-driver-prod
           requires:
             - prepare
-            - hold
+          filters:
+            branches:
+              only:
+                - master
       - build-backend-service:
           context: TPI_PROD
           name: build-backend-service-prod
           requires:
             - prepare
             - build-mbinit      
-            - hold
+          filters:
+            branches:
+              only:
+                - master
       - build-backend-service-core:
           context: TPI_PROD
           name: build-backend-service-core-prod
           requires:
             - prepare
             - build-mbinit      
-            - hold
+          filters:
+            branches:
+              only:
+                - master
       - build-backend-driver-app-link:
           context: TPI_PROD
           name: build-backend-driver-app-link-prod
           requires:
             - prepare
             - build-mbinit      
-            - hold
+          filters:
+            branches:
+              only:
+                - master
       - deploy-dev:
           context: TPI_PROD
           name: deploy-dev-prod
@@ -408,3 +451,7 @@ workflows:
             - build-backend-driver-app-link-prod
             - build-backend-service-prod
             - build-backend-service-core-prod
+          filters:
+            branches:
+              only:
+                - master
