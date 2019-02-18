@@ -87,6 +87,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   satelliteClientQueryFiltered$: Observable<any[]>;
   clientSatelliteList = [];
 
+  openedSideNav: boolean = true;
   map: MapRef;
   bounds: google.maps.LatLngBounds;
   markers: MarkerRef[] = [];

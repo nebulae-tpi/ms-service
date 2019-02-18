@@ -48,7 +48,7 @@ module.exports = {
                 mergeMap(response => getResponseFromBackEnd$(response))
             ).toPromise();
         },
-        ServiceClientSatellite(root, args, context) {
+        ServiceServicesSatellite(root, args, context) {
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-'+'Service', 'ServiceServicesSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE", "OPERATOR"])
             .pipe(
                 mergeMap(() =>

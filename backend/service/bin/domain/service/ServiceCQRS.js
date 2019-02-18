@@ -63,6 +63,7 @@ class ServiceCQRS {
    * @param {*} args args
    */
   getServiceSatelliteList$({ args }, authToken) {
+    console.log('****************** getServiceSatelliteList => ', args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
@@ -97,6 +98,7 @@ class ServiceCQRS {
    * @param {*} args args
    */
   getServiceList$({ args }, authToken) {
+    console.log('getServiceList => ', args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",
@@ -127,6 +129,7 @@ class ServiceCQRS {
    * @param {*} args args
    */
   getServiceListSize$({ args }, authToken) {
+    console.log('getServiceListSize => ', args);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Service",

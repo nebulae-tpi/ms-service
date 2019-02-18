@@ -73,18 +73,18 @@ class ServiceES {
       );
   }
 
-      /**
-     * Handles the shift event
-     * @param {*} shiftEvent shift event
-     */
-    handleShiftEvents$(shiftEvent) {
-      //console.log('handleShiftEvents => ', shiftEvent);
-      return of(shiftEvent)
-      .pipe(        
-        tap(res => {
-          this.serviceUpdatedEventEmitter$.next(shiftEvent.data.serviceId);
-        }),
-      );
+  /**
+   * Handles the shift event
+   * @param {*} shiftEvent shift event
+   */
+  handleShiftEvents$(shiftEvent) {
+    //console.log('handleShiftEvents => ', shiftEvent);
+    return of(shiftEvent)
+    .pipe(        
+      tap(res => {
+        this.serviceUpdatedEventEmitter$.next(shiftEvent.data.serviceId);
+      }),
+    );
   }
 
 

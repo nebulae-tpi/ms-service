@@ -6,11 +6,11 @@ export const locale = {
       'CLOSE': 'Cerrar',
       'REQUEST_VEHICLE_TITLE': 'Solicitud de servicio',
       'OTHERS': 'Otros',
-      'REQUEST_TAXI': 'Solicitar taxi',
-      'VEHICLES_NUMBER': 'Número vehículos',
+      'REQUEST_TAXI': 'Solicitar Vehículos',
+      'VEHICLES_NUMBER': 'Número Vehículos',
       'REFERENCE': 'Referencia',
       'PAYMENT_TYPE': 'Tipo pago',
-      'TIP': 'Propina conductor',
+      'TIP': 'Propina Conductor',
       'FEATURES': 'Características',
       'NOTES': 'Notas',
       'SERVICE': 'Servicio',
@@ -70,6 +70,7 @@ export const locale = {
           'CANCELLED_DRIVER': 'Cancelado por conductor',
           'CANCELLED_CLIENT': 'Cancelado por cliente',
           'CANCELLED_OPERATOR': 'Cancelado por operador',
+          'CANCELLED_SYSTEM': 'Cancelado por sistema',
         }
       }
     },

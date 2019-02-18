@@ -52,33 +52,33 @@
         "src": "frontend/emi/satellite",
         "assets" :"frontend/emi/assets/satellite",
         "groups": [
-            {
-              "id": "SATELLITE",
-              "icon": "location_searching",
-              "translate": {
-                "en": "Satellite",
-                "es": "Satélite"
-              },
-              "priority": 200
-            }
-          ],
-        "contents": [
-            {
-                "groupId": "SATELLITE",  
-                "id": "satellite",
-                "icon": "explore",
-                "translate": {
-                    "en": "Satellite",
-                    "es": "Satélite"
-                },
-                "navURL": "/satellite",
-                "path": "satellite",
-                "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
-                "priority": 1000,
-                "roles" : ["SATELLITE", "OPERATOR"],
-                "default" : false
-            }            
+          {
+            "id": "OPERATION",
+            "icon": "location_searching",
+            "translate": {
+              "en": "Operation",
+              "es": "Operación"
+            },
+            "priority": 200
+          }
         ],
+        "contents": [
+          {
+              "groupId": "OPERATION",  
+              "id": "poi",
+              "icon": "map",
+              "translate": {
+                "en": "POI",
+                "es": "POI"
+            },
+              "navURL": "/poi",
+              "path": "poi",
+              "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
+              "priority": 1000,
+              "roles" : ["SATELLITE", "OPERATOR"],
+              "default" : false
+          }            
+      ],
         "preBuildCommands": [],
         "environmentVars": {
         }

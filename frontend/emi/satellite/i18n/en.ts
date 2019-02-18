@@ -6,11 +6,11 @@ export const locale = {
       'CLOSE': 'Close',
       'REQUEST_VEHICLE_TITLE': 'Request service',
       'OTHERS': 'Others',
-      'REQUEST_TAXI': 'Request taxi',
-      'VEHICLES_NUMBER': 'Vehicle number',
+      'REQUEST_TAXI': 'Request Vehicle',
+      'VEHICLES_NUMBER': 'Vehicle Number',
       'REFERENCE': 'Reference',
-      'PAYMENT_TYPE': 'Payment type',
-      'TIP': 'Driver tip',
+      'PAYMENT_TYPE': 'Payment Type',
+      'TIP': 'Driver Tip',
       'FEATURES': 'Features',
       'NOTES': 'Notes',
       'SERVICE': 'Service',
@@ -70,6 +70,7 @@ export const locale = {
           'CANCELLED_DRIVER': 'Cancelled by driver',
           'CANCELLED_CLIENT': 'Cancelled by client',
           'CANCELLED_OPERATOR': 'Cancelled by operator',
+          'CANCELLED_SYSTEM': 'Cancelled by system',
         }
       }
     },
