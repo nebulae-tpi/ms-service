@@ -51,5 +51,9 @@ class CustomError extends Error {
     INTERNAL_SERVER_ERROR_CODE,
     PERMISSION_DENIED,
     LICENSE_PLATE_ALREADY_ASSIGNED,
-    LICENSE_PLATE_NO_EXIST
+    LICENSE_PLATE_NO_EXIST,
+    ERROR_23020: new CustomError('StopShiftError', `StopShift`, 23020, 'No se puede detener el turno: el conductor no tiene un turno abierto'),
+    ERROR_23021: new CustomError('StopShiftError', `StopShift`, 23021, 'No se puede detener el turno: todavía hay un servicio en curso'),
+    ERROR_23022: new CustomError('StopShiftError', `StopShift`, 23022, 'No se puede detener el turno: El turno ya se encuentra cerrado'),
+
   } 

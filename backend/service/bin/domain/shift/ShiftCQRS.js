@@ -14,7 +14,10 @@ const {
   CustomError,
   DefaultError,
   INTERNAL_SERVER_ERROR_CODE,
-  PERMISSION_DENIED
+  PERMISSION_DENIED,
+  ERROR_23020,
+  ERROR_23021,
+  ERROR_23022
 } = require("../../tools/customError");
 
 
@@ -167,7 +170,12 @@ class ClientCQRS {
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
-      mergeMap(() => ShiftDA.getShiftById$(args.id)),     
+      mergeMap(() => ShiftDA.getShiftById$(args.id)),  
+
+      tap(shift => { if (!shift) throw ERROR_23020; }), // Driver does not have an open shift verification
+      tap((shift) => { if (shift.state === 'BUSY') throw ERROR_23021; }), // Open Service verfication
+      tap((shift) => { if (shift.state === 'CLOSED') throw ERROR_23022; }), // Service already closed
+
       mergeMap(shift => this.generateEventStoreEvent$("ShiftStateChanged", 1, "Shift", shift._id, { ...shift, state: "CLOSED" }, authToken.preferred_username)),
       mergeMap(event =>  eventSourcing.eventStore.emitEvent$(event)),
       map(() => ({ code: 200, message: `Shift with ID ${args.id} has been closed` })),
