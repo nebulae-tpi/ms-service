@@ -391,6 +391,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
 
     this.shiftListservice.closeService$(shiftId)
       .pipe(
+        mergeMap(response => this.graphQlAlarmsErrorHandler$(response)),
         map(r => !r.errors ? r.data : null),
         tap(response => {
           if (response && response.ServiceShiftClose && response.ServiceShiftClose.code === 200) {

@@ -126,7 +126,10 @@ export const locale = {
     },
     ERRORS: {
       1: 'Error interno de servidor',
-      2: 'Permiso denegado.'
+      2: 'Permiso denegado.',
+      23020: 'El turno no existe',
+      23021: 'Todavía hay un servicio en curso',
+      23022: 'El turno ya se encontraba cerrado'
     }
   }
 };

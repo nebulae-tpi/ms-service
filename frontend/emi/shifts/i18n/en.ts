@@ -126,7 +126,10 @@ export const locale = {
     },
     ERRORS: {
       1: 'Internal server error',
-      2: 'Permission denied'
+      2: 'Permission denied',
+      23020: 'Shift do not exist',
+      23021: 'There is still a service in progress',
+      23022: 'Shift already closed'
     }
   }
 };
