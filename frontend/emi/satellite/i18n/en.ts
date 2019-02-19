@@ -37,6 +37,7 @@ export const locale = {
         'MIN_MAX_TIP': 'Tip is optional but it should be between $ 500 and $ 100,000.',
         'LICENSE_PLATE': 'License plate',
         'DRIVER': 'Driver',
+        'CLIENT': 'Client',
         'SERVICE_PARAMS': 'Params',
         'STATE': 'State',
         'REFERENCE': 'Reference',
