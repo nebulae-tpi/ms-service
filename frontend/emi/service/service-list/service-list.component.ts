@@ -89,7 +89,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   //Subject to unsubscribe 
   private ngUnsubscribe = new Subject();
 
-  stateList: string[] = ['REQUESTED', 'ASSIGNED', 'ARRIVED', 'ON_BOARD', 'DONE', 'CANCELLED_CLIENT', 'CANCELLED_DRIVER',];
+  stateList: string[] = ['REQUESTED', 'ASSIGNED', 'ARRIVED', 'ON_BOARD', 'DONE', 'CANCELLED_CLIENT', 'CANCELLED_DRIVER', 'CANCELLED_OPERATOR', 'CANCELLED_SYSTEM'];
   
   minInitDate: any = null;
   maxInitDate: any = null;

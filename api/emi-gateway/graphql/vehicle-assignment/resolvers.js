@@ -37,7 +37,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles, 'ms-Service', 'ServiceDrivers',
                 PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
             )
             .pipe(
                 mergeMap(() =>
@@ -57,7 +57,8 @@ module.exports = {
             //console.log("Query.ServiceDriversSize", args);
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceDriversSize', PERMISSION_DENIED_ERROR_CODE,
-                'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN"]
+                'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
             )
             .pipe(
                 mergeMap(() =>
@@ -77,9 +78,10 @@ module.exports = {
             //console.log("Query.ServiceDriversSize", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
-                'ms-'+'Service', 'ServiceDriver',
+                'ms-Service', 'ServiceDriver',
                 PERMISSION_DENIED_ERROR_CODE,
-                'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN" ]
+                'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR" ]
                 )
             .pipe(
                 mergeMap(() =>
@@ -99,7 +101,8 @@ module.exports = {
             // console.log("ServiceDriverVehicleList", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles, 'ms-Service', 'ServiceDriverVehicleList',
-                PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN" ]
+                PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR" ]
             )
             .pipe(
                 mergeMap(() =>
@@ -127,7 +130,8 @@ module.exports = {
                 context.authToken.realm_access.roles,
                 'ms-Service', 'assignVehicleToDriver',
                 PERMISSION_DENIED_ERROR_CODE,
-                'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN" ]
+                'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
                 )
               .pipe(
                 mergeMap(() =>
@@ -149,7 +153,8 @@ module.exports = {
                 context.authToken.realm_access.roles,
                 'ms-Service', 'unassignVehicleFromDriver',
                 PERMISSION_DENIED_ERROR_CODE,
-                'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN" ]
+                'Permission denied',
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR" ]
                 )
               .pipe(
                 mergeMap(() =>
@@ -164,9 +169,7 @@ module.exports = {
                 mergeMap(response => getResponseFromBackEnd$(response))
               )
               .toPromise();
-          },
-
-          
+          }          
     },
     //// SUBSCRIPTIONS ///////
     Subscription: {
