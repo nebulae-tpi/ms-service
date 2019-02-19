@@ -169,6 +169,7 @@ class ClientCQRS {
     ).pipe(
       mergeMap(() => ShiftDA.getShiftById$(args.id)),     
       mergeMap(shift => this.generateEventStoreEvent$("ShiftStateChanged", 1, "Shift", shift._id, { ...shift, state: "CLOSED" }, authToken.preferred_username)),
+      mergeMap(event =>  eventSourcing.eventStore.emitEvent$(event)),
       map(() => ({ code: 200, message: `Shift with ID ${args.id} has been closed` })),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
