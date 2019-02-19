@@ -63,6 +63,7 @@ import * as moment from 'moment';
 //////////// Other Services ////////////
 import { ShiftListService } from './shift-list.service';
 import { ToolbarService } from '../../../toolbar/toolbar.service';
+import { DialogComponent } from '../dialog/dialog.component';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -132,6 +133,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     private adapter: DateAdapter<any>,
     private shiftListservice: ShiftListService,
     private toolbarService: ToolbarService,
+    private dialog: MatDialog,
   ) {
       this.translationLoader.loadTranslations(english, spanish);
   }
@@ -388,9 +390,9 @@ export class ShiftListComponent implements OnInit, OnDestroy {
   }
 
   closeShift(shiftId: any){
-
-    this.shiftListservice.closeService$(shiftId)
+    this.showConfirmationDialog$('SHIFT.CLOSE_SHIFT_MESSAGE', 'SHIFT.CLOSE_SHIFT')
       .pipe(
+        mergeMap(() => this.shiftListservice.closeService$(shiftId)),
         mergeMap(response => this.graphQlAlarmsErrorHandler$(response)),
         map(r => !r.errors ? r.data : null),
         tap(response => {
@@ -402,6 +404,19 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => { }, e => console.log(e), () => { });
 
+  }
+
+  showConfirmationDialog$(dialogMessage, dialogTitle) {
+    return this.dialog.open(DialogComponent, {
+      data: {
+        dialogMessage,
+        dialogTitle
+      }
+    })
+      .afterClosed()
+      .pipe(
+        filter(okButton => okButton)
+      );
   }
 
   /**

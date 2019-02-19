@@ -2,7 +2,9 @@ export const locale = {
   lang: 'en',
   data: {
     SHIFT: {
+      CANCEL: 'Cancel',
       CLOSE_SHIFT: 'Close Shift',
+      CLOSE_SHIFT_MESSAGE: 'Do you want to close the driver\'s shift?',
       SHIFT_CLOSED: 'The Shift Has Been Closed',
       HEADER_TITLE: 'SHIFTS',
       DETAIL_HEADER_NAME: 'Shift Detail',

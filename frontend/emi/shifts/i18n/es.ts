@@ -2,7 +2,9 @@ export const locale = {
   lang: 'es',
   data: {
     SHIFT: {
+      CANCEL: 'Cancelar',
       CLOSE_SHIFT: 'Cerrar Turno',
+      CLOSE_SHIFT_MESSAGE: '¿Deseas cerrar el el turno del conductor?',
       SHIFT_CLOSED: 'El Turno Ha Sido Cerrado',
       HEADER_TITLE: 'TURNOS',
       DETAIL_HEADER_NAME: 'Detalle del Turno',

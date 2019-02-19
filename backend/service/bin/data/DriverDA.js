@@ -41,6 +41,7 @@ class DriverDA {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
+      active: true
     };
 
     if (filter.businessId) {
@@ -72,6 +73,7 @@ class DriverDA {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
+      active: true
     };
 
     if (filter.businessId) {
@@ -164,6 +166,7 @@ class DriverDA {
   }
 
   static assignVehicle$(driverId, vehiclePlate){
+    // todo: guardar el registro de quien es el que hace la asignacion
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.updateOne(
       {_id: driverId },
