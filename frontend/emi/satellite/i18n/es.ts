@@ -37,6 +37,7 @@ export const locale = {
         'MIN_MAX_TIP': 'La propina es un valor opcional pero debe estar entre $500 y $100.000.',
         'LICENSE_PLATE': 'Placa',
         'DRIVER': 'Conductor',
+        'CLIENT': 'Cliente',
         'SERVICE_PARAMS': 'Parámetros',
         'STATE': 'Estado',
         'REFERENCE': 'Referencia',

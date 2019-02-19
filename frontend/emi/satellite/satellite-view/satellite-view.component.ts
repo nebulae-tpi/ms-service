@@ -653,7 +653,9 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
           this.showSnackBar('SATELLITE.SERVICES.REQUEST_SERVICE_SUCCESS');
           this.buildRequestTaxiForm();
           this.clientFilterCtrl.reset();
-          this.clientData = null;
+          if(this.isOperator){
+            this.clientData = null;
+          }          
         }
       },
       error => {
