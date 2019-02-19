@@ -50,16 +50,22 @@
                     <span class="value" >{{service.vehicle.licensePlate}}</span>
                 </div>
 
-                <div class="h3 secondary-text" *ngIf="service.driver && service.driver.fullname">
-                    <span class="title secondary-text">{{'SATELLITE.SERVICES.DRIVER' | translate}}: </span>
-                    <span>&nbsp;&nbsp;</span>
-                    <span class="value">{{service.driver.fullname}}</span>
-                </div>
-
                 <div class="h3 secondary-text">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.STATE' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
                     <span class="value">{{'SATELLITE.SERVICES.STATES.' + service.state | translate}}</span>
+                </div>
+
+                <div class="h3 secondary-text" *ngIf="service.client && service.client.fullname">
+                    <span class="title secondary-text">{{'SATELLITE.SERVICES.CLIENT' | translate}}: </span>
+                    <span>&nbsp;&nbsp;</span>
+                    <span class="value">{{service.client.fullname}}</span>
+                </div>
+
+                <div class="h3 secondary-text" *ngIf="service.driver && service.driver.fullname">
+                    <span class="title secondary-text">{{'SATELLITE.SERVICES.DRIVER' | translate}}: </span>
+                    <span>&nbsp;&nbsp;</span>
+                    <span class="value">{{service.driver.fullname}}</span>
                 </div>
 
                 <div class="h3 secondary-text" *ngIf="service.pickUp.addressLine1">
@@ -68,11 +74,11 @@
                     <span class="value">{{service.pickUp.addressLine1}}</span>
                 </div>
 
-                <div class="h3 secondary-text" *ngIf="service.pickUp.addressLine2">
+                <!-- <div class="h3 secondary-text" *ngIf="service.pickUp.addressLine2">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.ADDRESS2' | translate}}: </span>
                     <span>&nbsp;&nbsp;</span>
                     <span class="value">{{service.pickUp.addressLine2}}</span>
-                </div>
+                </div> -->
 
                 <div class="h3 secondary-text" *ngIf="service.pickUp.notes">
                     <span class="title secondary-text">{{'SATELLITE.SERVICES.REFERENCE' | translate}}: </span>

@@ -177,7 +177,9 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
     this.getRoles$()
     .pipe(
       mergeMap(roles => {
-        const authorType = roles.some(role => role === 'OPERATOR') ? 'OPERATOR' : 'CLIENT';
+        //TODO: Uncomment this line
+        //const authorType = roles.some(role => role === 'OPERATOR') ? 'OPERATOR' : 'CLIENT';
+        const authorType = 'CLIENT';
         return this.dialog
         // Opens confirm dialog
         .open(CancelServiceDialogComponent, {data: { serviceId: service._id, authorType: authorType}})
