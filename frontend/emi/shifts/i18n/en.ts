@@ -2,6 +2,10 @@ export const locale = {
   lang: 'en',
   data: {
     SHIFT: {
+      CANCEL: 'Cancel',
+      CLOSE_SHIFT: 'Close Shift',
+      CLOSE_SHIFT_MESSAGE: 'Do you want to close the driver\'s shift?',
+      SHIFT_CLOSED: 'The Shift Has Been Closed',
       HEADER_TITLE: 'SHIFTS',
       DETAIL_HEADER_NAME: 'Shift Detail',
       SHIFT_TABLE_LIST: {
@@ -12,7 +16,8 @@ export const locale = {
         LICENSE_PLATE: 'License Plate',
         DRIVER_DOCUMENT: 'Driver Document ID',
         SHIFT_STATE: 'State',
-        LAST_COMMUNICATION: 'Last Communication Established'
+        LAST_COMMUNICATION: 'Last Communication Established',
+        ACTIONS: 'Actions'
       },
       DRIVER_DETAIL: {
         ID: 'ID',
@@ -123,7 +128,10 @@ export const locale = {
     },
     ERRORS: {
       1: 'Internal server error',
-      2: 'Permission denied'
+      2: 'Permission denied',
+      23020: 'Shift do not exist',
+      23021: 'There is still a service in progress',
+      23022: 'Shift already closed'
     }
   }
 };

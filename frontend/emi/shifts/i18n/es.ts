@@ -2,6 +2,10 @@ export const locale = {
   lang: 'es',
   data: {
     SHIFT: {
+      CANCEL: 'Cancelar',
+      CLOSE_SHIFT: 'Cerrar Turno',
+      CLOSE_SHIFT_MESSAGE: '¿Deseas cerrar el el turno del conductor?',
+      SHIFT_CLOSED: 'El Turno Ha Sido Cerrado',
       HEADER_TITLE: 'TURNOS',
       DETAIL_HEADER_NAME: 'Detalle del Turno',
       SHIFT_TABLE_LIST: {
@@ -12,7 +16,8 @@ export const locale = {
         LICENSE_PLATE: 'Placa Vehículo',
         DRIVER_DOCUMENT: 'Cédula de Conductor',
         SHIFT_STATE: 'Estado',
-        LAST_COMMUNICATION: 'Última Conexión Establecida'
+        LAST_COMMUNICATION: 'Última Conexión Establecida',
+        ACTIONS: 'Acciones'
       },
       DRIVER_DETAIL: {
         ID: 'ID',
@@ -123,7 +128,10 @@ export const locale = {
     },
     ERRORS: {
       1: 'Error interno de servidor',
-      2: 'Permiso denegado.'
+      2: 'Permiso denegado.',
+      23020: 'El turno no existe',
+      23021: 'Todavía hay un servicio en curso',
+      23022: 'El turno ya se encontraba cerrado'
     }
   }
 };

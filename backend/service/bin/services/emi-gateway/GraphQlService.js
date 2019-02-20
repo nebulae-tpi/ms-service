@@ -227,6 +227,10 @@ class GraphQlService {
         aggregateType: "Shift",
         messageType: "emigateway.graphql.query.serviceShiftOnlineChangesListSize"
       },
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.mutation.serviceShiftClose"
+      }
 
     ];
   }
@@ -315,6 +319,10 @@ class GraphQlService {
       },
       "emigateway.graphql.query.serviceShiftOnlineChangesListSize": {
         fn: ShiftCQRS.getShiftOnlineChangesListSize$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.mutation.serviceShiftClose": {
+        fn: ShiftCQRS.closeShift$,
         obj: ShiftCQRS
       }
 

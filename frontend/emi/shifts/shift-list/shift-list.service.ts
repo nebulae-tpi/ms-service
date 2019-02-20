@@ -6,7 +6,8 @@ import {
 import { GatewayService } from '../../../../api/gateway.service';
 import {
   ServiceShifts,
-  ServiceShiftsSize
+  ServiceShiftsSize,
+  ServiceShiftClose
 } from '../gql/shift';
 import * as moment from 'moment';
 
@@ -14,7 +15,7 @@ import * as moment from 'moment';
 export class ShiftListService {
 
   private _filterSubject$ = new BehaviorSubject({
-      initTimestamp: moment().startOf('month'),
+      initTimestamp: moment().subtract(1, 'day').startOf('day'),
       endTimestamp: moment().endOf('day')
   });
 
@@ -61,6 +62,21 @@ export class ShiftListService {
       fetchPolicy: 'network-only',
       errorPolicy: 'all'
     });
+  }
+
+  /**
+   * Close a Shift
+   * @param shiftId Shift ID
+   */
+  closeService$(shiftId: string) {
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: ServiceShiftClose,
+        variables: {
+          id: shiftId
+        },
+        errorPolicy: 'all'
+      });
   }
 
 

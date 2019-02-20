@@ -1,6 +1,15 @@
 import gql from "graphql-tag";
 
 
+export const ServiceShiftClose = gql `
+  mutation ServiceShiftClose($id: String!){
+    ServiceShiftClose(id: $id){
+      code
+      message
+    }
+  }
+`;
+
 // We use the gql tag to parse our query string into a query document
 export const ServiceShift = gql`
   query ServiceShift($id: String!) {

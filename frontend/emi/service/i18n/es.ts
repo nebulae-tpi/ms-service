@@ -36,6 +36,8 @@ export const locale = {
         'DONE': 'Finalizado',
         'CANCELLED_DRIVER': 'Cancelado por Conductor',
         'CANCELLED_CLIENT': 'Cancelado por Cliente',
+        'CANCELLED_OPERATOR': 'Cancelado por Operador',
+        'CANCELLED_SYSTEM': 'Cancelado por Sistema'
       },
       SERVICE_PAYMENT_TYPE: {
         'CASH': 'Efectivo',

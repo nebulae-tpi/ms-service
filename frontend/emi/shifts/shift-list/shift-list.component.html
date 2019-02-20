@@ -17,10 +17,13 @@
             "SHIFT.HEADER_TITLE" | translate }}</span>
         </div>
 
-        <div class="account" fxFlex fxFill fxLayout="row" fxLayoutAlign="space-between end">
+        <div fxFlex fxFill fxLayout="row" fxLayoutAlign="space-between center">
           <span class="mat-title" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }">{{
             "SHIFT.SHIFT_FILTERS.FILTER_TITLE" | translate }}
           </span>
+          <button class="mat-title" mat-button (click)="refreshData()" >
+            <mat-icon>sync</mat-icon>
+          </button>
         </div>
       </div>
       <!-- / SIDENAV HEADER -->
@@ -29,7 +32,7 @@
       <div class="content" fusePerfectScrollbar *fuseIfOnDom [@animate]="{ value: '*', params: { y: '50px' } }">
         <div class="nav mt-20" fxLayout="column">
           <form fxLayout="column" fxLayoutAlign="start" fxFlex="100" name="form" [formGroup]="filterForm">
-            <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">              
+            <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
 
               <!-- INITIAL TIME -->
               <mat-form-field>
@@ -61,19 +64,33 @@
 
               <!-- VEHICLE LICENSE PLATE -->
               <mat-form-field>
-                <input matInput placeholder="{{'SHIFT.SHIFT_FILTERS.VEHICLE_LICENSE_PLATE' | translate}}" formControlName="vehicleLicensePlate"
-                  id="vehicleLicensePlate" maxlength="20" />
+                <input matInput maxlength="6" placeholder="{{'SHIFT.SHIFT_FILTERS.VEHICLE_LICENSE_PLATE' | translate}}" formControlName="vehicleLicensePlate"
+                  id="vehicleLicensePlate" />
               </mat-form-field>
 
               <!-- SHIFTS STATES -->
-              <mat-form-field>
+              <!-- <mat-form-field>
                 <mat-select placeholder="{{'SHIFT.SHIFT_FILTERS.STATES' | translate}}" formControlName="states"
                   multiple>
                   <mat-option *ngFor="let state of stateList" [value]="state">
                     {{ "SHIFT.SHIFT_STATES."+state | translate}}
                   </mat-option>
                 </mat-select>
-              </mat-form-field>
+              </mat-form-field> -->
+
+              <div fxFlex="100">
+                <div fxLayout="column" fxLayoutAlign="center start">
+                  <div fxFlex="100" formArrayName="states"
+                    *ngFor="let state of filterForm.get('states')['controls'] ; let i = index;">
+                    <div fxFlex="100" class="ml-12" [formGroupName]="i" fxLayoutAlign="start start">
+                      <mat-checkbox fxFlex="100" [formControlName]="'active'">
+                        {{ 'SHIFT.SHIFT_STATES.' + state.get('name').value | translate }}
+                      </mat-checkbox>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
 
             </div>
           </form>
@@ -98,9 +115,13 @@
             aria-label="Toggle Sidenav">
             <mat-icon>menu</mat-icon>
           </button>
+          <button mat-button fxHide.gt-md (click)="refreshData()" >
+            <mat-icon>sync</mat-icon>
+          </button>
         </div>
       </div>
       <!-- / CONTENT HEADER -->
+      
 
       <!-- CONTENT CARD -->
       <div class="content-card mat-white-bg">
@@ -110,16 +131,14 @@
           <ng-container cdkColumnDef="timestamp">
             <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.SHIFT_TABLE_LIST.TIMESTAMP" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let shift">
-              <p class="text-truncate">
-                {{ shift.timestamp | date: "dd/MM/y HH:mm:ss" }}
-              </p>
+              <p>{{ shift.timestamp | date: "dd/MM/y HH:mm:ss" }}</p>
             </mat-cell>
           </ng-container>
 
           <!--  Driver username Column -->
           <ng-container cdkColumnDef="driverUsername">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.DRIVER_USERNAME" | translate}}</mat-header-cell>
-            <mat-cell *cdkCellDef="let shift">
+            <mat-cell *cdkCellDef="let shift" fxHide fxShow.gt-xs >
               <p *ngIf="shift.driver && shift.driver.username" class="text-truncate">
                 {{ shift.driver.username | uppercase }}
               </p>
@@ -129,7 +148,7 @@
           <!--  Driver documentId Column -->
           <ng-container cdkColumnDef="driverDocumentId">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.DRIVER_DOCUMENT" | translate}}</mat-header-cell>
-            <mat-cell *cdkCellDef="let shift">
+            <mat-cell *cdkCellDef="let shift" fxHide fxShow.gt-xs >
               <p class="text-truncate">
                 {{ shift.driver.documentId}}
               </p>
@@ -139,31 +158,41 @@
           <!--  License plate Column -->
           <ng-container cdkColumnDef="licensePlate">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.LICENSE_PLATE" | translate}}</mat-header-cell>
-            <mat-cell *cdkCellDef="let shift">
+            <mat-cell *cdkCellDef="let shift" fxHide fxShow.gt-xs>
               <p *ngIf="shift.vehicle && shift.vehicle.licensePlate" class="text-truncate"> {{ shift.vehicle.licensePlate | uppercase }} </p>
             </mat-cell>
           </ng-container>
 
           <!--  SHIFT STATE COLUMN -->
           <ng-container cdkColumnDef="vehicleModel">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.SHIFT_STATE" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.SHIFT_TABLE_LIST.SHIFT_STATE" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let shift">
               <p class="text-truncate"> {{ 'SHIFT.SHIFT_STATES.' + shift.state | translate}} </p>
             </mat-cell>
           </ng-container>
 
-
           <!--  LAST COMMUNICATION  ESTABLISHED Column -->
           <ng-container cdkColumnDef="lastReceivedComm">
-              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SHIFT.SHIFT_TABLE_LIST.LAST_COMMUNICATION" | translate}}</mat-header-cell>
+              <mat-header-cell *cdkHeaderCellDef >{{"SHIFT.SHIFT_TABLE_LIST.LAST_COMMUNICATION" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let shift">
                 <p  [ngClass]="{'red-color': !shift.online, 'green-color': shift.online }"> {{ shift.lastReceivedComm | date: "dd/MM/y HH:mm:ss" }} </p>
               </mat-cell>
             </ng-container>
 
+          <!--  ACTIONS COLUMN -->
+          <ng-container cdkColumnDef="actions">
+            <mat-header-cell *cdkHeaderCellDef >{{"SHIFT.SHIFT_TABLE_LIST.ACTIONS" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let shift" (click)="$event.stopPropagation()">
+              <button *ngIf="shift.state != 'CLOSED'" (click)="closeShift(shift._id)"
+                matTooltip="{{ 'SHIFT.CLOSE_SHIFT' | translate }}"  mat-icon-button>
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
-          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="selectedElement" (click)="selectserviceRow(row)"
+          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="item" (click)="selectserviceRow(row)"
             [ngClass]="{highlight: selectedService && selectedService._id == row._id}"
             [routerLink]="row._id" matRipple>
           </mat-row>

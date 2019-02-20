@@ -11,7 +11,8 @@ import {
   FormBuilder,
   FormGroup,
   FormControl,
-  Validators
+  Validators,
+  FormArray
 } from '@angular/forms';
 
 import { Router, ActivatedRoute } from '@angular/router';
@@ -63,6 +64,7 @@ import * as moment from 'moment';
 //////////// Other Services ////////////
 import { ShiftListService } from './shift-list.service';
 import { ToolbarService } from '../../../toolbar/toolbar.service';
+import { DialogComponent } from '../dialog/dialog.component';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -85,11 +87,12 @@ export class ShiftListComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject();
 
   stateList: string[] = ['AVAILABLE', 'NOT_AVAILABLE', 'BUSY', 'BLOCKED', 'CLOSED'];
+  DEFAULT_STATE = ['BLOCKED', 'CLOSED'];
 
 
   //////// FORMS //////////
   filterForm: FormGroup;
-  
+
   minInitDate: any = null;
   maxInitDate: any = null;
   maxEndDate: any = null;
@@ -112,7 +115,8 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       'driverDocumentId',
       'licensePlate',
       'vehicleModel',
-      'lastReceivedComm'
+      'lastReceivedComm',
+      'actions'
     ];
 
   /////// OTHERS ///////
@@ -131,6 +135,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     private adapter: DateAdapter<any>,
     private shiftListservice: ShiftListService,
     private toolbarService: ToolbarService,
+    private dialog: MatDialog,
   ) {
       this.translationLoader.loadTranslations(english, spanish);
   }
@@ -147,27 +152,25 @@ export class ShiftListComponent implements OnInit, OnDestroy {
   }
 
   onInitDateChange() {
-    const start = this.filterForm.get("initTimestamp").value;
-    const end = this.filterForm.get("endTimestamp").value;
+    const start = this.filterForm.get('initTimestamp').value;
+    const end = this.filterForm.get('endTimestamp').value;
 
     const startMonth = start.month();
     const startYear = start.year();
-    const startMonthYear = startMonth + "-" + startYear;
+    const startMonthYear = startMonth + '-' + startYear;
 
     const endMonth = end.month();
     const endYear = end.year();
-    const endMonthYear = endMonth + "-" + endYear;
+    const endMonthYear = endMonth + '-' + endYear;
 
     this.minEndDate = moment(start);
-    this.maxEndDate = moment(start.valueOf()).endOf("month");
-    if (startMonthYear != endMonthYear) {      
+    this.maxEndDate = moment(start.valueOf()).endOf('month');
+    if (startMonthYear !== endMonthYear) {
       this.filterForm.patchValue({
         endTimestamp: this.maxEndDate
-      });      
+      });
     }
-    console.log('minEndDate => ', this.minEndDate);
-    console.log('maxEndDate => ', this.maxEndDate.format());
-    
+
   }
 
   onEndDateChange() {
@@ -212,22 +215,39 @@ export class ShiftListComponent implements OnInit, OnDestroy {
    * Builds filter form
    */
   buildFilterForm() {
-    this.minInitDate =moment('2019-01-01').startOf("month");
-    this.maxInitDate = moment().add(1, "months").endOf("day");
+    this.minInitDate = moment('2019-01-01').startOf('month');
+    this.maxInitDate = moment().add(1, 'months').endOf('day');
 
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("day");    
+    const startOfMonth = moment().startOf('month');
+    const initTimeStampValue = moment().subtract(1, 'day').startOf('day');
+    const endOfMonth = moment().endOf('day');
     this.minEndDate = startOfMonth;
     this.maxEndDate = endOfMonth;
     // Reactive Filter Form
     this.filterForm = this.formBuilder.group({
-      initTimestamp: [startOfMonth, [Validators.required]],
+      initTimestamp: [initTimeStampValue, [Validators.required]],
       endTimestamp: [endOfMonth, [Validators.required]],
       driverDocumentId: [null],
       driverFullname: [null],
       vehicleLicensePlate: [null],
-      states: [null]
+      states: this.formBuilder.array([]),
     });
+
+
+    this.stateList.forEach(stateKey => {
+
+      const stateControl = (this.filterForm.get('states') as FormArray).controls.find(control => control.get('name').value === stateKey );
+      if (!stateControl){
+        (this.filterForm.get('states') as FormArray).push(
+          new FormGroup({
+            name: new FormControl(stateKey),
+            active: new FormControl( !this.DEFAULT_STATE.includes(stateKey)  )
+          })
+        );
+      }
+    });
+
+
 
     this.filterForm.disable({
       onlySelf: true,
@@ -271,7 +291,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
               driverDocumentId: filterValue.driverDocumentId,
               driverFullname: filterValue.driverFullname,
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
-              states: filterValue.states
+              states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
             });
             this.onInitDateChange();
             this.onEndDateChange();
@@ -308,9 +328,8 @@ export class ShiftListComponent implements OnInit, OnDestroy {
           driverDocumentId: filterValue.driverDocumentId,
           driverFullname: filterValue.driverFullname,
           vehicleLicensePlate: filterValue.vehicleLicensePlate,
-          states: filterValue.states,
+          states: filterValue.states.filter(control => control.active === true).map(control => control.name),
         };
-        console.log('paginator', paginator);
 
         const paginationInput = {
           page: paginator.pagination.page,
@@ -327,12 +346,6 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
-
-      console.log('###############################');
-      console.log(size);
-      console.log(list);
-      console.log('###############################');
-
 
       this.dataSource.data = list;
       this.tableSize = size;
@@ -378,12 +391,67 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     this.tablePage = 0;
     this.tableCount = 10;
 
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("day");
+    const startOfMonth = moment().startOf('month');
+    const startYesterday = moment().subtract(1, 'day').startOf('day');
+    const endOfMonth = moment().endOf('day');
     this.filterForm.patchValue({
-      initTimestamp: startOfMonth,
+      initTimestamp: startYesterday,
       endTimestamp: endOfMonth
     });
+
+    while ((this.filterForm.get('states') as FormArray).length !== 0) {
+      (this.filterForm.get('states') as FormArray).removeAt(0);
+    }
+
+
+
+    this.stateList.forEach(stateKey => {
+      const stateControl = (this.filterForm.get('states') as FormArray).controls.find(control => control.get('name').value === stateKey );
+      if (!stateControl){
+        (this.filterForm.get('states') as FormArray).push(
+          new FormGroup({
+            name: new FormControl(stateKey),
+            active: new FormControl( !this.DEFAULT_STATE.includes(stateKey) )
+          })
+        );
+      }
+    });
+
+  }
+
+  closeShift(shiftId: any){
+    this.showConfirmationDialog$('SHIFT.CLOSE_SHIFT_MESSAGE', 'SHIFT.CLOSE_SHIFT')
+      .pipe(
+        mergeMap(() => this.shiftListservice.closeService$(shiftId)),
+        mergeMap(response => this.graphQlAlarmsErrorHandler$(response)),
+        map(r => !r.errors ? r.data : null),
+        tap(response => {
+          if (response && response.ServiceShiftClose && response.ServiceShiftClose.code === 200) {
+            this.showMessageSnackbar(this.translate.instant('SHIFT.SHIFT_CLOSED'));
+            this.dataSource.data.find((s: any) => s._id === shiftId)['state'] = 'CLOSED';
+          }
+        })
+      )
+      .subscribe(() => { }, e => console.log(e), () => { });
+
+  }
+
+  refreshData(){
+    const driverFullname = this.filterForm.get('driverFullname').value;
+    this.filterForm.get('driverFullname').setValue(driverFullname);
+  }
+
+  showConfirmationDialog$(dialogMessage, dialogTitle) {
+    return this.dialog.open(DialogComponent, {
+      data: {
+        dialogMessage,
+        dialogTitle
+      }
+    })
+      .afterClosed()
+      .pipe(
+        filter(okButton => okButton)
+      );
   }
 
   /**
@@ -460,7 +528,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
         messageKey ? data[messageKey] : '',
         detailMessageKey ? data[detailMessageKey] : '',
         {
-          duration: 2000
+          duration: 4000
         }
       );
     });

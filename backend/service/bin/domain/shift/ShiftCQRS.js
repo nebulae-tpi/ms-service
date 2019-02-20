@@ -2,7 +2,7 @@
 
 const uuidv4 = require("uuid/v4");
 const { of, interval } = require("rxjs");
-const { take, mergeMap, catchError, map, toArray } = require('rxjs/operators');
+const { take, mergeMap, catchError, map, toArray, tap } = require('rxjs/operators');
 const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
 const ShiftDA = require('./data-access/ShiftDA');
@@ -14,7 +14,10 @@ const {
   CustomError,
   DefaultError,
   INTERNAL_SERVER_ERROR_CODE,
-  PERMISSION_DENIED
+  PERMISSION_DENIED,
+  ERROR_23020,
+  ERROR_23021,
+  ERROR_23022
 } = require("../../tools/customError");
 
 
@@ -36,8 +39,8 @@ class ClientCQRS {
   getShift$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriver",
+      "Shift",
+      "getShift",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -55,8 +58,8 @@ class ClientCQRS {
   getShiftList$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Service",
-      "getClientSatellite",
+      "Shift",
+      "getShiftList",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -83,8 +86,8 @@ class ClientCQRS {
   getShiftListSize$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftListSize",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -105,8 +108,8 @@ class ClientCQRS {
   getShiftStateChangesList$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftStateChangesList",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -120,8 +123,8 @@ class ClientCQRS {
   getShiftStateChangesListSize$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftStateChangesListSize",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -134,8 +137,8 @@ class ClientCQRS {
   getShiftOnlineChangesList$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftOnlineChangesList",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -148,8 +151,8 @@ class ClientCQRS {
   getShiftOnlineChangesListSize$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
-      "Driver",
-      "getDriverListSize",
+      "Shift",
+      "getShiftOnlineChangesListSize",
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
@@ -158,7 +161,38 @@ class ClientCQRS {
       catchError(err => GraphqlResponseTools.handleError$(err))
     );
   }
+
+  closeShift$({ args }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "Shift",
+      "closeShift",
+      PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+    ).pipe(
+      mergeMap(() => ShiftDA.getShiftById$(args.id)),
+      tap(shift => { if (!shift) throw ERROR_23020; }), // Driver does not have an open shift verification
+      tap((shift) => { if (shift.state === 'BUSY') throw ERROR_23021; }), // Open Service verfication
+      tap((shift) => { if (shift.state === 'CLOSED') throw ERROR_23022; }), // Service already closed
+      mergeMap(shift => this.generateEventStoreEvent$("ShiftStateChanged", 1, "Shift", shift._id, { ...shift, state: "CLOSED" }, authToken.preferred_username)),
+      mergeMap(event =>  eventSourcing.eventStore.emitEvent$(event)),
+      map(() => ({ code: 200, message: `Shift with ID ${args.id} has been closed` })),
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
   //#endregion
+
+  generateEventStoreEvent$(eventType, eventVersion, aggregateType, aggregateId, data, user) {
+    return of(new Event({
+      eventType: eventType,
+      eventTypeVersion: eventVersion,
+      aggregateType: aggregateType,
+      aggregateId: aggregateId,
+      data: data,
+      user: user
+    }))
+  }
 
 }
 
