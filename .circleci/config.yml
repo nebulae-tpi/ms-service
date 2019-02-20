@@ -1,4 +1,3 @@
-
 version: 2.1
 jobs:
   prepare:
@@ -30,40 +29,40 @@ jobs:
           command: |            
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/            
-            echo $GCP_SERVICE_ACCOUNT_DEV | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
-            npm config set prefix '~/.npm-global'
-            export PATH=~/.npm-global/bin:$PATH
-            source ~/.profile
-            npm install -g @nebulae/cli
-            npm install -g @angular/cli
-            nebulae register microfrontend --microservice-id=service --frontend-id=emi --setup-file=/home/circleci/nebulae/repo/etc/mfe-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
-            nebulae compose-ui production --shell-finalEnvFile=$FILE_ENV_FRONTEND --shell-type=FUSE2_ANGULAR --shell-repo=https://github.com/nebulae-tpi/emi.git --frontend-id=emi --output-dir=/home/circleci/nebulae/frontend/emi/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json
-            ls /home/circleci/nebulae/frontend/emi/           
+            gitChanged frontend || echo $GCP_SERVICE_ACCOUNT_DEV | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
+            gitChanged frontend || npm config set prefix '~/.npm-global'
+            gitChanged frontend || export PATH=~/.npm-global/bin:$PATH
+            gitChanged frontend || source ~/.profile
+            gitChanged frontend || npm install -g @nebulae/cli
+            gitChanged frontend || npm install -g @angular/cli
+            gitChanged frontend || nebulae register microfrontend --microservice-id=service --frontend-id=emi --setup-file=/home/circleci/nebulae/repo/etc/mfe-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
+            gitChanged frontend || nebulae compose-ui production --shell-finalEnvFile=$FILE_ENV_FRONTEND --shell-type=FUSE2_ANGULAR --shell-repo=https://github.com/nebulae-tpi/emi.git --frontend-id=emi --output-dir=/home/circleci/nebulae/frontend/emi/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json
+            gitChanged frontend || ls /home/circleci/nebulae/frontend/emi/           
       - run:
           name: Download SHELL Repository
           command: |
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/
             mkdir -p ~/nebulae/frontend/shell 
-            ( git clone --depth=1 https://github.com/nebulae-tpi/emi ~/nebulae/frontend/shell )      
+            gitChanged frontend || ( git clone --depth=1 https://github.com/nebulae-tpi/emi ~/nebulae/frontend/shell )      
       - run:
           name: commit & push package-lock.json changes
           command: |
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/
-            cp /home/circleci/nebulae/frontend/emi/package-lock.json ~/nebulae/frontend/shell/frontend/emi/package-lock.json                        
-            ( cd ~/nebulae/frontend/shell && gitPublishPackageLockChanges "$GITHUB_USER_EMAIL" "$GITHUB_USER_NAME" "$GITHUB_PERSONAL_ACCESS_TOKEN" "nebulae-tpi/emi" "master" && cd ~/nebulae/repo/)
+            gitChanged frontend || cp /home/circleci/nebulae/frontend/emi/package-lock.json ~/nebulae/frontend/shell/frontend/emi/package-lock.json                        
+            gitChanged frontend || ( cd ~/nebulae/frontend/shell && gitPublishPackageLockChanges "$GITHUB_USER_EMAIL" "$GITHUB_USER_NAME" "$GITHUB_PERSONAL_ACCESS_TOKEN" "nebulae-tpi/emi" "master" && cd ~/nebulae/repo/)
       - setup_remote_docker
       - run:
           name: Build docker image and push it to hub
           command: |
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/            
-            ls ~/nebulae/frontend/emi/dist/ 
-            export DOCKERHUB_IMAGE=emi
-            export FRONTEND_SHELL_PATH=~/nebulae/frontend/emi
-            ( cd ~/nebulae/frontend/shell && sh deployment/docker/build-docker-hub.sh && cd ~/nebulae/repo/ )
-            echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/frontend/DOCKERHUB_GENERATED_IMAGE_DIGEST
+            gitChanged frontend || ls ~/nebulae/frontend/emi/dist/ 
+            gitChanged frontend || export DOCKERHUB_IMAGE=emi
+            gitChanged frontend || export FRONTEND_SHELL_PATH=~/nebulae/frontend/emi
+            gitChanged frontend || ( cd ~/nebulae/frontend/shell && sh deployment/docker/build-docker-hub.sh && cd ~/nebulae/repo/ )
+            gitChanged frontend || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/frontend/DOCKERHUB_GENERATED_IMAGE_DIGEST
       - persist_to_workspace:
           root: ~/nebulae/
           paths:
@@ -84,14 +83,14 @@ jobs:
           command: |    
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/            
-            echo $GCP_SERVICE_ACCOUNT_DEV | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
-            npm config set prefix '~/.npm-global'
-            export PATH=~/.npm-global/bin:$PATH
-            source ~/.profile
-            npm install -g @nebulae/cli
-            nebulae register microapi --microservice-id=service --api-id=emi-gateway --setup-file=/home/circleci/nebulae/repo/etc/mapi-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
-            nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/emi-gateway.git --api-id=emi-gateway --output-dir=/home/circleci/nebulae/api/emi-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
-            ls /home/circleci/nebulae/api/emi-gateway/
+            gitChanged api/emi-gateway || echo $GCP_SERVICE_ACCOUNT_DEV | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
+            gitChanged api/emi-gateway || npm config set prefix '~/.npm-global'
+            gitChanged api/emi-gateway || export PATH=~/.npm-global/bin:$PATH
+            gitChanged api/emi-gateway || source ~/.profile
+            gitChanged api/emi-gateway || npm install -g @nebulae/cli
+            gitChanged api/emi-gateway || nebulae register microapi --microservice-id=service --api-id=emi-gateway --setup-file=/home/circleci/nebulae/repo/etc/mapi-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
+            gitChanged api/emi-gateway || nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/emi-gateway.git --api-id=emi-gateway --output-dir=/home/circleci/nebulae/api/emi-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
+            gitChanged api/emi-gateway || ls /home/circleci/nebulae/api/emi-gateway/
       - setup_remote_docker
       - run:
           name: Build docker image and push it to hub
@@ -99,12 +98,12 @@ jobs:
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/
             mkdir -p ~/nebulae/api
-            ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-tpi/emi-gateway  ~/nebulae/api/shell )      
-            ls ~/nebulae/api/shell
-            export DOCKERHUB_IMAGE=emigateway
-            export API_SHELL_PATH=/home/circleci/nebulae/api/
-            ( cd ~/nebulae/api/shell && sh ~/nebulae/api/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
-            echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api/EMI_DOCKERHUB_GENERATED_IMAGE_DIGEST
+            gitChanged api/emi-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-tpi/emi-gateway  ~/nebulae/api/shell )      
+            gitChanged api/emi-gateway || ls ~/nebulae/api/shell
+            gitChanged api/emi-gateway || export DOCKERHUB_IMAGE=emigateway
+            gitChanged api/emi-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
+            gitChanged api/emi-gateway || ( cd ~/nebulae/api/shell && sh ~/nebulae/api/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
+            gitChanged api/emi-gateway || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api/EMI_DOCKERHUB_GENERATED_IMAGE_DIGEST
       - persist_to_workspace:
           root: ~/nebulae/
           paths:
@@ -124,14 +123,14 @@ jobs:
           command: |    
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/            
-            echo $GCP_SERVICE_ACCOUNT_DEV | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
-            npm config set prefix '~/.npm-global'
-            export PATH=~/.npm-global/bin:$PATH
-            source ~/.profile
-            npm install -g @nebulae/cli
-            nebulae register microapi --microservice-id=service --api-id=driver-gateway --setup-file=/home/circleci/nebulae/repo/etc/mapi-driver-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
-            nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/driver-gateway.git --api-id=driver-gateway --output-dir=/home/circleci/nebulae/api/driver-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
-            ls /home/circleci/nebulae/api/driver-gateway/
+            gitChanged api/driver-gateway || echo $GCP_SERVICE_ACCOUNT_DEV | base64 --decode --ignore-garbage > /tmp/gcloud-service-key.json
+            gitChanged api/driver-gateway || npm config set prefix '~/.npm-global'
+            gitChanged api/driver-gateway || export PATH=~/.npm-global/bin:$PATH
+            gitChanged api/driver-gateway || source ~/.profile
+            gitChanged api/driver-gateway || npm install -g @nebulae/cli
+            gitChanged api/driver-gateway || nebulae register microapi --microservice-id=service --api-id=driver-gateway --setup-file=/home/circleci/nebulae/repo/etc/mapi-driver-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
+            gitChanged api/driver-gateway || nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/driver-gateway.git --api-id=driver-gateway --output-dir=/home/circleci/nebulae/api/driver-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
+            gitChanged api/driver-gateway || ls /home/circleci/nebulae/api/driver-gateway/
       - setup_remote_docker
       - run:
           name: Build docker image and push it to hub
@@ -139,12 +138,12 @@ jobs:
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/
             mkdir -p ~/nebulae/api-driver
-            ( cd  ~/nebulae/api-driver/ && git clone --depth=1 https://github.com/nebulae-tpi/driver-gateway  ~/nebulae/api-driver/shell )      
-            ls ~/nebulae/api-driver/shell
-            export DOCKERHUB_IMAGE=drivergateway
-            export API_SHELL_PATH=/home/circleci/nebulae/api/
-            ( cd ~/nebulae/api-driver/shell && sh ~/nebulae/api-driver/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
-            echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api-driver/DRIVER_DOCKERHUB_GENERATED_IMAGE_DIGEST
+            gitChanged api/driver-gateway || ( cd  ~/nebulae/api-driver/ && git clone --depth=1 https://github.com/nebulae-tpi/driver-gateway  ~/nebulae/api-driver/shell )      
+            gitChanged api/driver-gateway || ls ~/nebulae/api-driver/shell
+            gitChanged api/driver-gateway || export DOCKERHUB_IMAGE=drivergateway
+            gitChanged api/driver-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
+            gitChanged api/driver-gateway || ( cd ~/nebulae/api-driver/shell && sh ~/nebulae/api-driver/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
+            gitChanged api/driver-gateway || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api-driver/DRIVER_DOCKERHUB_GENERATED_IMAGE_DIGEST
       - persist_to_workspace:
           root: ~/nebulae/
           paths:
@@ -197,10 +196,10 @@ jobs:
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/service/
             export DOCKERHUB_IMAGE=service.backend.service
             export DOCKERHUB_TAG=0.2.12
-            docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service/
-            docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-            docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
-            docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
+            gitChanged backend/service || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service/
+            gitChanged backend/service || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+            gitChanged backend/service || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
+            gitChanged backend/service || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
       - persist_to_workspace:
           root: ~/nebulae/
           paths:
@@ -224,10 +223,10 @@ jobs:
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/service-core/
             export DOCKERHUB_IMAGE=service.backend.servicecore
             export DOCKERHUB_TAG=2.4.8  # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
-            docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service-core/
-            docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-            docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
-            docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
+            gitChanged backend/service-core || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service-core/
+            gitChanged backend/service-core || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+            gitChanged backend/service-core || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
+            gitChanged backend/service-core || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
       - persist_to_workspace:
           root: ~/nebulae/
           paths:
@@ -252,10 +251,10 @@ jobs:
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/driver-app-link/
             export DOCKERHUB_IMAGE=service.backend.driverapplink
             export DOCKERHUB_TAG=2.4.8  # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER
-            docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/driver-app-link/
-            docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-            docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
-            docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
+            gitChanged backend/driver-app-link || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/driver-app-link/
+            gitChanged backend/driver-app-link || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+            gitChanged backend/driver-app-link || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
+            gitChanged backend/driver-app-link || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
       - persist_to_workspace:
           root: ~/nebulae/
           paths: 
