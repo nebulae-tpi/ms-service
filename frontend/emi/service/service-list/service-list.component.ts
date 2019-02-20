@@ -179,8 +179,6 @@ export class ServiceListComponent implements OnInit, OnDestroy {
         endTimestamp: this.maxEndDate
       });
     }
-    console.log('minEndDate => ', this.minEndDate);
-    console.log('maxEndDate => ', this.maxEndDate.format());
 
   }
 
@@ -235,7 +233,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     const endOfMonth = moment().endOf('day');
     this.minEndDate = startOfMonth;
     this.maxEndDate = endOfMonth;
-    
+
     this.filterForm = this.formBuilder.group({
       initTimestamp: [initTimeStampValue, [Validators.required]],
       endTimestamp: [endOfMonth, [Validators.required]],
