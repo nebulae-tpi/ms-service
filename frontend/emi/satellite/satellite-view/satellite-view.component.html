@@ -9,7 +9,7 @@
       class="sidenav"
       align="start"
       mode="side"
-      opened="true"
+      [(opened)]="openedSideNav"
       fuseMatSidenavHelper="carded-left-sidenav"
     >
       <!-- SIDENAV HEADER -->
@@ -92,12 +92,12 @@
                 <mat-form-field class="mt-12">
                   <input matInput [formControl]="clientFilterCtrl" placeholder="{{ 'SATELLITE.SATELLITE_CLIENT_PLACEHOLDER' | translate }}" aria-label="satelliteClient" [matAutocomplete]="auto">
 
-                  <mat-autocomplete #auto="matAutocomplete" (optionSelected)='setSelectedClientSatellite($event.option.value)' [displayWith]="displayFn">
+                  <mat-autocomplete panelWidth="200" #auto="matAutocomplete" autoActiveFirstOption (optionSelected)='setSelectedClientSatellite($event.option.value)' [displayWith]="displayFn">
                     <mat-option *ngFor="let satelliteClient of satelliteClientQueryFiltered$ | async" [value]="satelliteClient">
                       <!-- <img style="vertical-align:middle;" aria-hidden src="./assets/devices-location/bus2.svg" height="20" /> -->
                       <mat-icon>person_pin_circle</mat-icon>
                       <!-- <span class="text-boxed text-uppercase">{{ satelliteClient._id }}</span> -->
-                      <span class="text-uppercase">{{ satelliteClient.generalInfo ? satelliteClient.generalInfo.name: '' }}</span>
+                      <span class="text-boxed text-uppercase">{{ satelliteClient.generalInfo ? satelliteClient.generalInfo.name: '' }}</span>
                     </mat-option>
                   </mat-autocomplete>
                 </mat-form-field>
@@ -238,7 +238,7 @@
             </form>
 
             <div class="p-24">
-              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" [disabled]="requestForm.invalid || !clientData"
+              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" [disabled]="requestForm.invalid || !clientData || !clientData.location"
                 aria-label="Request taxi" (click)="requestService()">
                 {{ "SATELLITE.REQUEST_TAXI" | translate }}
               </button>

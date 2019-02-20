@@ -67,8 +67,7 @@ class ClientCQRS {
         const businessId = authToken.businessId || '-1';
         const clientId = !isOperator && isSatellite ? (authToken.clientId || '-1'): null;
 
-
-        return ClientDA.getSatelliteClients$(args.clienText, args.limit, businessId, clientId);
+        return ClientDA.getSatelliteClients$(args.clientText, args.limit, businessId, clientId);
       }),
       toArray(),
       mergeMap(rawResponse => {

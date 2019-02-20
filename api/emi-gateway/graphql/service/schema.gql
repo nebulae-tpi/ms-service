@@ -125,7 +125,7 @@ type ServiceClientSatelliteGeneralInfo {
 
 type ServiceClientSatelliteInfo {
   "Referrer driver document id"
-  referrerDriverDocumentId: String!,
+  referrerDriverDocumentId: String,
   "Tipping type"
   tipType: String
   "Tip given to the client. Eg. satellites"
@@ -221,7 +221,7 @@ input ServiceServicePaginationInput {
 
 
 
-##  SHIFT SEGMENT  ##
+##  SHIFT SEGMENT ##
 
 input ServiceShiftPaginationInput {
   "Page"
@@ -341,7 +341,7 @@ type ServiceShift {
 }
 
 type Query {
-  ## CLIENT SATELLITE
+  ## CLIENT SATELLITE.
   "Get client satellite data of the client satellite logged"
   ServiceClientSatellite: ServiceClientSatellite
   "Gets the client satellite by its name"

@@ -37,12 +37,12 @@ class ClientDA {
     /**
    * Gets the satellite clients by the client name
    */
-  static getSatelliteClients$(clienText, limit, businessId, clientId) {
+  static getSatelliteClients$(clientText, limit, businessId, clientId) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {};
-    if(clienText){
-      query['$or'] = [ { id: {$regex: clienText, $options: 'i'} }, { 'generalInfo.name': {$regex: filterText, $options: 'i'} } ];
+    if(clientText){
+      query['generalInfo.name'] = {$regex: '^'+clientText, $options: 'i'};
     }
 
     if(businessId){

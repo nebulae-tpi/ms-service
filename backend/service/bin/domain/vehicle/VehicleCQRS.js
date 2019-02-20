@@ -29,7 +29,7 @@ class VehicleCQRS {
   }
 
   /**  
-   * Gets the Driver
+   * Gets the Driver.
    *
    * @param {*} args args
    */
