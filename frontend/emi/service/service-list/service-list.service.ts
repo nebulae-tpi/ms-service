@@ -16,7 +16,7 @@ export class ServiceListService {
 
   private _filterSubject$ = new BehaviorSubject({
       initTimestamp: moment().subtract(1, 'day').startOf('day'),
-      endTimestamp: moment().endOf('day')
+      endTimestamp: moment().endOf('day'),
   });
 
   private _paginatorSubject$ = new BehaviorSubject({

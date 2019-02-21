@@ -303,8 +303,9 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       take(1)
     ).subscribe(([filterValue, paginator]) => {
           if (filterValue) {
-            console.log('loadLastFilters => ', filterValue.initTimestamp.format(), filterValue.endTimestamp.format());
-            console.log('filterValue.states =====> ', filterValue.states);
+            // console.log('loadLastFilters => ', filterValue.initTimestamp.format(), filterValue.endTimestamp.format());
+            // console.log('filterValue.states =====> ', filterValue.states);
+          
             this.filterForm.patchValue({
               initTimestamp: filterValue.initTimestamp,
               endTimestamp: filterValue.endTimestamp,
@@ -313,9 +314,25 @@ export class ServiceListComponent implements OnInit, OnDestroy {
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
               clientUsername: filterValue.clientUsername,
               clientFullname: filterValue.clientFullname,
-              states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
+              //states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
+              //states: this.formBuilder.array([]),
               showClosedServices: filterValue.showClosedServices
             });
+            
+
+          if(filterValue.states) {
+            this.filterForm.setControl('states', this.formBuilder.array([]))
+              filterValue.states.forEach(stateKey => {                
+                  (this.filterForm.get('states') as FormArray).push(
+                    new FormGroup({
+                      name: new FormControl(stateKey.name),
+                      active: new FormControl(stateKey.active)
+                    })
+                  );                
+              });
+          }            
+
+
             this.onInitDateChange();
             // this.onEndDateChange();
           }
