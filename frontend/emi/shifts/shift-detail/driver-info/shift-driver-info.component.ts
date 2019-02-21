@@ -87,7 +87,7 @@ export class ShiftDriverInfoComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    console.log(this.shift);
+    //console.log(this.shift);
     this.shiftDriverInfoForm = new FormGroup({
       id: new FormControl(this.shift ? (this.shift.driver || {}).id : ''),
       fullName: new FormControl(this.shift ? (this.shift.driver || {}).fullname : ''),

@@ -93,7 +93,9 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe((service: any) => {
-      this.service = service;
+      if(service != null && this.service != null && service._id === this.service._id){
+        this.service = service;
+      }      
     })
   }
 

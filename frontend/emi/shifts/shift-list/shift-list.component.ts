@@ -257,19 +257,19 @@ export class ShiftListComponent implements OnInit, OnDestroy {
 
   updateFilterDataSubscription() {
     this.listenFilterFormChanges$()
-      .pipe(
+      .pipe(        
+        tap(filterData => this.shiftListservice.updateFilterData(filterData) ),
         takeUntil(this.ngUnsubscribe),
-        tap(filterData => this.shiftListservice.updateFilterData(filterData) )
       )
       .subscribe();
   }
 
   updatePaginatorDataSubscription() {
     this.listenPaginatorChanges$()
-      .pipe(
-        takeUntil(this.ngUnsubscribe),
+      .pipe(        
         map(pagination => ({ pagination: {page: pagination.pageIndex, count: pagination.pageSize, sort: -1} })),
-        tap(paginator => this.shiftListservice.updatePaginatorData(paginator) )
+        tap(paginator => this.shiftListservice.updatePaginatorData(paginator) ),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe();
   }
@@ -291,8 +291,21 @@ export class ShiftListComponent implements OnInit, OnDestroy {
               driverDocumentId: filterValue.driverDocumentId,
               driverFullname: filterValue.driverFullname,
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
-              states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
+              //states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
             });
+
+            if(filterValue.states) {
+              this.filterForm.setControl('states', this.formBuilder.array([]))
+                filterValue.states.forEach(stateKey => {                
+                    (this.filterForm.get('states') as FormArray).push(
+                      new FormGroup({
+                        name: new FormControl(stateKey.name),
+                        active: new FormControl(stateKey.active)
+                      })
+                    );                
+                });
+            }  
+
             this.onInitDateChange();
             this.onEndDateChange();
           }
@@ -430,7 +443,8 @@ export class ShiftListComponent implements OnInit, OnDestroy {
             this.showMessageSnackbar(this.translate.instant('SHIFT.SHIFT_CLOSED'));
             this.dataSource.data.find((s: any) => s._id === shiftId)['state'] = 'CLOSED';
           }
-        })
+        }),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(() => { }, e => console.log(e), () => { });
 
