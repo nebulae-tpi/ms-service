@@ -30,7 +30,7 @@ const buildErrorResponse$ = (errCode, rawRespponse) => {
     );
 };
 
-const handleError$ = (err, doLog = false) => {
+const handleError$ = (err = new Error('NULL_ERROR'), doLog = false) => {
     return of(err).pipe(
         tap(err => { if (doLog) logError(err); }),
         map(err => {
@@ -52,10 +52,10 @@ const handleError$ = (err, doLog = false) => {
  * Logs an error at the console.error printing only the message and the stack related to the project source code
  * @param {Error} error 
  */
-const logError = (error) => {  
-    if (!error) {        
+const logError = (error) => {
+    if (!error) {
         return;
-    }  
+    }
     if (!error.stack) {
         console.error(error);
         return;
