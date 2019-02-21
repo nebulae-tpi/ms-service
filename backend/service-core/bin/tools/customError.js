@@ -53,6 +53,7 @@ module.exports = {
   ERROR_23010: new CustomError('StartShiftError', `StartShift`, 23010, 'No se puede iniciar el turno: el conductor ya tiene un turno abierto'),
   ERROR_23011: new CustomError('StartShiftError', `StartShift`, 23011, 'No se puede iniciar el turno: el vehiculo seleccionado tiene un turno abierto'),
   ERROR_23012: new CustomError('StartShiftError', `StartShift`, 23012, 'No se puede iniciar el turno: conductor actualmente inactivo.  Por favor comunicarse con el administrador del sistema'),
+  ERROR_23013: new CustomError('StartShiftError', `StartShift`, 23013, 'No se puede iniciar el turno: vehiculo actualmente inactivo.  Por favor comunicarse con el administrador del sistema.'),
   ERROR_23014: new CustomError('StartShiftError', `StartShift`, 23014, 'No se puede iniciar el turno: el vehículo no está asignado al conductor'),
   ERROR_23015: new CustomError('StartShiftError', `StartShift`, 23015, 'No se puede iniciar el turno: vehículo no registrado.  Por favor comunicarse con el administrador del sistema'),
   ERROR_23016: new CustomError('StartShiftError', `StartShift`, 23016, 'No se puede iniciar el turno: conductor no registrado.  Por favor comunicarse con el administrador del sistema'),
