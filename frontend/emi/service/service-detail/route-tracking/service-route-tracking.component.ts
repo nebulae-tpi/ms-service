@@ -113,7 +113,7 @@ export class ServiceRouteTrackingComponent implements OnInit, OnDestroy {
   }
 
   initMap() {
-    console.log('initMap1');
+    //console.log('initMap1');
     this.map = new MapRef(this.gmapElement.nativeElement, {
       center: new google.maps.LatLng(6.1701312, -75.6058417),
       zoom: 14,
