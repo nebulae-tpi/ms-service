@@ -52,7 +52,10 @@ const handleError$ = (err, doLog = false) => {
  * Logs an error at the console.error printing only the message and the stack related to the project source code
  * @param {Error} error 
  */
-const logError = (error) => {
+const logError = (error) => {  
+    if (!error) {        
+        return;
+    }  
     if (!error.stack) {
         console.error(error);
         return;
