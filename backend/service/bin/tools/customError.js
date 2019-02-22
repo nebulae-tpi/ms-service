@@ -56,4 +56,6 @@ class CustomError extends Error {
     ERROR_23021: new CustomError('StopShiftError', `StopShift`, 23021, 'No se puede detener el turno: todavía hay un servicio en curso'),
     ERROR_23022: new CustomError('StopShiftError', `StopShift`, 23022, 'No se puede detener el turno: El turno ya se encuentra cerrado'),
 
+    ERROR_23023: new CustomError('VehicleAssignent', `AssignVehicleToDriver`, 23023, 'No se puede asignar el vehículo porque está inactivo'),
+
   } 

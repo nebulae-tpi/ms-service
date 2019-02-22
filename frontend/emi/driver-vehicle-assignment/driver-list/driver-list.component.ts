@@ -101,14 +101,14 @@ export class DriverListComponent implements OnInit, OnDestroy {
   paginator: MatPaginator;
   tableSize: number;
   tablePage = 0;
-  tableCount = 10;
+  tableCount = 25;
 
   // Columns to show in the table
   displayedColumns = [
     'name',
     'lastname',
-    'vehicleQty',
-    'active'
+    'document',
+    'vehicleQty'
   ];
 
   /////// OTHERS ///////
@@ -160,7 +160,6 @@ export class DriverListComponent implements OnInit, OnDestroy {
    */
   listenFilterFormChanges$() {
     return this.filterForm.valueChanges.pipe(
-      debounceTime(500),
       distinctUntilChanged()
     );
   }
@@ -180,7 +179,8 @@ export class DriverListComponent implements OnInit, OnDestroy {
     this.filterForm = this.formBuilder.group({
       name: [null],
       lastname: [null],
-      documentId: [null]
+      documentId: [null],
+      licensePlate: [null]
     });
 
     this.filterForm.disable({
@@ -227,8 +227,9 @@ export class DriverListComponent implements OnInit, OnDestroy {
           if (filter) {
             this.filterForm.patchValue({
               name: filterValue.name,
-              creationTimestamp: filterValue.creationTimestamp,
-              creatorUser: filterValue.creatorUser
+              lastname: filterValue.lastname,
+              documentId: filterValue.documentId,
+              licensePlate: filterValue.licensePlate
             });
           }
 
@@ -259,8 +260,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
           name: filterValue.name,
           lastname: filterValue.lastname,
           documentId: filterValue.documentId,
-          creatorUser: filterValue.creatorUser,
-          creationTimestamp: filterValue.creationTimestamp ? filterValue.creationTimestamp.valueOf() : null
+          licensePlate: filterValue.licensePlate
         };
         const paginationInput = {
           page: paginator.pagination.page,
@@ -278,7 +278,6 @@ export class DriverListComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
-      console.log('LISTADO ==> ', list);
       this.dataSource.data = list;
       this.tableSize = size;
     });
@@ -321,7 +320,8 @@ export class DriverListComponent implements OnInit, OnDestroy {
     this.filterForm.reset();
     this.paginator.pageIndex = 0;
     this.tablePage = 0;
-    this.tableCount = 10;
+    this.tableCount = 25;
+    this.paginator._changePageSize(25)
   }
 
   /**

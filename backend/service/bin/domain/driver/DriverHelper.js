@@ -8,7 +8,8 @@ const {
     INTERNAL_SERVER_ERROR_CODE,
     PERMISSION_DENIED,
     LICENSE_PLATE_ALREADY_ASSIGNED,
-    LICENSE_PLATE_NO_EXIST
+    LICENSE_PLATE_NO_EXIST,
+    ERROR_23023
   } = require("../../tools/customError");
 
 const { of, interval, from, throwError, forkJoin } = require("rxjs");
@@ -35,6 +36,8 @@ class DriverHelperTool {
                         return throwError(new CustomError('License plate do not exist', 'AssignVehicle',
                             LICENSE_PLATE_NO_EXIST.code, LICENSE_PLATE_NO_EXIST.description)
                         )
+                    } else if(!vehicleFound.active) {
+                        return throwError(ERROR_23023)
                     } else {
                         return of(true)
                     }
