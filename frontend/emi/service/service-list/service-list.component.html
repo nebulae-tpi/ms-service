@@ -155,7 +155,7 @@
           <ng-container cdkColumnDef="timestamp">
             <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.TIMESTAMP" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let service">
-              <p class="text-truncate">
+              <p>
                 {{ service.timestamp | date: "dd/MM/y HH:mm:ss"}}
               </p>
             </mat-cell>
@@ -164,8 +164,8 @@
           <!--  Client name Column -->
           <ng-container cdkColumnDef="clientName">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.CLIENT_NAME" | translate}}</mat-header-cell>
-              <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+              <mat-cell *cdkCellDef="let service" fxHide fxShow.gt-xs>
+                <p >
                   {{ service.client.fullname | uppercase }}
                 </p>
               </mat-cell>
@@ -173,9 +173,9 @@
 
           <!--  Driver name Column -->
           <ng-container cdkColumnDef="driverName">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+                <p >
                   {{ service.driver ? service.driver.fullname: ''}}
                 </p>
               </mat-cell>
@@ -183,9 +183,9 @@
 
           <!--  License plate Column -->
           <ng-container cdkColumnDef="licensePlate">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.LICENSE_PLATE" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.LICENSE_PLATE" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+                <p >
                   {{ service.vehicle ? service.vehicle.licensePlate: ''}}
                 </p>
               </mat-cell>
@@ -194,8 +194,8 @@
           <!--  PaymentType Column -->
           <ng-container cdkColumnDef="paymentType">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.PAYMENT_TYPE" | translate}}</mat-header-cell>
-              <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+              <mat-cell *cdkCellDef="let service" fxHide fxShow.gt-xs>
+                <p >
                   {{ "SERVICE.SERVICE_PAYMENT_TYPE."+service.paymentType | translate}}
                 </p>
               </mat-cell>
@@ -204,9 +204,9 @@
 
            <!--  State Column -->
            <ng-container cdkColumnDef="state">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.STATE" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.STATE" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+                <p >
                   {{ "SERVICE.SERVICE_STATES."+service.state | translate}}
                 </p>
               </mat-cell>
