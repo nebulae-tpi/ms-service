@@ -13,7 +13,7 @@ spec:
         app: service
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.service:0.2.14
+      - image: DOCKERHUB/service.backend.service:0.2.15
         name: service
         volumeMounts:
         - name: google-application-credentials
@@ -63,7 +63,7 @@ spec:
         - name: SHIFT_CLOSE_THRESHOLD
           value: "3600000"
         - name: SHIFT_DISCONNECT_THRESHOLD
-          value: "60000"
+          value: "120000"
         - name: SERVICE_CLOSED_THRESHOLD
           value: "120000"
         

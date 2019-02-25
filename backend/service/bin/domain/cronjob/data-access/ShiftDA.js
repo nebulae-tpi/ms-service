@@ -13,6 +13,7 @@ const Crosscutting = require("../../../tools/Crosscutting");
 const SHIFT_DISCONNECT_THRESHOLD = parseInt(process.env.SHIFT_DISCONNECT_THRESHOLD) || 5 * 60 * 1000; // FIVE MINUTES
 const SHIFT_CLOSE_THRESHOLD =  parseInt(process.env.SHIFT_CLOSE_THRESHOLD) || 60 * 60 * 1000; // TWELVE HOUR
 
+
 class ShiftDA {
 
   static start$(mongoDbInstance) {
