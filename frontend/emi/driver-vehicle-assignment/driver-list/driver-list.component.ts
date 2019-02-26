@@ -304,7 +304,10 @@ export class DriverListComponent implements OnInit, OnDestroy {
     return this.DriverListservice.getdriverSize$(filterInput)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      map(resp => resp.data.ServiceDriversSize)
+      map(resp => {
+        console.log(resp);
+        return resp.data && resp.data.ServiceDriversSize ? resp.data.ServiceDriversSize: 0;
+      })
     );
   }
 

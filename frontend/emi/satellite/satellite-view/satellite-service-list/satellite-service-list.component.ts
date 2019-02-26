@@ -125,7 +125,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
   closeBar()
   {
     if (!this.barClosed){
-      console.log('closeBar ');
+      //console.log('closeBar ');
       this.player =
           this.animationBuilder
               .build([
@@ -144,7 +144,7 @@ export class SatelliteServiceListComponent implements OnInit, OnDestroy {
   openBar()
   {
     if (this.barClosed){
-      console.log('openBar ');
+      //console.log('openBar ');
       this.barClosed = false;
 
       this.player =

@@ -386,7 +386,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     return this.shiftListservice.getShiftListSize$(filterInput)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      map(resp => resp.data.ServiceShiftsSize)
+      map(resp => resp.data && resp.data.ServiceShiftsSize ? resp.data.ServiceShiftsSize : 0)
     );
   }
 

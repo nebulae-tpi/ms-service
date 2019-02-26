@@ -11,7 +11,7 @@ const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLinkBroker")();
-const { ERROR_23003 } = require('../../tools/customError');
+const { ERROR_23003, ERROR_23212 } = require('../../tools/customError');
 
 const { ShiftDA } = require('./data-access')
 
@@ -72,7 +72,13 @@ class ShiftDAL {
         if(!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
         if(!data.location.lng || !data.location.lat) throw new Error(`Driver-app sent ShiftLocationReported without valid location:  ${JSON.stringify(data)}`);
 
-
+        //Check if the location is in the Colombian territory,otherwise the location is not going to be processed and an error will be thrown.
+        if(
+            (data.location.lat < -3.867790 || data.location.lat > 12.373907) || 
+            (data.location.lng < -78.793839 || data.location.lng > -66.965140)){
+            console.log(`WARNING - handleShiftLocationReported (Invalid location reported): ${JSON.stringify(data)} `);
+            return throwError(ERROR_23212(data.location));
+        }
 
         const location = {type:"Point", coordinates: [data.location.lng,data.location.lat]};
 
