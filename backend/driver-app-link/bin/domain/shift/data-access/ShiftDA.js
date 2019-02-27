@@ -30,7 +30,7 @@ class ShiftDA {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOne(
         { _id },
-        projection
+        {projection}
       )
     ).pipe(filter(shift => shift));
   }

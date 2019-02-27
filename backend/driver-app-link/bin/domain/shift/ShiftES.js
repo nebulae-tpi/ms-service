@@ -1,6 +1,5 @@
 'use strict'
 
-
 const { of, interval, forkJoin, empty } = require("rxjs");
 const { mergeMapTo, tap, mergeMap, catchError, map, toArray, delay, filter } = require('rxjs/operators');
 
@@ -116,11 +115,14 @@ class ShiftES {
      * @param {Event} shiftDriverBlockAddedEvt
      */
     handleShiftDriverBlockAdded$({ aid, data }) {
-        console.log(`ShiftES: handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
+        console.log(`ShiftES: handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE        
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, driver: 1 }).pipe(
-            mergeMap(({ businessId, driver, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, driver }))
-        );
+        return ShiftDA.findById$(aid, { businessId: 1, driver: 1 })
+            .pipe(
+                mergeMap(({ businessId, driver }) =>
+                    driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, driver })
+                )
+            );
     }
 
     /**
