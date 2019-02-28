@@ -108,6 +108,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   //////// FORMS //////////
   requestForm: FormGroup;
   clientFilterCtrl: FormControl;
+  requestButtonDisabled = false;
 
   constructor(
     private datePipe: DatePipe,
@@ -605,8 +606,16 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   requestService(){
     const requestServiceForm = this.requestForm.getRawValue();
-    return range(1, requestServiceForm.taxisNumber || 1)
+
+    this.requestButtonDisabled = false;
+    return of(requestServiceForm.taxisNumber || 1)
     .pipe(
+      tap(taxisNumber => {
+        this.requestButtonDisabled = true;
+        console.log('requestButtonDisabled => ', this.requestButtonDisabled);
+        console.log('requestForm.invalid || !clientData || !clientData.location || requestButtonDisabled => ', (this.requestForm.invalid || !this.clientData || !this.clientData.location || this.requestButtonDisabled));
+      }),
+      mergeMap(taxisNumber => range(1, taxisNumber)),
       map(requestNumber => {
         const features = requestServiceForm.features.filter(feature => feature.active).map(feature => feature.name);
 
@@ -645,6 +654,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
         };
       }),
       mergeMap(serviceCoreRequest=> this.satelliteViewService.createServiceCoreRequestService$(serviceCoreRequest)),
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(
@@ -661,11 +671,20 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
       error => {
         this.showSnackBar('SATELLITE.ERROR_OPERATION');
         console.log('Error ==> ', error);
+        this.activeRequestButton();
+      },
+      () => {
+        this.activeRequestButton();
       }
     );
   }
 
-
+  /**
+   * Activates the request button
+   */
+  activeRequestButton(){
+    this.requestButtonDisabled = false;
+  }
 
   /**
    * Checks if the logged user has role OPERATOR
@@ -806,6 +825,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   showSnackBarError(response) {
     if (response.errors) {
+      console.log('response.errors ', response.errors);
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
