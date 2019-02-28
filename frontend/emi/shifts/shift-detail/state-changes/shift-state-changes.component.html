@@ -1,0 +1,91 @@
+<div class="tab-content p-24">
+        <div class="w-100-p" fxLayout="row wrap" fusePerfectScrollbar>
+      
+          <div class="pr-4 pl-4 pt-8 pb-8" fxFlex="100" fxFlex.gt-md="50">
+            <div class="content-card mat-white-bg">
+              <mat-table id="entity-table"  class="item-table adaptativeTable" #table [dataSource]="stateChangesDataSource">
+      
+                <!-- Timestamp Column -->
+                <ng-container cdkColumnDef="timestamp">
+                  <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.STATE_CHANGES.TIMESTAMP" | translate}}</mat-header-cell>
+                  <mat-cell *cdkCellDef="let state">
+                    <div fxHide fxShow.gt-xs class="text-truncate">
+                      {{ state.timestamp | date: "dd/MM/y HH:mm:ss"}}
+                    </div>
+                    <div fxShow fxHide.gt-xs class="text-truncate">
+                      <div>{{  state.timestamp | date: "dd/MM/yy" }}</div>
+                      <div>{{  state.timestamp | date: "HH:mm:ss" }}</div>
+                    </div>
+                  </mat-cell>
+                </ng-container>
+      
+                <!--  STATE COLUMN -->
+                <ng-container cdkColumnDef="state">
+                    <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.STATE_CHANGES.STATE" | translate}}</mat-header-cell>
+                    <mat-cell *cdkCellDef="let state">
+                      <p class="text-truncate">
+                        {{ 'SHIFT.SHIFT_STATES.' +  state.state | translate }}
+                      </p>
+                    </mat-cell>
+                  </ng-container>
+      
+                <mat-header-row *cdkHeaderRowDef="stateChangesDisplayedColumns"></mat-header-row>
+      
+                <mat-row *cdkRowDef="let row; columns: stateChangesDisplayedColumns" class="item" (click)="selectState(row)"
+                  [ngClass]="{highlight: selectedService && selectedService._id == row._id}" matRipple>
+                </mat-row>
+              </mat-table>
+              <mat-paginator #stateChangesPaginator [length]="stateChangesTableSize" [pageIndex]="stateChangesTablePage" [pageSize]="stateChangesTableCount"
+                [pageSizeOptions]="[5, 10, 25, 100]">
+              </mat-paginator>
+            </div>
+          </div>
+      
+          <div class="pr-4 pl-4 pt-8 pb-8" fxFlex="100" fxFlex.gt-md="50">
+            <div class="content-card mat-white-bg">
+              <mat-table id="entity-table" class="item-table" #table [dataSource]="conectDisconectDataSource">
+      
+                <!-- Timestamp Column -->
+                <ng-container cdkColumnDef="timestamp">
+                  <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.STATE_CHANGES.TIMESTAMP" | translate}}</mat-header-cell>
+                  <mat-cell *cdkCellDef="let state">
+                    <div fxHide fxShow.gt-xs class="text-truncate">
+                      {{ state.timestamp | date: "dd/MM/y HH:mm:ss"}}
+                    </div>
+                    <div fxShow fxHide.gt-xs class="text-truncate">
+                      <div>{{ state.timestamp | date: "dd/MM/yy" }}</div>
+                      <div>{{ state.timestamp | date: "HH:mm:ss" }}</div>
+                    </div>
+                  </mat-cell>
+                </ng-container>
+      
+                <!--  ONLINE COLUMN -->
+                <ng-container cdkColumnDef="state">
+                  <mat-header-cell *cdkHeaderCellDef>{{"SHIFT.STATE_CHANGES.STATE" | translate}}</mat-header-cell>
+                  <mat-cell *cdkCellDef="let state">
+                    <div *ngIf="state.online" fxLayoutAlign="center center" class="text-truncate">
+                      <i class="material-icons"> done </i>
+                      {{ 'SHIFT.STATE_CHANGES.ONLINE' | translate }}
+                    </div>
+                    <div *ngIf="!state.online" fxLayoutAlign="center center" class="text-truncate">
+                      <i class="material-icons"> close </i>
+                      {{ 'SHIFT.STATE_CHANGES.OFFLINE' | translate }}
+                    </div>
+                  </mat-cell>
+                </ng-container>
+      
+      
+                <mat-header-row *cdkHeaderRowDef="conectDisconectDisplayedColumns"></mat-header-row>
+      
+                <mat-row *cdkRowDef="let row; columns: conectDisconectDisplayedColumns" class="item" (click)="selectState(row)"
+                  [ngClass]="{highlight: selectedService && selectedService._id == row._id}" matRipple>
+                </mat-row>
+              </mat-table>
+              <mat-paginator #conectDisconectPaginator [length]="conectDisconectTableSize" [pageIndex]="conectDisconectTablePage" [pageSize]="conectDisconectTableCount"
+                [pageSizeOptions]="[5, 10, 25, 100]">
+              </mat-paginator>
+            </div>
+          </div>
+      
+        </div>
+      </div>
