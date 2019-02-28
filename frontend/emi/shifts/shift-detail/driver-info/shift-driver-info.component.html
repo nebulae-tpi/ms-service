@@ -28,7 +28,9 @@
     <div *ngIf="shift.driver.blocks && shift.driver.blocks.length > 0" class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
         <div class="pb-8 pt-8"> {{ 'SHIFT.DRIVER_DETAIL.BLOCKS_TITLE' | translate }} </div>
         <mat-chip-list>
-            <mat-chip *ngFor="let block of shift.driver.blocks" color="primary" selected>{{ block }}</mat-chip>
+            <mat-chip *ngFor="let block of shift.driver.blocks" color="primary" selected>
+                {{ 'SHIFT.DRIVER_DETAIL.BLOCKS.' + block.key | translate }}
+            </mat-chip>
         </mat-chip-list>
     </div>
 
