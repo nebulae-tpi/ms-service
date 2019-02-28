@@ -192,13 +192,13 @@ class DriverDA {
   }
 
   static insertBlock$(driverId, block){
-    console.log("insertBlock$$", licensePlate);
+    console.log("insertBlock$$", block);
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.updateOne({_id: driverId}, {$push: { blocks: block } }) )
   }
 
   static removeBlock$(driverId, blockKey){
-    console.log("removeBlock$", licensePlate);
+    console.log("removeBlock$", blockKey);
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.updateOne({_id: driverId}, {$pull: { blocks: { key: blockKey } } }) )
   }  
