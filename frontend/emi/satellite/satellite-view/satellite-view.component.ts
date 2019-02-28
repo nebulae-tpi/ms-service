@@ -222,7 +222,6 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
                   if(service.state === 'ON_BOARD' || service.state === 'DONE'){
                     this.removeServiceFromArray(service._id);
                     this.removeMarkerFromMap(marker);
-                    console.log('Satellite => ');
                     return;
                   }                  
                 }
@@ -401,7 +400,6 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
         );
       }
     });
-    console.log('buildRequestTaxiForm');
   }
 
   /**
@@ -612,8 +610,6 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
     .pipe(
       tap(taxisNumber => {
         this.requestButtonDisabled = true;
-        console.log('requestButtonDisabled => ', this.requestButtonDisabled);
-        console.log('requestForm.invalid || !clientData || !clientData.location || requestButtonDisabled => ', (this.requestForm.invalid || !this.clientData || !this.clientData.location || this.requestButtonDisabled));
       }),
       mergeMap(taxisNumber => range(1, taxisNumber)),
       map(requestNumber => {
@@ -701,7 +697,6 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
 
   onSelectedService(service){
     // this.selectedService = service;
-    console.log('onSelectedService => ', service._id);
     const marker = this.getMarkerFromArray(service._id);
     if (marker){
       this.onMarkerClick(marker, null);
@@ -825,7 +820,6 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   showSnackBarError(response) {
     if (response.errors) {
-      console.log('response.errors ', response.errors);
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
