@@ -28,6 +28,11 @@ export const locale = {
         },
         LANGUAGES_TITLE: 'Languages',
         BLOCKS_TITLE: 'Blocks',
+        BLOCKS: {
+          BREACH_SERVICE: 'Breach Service',
+          BREACH_AGREEMENT: 'Breach Business Agreement',
+          DOORMAN_COMPLAINT: 'Doorman complaint'
+        },
         LANGUAGES: {
           EN: 'English',
           english: 'English'
