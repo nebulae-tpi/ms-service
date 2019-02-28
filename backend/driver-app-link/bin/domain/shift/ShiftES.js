@@ -115,11 +115,7 @@ class ShiftES {
      * @param {Event} shiftDriverBlockAddedEvt
      */
     handleShiftDriverBlockAdded$({ aid, data }) {
-<<<<<<< HEAD
-        //console.log(`ShiftES: handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
-=======
         console.log(`ShiftES: handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE        
->>>>>>> develop
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
         return ShiftDA.findById$(aid, { businessId: 1, driver: 1 })
             .pipe(
