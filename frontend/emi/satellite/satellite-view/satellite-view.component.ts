@@ -680,7 +680,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
-   * Activates the request button
+   * Activates the request button.
    */
   activeRequestButton(){
     this.requestButtonDisabled = false;
