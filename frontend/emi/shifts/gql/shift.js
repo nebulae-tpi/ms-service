@@ -27,7 +27,9 @@ export const ServiceShift = gql`
       driver {
         id
         fullname
-        blocks
+        blocks{
+          key
+        }
         documentType
         documentId
         pmr
@@ -66,7 +68,9 @@ export const ServiceShifts = gql`
       driver {
         id
         fullname
-        blocks
+        blocks {
+          key
+        }
         # documentType
         documentId
         # pmr
