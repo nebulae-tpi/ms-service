@@ -42,13 +42,17 @@ class ShiftDAL {
                         ),
                         mergeMap(e => this.handlers[e.t](e)),
                     ).subscribe(
-                        (handlerEvt) => { console.log(`ShiftDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`); },
+                        (handlerEvt) => {
+                            //console.log(`ShiftDAL.handlerEvt[${evt.t}]: ${JSON.stringify(handlerEvt)}`);
+                        },
                         async (handlerErr) => {
                             console.error(`ShiftDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`);
                             ShiftDAL.logError(handlerErr);
                             await driverAppLinkBroker.sendErrorEventToDrivers$(evt.topic.split('/')[0], evt.att.un, 'Error', { code: handlerErr.code, msg: handlerErr.message, rejectedEventType: evt.t, rejectedMessageId: evt.id }).toPromise();
                         },
-                        () => console.log(`ShiftDAL.handlerCompleted[${evt.t}]`),
+                        () => {
+                            //console.log(`ShiftDAL.handlerCompleted[${evt.t}]`);
+                        },
                     );
                     evtObs.complete();
                 }))
@@ -68,16 +72,16 @@ class ShiftDAL {
      * process event and forwards the right data to the drivers
      * @param {Event} shiftStartedEvt
      */
-    handleShiftLocationReported$({ data ,authToken}) {
-        if(!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
-        if(!data.location.lng || !data.location.lat) throw new Error(`Driver-app sent ShiftLocationReported without valid location:  ${JSON.stringify(data)}`);
+    handleShiftLocationReported$({ data, authToken }) {
+        if (!data._id) throw new Error(`Driver-app sent ShiftLocationReported without _id:  ${JSON.stringify(data)}`);
+        if (!data.location.lng || !data.location.lat) throw new Error(`Driver-app sent ShiftLocationReported without valid location:  ${JSON.stringify(data)}`);
 
 
 
-        const location = {type:"Point", coordinates: [data.location.lng,data.location.lat]};
+        const location = { type: "Point", coordinates: [data.location.lng, data.location.lat] };
 
 
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId,authToken)).pipe(
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId, authToken)).pipe(
             mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data)}`)
         );
     }
@@ -90,7 +94,7 @@ class ShiftDAL {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    static buildShiftLocationReportedEsEvent(aid, location,serviceId, authToken) {
+    static buildShiftLocationReportedEsEvent(aid, location, serviceId, authToken) {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: aid,

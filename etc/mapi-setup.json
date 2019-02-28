@@ -16,5 +16,11 @@
         "type": "graphql",        
         "src": "api/emi-gateway/graphql/service-core",
         "preBuildCommands": []
+    },
+    {
+        "name": "integrated-operating-environment",
+        "type": "graphql",        
+        "src": "api/emi-gateway/graphql/integrated-operating-environment",
+        "preBuildCommands": []
     }
 ]

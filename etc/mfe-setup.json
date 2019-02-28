@@ -1,157 +1,215 @@
 [
-    {
-        "name": "frontend/emi/driver-vehicle-assignment",
-        "src": "frontend/emi/driver-vehicle-assignment",
-        "groups": [
-            {
-              "id": "BUSINESS_UNIT_MANAGER",
-              "icon": "location_searching",
-              "translate": {
-                "en": "Business units",
-                "es": "Unidades de negocio"
-              },
-              "priority": 200
-            }
-          ],
-        "subgroups": [
-            {
-                "groupId": "BUSINESS_UNIT_MANAGER",
-                "id": "management",
-                "icon": "settings",
-                "translate": {
-                    "en": "Management",
-                    "es": "Gestión"
-                },
-                "priority": 2000
-            }
+  {
+    "name": "frontend/emi/driver-vehicle-assignment",
+    "src": "frontend/emi/driver-vehicle-assignment",
+    "groups": [
+      {
+        "id": "BUSINESS_UNIT_MANAGER",
+        "icon": "location_searching",
+        "translate": {
+          "en": "Business units",
+          "es": "Unidades de negocio"
+        },
+        "priority": 200
+      }
+    ],
+    "subgroups": [
+      {
+        "groupId": "BUSINESS_UNIT_MANAGER",
+        "id": "management",
+        "icon": "settings",
+        "translate": {
+          "en": "Management",
+          "es": "Gestión"
+        },
+        "priority": 2000
+      }
+    ],
+    "contents": [
+      {
+        "groupId": "BUSINESS_UNIT_MANAGER",
+        "subgroupId": "management",
+        "id": "driver-vehicle-assignment",
+        "icon": "assignment",
+        "translate": {
+          "en": "Vehicles assignment",
+          "es": "Asignación de vehículos"
+        },
+        "navURL": "/driver-vehicle-assignment",
+        "path": "driver-vehicle-assignment",
+        "loadChildren": "./main/content/driver-vehicle-assignment/driver-vehicle-assignment.module#DriverVehicleAssignmentModule",
+        "priority": 900,
+        "roles": [
+          "PLATFORM-ADMIN",
+          "BUSINESS-OWNER",
+          "BUSINESS-ADMIN",
+          "COORDINATOR"
         ],
-        "contents": [
-            {
-                "groupId": "BUSINESS_UNIT_MANAGER",
-                "subgroupId": "management",   
-                "id": "driver-vehicle-assignment",
-                "icon": "assignment",
-                "translate": {
-                    "en": "Vehicles assignment",
-                    "es": "Asignación de vehículos"
-                },
-                "navURL": "/driver-vehicle-assignment",
-                "path": "driver-vehicle-assignment",
-                "loadChildren": "./main/content/driver-vehicle-assignment/driver-vehicle-assignment.module#DriverVehicleAssignmentModule",
-                "priority": 900,
-                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"],
-                "default" : false
-            }            
+        "default": false
+      }
+    ],
+    "preBuildCommands": [],
+    "environmentVars": {}
+  },
+  {
+    "name": "satellite",
+    "src": "frontend/emi/satellite",
+    "assets": "frontend/emi/assets/satellite",
+    "groups": [
+      {
+        "id": "OPERATION",
+        "icon": "location_searching",
+        "translate": {
+          "en": "Operation",
+          "es": "Operación"
+        },
+        "priority": 200
+      }
+    ],
+    "contents": [
+      {
+        "groupId": "OPERATION",
+        "id": "poi",
+        "icon": "map",
+        "translate": {
+          "en": "POI",
+          "es": "POI"
+        },
+        "navURL": "/poi",
+        "path": "poi",
+        "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
+        "priority": 1000,
+        "roles": [
+          "SATELLITE",
+          "OPERATOR"
         ],
-        "preBuildCommands": [],
-        "environmentVars": {
-        }
-    },
-    {
-        "name": "satellite",
-        "src": "frontend/emi/satellite",
-        "assets" :"frontend/emi/assets/satellite",
-        "groups": [
-          {
-            "id": "OPERATION",
-            "icon": "location_searching",
-            "translate": {
-              "en": "Operation",
-              "es": "Operación"
-            },
-            "priority": 200
-          }
+        "default": false
+      }
+    ],
+    "preBuildCommands": [],
+    "environmentVars": {}
+  },
+  {
+    "name": "operation",
+    "src": "frontend/emi/service",
+    "groups": [
+      {
+        "id": "OPERATION",
+        "icon": "location_searching",
+        "translate": {
+          "en": "Operation",
+          "es": "Operación"
+        },
+        "priority": 200
+      }
+    ],
+    "contents": [
+      {
+        "groupId": "OPERATION",
+        "id": "operation",
+        "icon": "explore",
+        "translate": {
+          "en": "Services",
+          "es": "Servicios"
+        },
+        "navURL": "/service",
+        "path": "service",
+        "loadChildren": "./main/content/service/service.module#ServiceModule",
+        "priority": 1000,
+        "roles": [
+          "PLATFORM-ADMIN",
+          "BUSINESS-OWNER",
+          "BUSINESS-ADMIN",
+          "SATELLITE",
+          "OPERATOR"
         ],
-        "contents": [
-          {
-              "groupId": "OPERATION",  
-              "id": "poi",
-              "icon": "map",
-              "translate": {
-                "en": "POI",
-                "es": "POI"
-            },
-              "navURL": "/poi",
-              "path": "poi",
-              "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
-              "priority": 1000,
-              "roles" : ["SATELLITE", "OPERATOR"],
-              "default" : false
-          }            
-      ],
-        "preBuildCommands": [],
-        "environmentVars": {
-        }
-    }, 
-    {
-        "name": "operation",
-        "src": "frontend/emi/service",
-        "groups": [
-            {
-              "id": "OPERATION",
-              "icon": "location_searching",
-              "translate": {
-                "en": "Operation",
-                "es": "Operación"
-              },
-              "priority": 200
-            }
-          ],
-        "contents": [
-            {
-                "groupId": "OPERATION",  
-                "id": "operation",
-                "icon": "explore",
-                "translate": {
-                    "en": "Services",
-                    "es": "Servicios"
-                },
-                "navURL": "/service",
-                "path": "service",
-                "loadChildren": "./main/content/service/service.module#ServiceModule",
-                "priority": 1000,
-                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"],
-                "default" : false
-            }            
+        "default": false
+      }
+    ],
+    "preBuildCommands": [
+      "npm install @types/googlemaps --save"
+    ],
+    "environmentVars": {}
+  },
+  {
+    "name": "shifts",
+    "src": "frontend/emi/shifts",
+    "groups": [
+      {
+        "id": "OPERATION",
+        "icon": "location_searching",
+        "translate": {
+          "en": "Operation",
+          "es": "Operación"
+        },
+        "priority": 200
+      }
+    ],
+    "contents": [
+      {
+        "groupId": "OPERATION",
+        "id": "shifts",
+        "icon": "ballot",
+        "translate": {
+          "en": "Shifts",
+          "es": "Turnos"
+        },
+        "navURL": "/shifts",
+        "path": "shifts",
+        "loadChildren": "./main/content/shifts/shifts.module#ShiftsModule",
+        "priority": 1000,
+        "roles": [
+          "PLATFORM-ADMIN",
+          "BUSINESS-OWNER",
+          "BUSINESS-ADMIN",
+          "BUSINESS-VIEWER",
+          "OPERATOR"
         ],
-        "preBuildCommands": [
-            "npm install @types/googlemaps --save"
+        "default": false
+      }
+    ],
+    "environmentVars": {}
+  },
+  {
+    "name": "integrated-operating-environment",
+    "src": "frontend/emi/integrated-operating-environment",
+    "assets": "frontend/emi/assets/integrated-operating-environment",
+    "groups": [
+      {
+        "id": "integrated-operating-environment",
+        "icon": "location_searching",
+        "translate": {
+          "en": "Integrated Operating Environment",
+          "es": "Entorno Operativo Integrado"
+        },
+        "priority": 1000
+      }
+    ],
+    "contents": [
+      {
+        "groupId": "integrated-operating-environment",
+        "id": "operator-workstation",
+        "icon": "ballot",
+        "translate": {
+          "en": "Operator Workstation",
+          "es": "Estación de Trabajo de Operador"
+        },
+        "path": "integrated-operating-environment",
+        "navURL": "/integrated-operating-environment/operator-workstation",
+        "loadChildren": "./main/content/integrated-operating-environment/integrated-operating-environment.module#IntegratedOperatingEnvironmentModule",
+        "priority": 1000,
+        "roles": [
+          "OPERATOR",
+          "OPERATION-SUPERVISOR",
+          "BUSINESS-OWNER",
+          "PLATFORM-ADMIN"
         ],
-        "environmentVars": {
-        }
-    },
-    {
-        "name": "shifts",
-        "src": "frontend/emi/shifts",
-        "groups": [
-            {
-              "id": "OPERATION",
-              "icon": "location_searching",
-              "translate": {
-                "en": "Operation",
-                "es": "Operación"
-              },
-              "priority": 200
-            }
-          ],
-        "contents": [
-            {
-                "groupId": "OPERATION",  
-                "id": "shifts",
-                "icon": "ballot",
-                "translate": {
-                    "en": "Shifts",
-                    "es": "Turnos"
-                },
-                "navURL": "/shifts",
-                "path": "shifts",
-                "loadChildren": "./main/content/shifts/shifts.module#ShiftsModule",
-                "priority": 1000,
-                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"],
-                "default" : false
-            }            
-        ],
-        "environmentVars": {
-        }
-    }
+        "default": false
+      }
+    ],
+    "preBuildCommands": [
+      "npm install angular2-hotkeys --save"
+    ],
+    "environmentVars": {}
+  }
 ]

@@ -32,7 +32,7 @@ class ShiftDA {
       online: true,
       
     };
-    if(requestedFeatures.length > 0){
+    if(requestedFeatures && requestedFeatures.length > 0){
       query['vehicle.features'] = { $all: requestedFeatures };
     }
     for (let i = 0, len = ignoredShiftsIds.length; i < len; i++) {

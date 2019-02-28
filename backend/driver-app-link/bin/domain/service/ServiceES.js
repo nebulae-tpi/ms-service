@@ -29,7 +29,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ aid, data }) {
-        console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
 
         const maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
         const minDistance = data.client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
@@ -38,9 +38,13 @@ class ServiceES {
 
         return Observable.create(obs => {
             this.imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId).subscribe(
-                (evt) => console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`),
+                (evt) => {
+                    //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
+                },
                 (error) => console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) ERROR: ${error}`),
-                () => console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) COMPL: COMPLETED\n`),
+                () => {
+                    //console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) COMPL: COMPLETED\n`);
+                },
             );
             obs.next(`ServiceES: handleServiceRequested: created subscription for imperativeServiceOfferAlgorithm(serviceId=${serviceId})`);
             obs.complete;
@@ -111,7 +115,7 @@ class ServiceES {
                         await driverAppLinkBroker.sendServiceEventToDrivers$(
                             shift.businessId,
                             shift.driver.username,
-                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...service.pickUp, location: undefined }, expirationTime: offerTotalThreshold }
+                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...service.pickUp, location: undefined }, dropOffSpecialType: service.dropOffSpecialType, expirationTime: offerTotalThreshold }
                         ).toPromise();
                         //re-eval service state\/
                         await timer(offerShiftSpan).toPromise();
@@ -161,7 +165,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceAssigned$({ aid, data }) {
-        console.log(`ServiceES: handleServiceAssigned: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServiceAssigned: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(
             aid,
             {
@@ -202,7 +206,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceArrived$({ aid, data }) {
-        console.log(`ServiceES: handleServiceArrived: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServiceArrived: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
@@ -216,7 +220,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServicePassengerBoarded$({ aid, data }) {
-        console.log(`ServiceES: handleServicePassengerBoarded: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServicePassengerBoarded: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
@@ -230,7 +234,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCompleted$({ aid, data }) {
-        console.log(`ServiceES: handleServiceCompleted: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServiceCompleted: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
@@ -246,7 +250,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCancelledByDriver$({ aid, data }) {
-        console.log(`ServiceES: handleServiceCancelledByDriver: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServiceCancelledByDriver: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
@@ -260,7 +264,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCancelledByClient$({ aid, data }) {
-        console.log(`ServiceES: handleServiceCancelledByClient: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServiceCancelledByClient: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
@@ -274,7 +278,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCancelledByOperator$({ aid, data }) {
-        console.log(`ServiceES: handleServiceCancelledByOperator: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceES: handleServiceCancelledByOperator: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 }).pipe(
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(

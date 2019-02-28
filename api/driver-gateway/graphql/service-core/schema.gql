@@ -111,6 +111,8 @@ type Service{
    pickUp: Location
    "Passenger drop off location"
    dropOff: Location
+   "dropOff especial type eg: AIRPORT, BUS_TERMINAL, OUT_OF_CITY"
+   dropOffSpecialType: String
    "Service verification code"
    verificationCode: String
    "Requested features keys"

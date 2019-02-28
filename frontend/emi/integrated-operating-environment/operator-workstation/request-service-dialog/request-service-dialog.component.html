@@ -1,0 +1,97 @@
+<form [formGroup]="form" (ngSubmit)="submit(form)">
+    <div class="nav" fxLayout="column">
+
+
+
+
+        <mat-dialog-content fxLayout="column" fxLayoutAlign="start" fxFlex="100">
+            <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
+
+                <div fxLayout="row wrap" fxLayoutAlign="space-between center" fxFlex="100">
+
+                    <h2 mat-dialog-title fxFlex="100">Request Service</h2>
+
+                    <mat-form-field fxFlex="100">
+                        <input matInput [formControl]="clientNameFilterCtrl" name="clientNameFilterCtrl"
+                            placeholder="{{ 'IOE_RSD.SATELLITE_CLIENT_PLACEHOLDER' | translate }}"
+                            [matAutocomplete]="auto" cdkFocusInitial>
+
+                        <mat-autocomplete panelWidth="200" #auto="matAutocomplete" autoActiveFirstOption
+                            (optionSelected)='onClientSelected($event.option.value)' [displayWith]="clientDisplayFn">
+                            <mat-option *ngFor="let client of queriedClientsByAutocomplete$ | async" [value]="client">
+                                <mat-icon>person_pin_circle</mat-icon>
+                                <span
+                                    class="text-boxed text-uppercase">{{ client.generalInfo ? client.generalInfo.name: '' }}
+                                </span>
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+
+
+                    <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider>
+                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="center center">
+                        <mat-dialog-actions>
+                            <button fxFlex="80" mat-raised-button color="accent" type="submit">Request</button>
+                        </mat-dialog-actions>
+                    </div>
+
+                    <mat-divider style="visibility:  hidden; height: 20px;" fxFlex="100"></mat-divider>
+                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
+                        <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
+                            <mat-icon class="icon s-40 mr-16">local_taxi</mat-icon>
+                            <span>{{form.controls['quantity'].value}}</span>
+                        </div>
+                        <mat-slider max="5" min="1" step="1" thumbLabel="true" tickInterval="1"
+                            formControlName="quantity" fxFlex="70">
+                        </mat-slider>
+                    </div>
+
+                    <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider>
+                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="end center">
+                        <mat-button-toggle-group name="featureOptionsGroup" formControlName="featureOptionsGroup"
+                            multiple="true">
+                            <mat-button-toggle value="AC">
+                                <mat-icon>ac_unit</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle value="ROOF_RACK">
+                                <mat-icon>grid_on</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle value="TRUNK">
+                                <mat-icon>work</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle value="PETS">
+                                <mat-icon>pets</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle value="BIKE_RACK">
+                                <mat-icon>motorcycle</mat-icon>
+                            </mat-button-toggle>
+                        </mat-button-toggle-group>
+                    </div>
+
+                    <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider>
+
+                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
+                        <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
+                            <mat-icon class="icon s-40 mr-16">map</mat-icon>
+                        </div>
+                        <span fxFlex></span>
+                        <mat-button-toggle-group name="destinationOptionsGroup"
+                            formControlName="destinationOptionsGroup">
+                            <mat-button-toggle value="AIRPORT">
+                                <mat-icon>local_airport</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle value="BUS_TERMINAL">
+                                <mat-icon>directions_bus</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle value="OUT_OF_CITY">
+                                <mat-icon>location_city</mat-icon>
+                            </mat-button-toggle>
+                        </mat-button-toggle-group>
+                    </div>
+
+
+                </div>
+            </div>
+        </mat-dialog-content>
+    </div>
+</form>

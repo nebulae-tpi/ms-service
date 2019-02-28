@@ -1,0 +1,323 @@
+
+"Async CMD server acknowledge"
+type IOECommandAck{
+    "message accepted by the server"
+    accepted: Boolean
+}
+
+
+"Service info"
+type IOEService{
+    "Service Identifier"
+    id: String
+    "Business ID"
+    businessId: String
+    "Shift ID"
+    shiftId: String
+    "Creation timestamp"
+    timestamp: BigInt
+    "Requested features keys"
+    requestedFeatures: [String]
+    "Client info"
+    client: IOEClient
+    "Passenger pick up location"
+    pickUp: IOELocation
+    "Passenger drop off location"
+    dropOff: IOELocation
+    "dropOff especial type eg: AIRPORT, BUS_TERMINAL, OUT_OF_CITY"
+    dropOffSpecialType: String
+    "Service verification code"
+    verificationCode: String
+    "Pickup ETA"
+    pickUpETA: BigInt
+    "Dropoff ETA"
+    dropOffpETA: BigInt   
+    "Payment type key"
+    paymentType: String
+    "Applicable fare discount"
+    fareDiscount: Float
+    "pre calculated fare"
+    fare: Int
+    "Tip given to the driver"
+    tip: Int
+    "Exact route taken by the driver"
+    route: [IOEPoint]   
+    "current service state: REQUESTED,ASSIGNED,ARRIVED,ON_BOARD,DONE,CANCELLED_CLIENT,CANCELLED_DRIVER,"
+    state: String
+    "All state changes"
+    StateChanges: [IOEStateChange]
+    "current location"
+    location: IOEPoint
+    "vehicle info"
+    vehicle: IOEVehicle
+    "driver info"
+    driver: IOEDriver
+    "Last service modification timestamp"
+    lastModificationTimestamp: BigInt
+    "request metadata"
+    request: Request
+}
+
+"Request metadata"
+type Request{
+    "request SOURCE channel: Eg. IVT | SAT | WHATSAPP | APP_CLIENT | OPERATOR"
+    sourceChannel: String
+    "request DESTINATION channel: Eg. APP_DRIVER | RF"
+    destChannel: String
+    "operator's id who created this request"
+    creationOperatorId: String
+    "operator's username who created this request"
+    creationOperatorUsername: String
+    "operator's id who own this request"
+    ownerOperatorId: String
+    "operator's username who own this request"
+    ownerOperatorUsername: String
+}
+
+"Request metadata"
+input RequestInput{
+    "request SOURCE channel: Eg. IVT | SAT | WHATSAPP | APP_CLIENT | OPERATOR"
+    sourceChannel: String
+    "request DESTINATION channel: Eg. APP_DRIVER | RF"
+    destChannel: String
+}
+
+"Client info"
+type IOEClient {
+    "Client ID"
+    id: String
+    "Business ID"
+    businessId: String
+    "Full name"
+    fullname: String
+    "user name"
+    username: String
+    "Tip given to the client. Eg. satellites"
+    tip: Int,
+    "Tiping type"
+    tipType: String,
+    "drivers document, this is the one who referred this client"
+    referrerDriverDocumentId: String
+    "custom offer min distance in radious"
+    offerMinDistance: Int
+    "custom offer max distance in radious"
+    offerMaxDistance: Int
+}
+
+"Client info"
+input IOEClientInput {
+    "Client ID"
+    id: String
+    "Full name"
+    fullname: String
+    "user name"
+    username: String
+    "Tip given to the client. Eg. satellites"
+    tip: Int,
+    "Tiping type"
+    tipType: String,
+    "drivers document, this is the one who referred this client"
+    referrerDriverDocumentId: String
+    "custom offer min distance in radious"
+    offerMinDistance: Int
+    "custom offer max distance in radious"
+    offerMaxDistance: Int
+}
+
+"Vehicle info"
+type IOEVehicle {
+    "License plate"
+    licensePlate: String
+}
+"Vehicle info"
+input IOEVehicleInput {
+    "License plate"
+    licensePlate: String
+}
+
+"Driver info"
+type IOEDriver {
+    "Driver fullname"
+    fullname: String
+    "document"
+    document: String
+    "driver id"
+    id: String
+}
+"Driver info"
+input IOEDriverInput {
+    "Driver fullname"
+    fullname: String
+    "document"
+    document: String
+    "driver id"
+    id: String
+}
+
+
+
+"Location info"
+type IOELocation {
+    "Accurate location, Exact marker point: Lat,Lng"
+    marker: IOEPoint
+    "Non-Accurate location, describes an area"
+    polygon: [IOEPoint]
+    "City name"
+    city: String
+    "Zone name"
+    zone: String
+    "Neighborhood name"
+    neighborhood: String
+    "Street address 1"
+    addressLine1: String
+    "Street address 2"
+    addressLine2: String
+    "location notes"
+    notes: String
+}
+
+"Location info"
+input IOELocationInput {
+    "Accurate location, Exact marker point: Lat,Lng"
+    marker: IOEPointInput
+    "Non-Accurate location, describes an area"
+    polygon: [IOEPointInput]
+    "City name"
+    city: String
+    "Zone name"
+    zone: String
+    "Neighborhood name"
+    neighborhood: String
+    "Street address 1"
+    addressLine1: String
+    "Street address 2"
+    addressLine2: String
+    "location notes"
+    notes: String
+}
+
+"Geo point"
+type IOEPoint {
+    "Latitude"
+    lat: Float
+    "Longitude"
+    lng: Float
+    "Optional timestamp"
+    timestamp: BigInt
+}
+
+"Geo point"
+input IOEPointInput {
+    "Latitude"
+    lat: Float
+    "Longitude"
+    lng: Float
+    "Optional timestamp"
+    timestamp: BigInt
+}
+
+
+"Service State Changes"
+type IOEStateChange{
+    "service state"
+    state: String
+    "state timestamp"
+    timestamp: BigInt
+    "location"
+    location: IOEPoint,
+    "notes"
+    notes: String
+}
+
+
+type Query{
+    "Gets a Service by its ID"
+    IOEService(id: String): IOEService
+    "Gets multiple services at once"
+    IOEServices(
+        serviceStatesFilter: [String]
+        serviceChannelsFilter: [String]
+        viewAllOperators: Boolean
+        page: Int
+        pageCount: Int
+        projections: [String]
+    ): [IOEService]
+}
+
+type Mutation {
+    "Request a new service"
+    IOERequestService(
+        "client info"
+        client: IOEClientInput!
+        "Passenger pick up location"
+        pickUp: IOELocationInput!
+        "Payment type key"
+        paymentType: String!
+        "Requested features keys"
+        requestedFeatures: [String]
+        "Passenger drop off location"
+        dropOff: IOELocationInput   
+        "dropOff especial type eg: AIRPORT, BUS_TERMINAL, OUT_OF_CITY"
+        dropOffSpecialType: String
+        "Applicable fare discount"
+        fareDiscount: Float
+        "pre calculated fare"
+        fare: Int 
+        "Tip given to the driver"
+        tip: Int
+        "request metadata"
+        request: RequestInput
+    ): IOECommandAck
+
+    "Cancel a requested service"
+    IOECancelService(
+        "Service Identifier"
+        id: String!
+        "cancellation reason"
+        reason: String!
+        "cancellation author type: DRIVER | CLIENT | OPERTAOR"
+        authorType: String!
+        "cancellation additional notes"
+        notes: String        
+    ): IOECommandAck
+
+    "Manually assign the service to eather a SHIFT (using ony the shiftId) or to a Driver & Vehicle (inserting all data)"
+    IOEAssignService(
+        "Service Identifier"
+        id: String!
+        "Shift ID"
+        shiftId: String
+        "vehicle info"
+        vehicle: IOEVehicleInput
+        "driver info"
+        driver: IOEDriverInput
+    ): IOECommandAck
+
+    "Manually report service pickup eta"
+    IOEReportServicePickupETA(
+        "Service Identifier"
+        id: String!
+        "Estimated Time of Arrival: exact date-time in UTC millis"
+        eta: BigInt
+    ): IOECommandAck
+
+    "Manually report service as ARRIVED"
+    IOEReportServiceAsArrived(
+        "Service Identifier"
+        id: String!        
+    ): IOECommandAck
+
+    "Manually report service as client picked up"
+    IOEReportServiceAsPickedUp(
+        "Service Identifier"
+        id: String!        
+    ): IOECommandAck
+
+    "Manually report service as COMPLETE"
+    IOEReportServiceAsCompleted(
+        "Service Identifier"
+        id: String!        
+    ): IOECommandAck
+
+
+}

@@ -1,0 +1,141 @@
+<div fxFlex="100" fxLayoutAlign="start center" class="mat-primary-bg">
+    <button mat-button fxHide.xs>
+        <mat-icon>refresh</mat-icon> <span fxHide.sm>REFRESH</span>
+    </button>
+
+    <button mat-button fxHide.xs (click)="showRequestServiceDialog()">
+        <mat-icon span>add_box</mat-icon> <span fxHide.sm>REQUEST</span>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="actions_menu">
+        <mat-icon>format_list_bulleted</mat-icon> <span fxHide.sm>ACTIONS</span>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="view_menu">
+        <mat-icon>visibility</mat-icon> <span fxHide.sm>VIEW</span>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="filter_menu" fxHide.lt-md>
+        <mat-icon>filter_list</mat-icon> <span fxHide.sm>FILTERS</span>
+    </button>
+
+    
+
+    <button mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
+        <mat-icon>device_hub</mat-icon> <span >CHANNELS</span>
+    </button>
+
+    <span fxFlex></span>
+
+
+
+
+    <div fxLayoutGap="2px grid">
+        <button mat-button fxFlex="30px">
+            <mat-icon>keyboard_arrow_left</mat-icon>
+        </button>
+        <button mat-button [matMenuTriggerFor]="pagination_menu" fxFlex="30px">
+            <span>00</span>
+        </button>
+        <button mat-button fxFlex="30px">
+            <mat-icon>keyboard_arrow_right</mat-icon>
+        </button>
+    </div>
+
+
+
+
+</div>
+
+<mat-menu #actions_menu="matMenu">
+    <button mat-button fxHide fxShow.xs>
+        <mat-icon>refresh</mat-icon> <span>REFRESH</span>
+    </button>
+    <button mat-menu-item (click)="showRequestServiceDialog()"fxHide fxShow.xs>
+        <mat-icon>add_box</mat-icon>
+        <span>Request</span>
+    </button>
+    <button mat-menu-item>
+        <mat-icon>cancel</mat-icon>
+        <span>Cancel</span>
+    </button>
+    <button mat-menu-item>
+        <mat-icon>directions_car</mat-icon>
+        <span>Assign</span>
+    </button>
+</mat-menu>
+
+<mat-menu #filter_menu="matMenu" overlapTrigger=false>    
+    <button mat-menu-item>
+        <mat-checkbox>Requested</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-checkbox>Assigned</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-checkbox>On board</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-checkbox>Arrived</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-checkbox>Done</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-checkbox>Closed</mat-checkbox>
+    </button>
+</mat-menu>
+
+<mat-menu #channels_menu="matMenu" overlapTrigger=false>
+    <button mat-menu-item>
+        <mat-icon>person</mat-icon>
+        <mat-checkbox>Operators</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-icon>call</mat-icon>
+        <mat-checkbox>IVR</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-icon>tablet</mat-icon>
+        <mat-checkbox>Satellites</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-icon>chat</mat-icon>
+        <mat-checkbox>WhatsApp</mat-checkbox>
+    </button>
+    <button mat-menu-item>
+        <mat-icon>chat</mat-icon>
+        <mat-checkbox>Facebook Msg</mat-checkbox>
+    </button>
+</mat-menu>
+
+<mat-menu #pagination_menu="matMenu" overlapTrigger=false>
+    <button mat-menu-item>
+        5
+    </button>
+    <button mat-menu-item>
+        10
+    </button>
+    <button mat-menu-item>
+        20
+    </button>    
+    <button mat-menu-item>
+        50
+    </button>
+    <button mat-menu-item>
+        100
+    </button>
+</mat-menu>
+
+<mat-menu #view_menu="matMenu" overlapTrigger=false>        
+    <button mat-menu-item [matMenuTriggerFor]="filter_menu" fxHide fxShow.lt-md>
+        <mat-icon>filter_list</mat-icon> <span>Filters</span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="channels_menu" fxHide fxShow.lt-md>
+        <mat-icon>device_hub</mat-icon> <span>Channels</span>
+    </button>
+    <button mat-menu-item >
+        <mat-icon>move_to_inbox</mat-icon>
+        <mat-checkbox (change)="onCheckInboxChange($event)" [(ngModel)]="isInboxVisible" >Inbox</mat-checkbox>
+    </button>
+</mat-menu>

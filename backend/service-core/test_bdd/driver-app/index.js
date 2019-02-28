@@ -55,8 +55,8 @@ let civicaReloader;
 
 
 const users = {
-    driver: { username: 'driver', password: 'uno.2.tres', client_id: 'DRIVER-APP', gqlUrl: 'http://localhost:3000/api/driver-gateway/graphql/http', businessId: "ea7f1b5b-1e8a-42cf-a5d5-47c3934cb82b" },
-    satellite: { username: 'satellite', password: 'uno.2.tres', client_id: 'emi', gqlUrl: 'http://localhost:3001/api/emi-gateway/graphql/http', businessId: "ea7f1b5b-1e8a-42cf-a5d5-47c3934cb82b" },
+    driver: { username: 'nebulae.driver1', password: 'uno.2.tres', client_id: 'DRIVER-APP', gqlUrl: 'http://localhost:3001/api/driver-gateway/graphql/http', businessId: "56a7de00-2fbb-438f-b9db-82fd6e6347cf" },
+    satellite: { username: 'nebulae.satellite', password: 'uno.2.tres', client_id: 'emi', gqlUrl: 'http://localhost:3000/api/emi-gateway/graphql/http', businessId: "56a7de00-2fbb-438f-b9db-82fd6e6347cf" },
 }
 
 
