@@ -52,6 +52,7 @@ export const ServiceShift = gql`
   }
 `;
 
+
 export const ServiceShifts = gql`
   query ServiceShifts($filterInput: ServiceShiftFilterInput!, $paginationInput: ServiceShiftPaginationInput!) {
     ServiceShifts(filterInput: $filterInput, paginationInput: $paginationInput) {

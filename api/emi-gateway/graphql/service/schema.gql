@@ -253,6 +253,7 @@ type ServiceShiftDriver {
   username: String
 }
 
+
 type ServiceShiftDriverBlock {
   key: String!
   notes: String
