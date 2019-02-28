@@ -116,10 +116,8 @@ export class VehicleAssignmentComponent implements OnInit, OnDestroy {
     )
     .subscribe( ({ driver, vehicleList }) => {
       this.driver = driver;
-      this.tableSize = this.driver ? this.driver.assignedVehicles.length: 0;
-      if(this.driver){
-        this.subscribeDriverVehicleAssigments();
-      }      
+      this.tableSize = this.driver.assignedVehicles.length;
+      this.subscribeDriverVehicleAssigments();
       this.dataSource.data = vehicleList;
     }, e => console.log(e));
   }

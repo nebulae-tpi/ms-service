@@ -61,27 +61,6 @@ import { KeycloakService } from "keycloak-angular";
 import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from "../../../../toolbar/toolbar.service";
 
-const ELEMENT_DATA: PeriodicElement[] = [
-  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
-  { position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li' },
-  { position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be' },
-  { position: 5, name: 'Boron', weight: 10.811, symbol: 'B' },
-  { position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C' },
-  { position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N' },
-  { position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O' },
-  { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
-  { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
-];
-
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-
 @Component({
   // tslint:disable-next-line:component-selector
   selector: 'datatable',
@@ -98,8 +77,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
   //current table max height
   tableHeight: number = 400;
 
-  displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-  dataSource = ELEMENT_DATA;
+  displayedColumns: string[] = ['_id', 'timestamp'];
+  dataSource = [];
 
 
 
@@ -122,7 +101,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('HELLO from datatable');
     this.listenLayoutChanges();
-
+    this.listenToolbarCommands();
+    this.loadTable();
   }
 
 
@@ -140,12 +120,54 @@ export class DatatableComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     ).subscribe(
       (layout) => {
-        this.dataSource[4].weight = layout.datatable.width;
         this.tableHeight = layout.datatable.height;
         console.log(`Layout = ${JSON.stringify(layout)}`);
       },
       (error) => console.error(`DatatableComponent.ngOnInit: Error => ${error}`),
       () => console.log(`DatatableComponent.ngOnInit: Completed`),
+    );
+  }
+
+  listenToolbarCommands() {
+    this.operatorWorkstationService.toolbarCommands$.pipe(
+      //filter(e => e),
+      debounceTime(250),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(
+      ({ code, args }) => {
+        switch (code) {
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH:
+            this.loadTable();
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_CHANNEL_FILTER:
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER:
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE:
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT:
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_CANCEL:
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_ASSIGN:
+            break;
+        }
+        console.log({ code, args });
+      },
+      (error) => console.error(`DatatableComponent.ngOnInit: Error => ${error}`),
+      () => console.log(`DatatableComponent.ngOnInit: Completed`),
+    );
+  }
+
+
+  loadTable() {
+    this.operatorWorkstationService.queryServices$([], [], true, 0, 10, undefined).subscribe(
+      (results) => {
+        console.log(`results = ${JSON.stringify(results)}`);
+        this.dataSource = results.data.IOEServices;
+      },
+      (error) => console.error(`DatatableComponent.loadTable: Error => ${error}`),
+      () => console.log(`DatatableComponent.loadTable: Completed`),
     );
   }
 

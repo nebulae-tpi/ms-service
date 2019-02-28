@@ -15,7 +15,7 @@ import * as moment from 'moment';
 export class ShiftListService {
 
   private _filterSubject$ = new BehaviorSubject({
-      initTimestamp: moment().subtract(1, 'day').startOf('day'),
+      initTimestamp: moment().startOf('month'),
       endTimestamp: moment().endOf('day')
   });
 

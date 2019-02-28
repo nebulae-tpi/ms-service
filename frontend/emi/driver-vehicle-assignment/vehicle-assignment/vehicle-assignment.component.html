@@ -68,8 +68,8 @@
 
           <!-- FUEL TYPE COLUMN -->
           <ng-container cdkColumnDef="fuelType">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"DRIVER.VEHICLE.FUEL_TYPE" | translate}}</mat-header-cell>
-            <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
+            <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE.FUEL_TYPE" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let vehicle">
               <p *ngIf="vehicle.fuelType" class="text-truncate"> {{ 'DRIVER.VEHICLE.FUEL_TYPES.' + vehicle.fuelType | translate | uppercase }} </p>
             </mat-cell>
           </ng-container>
@@ -84,8 +84,8 @@
 
           <!-- ACTIVE Column -->
           <ng-container cdkColumnDef="active">
-              <mat-header-cell *cdkHeaderCellDef>{{ "DRIVER.VEHICLE.ACTIVE" | translate }}</mat-header-cell>
-              <mat-cell *cdkCellDef="let vehicle">
+              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{ "DRIVER.VEHICLE.ACTIVE" | translate }}</mat-header-cell>
+              <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
                 <mat-icon *ngIf="vehicle.active" class="active-icon mat-green-600-bg s-16">check</mat-icon>
                 <mat-icon *ngIf="!vehicle.active" class="active-icon mat-red-500-bg s-16">close</mat-icon>
               </mat-cell>
@@ -93,17 +93,20 @@
 
             <!-- ACTION Column -->
           <ng-container cdkColumnDef="actions">
-            <mat-header-cell *cdkHeaderCellDef>{{ "DRIVER.VEHICLE.ACTIONS" | translate }}</mat-header-cell>
-            <mat-cell *cdkCellDef="let vehicle">
+            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{ "DRIVER.VEHICLE.ACTIONS" | translate }}</mat-header-cell>
+            <mat-cell *cdkCellDef="let vehicle" fxHide fxShow.gt-xs>
                 <button class="mr-8 ml-8"  mat-icon-button (click)="removeVehicleFromDriver(vehicle)">
                     <mat-icon>delete</mat-icon>
                 </button>
             </mat-cell>
           </ng-container>
 
+
+
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
-          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="item" matRipple>
+          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="selectedElement"
+            [ngClass]="{ highlight: selectedDriver && selectedDriver._id == row._id }" matRipple>
           </mat-row>
         </mat-table>
         <mat-paginator #paginator [length]="tableSize" [pageIndex]="tablePage" [pageSize]="tableCount" [pageSizeOptions]="[5, 10, 25, 100]">

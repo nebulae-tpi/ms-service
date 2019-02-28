@@ -1,5 +1,5 @@
 <div fxFlex="100" fxLayoutAlign="start center" class="mat-primary-bg">
-    <button mat-button fxHide.xs>
+    <button mat-button fxHide.xs (click)="sendDatatableRefreshCommand()">
         <mat-icon>refresh</mat-icon> <span fxHide.sm>REFRESH</span>
     </button>
 
@@ -48,18 +48,18 @@
 </div>
 
 <mat-menu #actions_menu="matMenu">
-    <button mat-button fxHide fxShow.xs>
+    <button mat-button fxHide fxShow.xs (click)="sendDatatableRefreshCommand()">
         <mat-icon>refresh</mat-icon> <span>REFRESH</span>
     </button>
     <button mat-menu-item (click)="showRequestServiceDialog()"fxHide fxShow.xs>
         <mat-icon>add_box</mat-icon>
         <span>Request</span>
     </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="sendDatatableServiceCancelCommand()">
         <mat-icon>cancel</mat-icon>
         <span>Cancel</span>
     </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="sendDatatableServiceAssignCommand()">
         <mat-icon>directions_car</mat-icon>
         <span>Assign</span>
     </button>

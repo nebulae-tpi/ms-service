@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import {
   debounceTime
 } from 'rxjs/operators';
@@ -8,6 +8,9 @@ import * as moment from 'moment';
 import {
   ServiceClientSatellites,
 } from '../gql/satellite.js';
+import {
+  IOERequestService, IOEServices
+} from '../gql/ioe.js';
 
 
 @Injectable()
@@ -20,10 +23,23 @@ export class OperatorWorkstationService {
   public static LAYOUT_COMMAND_SHOW_INBOX = 100;
   public static LAYOUT_COMMAND_HIDE_INBOX = 101;
 
+  public static TOOLBAR_COMMAND_DATATABLE_FOCUS = 1000;
+  public static TOOLBAR_COMMAND_DATATABLE_REFRESH = 1001;
+  public static TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE = 1002;
+  public static TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT = 1003;
+  public static TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER = 1004;
+  public static TOOLBAR_COMMAND_DATATABLE_APPLY_CHANNEL_FILTER = 1005;
+  public static TOOLBAR_COMMAND_SERVICE_CANCEL = 2001;
+  public static TOOLBAR_COMMAND_SERVICE_ASSIGN = 2002;
+
   /**
    * layout dimension observable
    */
   layoutChanges$ = new BehaviorSubject(undefined);
+  /**
+   * toolbar commands bus
+   */
+  toolbarCommands$ = new Subject();
 
   constructor(private gateway: GatewayService) {
   }
@@ -69,6 +85,13 @@ export class OperatorWorkstationService {
 
 
   /**
+   * Publish toolbar command
+   */
+  publishToolbarCommand(command) {
+    this.toolbarCommands$.next(command);
+  }
+
+  /**
    * Queries client/satellites by keyword
    * @param clientText client key word
    * @param limit result count limit
@@ -81,6 +104,47 @@ export class OperatorWorkstationService {
           clientText: clientText,
           limit: limit
         },
+        errorPolicy: 'all'
+      });
+  }
+
+  /**
+   * send a request service command to the server
+   * @param IOERequest 
+   */
+  requestService$(IOERequest: any) {
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: IOERequestService,
+        variables: {
+          client: IOERequest.client,
+          pickUp: IOERequest.pickUp,
+          paymentType: IOERequest.paymentType,
+          requestedFeatures: IOERequest.requestedFeatures,
+          dropOff: IOERequest.dropOff,
+          dropOffSpecialType: IOERequest.dropOffSpecialType,
+          fareDiscount: IOERequest.fareDiscount,
+          fare: IOERequest.fare,
+          tip: IOERequest.tip,
+          request: IOERequest.request
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+
+  /**
+   * Query all services filtered
+   * @param IOERequest 
+   */
+  queryServices$(serviceStatesFilter, serviceChannelsFilter, viewAllOperators, page, pageCount, projections) {
+    return this.gateway.apollo
+      .query<any>({
+        query: IOEServices,
+        variables: {
+          serviceStatesFilter, serviceChannelsFilter, viewAllOperators, page, pageCount, projections
+        },
+        fetchPolicy: 'network-only',
         errorPolicy: 'all'
       });
   }

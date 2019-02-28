@@ -5,17 +5,16 @@ import {
   OnDestroy,
   ViewChild,
   ElementRef
-} from '@angular/core';
+} from "@angular/core";
 
 import {
   FormBuilder,
   FormGroup,
   FormControl,
-  Validators,
-  FormArray
-} from '@angular/forms';
+  Validators
+} from "@angular/forms";
 
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from "@angular/router";
 
 ////////// RXJS ///////////
 import {
@@ -30,9 +29,9 @@ import {
   debounceTime,
   distinctUntilChanged,
   take
-} from 'rxjs/operators';
+} from "rxjs/operators";
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from 'rxjs';
+import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from "rxjs";
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -41,34 +40,34 @@ import {
   MatTableDataSource,
   MatSnackBar,
   MatDialog
-} from '@angular/material';
-import { fuseAnimations } from '../../../../core/animations';
+} from "@angular/material";
+import { fuseAnimations } from "../../../../core/animations";
 
 //////////// i18n ////////////
 import {
   TranslateService,
   LangChangeEvent,
   TranslationChangeEvent
-} from '@ngx-translate/core';
-import { locale as english } from '../i18n/en';
-import { locale as spanish } from '../i18n/es';
-import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
+} from "@ngx-translate/core";
+import { locale as english } from "../i18n/en";
+import { locale as spanish } from "../i18n/es";
+import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
 
 ///////// DATEPICKER //////////
-import { MAT_MOMENT_DATE_FORMATS } from './my-date-format';
+import { MAT_MOMENT_DATE_FORMATS } from "./my-date-format";
 import {
   DateAdapter,
   MAT_DATE_FORMATS,
   MAT_DATE_LOCALE,
   MomentDateAdapter
-} from '@coachcare/datepicker';
+} from "@coachcare/datepicker";
 
-import * as moment from 'moment';
+import * as moment from "moment";
 
 //////////// Other Services ////////////
-import { KeycloakService } from 'keycloak-angular';
+import { KeycloakService } from "keycloak-angular";
 import { ServiceListService } from './service-list.service';
-import { ToolbarService } from '../../../toolbar/toolbar.service';
+import { ToolbarService } from "../../../toolbar/toolbar.service";
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -77,7 +76,7 @@ import { ToolbarService } from '../../../toolbar/toolbar.service';
   styleUrls: ['./service-list.component.scss'],
   animations: fuseAnimations,
   providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'es' },
+    { provide: MAT_DATE_LOCALE, useValue: "es" },
     // {
     //   provide: DateAdapter,
     //   useClass: MomentDateAdapter,
@@ -87,11 +86,11 @@ import { ToolbarService } from '../../../toolbar/toolbar.service';
   ]
 })
 export class ServiceListComponent implements OnInit, OnDestroy {
-  // Subject to unsubscribe
+  //Subject to unsubscribe 
   private ngUnsubscribe = new Subject();
 
   stateList: string[] = ['REQUESTED', 'ASSIGNED', 'ARRIVED', 'ON_BOARD', 'DONE', 'CANCELLED_CLIENT', 'CANCELLED_DRIVER', 'CANCELLED_OPERATOR', 'CANCELLED_SYSTEM'];
-
+  
   minInitDate: any = null;
   maxInitDate: any = null;
   maxEndDate: any = null;
@@ -99,7 +98,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
 
   //////// FORMS //////////
   filterForm: FormGroup;
-
+  
 
   /////// TABLE /////////
 
@@ -122,19 +121,19 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   // ];
     // Columns to show in the table
     displayedColumns = [
-      'timestamp',
-      'clientName',
-      'driverName',
-      'licensePlate',
-      'paymentType',
-      'state'
+      "timestamp",
+      "clientName",
+      "driverName",
+      "licensePlate",
+      "paymentType",
+      "state"
     ];
 
   /////// OTHERS ///////
 
   selectedService: any = null;
 
-  constructor(
+  constructor(    
     private formBuilder: FormBuilder,
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
@@ -146,14 +145,14 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     private ServiceListservice: ServiceListService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog
-  ) {
+  ) {    
       this.translationLoader.loadTranslations(english, spanish);
   }
-
+    
 
   ngOnInit() {
     this.onLangChange();
-    this.buildFilterForm();
+    this.buildFilterForm();  
     this.updateFilterDataSubscription();
     this.updatePaginatorDataSubscription();
     this.loadLastFilters();
@@ -161,25 +160,27 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   }
 
   onInitDateChange() {
-    const start = this.filterForm.get('initTimestamp').value;
-    const end = this.filterForm.get('endTimestamp').value;
+    const start = this.filterForm.get("initTimestamp").value;
+    const end = this.filterForm.get("endTimestamp").value;
 
     const startMonth = start.month();
     const startYear = start.year();
-    const startMonthYear = startMonth + '-' + startYear;
+    const startMonthYear = startMonth + "-" + startYear;
 
     const endMonth = end.month();
     const endYear = end.year();
-    const endMonthYear = endMonth + '-' + endYear;
+    const endMonthYear = endMonth + "-" + endYear;
 
     this.minEndDate = moment(start);
-    this.maxEndDate =  moment(start.valueOf()).endOf('month');
-    if (startMonthYear !== endMonthYear) {
+    this.maxEndDate =  moment(start.valueOf()).endOf("month");
+    if (startMonthYear != endMonthYear) {      
       this.filterForm.patchValue({
         endTimestamp: this.maxEndDate
-      });
+      });      
     }
-
+    console.log('minEndDate => ', this.minEndDate);
+    console.log('maxEndDate => ', this.maxEndDate.format());
+    
   }
 
   onEndDateChange() {
@@ -215,7 +216,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Emits the paginator data when it changes
+   * Emits the paginator data when it changes   
    */
   listenPaginatorChanges$() {
     return this.paginator.page;
@@ -225,41 +226,30 @@ export class ServiceListComponent implements OnInit, OnDestroy {
    * Builds filter form
    */
   buildFilterForm() {
-    this.minInitDate = moment('2019-01-01').startOf('month');
-    this.maxInitDate = moment().add(1, 'months').endOf('day');
+    this.minInitDate =moment('2019-01-01').startOf("month");
+    this.maxInitDate = moment().add(1, "months").endOf("day");
 
-    const startOfMonth = moment().startOf('month');
-    const initTimeStampValue = moment().subtract(1, 'day').startOf('day');
-    const endOfMonth = moment().endOf('day');
+    console.log('this.minInitDate => ', this.minInitDate.format());
+    console.log('this.maxInitDate => ', this.maxInitDate.format());
+
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("day");    
     this.minEndDate = startOfMonth;
     this.maxEndDate = endOfMonth;
-
+    // Reactive Filter Form
     this.filterForm = this.formBuilder.group({
-      initTimestamp: [initTimeStampValue, [Validators.required]],
+      initTimestamp: [startOfMonth, [Validators.required]],
       endTimestamp: [endOfMonth, [Validators.required]],
       driverDocumentId: [null],
       driverFullname: [null],
       vehicleLicensePlate: [null],
       clientUsername: [null],
       clientFullname: [null],
-      states: this.formBuilder.array([]),
+      states: [null],
       showClosedServices: [false]
     });
 
-    this.stateList.forEach(stateKey => {
-      const stateControl = (this.filterForm.get('states') as FormArray).controls.find(control => control.get('name').value === stateKey );
-      if (!stateControl){
-        (this.filterForm.get('states') as FormArray).push(
-          new FormGroup({
-            name: new FormControl(stateKey),
-            active: new FormControl(stateKey !==  'DONE')
-          })
-        );
-      }
-    });
-
-
-    // console.log('raw => ', this.filterForm.getRawValue());
+    console.log('raw => ', this.filterForm.getRawValue());
     this.filterForm.disable({
       onlySelf: true,
       emitEvent: false
@@ -272,7 +262,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(filterData => {
-        // console.log('filterData => ', filterData.initTimestamp.format(), filterData.endTimestamp.format());
+        console.log('filterData => ', filterData.initTimestamp.format(), filterData.endTimestamp.format());
         this.ServiceListservice.updateFilterData(filterData);
       });
   }
@@ -301,52 +291,34 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       this.ServiceListservice.paginator$
     ).pipe(
       take(1)
-    ).subscribe(([filterValue, paginator]) => {
-          if (filterValue) {
-            // console.log('loadLastFilters => ', filterValue.initTimestamp.format(), filterValue.endTimestamp.format());
-            // console.log('filterValue.states =====> ', filterValue.states);
-          
+    ).subscribe(([filter, paginator]) => {
+          if (filter) {
+            console.log('loadLastFilters => ', filter.initTimestamp.format(), filter.endTimestamp.format());
             this.filterForm.patchValue({
-              initTimestamp: filterValue.initTimestamp,
-              endTimestamp: filterValue.endTimestamp,
-              driverDocumentId: filterValue.driverDocumentId,
-              driverFullname: filterValue.driverFullname,
-              vehicleLicensePlate: filterValue.vehicleLicensePlate,
-              clientUsername: filterValue.clientUsername,
-              clientFullname: filterValue.clientFullname,
-              //states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
-              //states: this.formBuilder.array([]),
-              showClosedServices: filterValue.showClosedServices
+              initTimestamp: filter.initTimestamp,
+              endTimestamp: filter.endTimestamp,
+              driverDocumentId: filter.driverDocumentId,
+              driverFullname: filter.driverFullname,
+              vehicleLicensePlate: filter.vehicleLicensePlate,
+              clientUsername: filter.clientUsername,
+              clientFullname: filter.clientFullname,
+              states: filter.states,
+              showClosedServices: filter.showClosedServices
             });
-            
-
-          if(filterValue.states) {
-            this.filterForm.setControl('states', this.formBuilder.array([]))
-              filterValue.states.forEach(stateKey => {                
-                  (this.filterForm.get('states') as FormArray).push(
-                    new FormGroup({
-                      name: new FormControl(stateKey.name),
-                      active: new FormControl(stateKey.active)
-                    })
-                  );                
-              });
-          }            
-
-
             this.onInitDateChange();
-            // this.onEndDateChange();
+            //this.onEndDateChange();
           }
 
           if (paginator) {
             this.tablePage = paginator.pagination.page;
             this.tableCount = paginator.pagination.count;
           }
-
+        
 
         this.filterForm.enable({ emitEvent: true });
       });
   }
-
+  
   /**
    * If a change is detect in the filter or the paginator then the table will be refreshed according to the values emmited
    */
@@ -357,21 +329,21 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       this.toolbarService.onSelectedBusiness$
     ).pipe(
       debounceTime(500),
-      filter(([filterValue, paginator, selectedBusiness]) => (filterValue != null && paginator != null)),
-      map(([filterValue, paginator, selectedBusiness]) => {
-        // console.log('filterForm --> ', this.filterForm.getRawValue());
+      filter(([filter, paginator, selectedBusiness]) => (filter != null && paginator != null)),
+      map(([filter, paginator,selectedBusiness]) => {
+        console.log('filterForm --> ', this.filterForm.getRawValue());
 
         const filterInput = {
-          businessId: selectedBusiness ? selectedBusiness.id : null,
-          initTimestamp: filterValue.initTimestamp ? filterValue.initTimestamp.valueOf() : null,
-          endTimestamp: filterValue.endTimestamp ? filterValue.endTimestamp.valueOf() : null,
-          driverDocumentId: filterValue.driverDocumentId,
-          driverFullname: filterValue.driverFullname,
-          vehicleLicensePlate: filterValue.vehicleLicensePlate,
-          clientUsername: filterValue.clientUsername,
-          clientFullname: filterValue.clientFullname,
-          states: filterValue.states.filter(control => control.active === true).map(control => control.name),
-          showClosedServices: filterValue.showClosedServices
+          businessId: selectedBusiness ? selectedBusiness.id: null,          
+          initTimestamp: filter.initTimestamp ? filter.initTimestamp.valueOf() : null,
+          endTimestamp: filter.endTimestamp ? filter.endTimestamp.valueOf() : null,
+          driverDocumentId: filter.driverDocumentId,
+          driverFullname: filter.driverFullname,
+          vehicleLicensePlate: filter.vehicleLicensePlate,
+          clientUsername: filter.clientUsername,
+          clientFullname: filter.clientFullname,
+          states: filter.states,
+          showClosedServices: filter.showClosedServices
         };
 
         const paginationInput = {
@@ -380,26 +352,26 @@ export class ServiceListComponent implements OnInit, OnDestroy {
           sort: paginator.pagination.sort,
         };
 
-        return [filterInput, paginationInput];
+        return [filterInput, paginationInput]
       }),
       mergeMap(([filterInput, paginationInput]) => {
         return forkJoin(
           this.getserviceList$(filterInput, paginationInput),
           this.getserviceSize$(filterInput),
-        );
+        )
       }),
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
       this.dataSource.data = list;
       this.tableSize = size;
-    });
+    })
   }
 
   /**
    * Gets the service list
-   * @param filterInput
-   * @param paginationInput
+   * @param filterInput 
+   * @param paginationInput 
    */
   getserviceList$(filterInput, paginationInput){
     return this.ServiceListservice.getserviceList$(filterInput, paginationInput)
@@ -411,13 +383,13 @@ export class ServiceListComponent implements OnInit, OnDestroy {
 
     /**
    * Gets the service size
-   * @param filterInput
+   * @param filterInput 
    */
   getserviceSize$(filterInput){
     return this.ServiceListservice.getserviceSize$(filterInput)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      map(resp => resp.data && resp.data.ServiceServicesSize ? resp.data.ServiceServicesSize : 0)
+      map(resp => resp.data && resp.data.ServiceServicesSize ? resp.data.ServiceServicesSize: 0)
     );
   }
 
@@ -435,40 +407,12 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     this.tablePage = 0;
     this.tableCount = 10;
 
-    const startOfMonth = moment().startOf('month');
-    const startYesterday = moment().subtract(1, 'day').startOf('day');
-    const endOfMonth = moment().endOf('day');
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("day");
     this.filterForm.patchValue({
-      initTimestamp: startYesterday,
+      initTimestamp: startOfMonth,
       endTimestamp: endOfMonth
     });
-
-    while ((this.filterForm.get('states') as FormArray).length !== 0) {
-      (this.filterForm.get('states') as FormArray).removeAt(0);
-    }
-
-    this.stateList.forEach(stateKey => {
-      const stateControl = (this.filterForm.get('states') as FormArray).controls.find(control => control.get('name').value === stateKey );
-      if (!stateControl){
-        (this.filterForm.get('states') as FormArray).push(
-          new FormGroup({
-            name: new FormControl(stateKey),
-            active: new FormControl(stateKey !==  'DONE')
-          })
-        );
-      }
-    });
-
-    console.log('RAW VALUE ==> ', this.filterForm.getRawValue().states);
-  }
-
-  refreshData(){
-    console.log('refresData');
-    const driverDocumentId = this.filterForm.get('driverDocumentId').value;
-    this.filterForm.get('driverDocumentId').setValue(driverDocumentId);
-
-
-
   }
 
   /**
@@ -479,13 +423,13 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     .pipe(
       take(1)
     ).subscribe(selectedBusiness => {
-      if (selectedBusiness == null || selectedBusiness.id == null){
+      if(selectedBusiness == null || selectedBusiness.id == null){
         this.showSnackBar('SERVICE.SELECT_BUSINESS');
       }else{
         this.router.navigate(['service/new']);
-      }
-    });
-  }
+      }      
+    })    
+  }  
 
   showSnackBar(message) {
     this.snackBar.open(this.translationLoader.getTranslate().instant(message),
@@ -513,11 +457,11 @@ export class ServiceListComponent implements OnInit, OnDestroy {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
             error.forEach(errorDetail => {
-              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
+              this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
             });
           } else {
             response.errors.forEach(errorData => {
-              this.showMessageSnackbar('ERRORS.' + errorData.message.code);
+              this.showMessageSnackbar("ERRORS." + errorData.message.code);
             });
           }
         });
@@ -542,15 +486,15 @@ export class ServiceListComponent implements OnInit, OnDestroy {
 
     this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey] : '',
-        detailMessageKey ? data[detailMessageKey] : '',
+        messageKey ? data[messageKey] : "",
+        detailMessageKey ? data[detailMessageKey] : "",
         {
           duration: 2000
         }
       );
     });
   }
-
+  
   ngOnDestroy() {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();

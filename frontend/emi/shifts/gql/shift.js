@@ -27,9 +27,7 @@ export const ServiceShift = gql`
       driver {
         id
         fullname
-        blocks{
-          key
-        }
+        blocks
         documentType
         documentId
         pmr
@@ -52,7 +50,6 @@ export const ServiceShift = gql`
   }
 `;
 
-
 export const ServiceShifts = gql`
   query ServiceShifts($filterInput: ServiceShiftFilterInput!, $paginationInput: ServiceShiftPaginationInput!) {
     ServiceShifts(filterInput: $filterInput, paginationInput: $paginationInput) {
@@ -69,9 +66,7 @@ export const ServiceShifts = gql`
       driver {
         id
         fullname
-        blocks {
-          key
-        }
+        blocks
         # documentType
         documentId
         # pmr

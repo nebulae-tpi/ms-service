@@ -8,8 +8,7 @@ export const locale = {
       FILTER: 'Filtros',
       NAME: 'Nombre',
       LASTNAME: 'Apellido',
-      VEHICLE_QTY: 'Vehículos Asignados',
-      DOCUMENT_ID: 'Documento',
+      VEHICLE_QTY: 'Cantidad de vehículos',
       PERSON_ID: 'Cédula',
       CREATION_DATE: 'Fecha creación',
       CREATOR_USER: 'Usuario creador',
@@ -70,7 +69,6 @@ export const locale = {
       2: 'Permiso denegado.',
       23011: 'Este vehículo ya pertenece al usuario',
       23012: 'Esta placa no existe en el sistema',
-      23023: 'No se puede asignar el vehíclulo porque se encuentra inactivo'
     }
   }
 };

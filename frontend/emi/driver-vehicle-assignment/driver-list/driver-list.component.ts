@@ -89,7 +89,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
-  ///////// FORMS //////////
+  //////// FORMS //////////
   filterForm: FormGroup;
 
 
@@ -101,14 +101,14 @@ export class DriverListComponent implements OnInit, OnDestroy {
   paginator: MatPaginator;
   tableSize: number;
   tablePage = 0;
-  tableCount = 25;
+  tableCount = 10;
 
   // Columns to show in the table
   displayedColumns = [
     'name',
     'lastname',
-    'document',
-    'vehicleQty'
+    'vehicleQty',
+    'active'
   ];
 
   /////// OTHERS ///////
@@ -160,6 +160,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
    */
   listenFilterFormChanges$() {
     return this.filterForm.valueChanges.pipe(
+      debounceTime(500),
       distinctUntilChanged()
     );
   }
@@ -179,8 +180,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
     this.filterForm = this.formBuilder.group({
       name: [null],
       lastname: [null],
-      documentId: [null],
-      licensePlate: [null]
+      documentId: [null]
     });
 
     this.filterForm.disable({
@@ -227,9 +227,8 @@ export class DriverListComponent implements OnInit, OnDestroy {
           if (filter) {
             this.filterForm.patchValue({
               name: filterValue.name,
-              lastname: filterValue.lastname,
-              documentId: filterValue.documentId,
-              licensePlate: filterValue.licensePlate
+              creationTimestamp: filterValue.creationTimestamp,
+              creatorUser: filterValue.creatorUser
             });
           }
 
@@ -260,7 +259,8 @@ export class DriverListComponent implements OnInit, OnDestroy {
           name: filterValue.name,
           lastname: filterValue.lastname,
           documentId: filterValue.documentId,
-          licensePlate: filterValue.licensePlate
+          creatorUser: filterValue.creatorUser,
+          creationTimestamp: filterValue.creationTimestamp ? filterValue.creationTimestamp.valueOf() : null
         };
         const paginationInput = {
           page: paginator.pagination.page,
@@ -278,6 +278,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
+      console.log('LISTADO ==> ', list);
       this.dataSource.data = list;
       this.tableSize = size;
     });
@@ -304,10 +305,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
     return this.DriverListservice.getdriverSize$(filterInput)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      map(resp => {
-        console.log(resp);
-        return resp.data && resp.data.ServiceDriversSize ? resp.data.ServiceDriversSize: 0;
-      })
+      map(resp => resp.data.ServiceDriversSize)
     );
   }
 
@@ -323,8 +321,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
     this.filterForm.reset();
     this.paginator.pageIndex = 0;
     this.tablePage = 0;
-    this.tableCount = 25;
-    this.paginator._changePageSize(25)
+    this.tableCount = 10;
   }
 
   /**

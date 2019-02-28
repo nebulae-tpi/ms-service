@@ -116,7 +116,9 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+
     this.initPaginatorsListeners();
+
   }
 
 
@@ -163,7 +165,8 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
     this.stateChangesPaginator.page
     .pipe(
       startWith({pageIndex: 0, pageSize: 10}),
-      map(p => ({pagination: {page: p.pageIndex, count: p.pageSize , sort: -1}})),      
+      map(p => ({pagination: {page: p.pageIndex, count: p.pageSize , sort: -1}})),
+      takeUntil(this.ngUnsubscribe),
       // query here
       mergeMap(pagination => forkJoin(
         this.shiftDetailService.getStateChangesList$(this.shift._id, pagination).pipe(map(r => r.data.ServiceShiftStateChangesList )),
@@ -173,15 +176,15 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
         this.stateChangesTableSize = listSize;
         this.stateChangesDataSource.data = stateChangesList;
       }),
-      takeUntil(this.ngUnsubscribe),
-      //tap(r => console.log(r))
+      tap(r => console.log(r))
     )
     .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
 
     this.conectDisconectPaginator.page
     .pipe(
       startWith({pageIndex: 0, pageSize: 10}),
-      map(p => ({pagination: {page: p.pageIndex, count: p.pageSize , sort: -1}})),      
+      map(p => ({pagination: {page: p.pageIndex, count: p.pageSize , sort: -1}})),
+      takeUntil(this.ngUnsubscribe),
       // query here
       mergeMap(pagination => forkJoin(
         this.shiftDetailService.getOnlineChangesList$(this.shift._id, pagination).pipe(map(r => r.data.ServiceShiftOnlineChangesList )),
@@ -191,8 +194,8 @@ export class ShiftStateChangesComponent implements OnInit, OnDestroy {
         this.conectDisconectTableSize = onlineChangesListSize;
         this.conectDisconectDataSource.data = onlineChangesList;
       }),
-      takeUntil(this.ngUnsubscribe),
-      //tap(result => console.log(result) )
+
+      tap(result => console.log(result) )
     )
     .subscribe(() => { }, e => console.log(), () => console.log('COMPLETED'));
 

@@ -33,7 +33,7 @@ import {
   take
 } from "rxjs/operators";
 
-import { Subject, iif, from, of, forkJoin, Observable, concat, combineLatest } from "rxjs";
+import { Subject, iif, from, of, forkJoin, Observable, range, combineLatest } from "rxjs";
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -65,7 +65,7 @@ import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from "../../../../toolbar/toolbar.service";
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 
-
+const SPECIAL_DESTINATION_PRICE_MODS = { 'AIRPORT': 5000, 'BUS_TERMINAL': 5000, 'OUT_OF_CITY': 5000 };
 
 
 @Component({
@@ -110,7 +110,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.queryUserRols();
     this.buildRequesServiceForm();
-    this.buildClientNameFilterCtrl();    
+    this.buildClientNameFilterCtrl();
   }
 
 
@@ -142,8 +142,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     this.queriedClientsByAutocomplete$ = this.clientNameFilterCtrl.valueChanges.pipe(
       debounceTime(200),
       distinctUntilChanged(),
-      filter(text =>  (typeof text === 'string' || text instanceof String)),
-      mergeMap(x => iif(() => !x, of([]), this.getAllSatelliteClientsFiltered$(x,3)))
+      filter(text => (typeof text === 'string' || text instanceof String)),
+      mergeMap(x => iif(() => !x, of([]), this.getAllSatelliteClientsFiltered$(x, 3)))
     );
   }
 
@@ -173,8 +173,75 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
   submit(event?) {
     console.log(this.form.getRawValue());
+    this.requestService(this.form.getRawValue());
     this.dialogRef.close();
   }
+
+  /**
+   * Send the request service command to the server
+   */
+  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip = undefined, fare = undefined, fareDiscount = undefined }) {
+
+    return range(1, quantity || 1)
+      .pipe(
+        map(requestNumber => {
+          return {
+            client: {
+              id: client._id,
+              fullname: client.generalInfo.name,
+              username: client.auth ? client.auth.username : null,
+              tip: (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
+                ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
+                : client.satelliteInfo
+                  ? client.satelliteInfo.tip
+                  : 0,
+              tipType: client.satelliteInfo ? client.satelliteInfo.tipType : '',
+              referrerDriverDocumentId: client.satelliteInfo ? client.satelliteInfo.referrerDriverDocumentId : null,
+              offerMinDistance: client.satelliteInfo ? client.satelliteInfo.offerMinDistance : null,
+              offerMaxDistance: client.satelliteInfo ? client.satelliteInfo.offerMaxDistance : null,
+            },
+            pickUp: {
+              marker: {
+                lat: client.location.lat,
+                lng: client.location.lng,
+              },              
+              polygon: null,
+              city: client.generalInfo.city,
+              zone: client.generalInfo.zone,
+              neighborhood: client.generalInfo.neighborhood,
+              addressLine1: client.generalInfo.addressLine1,
+              addressLine2: client.generalInfo.addressLine2,
+              notes: client.generalInfo.notes
+            },
+            paymentType,
+            requestedFeatures: featureOptionsGroup,
+            dropOff: null,
+            dropOffSpecialType: destinationOptionsGroup,
+            fareDiscount,
+            fare,
+            tip,
+            request: {
+              sourceChannel: 'OPERATOR',
+              destChannel: 'DRIVER_APP',
+            }
+          };
+        }),
+        mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(
+        (result: any) => {
+          if (result.data && result.data.IOERequestService && result.data.IOERequestService.accepted) {
+            this.showMessageSnackbar('SATELLITE.SERVICES.REQUEST_SERVICE_SUCCESS');
+          }
+        },
+        error => {
+          this.showMessageSnackbar('SATELLITE.ERROR_OPERATION');
+          console.log('Error ==> ', error);
+        }
+      );
+  }
+
 
 
   //#region TOOLS - ERRORS HANDLERS - SNACKBAR
@@ -239,7 +306,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
    * query current user roles
    */
   async queryUserRols() {
-    this.userRoles = await this.keycloakService.getUserRoles(true);    
+    this.userRoles = await this.keycloakService.getUserRoles(true);
     console.log(JSON.stringify(this.userRoles));
   }
   //#endregion

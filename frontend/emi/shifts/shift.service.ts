@@ -6,7 +6,9 @@ import { GatewayService } from '../../../api/gateway.service';
 @Injectable()
 export class ShiftService {
 
+
   constructor(private gateway: GatewayService) {
+
 
   }
 

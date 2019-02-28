@@ -65,6 +65,7 @@ import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from "../../../../toolbar/toolbar.service";
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 import { RequestServiceDialogComponent } from '../request-service-dialog/request-service-dialog.component'
+import { OperatorWorkstationComponent } from "../operator-workstation.component";
 
 const REQUEST_SERVICE_DIALOG_MAX_DIMENSION = [400, 400];
 
@@ -81,7 +82,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   //Subject to unsubscribe 
   private ngUnsubscribe = new Subject();
   //weather or not the inbox should be visible
-  private isInboxVisible: boolean = false;
+  isInboxVisible: boolean = false;
   // current layout
   private layout = undefined;
   //current user roles
@@ -158,6 +159,22 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.showRequestServiceDialog();
       return false;
     }));
+    this._hotkeysService.add(new Hotkey(['r'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableRefreshCommand();
+      return false;
+    }));
+    this._hotkeysService.add(new Hotkey(['c'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableServiceCancelCommand();
+      return false;
+    }));
+    this._hotkeysService.add(new Hotkey(['a'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableServiceAssignCommand();
+      return false;
+    }));
+    this._hotkeysService.add(new Hotkey(['t'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableFocusCommand();
+      return false;
+    }));
   }
 
 
@@ -167,7 +184,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   showRequestServiceDialog($event?) {
     if (this.isThereAnOpenDialog()) return;
-    if( !this.userRoles.includes('OPERATOR') || this.userRoles.includes('OPERATION-SUPERVISOR')){
+    if (!this.userRoles.includes('OPERATOR') || this.userRoles.includes('OPERATION-SUPERVISOR')) {
       this.showMessageSnackbar("ERRORS.2")
       return;
     }
@@ -192,6 +209,79 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.requestServiceDialogRef = undefined;
       }
     );
+  }
+
+  /**
+   * Sends the command to refresh datatable 
+   * @param $event 
+   */
+  sendDatatableRefreshCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH, args: [] });
+  }
+  /**
+   * sendDatatableApplyChannelFilterCommand
+   * @param $event 
+   */
+  sendDatatableApplyChannelFilterCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    console.log('sendDatatableApplyChannelFilterCommand');
+  }
+  /**
+   * sendDatatableApplyServiceFilterCommand
+   * @param $event 
+   */
+  sendDatatableApplyServiceFilterCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    console.log('sendDatatableApplyServiceFilterCommand');
+  }
+  /**
+   * sendDatatableApplyChangePageCommand
+   * @param $event 
+   */
+  sendDatatableApplyChangePageCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    console.log('sendDatatableApplyChangePageCommand');
+  }
+  /**
+   * sendDatatableApplyChangePageCountCommand
+   * @param $event 
+   */
+  sendDatatableApplyChangePageCountCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    console.log('sendDatatableApplyChangePageCountCommand');
+  }
+  /**
+   * sendDatatableFocusCommand
+   * @param $event 
+   */
+  sendDatatableFocusCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    console.log('sendDatatableFocusCommand');
+  }
+  /**
+   * sendDatatableServiceCancelCommand
+   * @param $event 
+   */
+  sendDatatableServiceCancelCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    if (!this.userRoles.includes('OPERATOR') || this.userRoles.includes('OPERATION-SUPERVISOR')) {
+      this.showMessageSnackbar("ERRORS.2")
+      return;
+    }
+    console.log('sendDatatableServiceCancelCommand');
+  }
+  /**
+   * sendDatatableServiceAssignCommand
+   * @param $event 
+   */
+  sendDatatableServiceAssignCommand($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    if (!this.userRoles.includes('OPERATOR') || this.userRoles.includes('OPERATION-SUPERVISOR')) {
+      this.showMessageSnackbar("ERRORS.2")
+      return;
+    }
+    console.log('sendDatatableServiceAssignCommand');
   }
 
   isThereAnOpenDialog(): boolean {

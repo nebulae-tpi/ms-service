@@ -30,7 +30,7 @@ export class ShiftDetailService {
   }
 
   getStateChangesList$(id: string, paginator: any ){
-    //console.log("PAginator => ", paginator);
+    console.log("PAginator => ", paginator);
     return this.gateway.apollo.query<any>({
       query: ServiceShiftStateChangesList,
       variables: {
