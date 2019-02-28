@@ -108,6 +108,21 @@ class DriverES {
 
     }
 
+    handleDriverBlockAdded$({aid, data}){
+        console.log("handleDriverBlockAdded$", data);
+        return DriverDA.insertBlock$(aid, { 
+            key: data.blockKey,
+            notes: data.notes, 
+            startTime: data.startTime,
+            endTime: data.endTime
+        })
+    }
+
+    handleDriverBlockRemoved$({aid, data}){
+        console.log("handleDriverBlockRemoved$", data);
+        return DriverDA.removeBlock$(aid, data.blockKey)
+    }
+
 }
 
 

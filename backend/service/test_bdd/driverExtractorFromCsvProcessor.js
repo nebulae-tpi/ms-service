@@ -6,7 +6,7 @@ const expect = require("chai").expect;
 const fs = require('fs');   
 const es = require('event-stream');
 
-const FILE_PATH = './test_bdd/driverVsVehicles_1_data.csv';
+const FILE_PATH = './test_bdd/errors_191502_data.csv';
 
 const KeyCloak = require('./utils/Keycloak');
 const GraphQL = require('./utils/GraphQl');
@@ -59,7 +59,7 @@ describe("BDD - MAIN TEST", function() {
     describe("Read CSV file and process it", function () {
 
         it("start service backend and its Database", function (done) {
-            this.timeout(600000);
+            this.timeout(6000000);
             const DriverMapperHelper = require("./utils/driverMapperHelper");
             const BUSINESS_ID = "4ab03a09-9e34-40fe-9102-25cc6b5b2176";
 
@@ -110,7 +110,6 @@ describe("BDD - MAIN TEST", function() {
                                                     VehicleGraphQlHelper.createVehicle$(graphQL, vehicle),
                                                     of({vehicle, driver})
                                                 )),
-                                                // delay(2000),
                                                 mergeMap(([ driverEdited, b, { vehicle, driver }]) =>
                                                     VehicleGraphQlHelper.findByPlate$(graphQL, vehicle.licensePlate)                                                   
                                                     .pipe(
@@ -137,7 +136,7 @@ describe("BDD - MAIN TEST", function() {
                         })
                             .on('error', function (err) { reject(err); })
                             .on('end', function () {
-                                console.log("TERMINA ACA");
+                                console.log(`\n \n ${documentIds.length} DOCUMENTS WERE PROCESSED`);
                                 resolve({});
                             })
                         )

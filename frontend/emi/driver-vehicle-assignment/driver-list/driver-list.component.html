@@ -39,6 +39,10 @@
                 <input maxlength="15" matInput placeholder="{{'DRIVER.PERSON_ID' | translate}}"
                   formControlName="documentId"/>
               </mat-form-field>
+              <mat-form-field>
+                <input maxlength="6" matInput placeholder="{{'DRIVER.LICENSE_PLATE' | translate}}"
+                  formControlName="licensePlate"/>
+              </mat-form-field>
 
               <!-- <mat-form-field>
                 <input matInput placeholder="{{'DRIVER.CREATOR_USER' | translate}}" formControlName="creatorUser" id="creatorUser"
@@ -52,9 +56,9 @@
                 <mat-datepicker [twelveHour]="false" type="datetime" #pickerCreationDate></mat-datepicker>
               </mat-form-field> -->
 
-              <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" aria-label="Filter" (click)="resetFilter()">
+              <!-- <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" aria-label="Filter" (click)="resetFilter()">
                 {{ "DRIVER.RESET_FILTER" | translate }}
-              </button>
+              </button> -->
             </div>
           </form>
 
@@ -88,41 +92,40 @@
 
           <!-- Name Column -->
           <ng-container cdkColumnDef="name">
-            <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.NAME" | translate}}</mat-header-cell>
-            <mat-cell *cdkCellDef="let driver">
-              <p *ngIf="driver.name" class="text-truncate"> {{ driver.name | uppercase }} </p>
+            <mat-header-cell *cdkHeaderCellDef fxFlex="38" fxFlex.gt-xs="25" >{{"DRIVER.NAME" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let driver" fxFlex="38" fxFlex.gt-xs="25">
+              <p *ngIf="driver.name" > {{ driver.name | uppercase }} </p>
             </mat-cell>
           </ng-container>
 
           <!-- Lastname Column -->
           <ng-container cdkColumnDef="lastname">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"DRIVER.LASTNAME" | translate}}</mat-header-cell>
-            <mat-cell *cdkCellDef="let driver" fxHide fxShow.gt-xs>
-                <p *ngIf="driver.lastname" class="text-truncate"> {{ driver.lastname | uppercase }} </p>
+            <mat-header-cell *cdkHeaderCellDef fxFlex="38" fxFlex.gt-xs="25">{{"DRIVER.LASTNAME" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let driver" fxFlex="38" fxFlex.gt-xs="25">
+                <p *ngIf="driver.lastname"> {{ driver.lastname | uppercase }} </p>
             </mat-cell>
           </ng-container>
+
+           <!-- DOCUMENT COLUMN -->
+           <ng-container cdkColumnDef="document">
+            <mat-header-cell *cdkHeaderCellDef >{{"DRIVER.DOCUMENT_ID" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let driver" fxHide fxShow.gt-xs fxFlex.gt-xs="25">
+                <p *ngIf="driver.documentId"> {{ driver.documentId | uppercase }} </p>
+            </mat-cell>
+          </ng-container>
+
 
           <!-- Vehicle quantity Column -->
           <ng-container cdkColumnDef="vehicleQty">
-            <mat-header-cell *cdkHeaderCellDef>{{"DRIVER.VEHICLE_QTY" | translate}}</mat-header-cell>
-            <mat-cell *cdkCellDef="let driver">
-              <p class="text-truncate"> {{ driver.assignedVehicles.length  }} </p>
+            <mat-header-cell *cdkHeaderCellDef fxFlex="24" fxFlex.gt-xs="25">{{"DRIVER.VEHICLE_QTY" | translate}}</mat-header-cell>
+            <mat-cell *cdkCellDef="let driver" fxFlex="24" fxFlex.gt-xs="25" fxLayoutAlign="center center">
+              <p> {{ driver.assignedVehicles.length  }} </p>
             </mat-cell>
           </ng-container>
 
-          <!-- Active Column -->
-          <ng-container cdkColumnDef="active">
-              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{ "DRIVER.ACTIVE" | translate }}</mat-header-cell>
-              <mat-cell *cdkCellDef="let driver" fxHide fxShow.gt-xs>
-                <mat-icon *ngIf="driver.active" class="active-icon mat-green-600-bg s-16">check</mat-icon>
-                <mat-icon *ngIf="!driver.active" class="active-icon mat-red-500-bg s-16">close</mat-icon>
-              </mat-cell>
-            </ng-container>
-
           <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
-          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="selectedElement" (click)="selectdriverRow(row)"
-            [ngClass]="{ highlight: selectedDriver && selectedDriver._id == row._id }"
+          <mat-row *cdkRowDef="let row; columns: displayedColumns" class="item" (click)="selectdriverRow(row)"
             [routerLink]="row._id" matRipple>
           </mat-row>
         </mat-table>

@@ -77,6 +77,8 @@ input ServiceVehicleAssignmentFilterInput {
   lastname: String
   "person ID"
   documentId: String
+  "License plate"
+  licensePlate: String
   "Driver state"
   state: Boolean
   "Creator user"

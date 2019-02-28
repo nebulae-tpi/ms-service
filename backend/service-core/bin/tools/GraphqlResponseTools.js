@@ -30,7 +30,7 @@ const buildErrorResponse$ = (errCode, rawRespponse) => {
     );
 };
 
-const handleError$ = (err, doLog = false) => {
+const handleError$ = (err = new Error('NULL_ERROR'), doLog = false) => {
     return of(err).pipe(
         tap(err => { if (doLog) logError(err); }),
         map(err => {
@@ -53,6 +53,9 @@ const handleError$ = (err, doLog = false) => {
  * @param {Error} error 
  */
 const logError = (error) => {
+    if (!error) {
+        return;
+    }
     if (!error.stack) {
         console.error(error);
         return;

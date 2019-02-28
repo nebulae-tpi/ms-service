@@ -40,9 +40,11 @@ class DriverDA {
   static getDriverList$(filter, pagination) {
     const collection = mongoDB.db.collection(CollectionName);
 
-    const query = {
-      active: true
-    };
+    const query = { active: true };
+
+    if(filter.licensePlate && filter.licensePlate.length >= 3 ){
+      query.assignedVehicles = { $regex: filter.licensePlate, $options: "i" };
+    }
 
     if (filter.businessId) {
       query.businessId = filter.businessId;
@@ -72,9 +74,7 @@ class DriverDA {
   static getDriverSize$(filter) {
     const collection = mongoDB.db.collection(CollectionName);
 
-    const query = {
-      active: true
-    };
+    const query = { active: true };
 
     if (filter.businessId) {
       query.businessId = filter.businessId;
@@ -190,6 +190,18 @@ class DriverDA {
       { $pull: { assignedVehicles: licensePlate } }
     ))
   }
+
+  static insertBlock$(driverId, block){
+    console.log("insertBlock$$", block);
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.updateOne({_id: driverId}, {$push: { blocks: block } }) )
+  }
+
+  static removeBlock$(driverId, blockKey){
+    console.log("removeBlock$", blockKey);
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.updateOne({_id: driverId}, {$pull: { blocks: { key: blockKey } } }) )
+  }  
 
 }
 /**

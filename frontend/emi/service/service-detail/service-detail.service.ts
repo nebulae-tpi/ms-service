@@ -16,7 +16,7 @@ export class ServiceDetailService {
   }
 
   getServiceService$(id: string) {
-    console.log('getServiceService => ', id);
+    //console.log('getServiceService => ', id);
     return this.gateway.apollo.query<any>({
       query: ServiceService,
       variables: {

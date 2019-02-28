@@ -38,11 +38,14 @@ class DriverES {
      * @param {Event} driverBlockAddedEvt
      */
     handleDriverBlockAdded$({ aid, data, user }) {
-        return ShiftDA.findOpenShiftByDriver$(aid, { _id: 1 }).pipe(
-            filter(shift => shift),
-            mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
-                this.buildShiftDriverBlockAddedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))), //Build and send ShiftDriverBlockAdded event (event-sourcing)
-        );
+        console.log("handleDriverBlockAdded$", aid, data, user);
+        return ShiftDA.findOpenShiftByDriver$(aid, { _id: 1 })
+            .pipe(
+                filter(shift => shift),
+                mergeMap(({ _id }) => eventSourcing.eventStore.emitEvent$(
+                    this.buildShiftDriverBlockAddedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))
+                ), //Build and send ShiftDriverBlockAdded event (event-sourcing)
+            );
     }
     //#region Object builders
 

@@ -49,6 +49,7 @@ module.exports = {
   INTERNAL_SERVER_ERROR_CODE,
   PERMISSION_DENIED,
   ERROR_23003: (msg) => {return new CustomError('Invalid JWT Token', `Auth`, 23003, msg)} ,
+  ERROR_23212: (location) => {return new CustomError('ShiftLocationReportedError', `ShiftLocationReported`, 23212, `Localización reportada inválida, ${JSON.stringify(location)}`)},  
   ERROR_23223: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23223, 'Servicio no encontrado'),
-  ERROR_23230: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23230, 'Estado de servicio no permitido'),  
+  ERROR_23230: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23230, 'Estado de servicio no permitido'),    
 } 

@@ -238,7 +238,7 @@ type ServiceShiftDriver {
   "Driver fullname"
   fullname: String
   "Driver Blocks"
-  blocks: [String]
+  blocks: [ServiceShiftDriverBlock] 
   "Driver Document Type"
   documentType: String
   "Driver document id"
@@ -251,6 +251,14 @@ type ServiceShiftDriver {
   phone: String
   "Driver username"
   username: String
+}
+
+
+type ServiceShiftDriverBlock {
+  key: String!
+  notes: String
+  startTime: BigInt
+  endTime: BigInt
 }
 
 type ServiceShiftVehicleBlock {

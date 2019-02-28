@@ -155,6 +155,14 @@ class EventStoreService {
         fn: DriverES.handleVehicleUnassigned$,
         obj: DriverES
       },
+      DriverBlockAdded:{
+        fn: DriverES.handleDriverBlockAdded$,
+        obj: DriverES
+      },
+      DriverBlockRemoved: {
+        fn: DriverES.handleDriverBlockRemoved$,
+        obj: DriverES
+      },
       //VEHICLE
       VehicleCreated: {
         fn: VehicleES.handleVehicleCreated$,
@@ -222,6 +230,7 @@ class EventStoreService {
   */
   generateAggregateEventsArray() {
     return [
+      // DRIVER
       {
         aggregateType: "Driver",
         eventType: "DriverCreated"
@@ -242,6 +251,16 @@ class EventStoreService {
         aggregateType: "Driver",
         eventType: "DriverAuthDeleted"
       },
+      {
+        aggregateType: "Driver",
+        eventType: "DriverBlockRemoved"
+      },
+      {
+        aggregateType: "Driver",
+        eventType: "DriverBlockAdded"
+      },
+
+      // VEHICLE
       {
         aggregateType: "Vehicle",
         eventType: "VehicleCreated"
