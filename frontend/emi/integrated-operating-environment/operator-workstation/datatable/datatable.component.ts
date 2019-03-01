@@ -82,7 +82,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   DATA TABLE VARS
   */
   // columns to display
-  displayedColumns: string[] = ['selected', 'state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span', 'distance'];
+  displayedColumns: string[] = [ 'state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta'];//'state_time_span'
   //Partial data: this is what is displayed to the user
   partialData = [];
   //total data source
@@ -165,6 +165,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
         this.pageCount = parseInt(`${(this.tableHeight / 30) * this.paginationFactor}`)
         console.log(`Layout = ${JSON.stringify(layout)}`);
         console.log(`pageCount = ${this.pageCount}`);
+        this.recalculatePartialData();
       },
       (error) => console.error(`DatatableComponent.listenLayoutChanges: Error => ${error}`),
       () => console.log(`DatatableComponent.listenLayoutChanges: Completed`),
@@ -177,7 +178,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       debounceTime(250),
       takeUntil(this.ngUnsubscribe)
     ).subscribe(
-      ({ code, args }) => {
+      async ({ code, args }) => {
         switch (code) {
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH:
             this.resetData();
@@ -187,6 +188,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER:
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE:
+            this.page = args.page;
+            await this.recalculatePartialData();
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT:
             break;
@@ -278,7 +281,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       'vehicle_plate': vehicle.licensePlate,
       'eta': pickUpETA,
       'state_time_span': '00:00:00',
-      'distance': 2.34
+      'distance': 0.00
     };
   }
 
@@ -321,13 +324,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
         break;
       case 'ArrowDown':
         this.selectNextRow();
-        break;
-      case 'ArrowLeft':
-        this.selectPrevPage();
-        break;
-      case 'ArrowRight':
-        this.selectNextPage();
-        break;
+        break;      
     }
   }
 

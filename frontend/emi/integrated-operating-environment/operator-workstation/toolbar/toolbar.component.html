@@ -1,28 +1,28 @@
 <div fxFlex="100" fxLayoutAlign="start center" class="mat-primary-bg">
     <button mat-button fxHide.xs (click)="sendDatatableRefreshCommand()">
-        <mat-icon>refresh</mat-icon> <span fxHide.sm>REFRESH</span>
+        <mat-icon span>refresh</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.REFRESH' | translate }}</span>
     </button>
 
     <button mat-button fxHide.xs (click)="showRequestServiceDialog()">
-        <mat-icon span>add_box</mat-icon> <span fxHide.sm>REQUEST</span>
+        <mat-icon span>add_box</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.REQUEST' | translate }}</span>
     </button>
 
     <button mat-button [matMenuTriggerFor]="actions_menu">
-        <mat-icon>format_list_bulleted</mat-icon> <span fxHide.sm>ACTIONS</span>
+        <mat-icon>format_list_bulleted</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.ACTIONS_LBL' | translate }}</span>
     </button>
 
-    <button mat-button [matMenuTriggerFor]="view_menu">
-        <mat-icon>visibility</mat-icon> <span fxHide.sm>VIEW</span>
+    <button mat-button [matMenuTriggerFor]="view_menu" *ngIf="false">
+        <mat-icon>visibility</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.VIEW' | translate }}</span>
     </button>
 
-    <button mat-button [matMenuTriggerFor]="filter_menu" fxHide.lt-md>
-        <mat-icon>filter_list</mat-icon> <span fxHide.sm>FILTERS</span>
+    <button mat-button [matMenuTriggerFor]="filter_menu" fxHide.lt-md  *ngIf="false">
+        <mat-icon>filter_list</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
     </button>
 
-    
 
-    <button mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
-        <mat-icon>device_hub</mat-icon> <span >CHANNELS</span>
+
+     <button mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md *ngIf="false">
+        <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
     </button>
 
     <span fxFlex></span>
@@ -31,13 +31,13 @@
 
 
     <div fxLayoutGap="2px grid">
-        <button mat-button fxFlex="30px">
+        <button mat-button fxFlex="30px" (click)="sendDatatableApplyPrevPage()">
             <mat-icon>keyboard_arrow_left</mat-icon>
         </button>
-        <button mat-button [matMenuTriggerFor]="pagination_menu" fxFlex="30px">
-            <span>00</span>
-        </button>
         <button mat-button fxFlex="30px">
+            <span>{{page+1}}</span>
+        </button>
+        <button mat-button fxFlex="30px" (click)="sendDatatableApplyNextPage()">
             <mat-icon>keyboard_arrow_right</mat-icon>
         </button>
     </div>
@@ -48,94 +48,85 @@
 </div>
 
 <mat-menu #actions_menu="matMenu">
-    <button mat-button fxHide fxShow.xs (click)="sendDatatableRefreshCommand()">
-        <mat-icon>refresh</mat-icon> <span>REFRESH</span>
+    <button mat-menu-item  fxHide fxShow.xs (click)="sendDatatableRefreshCommand()">
+        <mat-icon>refresh</mat-icon> 
+        <span>{{ 'TOOLBAR.ACTIONS.REFRESH' | translate }}</span>
     </button>
     <button mat-menu-item (click)="showRequestServiceDialog()"fxHide fxShow.xs>
         <mat-icon>add_box</mat-icon>
-        <span>Request</span>
+        <span>{{ 'TOOLBAR.ACTIONS.REQUEST' | translate }}</span>
     </button>
     <button mat-menu-item (click)="sendDatatableServiceCancelCommand()">
         <mat-icon>cancel</mat-icon>
-        <span>Cancel</span>
+        <span>{{ 'TOOLBAR.ACTIONS.CANCEL' | translate }}</span>
     </button>
-    <button mat-menu-item (click)="sendDatatableServiceAssignCommand()">
+    <button mat-menu-item (click)="sendDatatableServiceAssignCommand()" *ngIf="false">
         <mat-icon>directions_car</mat-icon>
-        <span>Assign</span>
+        <span>{{ 'TOOLBAR.ACTIONS.ASSIGN' | translate }}</span>
     </button>
 </mat-menu>
 
-<mat-menu #filter_menu="matMenu" overlapTrigger=false>    
-    <button mat-menu-item>
-        <mat-checkbox>Requested</mat-checkbox>
+<mat-menu #filter_menu="matMenu" overlapTrigger=false>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-checkbox>{{ 'TOOLBAR.FILTERS.REQUESTED' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
-        <mat-checkbox>Assigned</mat-checkbox>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-checkbox>{{ 'TOOLBAR.FILTERS.ASSIGNED' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
-        <mat-checkbox>On board</mat-checkbox>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-checkbox>{{ 'TOOLBAR.FILTERS.ON_BOARD' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
-        <mat-checkbox>Arrived</mat-checkbox>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-checkbox>{{ 'TOOLBAR.FILTERS.ARRIVED' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
-        <mat-checkbox>Done</mat-checkbox>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-checkbox>{{ 'TOOLBAR.FILTERS.DONE' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
-        <mat-checkbox>Closed</mat-checkbox>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-checkbox>{{ 'TOOLBAR.FILTERS.CLOSED' | translate }}</mat-checkbox>
     </button>
 </mat-menu>
 
 <mat-menu #channels_menu="matMenu" overlapTrigger=false>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>person</mat-icon>
-        <mat-checkbox>Operators</mat-checkbox>
+        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.OPERATORS' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>call</mat-icon>
-        <mat-checkbox>IVR</mat-checkbox>
+        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.IVR' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>tablet</mat-icon>
-        <mat-checkbox>Satellites</mat-checkbox>
+        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.SATELLITES' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>chat</mat-icon>
-        <mat-checkbox>WhatsApp</mat-checkbox>
+        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.WHATSAPP' | translate }}</mat-checkbox>
     </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>chat</mat-icon>
-        <mat-checkbox>Facebook Msg</mat-checkbox>
+        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.FACEBOOK_MSG' | translate }}</mat-checkbox>
     </button>
 </mat-menu>
 
 <mat-menu #pagination_menu="matMenu" overlapTrigger=false>
-    <button mat-menu-item>
-        5
-    </button>
-    <button mat-menu-item>
-        10
-    </button>
-    <button mat-menu-item>
-        20
-    </button>    
-    <button mat-menu-item>
-        50
-    </button>
-    <button mat-menu-item>
-        100
-    </button>
+    <button mat-menu-item>5</button>
+    <button mat-menu-item>10</button>
+    <button mat-menu-item>20</button>
+    <button mat-menu-item>50</button>
+    <button mat-menu-item>100</button>
 </mat-menu>
 
-<mat-menu #view_menu="matMenu" overlapTrigger=false>        
-    <button mat-menu-item [matMenuTriggerFor]="filter_menu" fxHide fxShow.lt-md>
-        <mat-icon>filter_list</mat-icon> <span>Filters</span>
+<mat-menu #view_menu="matMenu" overlapTrigger=false>
+    <button mat-menu-item [matMenuTriggerFor]="filter_menu" fxHide fxShow.lt-md (click)="$event.stopPropagation()">
+        <mat-icon>filter_list</mat-icon> <span>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
     </button>
-    <button mat-menu-item [matMenuTriggerFor]="channels_menu" fxHide fxShow.lt-md>
-        <mat-icon>device_hub</mat-icon> <span>Channels</span>
+    <button mat-menu-item [matMenuTriggerFor]="channels_menu" fxHide fxShow.lt-md (click)="$event.stopPropagation()">
+        <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
     </button>
-    <button mat-menu-item >
+    <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>move_to_inbox</mat-icon>
-        <mat-checkbox (change)="onCheckInboxChange($event)" [(ngModel)]="isInboxVisible" >Inbox</mat-checkbox>
+        <mat-checkbox (change)="onCheckInboxChange($event)" [(ngModel)]="isInboxVisible">Inbox</mat-checkbox>
     </button>
 </mat-menu>

@@ -1,28 +1,23 @@
 <form [formGroup]="form" (ngSubmit)="submit(form)">
     <div class="nav" fxLayout="column">
 
-
-
-
         <mat-dialog-content fxLayout="column" fxLayoutAlign="start" fxFlex="100">
             <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
 
                 <div fxLayout="row wrap" fxLayoutAlign="space-between center" fxFlex="100">
 
-                    <h2 mat-dialog-title fxFlex="100">Request Service</h2>
+                    <h2 mat-dialog-title fxFlex="100">{{ 'SERVICES.REQUEST_DIALOG.TITLE' | translate }}</h2>
 
                     <mat-form-field fxFlex="100">
                         <input matInput [formControl]="clientNameFilterCtrl" name="clientNameFilterCtrl"
-                            placeholder="{{ 'IOE_RSD.SATELLITE_CLIENT_PLACEHOLDER' | translate }}"
+                            placeholder="{{ 'SERVICES.REQUEST_DIALOG.SATELLITE_CLIENT_PLACEHOLDER' | translate }}"
                             [matAutocomplete]="auto" cdkFocusInitial>
 
                         <mat-autocomplete panelWidth="200" #auto="matAutocomplete" autoActiveFirstOption
                             (optionSelected)='onClientSelected($event.option.value)' [displayWith]="clientDisplayFn">
                             <mat-option *ngFor="let client of queriedClientsByAutocomplete$ | async" [value]="client">
                                 <mat-icon>person_pin_circle</mat-icon>
-                                <span
-                                    class="text-boxed text-uppercase">{{ client.generalInfo ? client.generalInfo.name: '' }}
-                                </span>
+                                <span class="text-boxed text-uppercase">{{ client.generalInfo ? client.generalInfo.name: '' }} </span>
                             </mat-option>
                         </mat-autocomplete>
                     </mat-form-field>
@@ -31,7 +26,9 @@
                     <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider>
                     <div fxFlex="100" fxLayout="row" fxLayoutAlign="center center">
                         <mat-dialog-actions>
-                            <button fxFlex="80" mat-raised-button color="accent" type="submit">Request</button>
+                            <button [disabled]="!form.controls['client'].value || !clientNameFilterCtrl.value" fxFlex="80" mat-raised-button color="accent" type="submit">
+                                {{ 'SERVICES.REQUEST_DIALOG.REQUEST_BTN_LBL' | translate }}
+                            </button>
                         </mat-dialog-actions>
                     </div>
 

@@ -1,9 +1,9 @@
 .table-container {
-  overflow: auto;    
+  overflow: auto;
 }
 
 table {
-  width: 100%;    
+  width: 100%;
 }
 .mat-cell {
   color: black;
@@ -13,6 +13,29 @@ table {
 .mat-header-row {
   height: 2em;
 }
+
 .mat-row {
-  height: 2em;
+  height: 28px;
+  min-width: 28px;
+  max-width: 28px;
+}
+
+.mat-row-selected {
+  background: silver  
+}
+
+
+.td-container {
+  position: relative;
+}
+.td-content {
+  position: absolute;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.td-spacer {
+  height: 0;
+  overflow: hidden;
 }

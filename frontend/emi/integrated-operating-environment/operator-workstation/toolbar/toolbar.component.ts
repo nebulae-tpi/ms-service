@@ -87,6 +87,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private layout = undefined;
   //current user roles
   userRoles = undefined
+  page = 0;
 
   /**
    * open RequestServiceDialogComponent reference
@@ -175,6 +176,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.sendDatatableFocusCommand();
       return false;
     }));
+    this._hotkeysService.add(new Hotkey(['left'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableApplyPrevPage();
+      return false;
+    }));
+    this._hotkeysService.add(new Hotkey(['right'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableApplyNextPage();
+      return false;
+    }));
   }
 
 
@@ -240,7 +249,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableApplyChangePageCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
-    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE, args: [] });
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE, args: {page:this.page} });
   }
   /**
    * sendDatatableApplyChangePageCountCommand
@@ -257,6 +266,24 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   sendDatatableFocusCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_FOCUS, args: [] });
+  }
+  /**
+   * sendDatatableApplyPrevPage
+   * @param $event 
+   */
+  sendDatatableApplyPrevPage($event?) {
+    if (this.isThereAnOpenDialog() || this.page <= 0) return;
+    this.page--;
+    this.sendDatatableApplyChangePageCommand();
+  }
+  /**
+   * sendDatatableApplyPrevPage
+   * @param $event 
+   */
+  sendDatatableApplyNextPage($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    this.page++;
+    this.sendDatatableApplyChangePageCommand();
   }
   /**
    * sendDatatableServiceCancelCommand

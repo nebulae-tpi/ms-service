@@ -6,7 +6,7 @@ import {
   ViewChild,
   ElementRef,
   HostListener
-} from "@angular/core";
+} from '@angular/core';
 
 import {
   FormBuilder,
@@ -14,9 +14,9 @@ import {
   FormControl,
   Validators,
   FormArray
-} from "@angular/forms";
+} from '@angular/forms';
 
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
 import {
@@ -31,9 +31,9 @@ import {
   debounceTime,
   distinctUntilChanged,
   take
-} from "rxjs/operators";
+} from 'rxjs/operators';
 
-import { Subject, iif, from, of, forkJoin, Observable, range, combineLatest } from "rxjs";
+import { Subject, iif, from, of, forkJoin, Observable, range, combineLatest } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -43,26 +43,26 @@ import {
   MatSnackBar,
   MatDialog,
   MatDialogRef
-} from "@angular/material";
-import { fuseAnimations } from "../../../../../core/animations";
+} from '@angular/material';
+import { fuseAnimations } from '../../../../../core/animations';
 
 //////////// i18n ////////////
 import {
   TranslateService,
   LangChangeEvent,
   TranslationChangeEvent
-} from "@ngx-translate/core";
-import { locale as english } from "../../i18n/en";
-import { locale as spanish } from "../../i18n/es";
-import { FuseTranslationLoaderService } from "../../../../../core/services/translation-loader.service";
+} from '@ngx-translate/core';
+import { locale as english } from '../../i18n/en';
+import { locale as spanish } from '../../i18n/es';
+import { FuseTranslationLoaderService } from '../../../../../core/services/translation-loader.service';
 
 
-import * as moment from "moment";
+import * as moment from 'moment';
 
 //////////// Other Services ////////////
-import { KeycloakService } from "keycloak-angular";
+import { KeycloakService } from 'keycloak-angular';
 import { OperatorWorkstationService } from '../operator-workstation.service';
-import { ToolbarService } from "../../../../toolbar/toolbar.service";
+import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 
 const SPECIAL_DESTINATION_PRICE_MODS = { 'AIRPORT': 5000, 'BUS_TERMINAL': 5000, 'OUT_OF_CITY': 5000 };
@@ -77,15 +77,15 @@ const SPECIAL_DESTINATION_PRICE_MODS = { 'AIRPORT': 5000, 'BUS_TERMINAL': 5000, 
   providers: []
 })
 export class RequestServiceDialogComponent implements OnInit, OnDestroy {
-  //current user roles
-  userRoles = undefined
-  //Subject to unsubscribe 
+  // current user roles
+  userRoles = undefined;
+  // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
   // Main form group
   form: FormGroup;
   // auto-complete search control
   clientNameFilterCtrl: FormControl;
-  //Stream of filtered client by auto-complete text
+  // Stream of filtered client by auto-complete text
   queriedClientsByAutocomplete$: Observable<any[]>;
 
 
@@ -142,6 +142,11 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     this.queriedClientsByAutocomplete$ = this.clientNameFilterCtrl.valueChanges.pipe(
       debounceTime(200),
       distinctUntilChanged(),
+      tap((selected) => {
+        if (typeof selected === 'string' || selected instanceof String) {
+          this.form.patchValue({ client: null });
+        }
+      }),
       filter(text => (typeof text === 'string' || text instanceof String)),
       mergeMap(x => iif(() => !x, of([]), this.getAllSatelliteClientsFiltered$(x, 3)))
     );
@@ -155,6 +160,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
         filter(resp => !resp.errors),
         mergeMap(clientSatellites => from(clientSatellites.data.ServiceClientSatellites)),
         toArray(),
+        tap(x => console.log(JSON.stringify(x)))
       );
   }
 
@@ -164,13 +170,14 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
   /**
    * extract client name from client object
-   * @param client 
+   * @param client
    */
   clientDisplayFn(client) {
     return client ? client.generalInfo.name : '';
   }
 
   submit(event?) {
+    console.log(this.form.getRawValue());
     this.requestService(this.form.getRawValue());
     this.dialogRef.close();
   }
@@ -178,7 +185,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   /**
    * Send the request service command to the server
    */
-  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip = undefined, fare = undefined, fareDiscount = undefined }) {
+  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount }) {
 
     return range(1, quantity || 1)
       .pipe(
@@ -202,7 +209,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
               marker: {
                 lat: client.location.lat,
                 lng: client.location.lng,
-              },              
+              },
               polygon: null,
               city: client.generalInfo.city,
               zone: client.generalInfo.zone,
@@ -262,11 +269,11 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
             error.forEach(errorDetail => {
-              this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
+              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
             });
           } else {
             response.errors.forEach(errorData => {
-              this.showMessageSnackbar("ERRORS." + errorData.message.code);
+              this.showMessageSnackbar('ERRORS.' + errorData.message.code);
             });
           }
         });
@@ -291,8 +298,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
     this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey] : "",
-        detailMessageKey ? data[detailMessageKey] : "",
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
         {
           duration: 2000
         }
@@ -305,6 +312,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
    */
   async queryUserRols() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
+    console.log(JSON.stringify(this.userRoles));
   }
   //#endregion
 
