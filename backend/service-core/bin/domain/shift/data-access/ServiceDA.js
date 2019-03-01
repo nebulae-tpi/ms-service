@@ -29,7 +29,7 @@ class ServiceDA {
    */
   static findOpeneServiceByShift$(shiftId) {
     const explorePastMonth = Date.today().getDate() <= 2;
-    const query = { "state": { "$ne": "CLOSED" }, "shiftId": driverId };
+    const query = { "state": { "$ne": "CLOSED" }, "shiftId": shiftId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
