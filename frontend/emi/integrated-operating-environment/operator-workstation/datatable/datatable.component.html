@@ -1,16 +1,54 @@
 <div class="table-container mat-elevation-z8"  [style.height.px]="tableHeight">
     <table mat-table [dataSource]="dataSource">
 
-        <!-- Position Column -->
-        <ng-container matColumnDef="_id">
-            <th mat-header-cell *matHeaderCellDef> _id </th>
-            <td mat-cell *matCellDef="let service"> {{service._id}} </td>
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> id </th>
+            <td mat-cell *matCellDef="let service"> {{service.id}} </td>
         </ng-container>
 
-        <!-- Name Column -->
-        <ng-container matColumnDef="timestamp">
-            <th mat-header-cell *matHeaderCellDef> Name </th>
-            <td mat-cell *matCellDef="let service"> {{service.timestamp}} </td>
+        <ng-container matColumnDef="state">
+            <th mat-header-cell *matHeaderCellDef> state </th>
+            <td mat-cell *matCellDef="let service"> {{service.state}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="creation_timestamp">
+            <th mat-header-cell *matHeaderCellDef> creation_timestamp </th>
+            <td mat-cell *matCellDef="let service"> {{service.creation_timestamp}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="client_name">
+            <th mat-header-cell *matHeaderCellDef> client_name </th>
+            <td mat-cell *matCellDef="let service"> {{service.client_name}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="pickup_addr">
+            <th mat-header-cell *matHeaderCellDef> pickup_addr </th>
+            <td mat-cell *matCellDef="let service"> {{service.pickup_addr}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="pickup_neig">
+            <th mat-header-cell *matHeaderCellDef> pickup_neig </th>
+            <td mat-cell *matCellDef="let service"> {{service.pickup_neig}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="vehicle_plate">
+            <th mat-header-cell *matHeaderCellDef> vehicle_plate </th>
+            <td mat-cell *matCellDef="let service"> {{service.vehicle_plate}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="eta">
+            <th mat-header-cell *matHeaderCellDef> eta </th>
+            <td mat-cell *matCellDef="let service"> {{service.eta}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="state_time_span">
+            <th mat-header-cell *matHeaderCellDef> state_time_span </th>
+            <td mat-cell *matCellDef="let service"> {{service.state_time_span}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="distance">
+            <th mat-header-cell *matHeaderCellDef> distance </th>
+            <td mat-cell *matCellDef="let service"> {{service.distance}} </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: false"></tr>

@@ -77,7 +77,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   //current table max height
   tableHeight: number = 400;
 
-  displayedColumns: string[] = ['_id', 'timestamp'];
+  displayedColumns: string[] = [ 'state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span', 'distance'];
   dataSource = [];
 
 
@@ -164,11 +164,28 @@ export class DatatableComponent implements OnInit, OnDestroy {
     this.operatorWorkstationService.queryServices$([], [], true, 0, 10, undefined).subscribe(
       (results) => {
         console.log(`results = ${JSON.stringify(results)}`);
-        this.dataSource = results.data.IOEServices;
+        const rawData = (results && results.data && results.data.IOEServices) ? results.data.IOEServices : [];
+        this.dataSource = rawData.map(s => this.convertServiceToTableFormat(s));
+        console.log(`results = ${JSON.stringify(this.dataSource)}`);
       },
       (error) => console.error(`DatatableComponent.loadTable: Error => ${error}`),
       () => console.log(`DatatableComponent.loadTable: Completed`),
     );
+  }
+
+  convertServiceToTableFormat({ id, state, timestamp, client, pickUp, pickUpETA, vehicle, driver }) {
+    return {
+      id,
+      state,
+      'creation_timestamp': timestamp,
+      'client_name': client.fullname,
+      'pickup_addr': pickUp.addressLine1,
+      'pickup_neig': pickUp.neighborhood,
+      'vehicle_plate': vehicle.licensePlate,
+      'eta': pickUpETA,
+      'state_time_span': '00:00:00',
+      'distance': 2.34
+    };
   }
 
 
