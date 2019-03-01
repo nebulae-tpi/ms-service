@@ -13,7 +13,7 @@ spec:
         app: service
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.service:0.2.21
+      - image: DOCKERHUB/service.backend.service:0.2.22
         name: service
         volumeMounts:
         - name: google-application-credentials
@@ -66,6 +66,8 @@ spec:
           value: "120000"
         - name: SERVICE_CLOSED_THRESHOLD
           value: "120000"
+        - name: SERVICE_COMPLETED_THRESHOLD
+          value: "300000"
         
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION

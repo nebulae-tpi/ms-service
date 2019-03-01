@@ -39,7 +39,7 @@ class CronJobES {
   handlePeriodicFifteenMinutes$() {
     console.log("------- handlePeriodicFifteenMinutes$ ----------");
     return forkJoin(
-      //this.checkDisconnectedShifts$(),
+      this.checkServicesOnBoardToComplete$(),
       this.checkClosedShifts$(),
       //this.checkServicesToClose$()
     )
@@ -71,6 +71,20 @@ class CronJobES {
         mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
         tap(() => console.log("ALL SHIFTS WERE CLOSED"))
+      )
+  }
+
+  /**
+   * Search the services that are on OnBoard state and emit an event for each service to complete it
+   */
+  checkServicesOnBoardToComplete$() {
+    return ServiceDA.findServicesOnboardToComplete$()
+      .pipe(
+        tap(service => console.log("SERVICE TO COMPLETE => ", JSON.stringify(service))),
+        mergeMap(service => this.generateEventStoreEvent$("ServiceCompleted", 1, "Service", service._id, {}, "SYSTEM")),
+        mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
+        toArray(),
+        tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE COMPLETED"))
       )
   }
 

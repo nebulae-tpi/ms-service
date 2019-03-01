@@ -105,7 +105,17 @@ class ShiftES {
     handleShiftDriverBlockRemoved$({ aid, data }) {
         //console.log(`ShiftES: handleShiftDriverBlockRemoved: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { driver: 1, businessId: 1 }).pipe(
+        return of('')
+        .pipe(
+            map(data => {
+                console.log('Antes delay1');
+                return data;
+            }),
+            delay(2000),
+            mergeMap(() => {
+                console.log('ShiftDA.findById1 ');
+                return ShiftDA.findById$(aid, { driver: 1, businessId: 1 });
+            }),
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, driver }))
         );
     }
@@ -117,8 +127,17 @@ class ShiftES {
     handleShiftDriverBlockAdded$({ aid, data }) {
         console.log(`ShiftES: handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE        
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { businessId: 1, driver: 1 })
+        return of('')
             .pipe(
+                map(data => {
+                    console.log('Antes delay2');
+                    return data;
+                }),
+                delay(2000),
+                mergeMap(() => {
+                    console.log('ShiftDA.findById2 ');
+                    return ShiftDA.findById$(aid, { businessId: 1, driver: 1 });
+                }),
                 mergeMap(({ businessId, driver }) =>
                     driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, driver })
                 )
