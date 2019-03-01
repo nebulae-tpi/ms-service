@@ -11,15 +11,19 @@
       <div fxLayout="column" fxLayoutAlign="space-between start" class="header p-24 pb-4" ngClass="mat-accent-bg"
         ngClass.gt-md="white-fg">
         <div class="logo" fxFlex fxLayout="row" fxLayoutAlign="start center">
-          <mat-icon class="logo-icon s-32" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '50ms', scale: '0.2' } }">local_taxi</mat-icon>
+          <mat-icon class="logo-icon s-32" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '50ms', scale: '0.2' } }">
+            local_taxi</mat-icon>
           <span class="logo-text" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }">{{
-            "SERVICE.HEADER_TITLE" | translate }}</span>
+                    "SERVICE.HEADER_TITLE" | translate }}</span>
         </div>
 
-        <div class="account" fxFlex fxFill fxLayout="row" fxLayoutAlign="space-between end">
+        <div fxFlex fxFill fxLayout="row" fxLayoutAlign="space-between center">
           <span class="mat-title" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }">{{
             "SERVICE.SERVICE_FILTERS.FILTER_TITLE" | translate }}
           </span>
+          <button class="mat-title" mat-button (click)="refreshData()" >
+              <mat-icon>sync</mat-icon>
+            </button>
         </div>
       </div>
       <!-- / SIDENAV HEADER -->
@@ -28,7 +32,10 @@
       <div class="content" fusePerfectScrollbar *fuseIfOnDom [@animate]="{ value: '*', params: { y: '50px' } }">
         <div class="nav mt-20" fxLayout="column">
           <form fxLayout="column" fxLayoutAlign="start" fxFlex="100" name="form" [formGroup]="filterForm">
+
             <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
+
+            <mat-checkbox class="mb-12" formControlName="showClosedServices">{{'SERVICE.SERVICE_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>
 
             <mat-form-field>
               <input matInput [matDatepicker]="pickerInitDate" placeholder="{{'SERVICE.SERVICE_FILTERS.INIT_TIMESTAMP' | translate}}"
@@ -43,7 +50,7 @@
               <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
               <mat-datepicker #pickerEndDate></mat-datepicker>
             </mat-form-field>
-            
+
             <mat-form-field>
               <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_DOCUMENT_ID' | translate}}" formControlName="driverDocumentId"
                 id="driverDocumentId" maxlength="20" />
@@ -53,8 +60,8 @@
               <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_FULLNAME' | translate}}" formControlName="driverFullname"
                 id="driverFullname" maxlength="20" />
             </mat-form-field>
-            
-            <mat-form-field>
+
+            <mat-form-field *ngIf="false">
               <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_USERNAME' | translate}}" formControlName="clientUsername"
                 id="clientUsername" maxlength="20" />
             </mat-form-field>
@@ -78,15 +85,37 @@
                   maxlength="20"/>
             </mat-form-field> -->
 
-            <mat-form-field>
+            <!-- <mat-form-field>
               <mat-select placeholder="{{'SERVICE.SERVICE_FILTERS.STATES' | translate}}" formControlName="states" multiple>
                 <mat-option *ngFor="let state of stateList" [value]="state">
                   {{ "SERVICE.SERVICE_STATES."+state | translate}}
                 </mat-option>
               </mat-select>
-            </mat-form-field>
+            </mat-form-field> -->
 
-            <mat-checkbox formControlName="showClosedServices">{{'SERVICE.SERVICE_FILTERS.SHOW_CLOSED' | translate}}</mat-checkbox>
+
+
+            <div fxFlex="100">
+              <div fxLayout="column" fxLayoutAlign="center start">
+                <mat-divider fxFlex="100"></mat-divider>
+                <!-- <div fxFlex="100" formArrayName="features"  *ngFor="let feature of requestForm.get('features').controls ; let i = index;">
+                  <div fxFlex="100" class="ml-12" [formGroupName]="i" fxLayoutAlign="start start" >
+                      <mat-checkbox fxFlex="100" [formControlName]="'active'">
+                          {{ 'SATELLITE.FEATURES_LIST.' + feature.get('name').value | translate }}
+                      </mat-checkbox>
+                  </div>
+                </div> -->
+
+                <div fxFlex="100" formArrayName="states" *ngFor="let state of filterForm.get('states')['controls'] ; let i = index;">
+                  <div fxFlex="100" class="ml-12" [formGroupName]="i" fxLayoutAlign="start start">
+                      <mat-checkbox fxFlex="100" [formControlName]="'active'">
+                          {{ 'SERVICE.SERVICE_STATES.' + state.get('name').value | translate }}
+                      </mat-checkbox>
+                  </div>
+                </div>
+              </div>
+
+          </div>
 
             </div>
           </form>
@@ -111,7 +140,9 @@
             aria-label="Toggle Sidenav">
             <mat-icon>menu</mat-icon>
           </button>
-      
+          <button mat-button fxHide.gt-md (click)="refreshData()" >
+            <mat-icon>sync</mat-icon>
+          </button>
         </div>
       </div>
       <!-- / CONTENT HEADER -->
@@ -124,7 +155,7 @@
           <ng-container cdkColumnDef="timestamp">
             <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.TIMESTAMP" | translate}}</mat-header-cell>
             <mat-cell *cdkCellDef="let service">
-              <p class="text-truncate">
+              <p>
                 {{ service.timestamp | date: "dd/MM/y HH:mm:ss"}}
               </p>
             </mat-cell>
@@ -133,8 +164,8 @@
           <!--  Client name Column -->
           <ng-container cdkColumnDef="clientName">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.CLIENT_NAME" | translate}}</mat-header-cell>
-              <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+              <mat-cell *cdkCellDef="let service" fxHide fxShow.gt-xs>
+                <p >
                   {{ service.client.fullname | uppercase }}
                 </p>
               </mat-cell>
@@ -142,9 +173,9 @@
 
           <!--  Driver name Column -->
           <ng-container cdkColumnDef="driverName">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.DRIVER_NAME" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+                <p >
                   {{ service.driver ? service.driver.fullname: ''}}
                 </p>
               </mat-cell>
@@ -152,9 +183,9 @@
 
           <!--  License plate Column -->
           <ng-container cdkColumnDef="licensePlate">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.LICENSE_PLATE" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.LICENSE_PLATE" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+                <p >
                   {{ service.vehicle ? service.vehicle.licensePlate: ''}}
                 </p>
               </mat-cell>
@@ -163,8 +194,8 @@
           <!--  PaymentType Column -->
           <ng-container cdkColumnDef="paymentType">
             <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.PAYMENT_TYPE" | translate}}</mat-header-cell>
-              <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+              <mat-cell *cdkCellDef="let service" fxHide fxShow.gt-xs>
+                <p >
                   {{ "SERVICE.SERVICE_PAYMENT_TYPE."+service.paymentType | translate}}
                 </p>
               </mat-cell>
@@ -173,9 +204,9 @@
 
            <!--  State Column -->
            <ng-container cdkColumnDef="state">
-            <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{"SERVICE.SERVICE_TABLE_LIST.STATE" | translate}}</mat-header-cell>
+            <mat-header-cell *cdkHeaderCellDef>{{"SERVICE.SERVICE_TABLE_LIST.STATE" | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let service">
-                <p class="text-truncate">
+                <p >
                   {{ "SERVICE.SERVICE_STATES."+service.state | translate}}
                 </p>
               </mat-cell>

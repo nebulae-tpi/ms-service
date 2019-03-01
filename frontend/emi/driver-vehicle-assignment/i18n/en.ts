@@ -8,7 +8,8 @@ export const locale = {
       FILTER: 'Filter',
       NAME: 'Name',
       LASTNAME: 'Lastname',
-      VEHICLE_QTY: 'Vehicle quantity',
+      VEHICLE_QTY: 'Assigned Vehicles',
+      DOCUMENT_ID: 'Person ID',
       PERSON_ID: 'Person ID',
       CREATION_DATE: 'Creation date',
       CREATOR_USER: 'Creator user',
@@ -68,7 +69,8 @@ export const locale = {
       1: 'Internal server error',
       2: 'Permission denied',
       23011: 'License plate already belongs to this driver',
-      23012: 'License plate do not exist in the system'
+      23012: 'License plate do not exist in the system',
+      23023: 'You can\'t assign vehicle because it\'s inactive '
     },
   }
 };

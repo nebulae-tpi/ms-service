@@ -15,8 +15,8 @@ import * as moment from 'moment';
 export class ServiceListService {
 
   private _filterSubject$ = new BehaviorSubject({
-      initTimestamp: moment().startOf('month'),
-      endTimestamp: moment().endOf('day')
+      initTimestamp: moment().subtract(1, 'day').startOf('day'),
+      endTimestamp: moment().endOf('day'),
   });
 
   private _paginatorSubject$ = new BehaviorSubject({
@@ -83,7 +83,7 @@ export class ServiceListService {
   }
 
   updateFilterData(filterData){
-    console.log('filterData -->> ', filterData);
+    // console.log('filterData -->> ', filterData);
     this._filterSubject$.next(filterData);
   }
 

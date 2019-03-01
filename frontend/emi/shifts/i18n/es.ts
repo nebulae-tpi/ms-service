@@ -28,6 +28,11 @@ export const locale = {
         },
         LANGUAGES_TITLE: 'Idiomas',
         BLOCKS_TITLE: 'Bloqueos',
+        BLOCKS: {
+          BREACH_SERVICE: 'Incumplimiento de Servicio',
+          BREACH_AGREEMENT: 'Incumplimiento de Acuerdo Empresarial',
+          DOORMAN_COMPLAINT: 'Queja del Portero'
+        },
         LANGUAGES: {
           EN: 'Inglés',
           english: 'Inglés'
