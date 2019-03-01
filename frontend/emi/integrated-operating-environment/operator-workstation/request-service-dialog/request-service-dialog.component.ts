@@ -71,8 +71,8 @@ const SPECIAL_DESTINATION_PRICE_MODS = { 'AIRPORT': 5000, 'BUS_TERMINAL': 5000, 
 @Component({
   // tslint:disable-next-line:component-selector
   selector: 'request-service-dialog',
-  templateUrl: './Request-service-dialog.component.html',
-  styleUrls: ['./Request-service-dialog.component.scss'],
+  templateUrl: './request-service-dialog.component.html',
+  styleUrls: ['./request-service-dialog.component.scss'],
   animations: fuseAnimations,
   providers: []
 })
