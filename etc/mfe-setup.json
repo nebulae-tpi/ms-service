@@ -68,7 +68,7 @@
     ],
     "contents": [
       {
-        "groupId": "OPERATION",
+        "groupId": "integrated-operating-environment",
         "id": "poi",
         "icon": "map",
         "translate": {
@@ -105,7 +105,7 @@
     ],
     "contents": [
       {
-        "groupId": "OPERATION",
+        "groupId": "integrated-operating-environment",
         "id": "operation",
         "icon": "explore",
         "translate": {
@@ -147,7 +147,7 @@
     ],
     "contents": [
       {
-        "groupId": "OPERATION",
+        "groupId": "integrated-operating-environment",
         "id": "shifts",
         "icon": "ballot",
         "translate": {
