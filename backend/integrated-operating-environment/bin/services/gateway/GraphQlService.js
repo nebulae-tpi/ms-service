@@ -183,10 +183,10 @@ class GraphQlService {
         aggregateType: "Service",
         messageType: "emigateway.graphql.mutation.IOERequestService"
       },   
-      // {
-      //   aggregateType: "Service",
-      //   messageType: "emigateway.graphql.mutation.IOECancelService"
-      // },   
+      {
+        aggregateType: "Service",
+        messageType: "emigateway.graphql.mutation.IOECancelService"
+      },   
       // {
       //   aggregateType: "Service",
       //   messageType: "emigateway.graphql.mutation.IOEAssignService"
@@ -253,10 +253,10 @@ class GraphQlService {
         fn: ServiceCQRS.requestServices$,
         obj: ServiceCQRS
       },
-      // "emigateway.graphql.mutation.IOECancelService": {
-      //   fn: ServiceCQRS.cancelService$,
-      //   obj: ServiceCQRS
-      // },
+      "emigateway.graphql.mutation.IOECancelService": {
+        fn: ServiceCQRS.cancelService$,
+        obj: ServiceCQRS
+      },
       // "emigateway.graphql.mutation.IOEAssignService": {
       //   fn: ServiceCQRS.assignService$,
       //   obj: ServiceCQRS

@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Service";
 const { ERROR_23104 } = require("../../../tools/customError");
-const { map, mergeMap, first, filter, catchError, tap } = require("rxjs/operators");
+const { map, mergeMap, first, filter, catchError, tap,take } = require("rxjs/operators");
 const { of, Observable, defer, throwError, range } = require("rxjs");
 
 class ServiceDA {
@@ -37,9 +37,6 @@ class ServiceDA {
    * Finds services by filters
    */
   static findByFilters$(businessId, states, channels, operatorId, page, count, projection = undefined) {
-
-    
-    
     const query = { "businessId": businessId, "closed": false };
     if (states && states.length > 0) {
       query.state = { "$in": states };
@@ -63,7 +60,8 @@ class ServiceDA {
             collection.find(query).sort({ timestamp: -1 }).skip(page * count).limit(count)
           )
         )
-      ),      
+      ),   
+      take(count)   
     );
   }
 

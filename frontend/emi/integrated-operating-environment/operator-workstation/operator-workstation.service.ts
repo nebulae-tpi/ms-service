@@ -9,7 +9,7 @@ import {
   ServiceClientSatellites,
 } from '../gql/satellite.js';
 import {
-  IOERequestService, IOEServices
+  IOERequestService, IOEServices, IOECancelService
 } from '../gql/ioe.js';
 
 
@@ -127,6 +127,24 @@ export class OperatorWorkstationService {
           fare: IOERequest.fare,
           tip: IOERequest.tip,
           request: IOERequest.request
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+  /**
+   * send a cancel service command to the server
+   * @param IOECommand 
+   */
+  cancelService$(IOECommand: any) {
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: IOECancelService,
+        variables: {
+          id: IOECommand.id,
+          reason: IOECommand.reason,
+          authorType: IOECommand.authorType,
+          notes: IOECommand.notes,
         },
         errorPolicy: 'all'
       });

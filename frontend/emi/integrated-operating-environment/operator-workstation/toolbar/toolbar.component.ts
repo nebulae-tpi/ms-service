@@ -225,7 +225,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableApplyChannelFilterCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
-    console.log('sendDatatableApplyChannelFilterCommand');
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_CHANNEL_FILTER, args: [] });
   }
   /**
    * sendDatatableApplyServiceFilterCommand
@@ -233,7 +233,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableApplyServiceFilterCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
-    console.log('sendDatatableApplyServiceFilterCommand');
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER, args: [] });
   }
   /**
    * sendDatatableApplyChangePageCommand
@@ -241,7 +241,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableApplyChangePageCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
-    console.log('sendDatatableApplyChangePageCommand');
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE, args: [] });
   }
   /**
    * sendDatatableApplyChangePageCountCommand
@@ -249,7 +249,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableApplyChangePageCountCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
-    console.log('sendDatatableApplyChangePageCountCommand');
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT, args: [] });
   }
   /**
    * sendDatatableFocusCommand
@@ -257,7 +257,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableFocusCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
-    console.log('sendDatatableFocusCommand');
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_FOCUS, args: [] });
   }
   /**
    * sendDatatableServiceCancelCommand
@@ -269,7 +269,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.showMessageSnackbar("ERRORS.2")
       return;
     }
-    console.log('sendDatatableServiceCancelCommand');
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_CANCEL, args: [] });
   }
   /**
    * sendDatatableServiceAssignCommand
@@ -281,7 +281,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.showMessageSnackbar("ERRORS.2")
       return;
     }
-    console.log('sendDatatableServiceAssignCommand');
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_ASSIGN, args: [] });
   }
 
   isThereAnOpenDialog(): boolean {

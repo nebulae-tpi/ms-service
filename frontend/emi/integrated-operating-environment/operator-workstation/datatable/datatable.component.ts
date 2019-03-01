@@ -60,6 +60,7 @@ import * as moment from "moment";
 import { KeycloakService } from "keycloak-angular";
 import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from "../../../../toolbar/toolbar.service";
+import { SelectionModel } from "@angular/cdk/collections";
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -72,13 +73,18 @@ import { ToolbarService } from "../../../../toolbar/toolbar.service";
 export class DatatableComponent implements OnInit, OnDestroy {
   //Subject to unsubscribe 
   private ngUnsubscribe = new Subject();
-
-
+  private loadingData = false;
+  //factor to calucllates how many rows per display
+  private paginationFactor = 1;
+  private page = 0;
+  private pageCount = 0;
   //current table max height
   tableHeight: number = 400;
 
-  displayedColumns: string[] = [ 'state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span', 'distance'];
+  displayedColumns: string[] = ['selected', 'state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span', 'distance'];
   dataSource = [];
+  selection = new SelectionModel(false, []);
+
 
 
 
@@ -121,10 +127,12 @@ export class DatatableComponent implements OnInit, OnDestroy {
     ).subscribe(
       (layout) => {
         this.tableHeight = layout.datatable.height;
+        this.pageCount = parseInt(`${(this.tableHeight / 30) * this.paginationFactor}`)
         console.log(`Layout = ${JSON.stringify(layout)}`);
+        console.log(`pageCount = ${this.pageCount}`); 
       },
-      (error) => console.error(`DatatableComponent.ngOnInit: Error => ${error}`),
-      () => console.log(`DatatableComponent.ngOnInit: Completed`),
+      (error) => console.error(`DatatableComponent.listenLayoutChanges: Error => ${error}`),
+      () => console.log(`DatatableComponent.listenLayoutChanges: Completed`),
     );
   }
 
@@ -148,33 +156,50 @@ export class DatatableComponent implements OnInit, OnDestroy {
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT:
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_CANCEL:
+            this.cancelSelectedTrip();
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_ASSIGN:
             break;
         }
         console.log({ code, args });
       },
-      (error) => console.error(`DatatableComponent.ngOnInit: Error => ${error}`),
-      () => console.log(`DatatableComponent.ngOnInit: Completed`),
+      (error) => console.error(`DatatableComponent.listenToolbarCommands: Error => ${error}`),
+      () => console.log(`DatatableComponent.listenToolbarCommands: Completed`),
     );
   }
 
 
   loadTable() {
-    this.operatorWorkstationService.queryServices$([], [], true, 0, 10, undefined).subscribe(
+    if (this.loadingData) {
+      console.log('ignoring table data refresh, already loading');
+      return;
+    }
+
+    this.loadingData = true;
+
+    this.operatorWorkstationService.queryServices$([], [], true, this.page, this.pageCount, undefined).subscribe(
       (results) => {
-        console.log(`results = ${JSON.stringify(results)}`);
+        //console.log(`results = ${JSON.stringify(results)}`);
         const rawData = (results && results.data && results.data.IOEServices) ? results.data.IOEServices : [];
         this.dataSource = rawData.map(s => this.convertServiceToTableFormat(s));
-        console.log(`results = ${JSON.stringify(this.dataSource)}`);
+        console.log(`results = ${this.dataSource.length}`);
       },
-      (error) => console.error(`DatatableComponent.loadTable: Error => ${error}`),
-      () => console.log(`DatatableComponent.loadTable: Completed`),
+      (error) => {
+        console.error(`DatatableComponent.loadTable: Error => ${error}`);
+        this.loadingData = false;
+      },
+      () => {
+        console.log(`DatatableComponent.loadTable: Completed`)
+        this.loadingData = false;
+      },
     );
   }
 
+
+
   convertServiceToTableFormat({ id, state, timestamp, client, pickUp, pickUpETA, vehicle, driver }) {
     return {
+      selected: '',
       id,
       state,
       'creation_timestamp': timestamp,
@@ -187,6 +212,75 @@ export class DatatableComponent implements OnInit, OnDestroy {
       'distance': 2.34
     };
   }
+
+  cancelSelectedTrip() {
+    const selectedRow = this.getSelectedRow();
+    console.log(selectedRow);
+    if (selectedRow) {
+      this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
+        (results) => {          
+          console.log(`DatatableComponent.cancelService = ${results}`);
+        },
+        (error) => {
+          console.error(`DatatableComponent.cancelService: Error => ${error}`);
+          this.loadingData = false;
+        },
+        () => {
+          console.log(`DatatableComponent.cancelService: Completed`)
+          this.loadingData = false;
+        },
+      );
+    }
+
+  }
+
+  //#region SELECTION
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    switch (event.key) {
+      case 'ArrowUp':
+        this.selectPrevRow();
+        break;
+      case 'ArrowDown':
+        this.selectNextRow();
+        break;
+    }
+  }
+
+  selectNextRow() {
+    if (this.dataSource.length === 0) {
+      return;
+    }
+    const currenSelectedIndex = this.dataSource.findIndex(s => s.selected === '>');
+    if (currenSelectedIndex === -1) {
+      this.dataSource[0].selected = '>';
+    } else {
+      if (currenSelectedIndex >= this.dataSource.length - 1) {
+        this.dataSource[this.dataSource.length - 1].selected = '>';
+      } else {
+        this.dataSource[currenSelectedIndex].selected = '';
+        this.dataSource[currenSelectedIndex + 1].selected = '>';
+      }
+    }
+
+  }
+  selectPrevRow() {
+    if (this.dataSource.length === 0) {
+      return;
+    }
+    const currenSelectedIndex = this.dataSource.findIndex(s => s.selected === '>');
+    if (currenSelectedIndex <= 0) {
+      this.dataSource[0].selected = '>';
+    } else {
+      this.dataSource[currenSelectedIndex].selected = '';
+      this.dataSource[currenSelectedIndex - 1].selected = '>';
+    }
+  }
+  getSelectedRow() {
+    const currenSelectedIndex = this.dataSource.findIndex(s => s.selected === '>');
+    return currenSelectedIndex === -1 ? undefined : this.dataSource[currenSelectedIndex];
+  }
+  //#endregion
 
 
 }

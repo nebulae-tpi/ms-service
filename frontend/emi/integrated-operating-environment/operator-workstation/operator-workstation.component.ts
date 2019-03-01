@@ -140,11 +140,7 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
     return this.layoutType === OperatorWorkstationService.LAYOUT_NO_INBOX;
   }
 
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    console.log(event.key);
-  }
-
+  
   @HostListener('window:resize', ['$event'])
   onResize(event?) {
     this.recalculateLayout();

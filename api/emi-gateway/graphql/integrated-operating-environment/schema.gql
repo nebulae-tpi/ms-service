@@ -238,6 +238,7 @@ type Query{
         serviceStatesFilter: [String]
         serviceChannelsFilter: [String]
         viewAllOperators: Boolean
+        businessId: String
         page: Int
         pageCount: Int
         projections: [String]
