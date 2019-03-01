@@ -9,7 +9,7 @@ import {
   ServiceClientSatellites,
 } from '../gql/satellite.js';
 import {
-  IOERequestService, IOEServices, IOECancelService
+  IOERequestService, IOEServices, IOECancelService, IOEServiceSubscription
 } from '../gql/ioe.js';
 
 
@@ -167,6 +167,18 @@ export class OperatorWorkstationService {
       });
   }
 
-
+  /**
+   * Event triggered when a business is created, updated or deleted.
+   */
+  listenIOEService$(businessId, operatorId): Observable<any> {
+    console.log(`=====${businessId}======${operatorId}=====`);
+    return this.gateway.apollo
+      .subscribe({
+        query: IOEServiceSubscription,
+        variables: {
+          businessId, operatorId
+        }
+      });
+  }
 
 }

@@ -1,5 +1,8 @@
 'use strict'
 
+const withFilter = require("graphql-subscriptions").withFilter;
+const PubSub = require("graphql-subscriptions").PubSub;
+const pubsub = new PubSub();
 const { of, Observable, bindNodeCallback } = require('rxjs');
 const { map, tap, mergeMap, switchMapTo } = require('rxjs/operators');
 
@@ -115,4 +118,69 @@ module.exports = {
       ).toPromise();
     },
   },
-}
+  //// SUBSCRIPTIONS ///////
+  Subscription: {
+    IOEService: {
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          return pubsub.asyncIterator("IOEService");
+        },
+        (payload, variables, context, info) => {
+          const businessOk = variables.businessId ? true : payload.IOEService.businessId === variables.businessId;
+          const operatorOk = variables.operatorId ? true : payload.IOEService.request.ownerOperatorId === variables.operatorId;
+          return businessOk && operatorOk;
+        }
+      )
+    }
+  }
+
+};
+
+
+//// SUBSCRIPTIONS SOURCES ////
+
+const eventDescriptors = [
+  {
+    backendEventName: 'IOEService',
+    gqlSubscriptionName: 'IOEService',
+    dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
+    onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
+    onEvent: (evt, descriptor) => console.log(`Event of type  ${descriptor.backendEventName} HERE!!!!`),// OPTIONAL, only use if needed
+  },
+];
+
+
+/**
+* Connects every backend event to the right GQL subscription
+*/
+eventDescriptors.forEach(descriptor => {
+  broker
+    .getMaterializedViewsUpdates$([descriptor.backendEventName])
+    .subscribe(
+      evt => {
+        if (descriptor.onEvent) {
+          descriptor.onEvent(evt, descriptor);
+        }
+        const payload = {};
+        payload[descriptor.gqlSubscriptionName] = descriptor.dataExtractor ? descriptor.dataExtractor(evt) : evt.data
+        pubsub.publish(descriptor.gqlSubscriptionName, payload);
+      },
+
+      error => {
+        if (descriptor.onError) {
+          descriptor.onError(error, descriptor);
+        }
+        console.error(
+          `Error listening ${descriptor.gqlSubscriptionName}`,
+          error
+        );
+      },
+
+      () =>
+        console.log(
+          `${descriptor.gqlSubscriptionName} listener STOPPED`
+        )
+    );
+});
+
+

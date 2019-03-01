@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Service";
 const { ERROR_23104 } = require("../../../tools/customError");
-const { map, mergeMap, first, filter, catchError, tap,take } = require("rxjs/operators");
+const { map, mergeMap, first, filter, catchError, tap, take } = require("rxjs/operators");
 const { of, Observable, defer, throwError, range } = require("rxjs");
 
 class ServiceDA {
@@ -29,8 +29,9 @@ class ServiceDA {
    */
   static findById$(_id, projection = undefined) {
     const query = { _id };
-    return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
-      .findOne(query, { projection }));
+    return defer(() =>
+      mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOne(query, { projection })
+    );
   }
 
   /**
@@ -47,10 +48,10 @@ class ServiceDA {
     if (operatorId) {
       query["request.ownerOperatorId"] = operatorId;
     }
-    console.log({businessId, states, channels, operatorId, page, count, projection});
-    console.log(JSON.stringify(query,null,1));
+    console.log({ businessId, states, channels, operatorId, page, count, projection });
+    console.log(JSON.stringify(query, null, 1));
 
-    const explorePastMonth = Date.today().getDate() <= 1;
+    const explorePastMonth = false; // TODO: solucionar// Date.today().getDate() <= 1;
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
@@ -60,8 +61,8 @@ class ServiceDA {
             collection.find(query).sort({ timestamp: -1 }).skip(page * count).limit(count)
           )
         )
-      ),   
-      take(count)   
+      ),
+      take(count)
     );
   }
 

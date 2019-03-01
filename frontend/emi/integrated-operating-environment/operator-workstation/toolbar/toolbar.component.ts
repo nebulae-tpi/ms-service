@@ -205,7 +205,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.requestServiceDialogRef = this.dialog.open(RequestServiceDialogComponent, dialogConfig);
     this.requestServiceDialogRef.afterClosed().subscribe(
       data => {
-        console.log(data ? JSON.stringify(data) : 'DATA IS NULL');
         this.requestServiceDialogRef = undefined;
       }
     );
@@ -321,7 +320,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   async queryUserRols() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
-    console.log(JSON.stringify(this.userRoles));
   }
 
 

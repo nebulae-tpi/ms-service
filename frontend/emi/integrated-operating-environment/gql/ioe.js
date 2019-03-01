@@ -71,3 +71,58 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
   }
 }
 `;
+
+// SUBSCRIPTION
+export const IOEServiceSubscription = gql`
+  subscription($businessId: String, $operatorId: String){
+    IOEService(businessId: $businessId, operatorId: $operatorId){    
+      id,
+        businessId,
+        shiftId,
+        timestamp,
+        requestedFeatures,
+        client{
+        id,
+          businessId,
+          fullname,
+          username,
+          tip,
+          tipType,
+          referrerDriverDocumentId,
+          offerMinDistance,
+          offerMaxDistance,      
+      },
+      pickUp{
+        marker{ lat, lng, timestamp },
+        city,
+          zone,
+          neighborhood,
+          addressLine1,
+          addressLine2,
+          notes
+      },
+      dropOffSpecialType,
+        verificationCode,
+        pickUpETA,
+        dropOffpETA,
+        paymentType,
+        fareDiscount,
+        fare,
+        tip,
+        route{ lat, lng, timestamp },
+      state,
+        StateChanges{ state, timestamp, location{ lat, lng, timestamp }, notes },
+      location{ lat, lng, timestamp },
+      vehicle{
+        licensePlate
+      },
+      driver{ fullname, document, id },
+      lastModificationTimestamp,
+        request{
+        sourceChannel, destChannel,
+          creationOperatorId, creationOperatorUsername,
+          ownerOperatorId, ownerOperatorUsername
+      }
+    }
+  }
+`;

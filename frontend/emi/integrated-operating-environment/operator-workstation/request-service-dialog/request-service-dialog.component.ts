@@ -155,7 +155,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
         filter(resp => !resp.errors),
         mergeMap(clientSatellites => from(clientSatellites.data.ServiceClientSatellites)),
         toArray(),
-        tap(x => console.log(JSON.stringify(x)))
       );
   }
 
@@ -172,7 +171,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   }
 
   submit(event?) {
-    console.log(this.form.getRawValue());
     this.requestService(this.form.getRawValue());
     this.dialogRef.close();
   }
@@ -307,7 +305,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
    */
   async queryUserRols() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
-    console.log(JSON.stringify(this.userRoles));
   }
   //#endregion
 

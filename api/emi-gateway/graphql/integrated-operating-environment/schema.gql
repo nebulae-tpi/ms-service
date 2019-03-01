@@ -245,6 +245,12 @@ type Query{
     ): [IOEService]
 }
 
+
+type Subscription {
+  "IOE Services events"
+  IOEService(businessId: String, operatorId: String): IOEService
+}
+
 type Mutation {
     "Request a new service"
     IOERequestService(
