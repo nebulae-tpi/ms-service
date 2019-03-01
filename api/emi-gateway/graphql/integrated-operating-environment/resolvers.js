@@ -183,4 +183,3 @@ eventDescriptors.forEach(descriptor => {
     );
 });
 
-
