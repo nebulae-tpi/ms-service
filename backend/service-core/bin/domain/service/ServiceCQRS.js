@@ -57,7 +57,7 @@ class ServiceCQRS {
       type: "Point",
       coordinates: [args.location.lng, args.location.lat]
     }
-    //ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
@@ -85,7 +85,7 @@ class ServiceCQRS {
         { ...service, skipPersist: true },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
