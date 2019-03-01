@@ -57,13 +57,13 @@
     "assets": "frontend/emi/assets/satellite",
     "groups": [
       {
-        "id": "OPERATION",
+        "id": "integrated-operating-environment",
         "icon": "location_searching",
         "translate": {
-          "en": "Operation",
-          "es": "Operación"
+          "en": "Integrated Operating Environment",
+          "es": "Entorno Operativo Integrado"
         },
-        "priority": 200
+        "priority": 1000
       }
     ],
     "contents": [
@@ -94,13 +94,13 @@
     "src": "frontend/emi/service",
     "groups": [
       {
-        "id": "OPERATION",
+        "id": "integrated-operating-environment",
         "icon": "location_searching",
         "translate": {
-          "en": "Operation",
-          "es": "Operación"
+          "en": "Integrated Operating Environment",
+          "es": "Entorno Operativo Integrado"
         },
-        "priority": 200
+        "priority": 1000
       }
     ],
     "contents": [
@@ -136,13 +136,13 @@
     "src": "frontend/emi/shifts",
     "groups": [
       {
-        "id": "OPERATION",
+        "id": "integrated-operating-environment",
         "icon": "location_searching",
         "translate": {
-          "en": "Operation",
-          "es": "Operación"
+          "en": "Integrated Operating Environment",
+          "es": "Entorno Operativo Integrado"
         },
-        "priority": 200
+        "priority": 1000
       }
     ],
     "contents": [
