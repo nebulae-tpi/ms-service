@@ -117,7 +117,7 @@ class PubSubBroker {
             from(topics).pipe(
                 filter(topicName => Object.keys(this.listeningTopics).indexOf(topicName) === -1),
                 mergeMap(topicName => {
-                    const subscriptionName = `${topicName}_service_core`;
+                    const subscriptionName = `${topicName}_service_ioe`;
                     return this.getSubscription$(topicName, subscriptionName).pipe(
                         map(subsription => {
                             return { topicName, subsription, subscriptionName };
