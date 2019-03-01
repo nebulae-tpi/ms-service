@@ -2,7 +2,7 @@
 
 
 const { of, iif, Observable, empty, throwError } = require("rxjs");
-const { mergeMapTo, tap, mergeMap, catchError, map, mapTo, first, filter } = require('rxjs/operators');
+const { mergeMapTo, tap, mergeMap, catchError, map, mapTo, first, filter, delay } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -120,7 +120,7 @@ class ServiceDAL {
     handleServiceVehicleArrived$({ data, authToken }) {
         const { _id, timestamp, location } = data;
         console.log(`ServiceDAL: handleServiceVehicleArrived: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
-        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
+        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(           
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
             tap((service) => { if (service.state !== 'ASSIGNED') throw ERROR_23230; }),// Service state not allowed

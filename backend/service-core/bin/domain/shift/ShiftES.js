@@ -34,11 +34,11 @@ class ShiftES {
      * @param {Event} shiftStateChangedEvt 
      */
     handleShiftStateChanged$({ aid, data, user }) {
-        console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateShiftStateAndGetOnlineFlag$(aid, data.state).pipe(
-            filter(shift => !shift.online),
+            filter(shift => shift && !shift.online),
             filter(shift => ["AVAILABLE", "NO_AVAILABLE", "BUSY"].includes(data.state)),//filter by the only states that can asure the device is online
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
@@ -49,7 +49,7 @@ class ShiftES {
      * @param {Event} shiftConnectedEvt
      */
     handleShiftConnected$({ aid }) {
-        console.log(`ShiftES.handleShiftConnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftConnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
@@ -61,7 +61,7 @@ class ShiftES {
      * @param {Event} shiftDisconnectedEvt
      */
     handleShiftDisconnected$({ aid }) {
-        console.log(`ShiftES.handleShiftDisconnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftDisconnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
@@ -73,7 +73,7 @@ class ShiftES {
      * @param {Event} shiftStoppedEvt
      */
     handleShiftStopped$({ aid }) {
-        console.log(`ShiftES.handleShiftStopped: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftStopped: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
@@ -85,7 +85,7 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockRemovedEvt
      */
     handleShiftVehicleBlockRemoved$({ aid, data, user }) {
-        console.log(`ShiftES.handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
@@ -100,7 +100,7 @@ class ShiftES {
      * @param {Event} shiftVehicleBlockAddedEvt
      */
     handleShiftVehicleBlockAdded$({ aid, data, user }) {
-        console.log(`ShiftES.handleShiftVehicleBlockAdded: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftVehicleBlockAdded: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
@@ -116,7 +116,7 @@ class ShiftES {
     * @param {Event} shiftDriverBlockRemovedEvt
     */
     handleShiftDriverBlockRemoved$({ aid, data, user }) {
-        console.log(`ShiftES.handleShiftDriverBlockRemoved: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftDriverBlockRemoved: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
@@ -131,7 +131,7 @@ class ShiftES {
      * @param {Event} shiftDriverBlockAddedEvt
      */
     handleShiftDriverBlockAdded$({ aid, data, user }) {
-        console.log(`ShiftES.handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftDriverBlockAdded: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
@@ -149,10 +149,10 @@ class ShiftES {
         if (aid === undefined) return of({});//DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
         return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
-            filter(shift => !shift.online),
+            filter(shift => shift && !shift.online),
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
 
