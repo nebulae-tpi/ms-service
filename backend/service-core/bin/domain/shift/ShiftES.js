@@ -38,7 +38,7 @@ class ShiftES {
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateShiftStateAndGetOnlineFlag$(aid, data.state).pipe(
-            filter(shift => !shift.online),
+            filter(shift => shift && !shift.online),
             filter(shift => ["AVAILABLE", "NO_AVAILABLE", "BUSY"].includes(data.state)),//filter by the only states that can asure the device is online
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
@@ -152,7 +152,7 @@ class ShiftES {
         console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
         return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
-            filter(shift => !shift.online),
+            filter(shift => shift && !shift.online),
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
 
