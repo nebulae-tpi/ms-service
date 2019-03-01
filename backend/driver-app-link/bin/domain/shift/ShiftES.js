@@ -38,7 +38,10 @@ class ShiftES {
     handleShiftStateChanged$({ aid, data }) {
         //console.log(`ShiftES: handleShiftStateChanged: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { businessId: 1, driver: 1, vehicle: 1, state: 1 }).pipe(
+        return of({})
+        .pipe(
+            delay(300),
+            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, driver: 1, vehicle: 1, state: 1 })),
             filter(shift => shift.driver && shift.vehicle),
             mergeMap((shift) => driverAppLinkBroker.sendShiftEventToDrivers$(shift.businessId, shift.driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema({ ...shift, ...data })))
         );
@@ -69,7 +72,10 @@ class ShiftES {
     handleShiftStopped$({ aid, data }) {
         //console.log(`ShiftES: handleShiftStopped: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 }).pipe(
+        return of({})
+        .pipe(
+            delay(300),
+            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1 })),
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, state: 'CLOSED' }))
         );
     }
@@ -81,7 +87,10 @@ class ShiftES {
     handleShiftVehicleBlockRemoved$({ aid, data }) {
         //console.log(`ShiftES: handleShiftVehicleBlockRemoved: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, vehicle: 1 }).pipe(
+        return of('')
+        .pipe(
+            delay(1000),
+            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, vehicle: 1 })),
             mergeMap(({ businessId, driver, vehicle }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, vehicle }))
         );
     }
@@ -93,7 +102,10 @@ class ShiftES {
     handleShiftVehicleBlockAdded$({ aid, data }) {
         //console.log(`ShiftES: handleShiftVehicleBlockAdded: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        return ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, vehicle: 1 }).pipe(
+        return of('')
+        .pipe(
+            delay(1000),
+            mergeMap(() =>  ShiftDA.findById$(aid, { businessId: 1, "driver.username": 1, vehicle: 1 })),
             mergeMap(({ businessId, vehicle, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, vehicle }))
         );
     }
@@ -107,13 +119,8 @@ class ShiftES {
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
         return of('')
         .pipe(
-            map(data => {
-                console.log('Antes delay1');
-                return data;
-            }),
-            delay(2000),
+            delay(1000),
             mergeMap(() => {
-                console.log('ShiftDA.findById1 ');
                 return ShiftDA.findById$(aid, { driver: 1, businessId: 1 });
             }),
             mergeMap(({ businessId, driver }) => driverAppLinkBroker.sendShiftEventToDrivers$(businessId, driver.username, 'ShiftStateChanged', { _id: aid, driver }))
@@ -129,13 +136,8 @@ class ShiftES {
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
         return of('')
             .pipe(
-                map(data => {
-                    console.log('Antes delay2.');
-                    return data;
-                }),
-                delay(2000),
+                delay(1000),
                 mergeMap(() => {
-                    console.log('ShiftDA.findById2.');
                     return ShiftDA.findById$(aid, { businessId: 1, driver: 1 });
                 }),
                 mergeMap(({ businessId, driver }) =>
