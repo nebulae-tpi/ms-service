@@ -130,12 +130,12 @@ class ShiftES {
         return of('')
             .pipe(
                 map(data => {
-                    console.log('Antes delay2');
+                    console.log('Antes delay2.');
                     return data;
                 }),
                 delay(2000),
                 mergeMap(() => {
-                    console.log('ShiftDA.findById2 ');
+                    console.log('ShiftDA.findById2.');
                     return ShiftDA.findById$(aid, { businessId: 1, driver: 1 });
                 }),
                 mergeMap(({ businessId, driver }) =>
