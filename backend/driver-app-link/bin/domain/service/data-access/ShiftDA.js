@@ -24,7 +24,7 @@ class ShiftDA {
 
 
   static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 1;
+    const explorePastMonth = false; //Date.today().getDate() <= 1; TODO:  FIX!!!!
 
     const query = {
       businessId,
