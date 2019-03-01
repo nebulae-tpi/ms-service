@@ -246,6 +246,7 @@ class ShiftDA {
       $and: [
         { online: false },
         { state: { $ne: "CLOSED" } },
+        { state: { $ne: "BUSY" } },
         { lastReceivedComm: { $lte: Date.now() - SHIFT_CLOSE_THRESHOLD } }
       ]
     };
