@@ -29,6 +29,7 @@ import {
   takeUntil,
   startWith,
   debounceTime,
+  throttleTime,
   distinctUntilChanged,
   take
 } from 'rxjs/operators';
@@ -176,9 +177,9 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     return client ? client.generalInfo.name : '';
   }
 
-  submit(event?) {
-    console.log(this.form.getRawValue());
+  submit(event?) {    
     this.requestService(this.form.getRawValue());
+    this.form.patchValue({ client: null });
     this.dialogRef.close();
   }
 
@@ -189,6 +190,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
     return range(1, quantity || 1)
       .pipe(
+        filter(() => client != null),
         map(requestNumber => {
           return {
             client: {
@@ -237,11 +239,11 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       .subscribe(
         (result: any) => {
           if (result.data && result.data.IOERequestService && result.data.IOERequestService.accepted) {
-            this.showMessageSnackbar('SATELLITE.SERVICES.REQUEST_SERVICE_SUCCESS');
+            this.showMessageSnackbar('SERVICES.REQUEST_SERVICE_SUCCESS');
           }
         },
         error => {
-          this.showMessageSnackbar('SATELLITE.ERROR_OPERATION');
+          this.showMessageSnackbar('SERVICES.ERROR_OPERATION');
           console.log('Error ==> ', error);
         }
       );

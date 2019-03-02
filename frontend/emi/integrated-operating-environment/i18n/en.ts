@@ -44,6 +44,8 @@ export const locale = {
       }
     },
     SERVICES: {
+      REQUEST_SERVICE_SUCCESS: 'Successful Request',
+      ERROR_OPERATION: 'Error operation',
       STATES: {
         REQUESTED: 'Requested',
         ASSIGNED: 'Assigned',
@@ -54,6 +56,7 @@ export const locale = {
         CANCELLED_OPERATOR: 'Can. Oper',
         CANCELLED_DRIVER: 'Can. Driver',
         CANCELLED_CLIENT: 'Can. Client',
+        CANCELLED_SYSTEM: 'Can. Sys',
       },
       REQUEST_DIALOG: {
         TITLE: 'Request a Service',
