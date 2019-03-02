@@ -311,9 +311,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
   //#endregion
 
-
-
-
   //#region ROW + PAGE SELECTION
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
