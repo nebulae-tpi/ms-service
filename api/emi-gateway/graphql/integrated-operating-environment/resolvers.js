@@ -127,7 +127,7 @@ module.exports = {
         },
         (payload, variables, context, info) => {
           const businessOk = !variables.businessId ? true : payload.IOEService.businessId === variables.businessId;
-          const operatorOk = !variables.operatorId ? true : payload.IOEService.request.ownerOperatorId === variables.operatorId;
+          const operatorOk = !variables.operatorId ? true : payload.IOEService.request && payload.IOEService.request.ownerOperatorId === variables.operatorId;
           return businessOk && operatorOk;
         }
       )
