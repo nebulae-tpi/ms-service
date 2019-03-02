@@ -82,7 +82,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   DATA TABLE VARS
   */
   // columns to display
-  displayedColumns: string[] = [ 'state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta'];//'state_time_span'
+  displayedColumns: string[] = ['state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta'];//'state_time_span'
   //Partial data: this is what is displayed to the user
   partialData = [];
   //total data source
@@ -232,7 +232,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
     console.log(`SERVICE => ${service.state}`);
 
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
-    if (oldDataIndex >= 0) {
+
+    if (service.closed && oldDataIndex >= 0) {
+      this.totalRawData.splice(oldDataIndex, 1);
+    } else if (oldDataIndex >= 0) {
       this.totalRawData[oldDataIndex] = service;
     } else {
       this.totalRawData.unshift(service);
@@ -270,6 +273,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
 
   convertServiceToTableFormat({ id, state, timestamp, client, pickUp, pickUpETA, vehicle, driver }) {
+    let eta = pickUpETA ? Math.floor((pickUpETA - Date.now()) / 60000) : null;
+    eta = (eta !== null && eta < 0) ? 0 : eta;
     return {
       selected: this.selectedServiceId === id ? ">" : "",
       id,
@@ -279,7 +284,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       'pickup_addr': pickUp.addressLine1,
       'pickup_neig': pickUp.neighborhood,
       'vehicle_plate': vehicle.licensePlate,
-      'eta': pickUpETA ?  Math.floor((pickUpETA - Date.now())/60000): null,
+      eta,
       'state_time_span': '00:00:00',
       'distance': 0.00
     };
@@ -321,7 +326,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
         break;
       case 'ArrowDown':
         this.selectNextRow();
-        break;      
+        break;
     }
   }
 
@@ -353,14 +358,14 @@ export class DatatableComponent implements OnInit, OnDestroy {
     }
     this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? ">" : "", }));
   }
-  async selectPrevPage(){
-    if(this.page <= 0){
+  async selectPrevPage() {
+    if (this.page <= 0) {
       return;
     }
     this.page--;
     await this.recalculatePartialData();
   }
-  async selectNextPage(){
+  async selectNextPage() {
     this.page++;
     await this.recalculatePartialData();
   }

@@ -53,7 +53,12 @@ class ServiceDAL {
                         async (handlerErr) => {
                             console.error(`ServiceDAL.handlerErr[${evt.t}]( ${JSON.stringify(evt.data)} ): ${handlerErr}`);
                             ServiceDAL.logError(handlerErr);
-                            await driverAppLinkBroker.sendErrorEventToDrivers$(evt.topic.split('/')[0], evt.att.un, 'Error', { code: handlerErr.code, msg: handlerErr.message, rejectedEventType: evt.t, rejectedMessageId: evt.id }).toPromise();
+                            const businessId = evt.topic.split('/')[0];
+                            const driverUserName = evt.att.un;
+                            const eventType = 'Error';
+                            const body = { code: handlerErr.code, msg: handlerErr.message, rejectedEventType: evt.t, rejectedMessageId: evt.id };
+                            await driverAppLinkBroker.sendErrorEventToDrivers$(businessId, driverUserName, eventType, body).toPromise();
+                            console.error(`driverAppLinkBroker.sendErrorEventToDrivers: businessId=${businessId}; driverUserName=${driverUserName}; eventType=${eventType}; body=${JSON.stringify(body)}`);
                         },
                         () => {
                             //console.log(`ServiceDAL.handlerCompleted[${evt.t}]`);
@@ -120,7 +125,7 @@ class ServiceDAL {
     handleServiceVehicleArrived$({ data, authToken }) {
         const { _id, timestamp, location } = data;
         console.log(`ServiceDAL: handleServiceVehicleArrived: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
-        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(           
+        return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
             tap((service) => { if (service.state !== 'ASSIGNED') throw ERROR_23230; }),// Service state not allowed
