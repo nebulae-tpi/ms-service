@@ -117,7 +117,7 @@ class ShiftCQRS {
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)), // query driver's open shift
       tap(shift => { if (!shift) throw ERROR_23020; }),// Driver does not have an open shift verification
       tap((shift) => { if (shift.state === 'BUSY') throw ERROR_23021; }),// Open Service verfication      
-      mergeMap(shift => ServiceDA.findOpeneServiceByShift$(shift._id).pipe(tap(service => { if (service) throw ERROR_23021; }), mapTo(shift))),// Open Service verfication
+      //mergeMap(shift => ServiceDA.findOpeneServiceByShift$(shift._id).pipe(tap(service => { if (service) throw ERROR_23021; }), mapTo(shift))),// Open Service verfication
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStoppedEsEvent(authToken, shift))), //Build and send ShiftStopped event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       tap(x => ShiftCQRS.log(`ShiftCQRS.stopShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
