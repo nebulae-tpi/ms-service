@@ -233,6 +233,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
 
+    if(service.closed){
+      console.log(`CLOSED: ${oldDataIndex}`);
+    }
+
     if (service.closed && oldDataIndex >= 0) {
       this.totalRawData.splice(oldDataIndex, 1);
     } else if (oldDataIndex >= 0) {

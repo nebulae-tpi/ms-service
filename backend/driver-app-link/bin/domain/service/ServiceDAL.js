@@ -86,7 +86,7 @@ class ServiceDAL {
      */
     handleServicePickUpETAReported$({ data, ts, authToken }) {
         const { _id, eta } = data;
-        console.log(`ServiceDAL: handleServicePickUpETAReported: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceDAL: handleServicePickUpETAReported: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
 
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
@@ -105,7 +105,7 @@ class ServiceDAL {
      */
     handleServiceDropOffETAReported$({ data, ts, authToken }) {
         const { _id, eta } = data;
-        console.log(`ServiceDAL: ServiceDropOffETAReported: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceDAL: ServiceDropOffETAReported: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
@@ -124,7 +124,7 @@ class ServiceDAL {
      */
     handleServiceVehicleArrived$({ data, authToken }) {
         const { _id, timestamp, location } = data;
-        console.log(`ServiceDAL: handleServiceVehicleArrived: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceDAL: handleServiceVehicleArrived: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
@@ -149,11 +149,11 @@ class ServiceDAL {
      */
     handleServiceClientPickedUp$({ data, authToken }) {
         const { _id, timestamp, location } = data;
-        console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
-            tap((service) => { if (service.state !== 'ARRIVED') throw ERROR_23230; }),// Service state not allowed
+            tap((service) => { if (service.state !== 'ARRIVED___') throw ERROR_23230; }),// Service state not allowed
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
                 _id,
@@ -173,7 +173,7 @@ class ServiceDAL {
      */
     handleServiceCompleted$({ data, authToken }) {
         const { _id, timestamp, location } = data;
-        console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
@@ -198,7 +198,7 @@ class ServiceDAL {
      */
     handleServiceCancelledByDriver$({ data, authToken }) {
         const { _id, timestamp, location, reason, notes } = data;
-        console.log(`ServiceDAL: handleServiceCancelledByDriver: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
+        //console.log(`ServiceDAL: handleServiceCancelledByDriver: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
