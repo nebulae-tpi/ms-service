@@ -145,7 +145,7 @@ class ServiceES {
 
     transmitEventToFrontEnd$(serviceEvent) {
         return of(serviceEvent).pipe(
-            delay(400),
+            delay(1000),
             mergeMap(evt => ServiceDA.findById$(evt.aid)),
             map(service => this.formatServiceToGraphqlIOEService(service)),
             mergeMap(ioeService => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEService`, ioeService))
