@@ -247,7 +247,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);
     const skip = this.page * this.pageCount;
     this.partialData = filteredData.slice(skip, skip + this.pageCount);
-    console.log(this.partialData.map(x => x.state))
+    // console.log(this.partialData.map(x => x.state))
   }
 
 
@@ -279,7 +279,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       'pickup_addr': pickUp.addressLine1,
       'pickup_neig': pickUp.neighborhood,
       'vehicle_plate': vehicle.licensePlate,
-      'eta': pickUpETA,
+      'eta': pickUpETA ?  Math.floor((pickUpETA - Date.now())/60000): null,
       'state_time_span': '00:00:00',
       'distance': 0.00
     };
