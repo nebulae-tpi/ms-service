@@ -29,6 +29,9 @@ export class OperatorWorkstationService {
   public static TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT = 1003;
   public static TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER = 1004;
   public static TOOLBAR_COMMAND_DATATABLE_APPLY_CHANNEL_FILTER = 1005;
+  public static TOOLBAR_COMMAND_DATATABLE_SELECT_PREV_ROW = 1006;
+  public static TOOLBAR_COMMAND_DATATABLE_SELECT_NEXT_ROW = 1007;
+  
   public static TOOLBAR_COMMAND_SERVICE_CANCEL = 2001;
   public static TOOLBAR_COMMAND_SERVICE_ASSIGN = 2002;
 
@@ -171,7 +174,6 @@ export class OperatorWorkstationService {
    * Event triggered when a business is created, updated or deleted.
    */
   listenIOEService$(businessId, operatorId): Observable<any> {
-    console.log(`=====${businessId}======${operatorId}=====`);
     return this.gateway.apollo
       .subscribe({
         query: IOEServiceSubscription,
