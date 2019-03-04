@@ -35,6 +35,8 @@ spec:
             - "0.0.0.0"
             - "--port"
             - "27017" 
+            - "--wiredTigerCacheSizeGB"
+            - "0.5"
             - "--replSet"
             - rs0
           ports:
