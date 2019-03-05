@@ -113,7 +113,7 @@ class ClientCQRS {
       PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
     ).pipe(
-      mergeMap(roles => ShiftDA.getShiftStateChangeList$(args.id, args.paginationInput)),
+      mergeMap(() => ShiftDA.getShiftStateChangeList$(args.id, args.paginationInput)),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
     );

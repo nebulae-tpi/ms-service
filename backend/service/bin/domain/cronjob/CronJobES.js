@@ -7,6 +7,7 @@ const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const { ShiftDA, ServiceDA } = require("./data-access");
+const MongoDB = require("../../data/MongoDB").singleton();
 
 /**
  * Singleton instance
@@ -15,6 +16,21 @@ let instance;
 
 class CronJobES {
   constructor() {
+    // of({})
+    // .pipe(
+    //   delay(4000),
+    //   mergeMap(() => eventSourcing.eventStore.emitEvent$(
+    //     new Event({
+    //       eventType: "PeriodicMonthly",
+    //       eventTypeVersion: 1,
+    //       aggregateType: "Cronjob",
+    //       aggregateId: "1",
+    //       data: {},
+    //       user: "SYSTEM"
+    //     })
+    //   ) )
+    // )
+    // .subscribe()
 
   }
 
@@ -43,6 +59,14 @@ class CronJobES {
       this.checkClosedShifts$(),
       //this.checkServicesToClose$()
     )
+  }
+
+  handlePeriodicMonthly$(){
+    console.log("------- handlePeriodicMonthly$ ----------");
+    return MongoDB.createIndexesOnHistoricalCollection$()
+    .pipe(
+      tap(r => console.log(r))
+    );
   }
 
   /**
