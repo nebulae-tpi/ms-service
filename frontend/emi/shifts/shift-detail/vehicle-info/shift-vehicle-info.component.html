@@ -1,12 +1,16 @@
 <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
     <form name="shiftDriverInfoForm" [formGroup]="shiftVehicleInfoForm" fxLayout="row wrap">
 
-      <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+      <!-- <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
         <input readonly="true" matInput name="id" formControlName="id" maxlength="40" placeholder="{{'SHIFT.VEHICLE_DETAIL.ID' | translate}}">
-      </mat-form-field>
+      </mat-form-field> -->
 
       <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
         <input readonly="true" matInput name="brand" formControlName="brand" maxlength="40" placeholder="{{'SHIFT.VEHICLE_DETAIL.BRAND' | translate}}">
+      </mat-form-field>
+            
+      <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
+        <input readonly="true" matInput name="licensePlate" formControlName="licensePlate" maxlength="40" placeholder="{{'SHIFT.VEHICLE_DETAIL.LICENSE_PLATE' | translate}}">
       </mat-form-field>
 
       <mat-form-field class="pr-12 pl-12" fxFlex="100" fxFlex.gt-xs="50">
@@ -32,7 +36,6 @@
               <mat-chip *ngFor="let feature of shift.vehicle.features" color="primary" selected>{{ 'SHIFT.VEHICLE_DETAIL.FEATURES.' + feature | translate }}</mat-chip>
           </mat-chip-list>
       </div>
-
 
     </form>
 

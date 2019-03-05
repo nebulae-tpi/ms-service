@@ -24,7 +24,8 @@ export const locale = {
         FULL_NAME: 'Fullname',
         DOC_TYPE: 'Document Type',
         DOC_TYPES: {
-          CC: 'Document ID'
+          CC: 'Document ID',
+          PASSPORT: 'Passtort'
         },
         LANGUAGES_TITLE: 'Languages',
         BLOCKS_TITLE: 'Blocks',
@@ -44,6 +45,7 @@ export const locale = {
       VEHICLE_DETAIL: {
         ID: 'ID',
         BRAND: 'Brand',
+        LICENSE_PLATE: 'License plate',
         MODEL: 'Model',
         LINE: 'Line',
         BLOCKS_TITLE: 'Blocks',
@@ -77,7 +79,7 @@ export const locale = {
         STATES: 'Estados',
         SHOW_CLOSED: 'Show Closed',
         FILTER_TITLE: 'Filters',
-        ONLINE_STATES:{
+        ONLINE_STATES: {
           true: 'Online',
           false: 'Online',
           null: 'Online/Offline'

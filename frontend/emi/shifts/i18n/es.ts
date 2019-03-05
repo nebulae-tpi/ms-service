@@ -24,7 +24,8 @@ export const locale = {
         FULL_NAME: 'Nombre',
         DOC_TYPE: 'Tipo de Documento',
         DOC_TYPES: {
-          CC: 'Cédula de Ciudadanía'
+          CC: 'Cédula de Ciudadanía',
+          PASSPORT: 'Pasaporte'
         },
         LANGUAGES_TITLE: 'Idiomas',
         BLOCKS_TITLE: 'Bloqueos',
@@ -44,6 +45,7 @@ export const locale = {
       VEHICLE_DETAIL: {
         ID: 'ID',
         BRAND: 'Marca',
+        LICENSE_PLATE: 'Placa',
         MODEL: 'Modelo',
         LINE: 'Línea',
         BLOCKS_TITLE: 'Bloqueos',
@@ -77,7 +79,7 @@ export const locale = {
         STATES: 'Estados',
         SHOW_CLOSED: 'Mostrar Cerrados',
         FILTER_TITLE: 'Filtros',
-        ONLINE_STATES:{
+        ONLINE_STATES: {
           true: 'Online',
           false: 'Online',
           null: 'Online/Offline'

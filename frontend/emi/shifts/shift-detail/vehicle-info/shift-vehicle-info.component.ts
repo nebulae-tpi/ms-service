@@ -3,46 +3,20 @@ import {
   Component,
   OnInit,
   OnDestroy,
-  ViewChild,
-  ElementRef,
   Input
 } from '@angular/core';
 
 import {
-  FormBuilder,
   FormGroup,
   FormControl,
-  Validators,
   FormArray
 } from '@angular/forms';
 
-import { Router, ActivatedRoute } from '@angular/router';
-
 ////////// RXJS ///////////
-import {
-  map,
-  mergeMap,
-  switchMap,
-  toArray,
-  filter,
-  tap,
-  takeUntil,
-  startWith,
-  debounceTime,
-  distinctUntilChanged,
-  take
-} from 'rxjs/operators';
-
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from 'rxjs';
-
+import { filter, tap } from 'rxjs/operators';
+import { Subject, of} from 'rxjs';
 //////////// ANGULAR MATERIAL ///////////
-import {
-  MatPaginator,
-  MatSort,
-  MatTableDataSource,
-  MatSnackBar,
-  MatDialog
-} from '@angular/material';
+import { MatSnackBar, MatDialog } from '@angular/material';
 
 //////////// i18n ////////////
 import { TranslateService } from '@ngx-translate/core';
@@ -51,10 +25,7 @@ import { locale as spanish } from '../../i18n/es';
 import { FuseTranslationLoaderService } from '../../../../../core/services/translation-loader.service';
 
 //////////// Others ////////////
-import { KeycloakService } from 'keycloak-angular';
-import { ShiftDetailService } from '../shift-detail.service';
 import { DialogComponent } from '../../dialog/dialog.component';
-import { ToolbarService } from '../../../../toolbar/toolbar.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -74,23 +45,18 @@ export class ShiftVehicleInfoComponent implements OnInit, OnDestroy {
   constructor(
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
-    private formBuilder: FormBuilder,
     public snackBar: MatSnackBar,
-    private router: Router,
-    private activatedRouter: ActivatedRoute,
-    private shiftDetailService: ShiftDetailService,
-    private dialog: MatDialog,
-    private toolbarService: ToolbarService
+    private dialog: MatDialog
   ) {
       this.translationLoader.loadTranslations(english, spanish);
   }
 
 
   ngOnInit() {
-    //console.log('VEHICLE ==> ', this.shift.vehicle);
     this.shiftVehicleInfoForm = new FormGroup({
       id: new FormControl(this.shift ? (this.shift.vehicle || {}).id : ''),
       brand: new FormControl(this.shift ? (this.shift.vehicle || {}).brand : ''),
+      licensePlate: new FormControl(this.shift ? (this.shift.vehicle || {}).licensePlate : ''),
       model: new FormControl(this.shift ? (this.shift.vehicle || {}).model : ''),
       line: new FormControl(this.shift ? (this.shift.vehicle || {}).line : ''),
       blocks: new FormArray([]),
@@ -180,8 +146,6 @@ export class ShiftVehicleInfoComponent implements OnInit, OnDestroy {
         );
       });
   }
-
-
 
   ngOnDestroy() {
     this.ngUnsubscribe.next();

@@ -189,7 +189,6 @@ module.exports = {
                     mergeMap(response => getResponseFromBackEnd$(response))
                 ).toPromise();
         },
-
         ServiceShiftStateChangesList(root, args, context) {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
