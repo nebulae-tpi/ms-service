@@ -163,19 +163,20 @@ export class DatatableComponent implements OnInit, OnDestroy {
       (layout) => {
         this.tableHeight = layout.datatable.height;
         this.pageCount = parseInt(`${(this.tableHeight / 30) * this.paginationFactor}`)
-        console.log(`Layout = ${JSON.stringify(layout)}`);
-        console.log(`pageCount = ${this.pageCount}`);
+        //console.log(`Layout = ${JSON.stringify(layout)}`);
+        //console.log(`pageCount = ${this.pageCount}`);
         this.recalculatePartialData();
       },
       (error) => console.error(`DatatableComponent.listenLayoutChanges: Error => ${error}`),
-      () => console.log(`DatatableComponent.listenLayoutChanges: Completed`),
+      () => {
+        //console.log(`DatatableComponent.listenLayoutChanges: Completed`)
+      },
     );
   }
 
   listenToolbarCommands() {
     this.operatorWorkstationService.toolbarCommands$.pipe(
-      //filter(e => e),
-      debounceTime(250),
+      debounceTime(10),
       takeUntil(this.ngUnsubscribe)
     ).subscribe(
       async ({ code, args }) => {
@@ -198,11 +199,19 @@ export class DatatableComponent implements OnInit, OnDestroy {
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_ASSIGN:
             break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SELECT_PREV_ROW:
+            this.selectPrevRow();
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SELECT_NEXT_ROW:
+            this.selectNextRow();
+            break;
         }
-        console.log({ code, args });
+        //console.log({ code, args });
       },
       (error) => console.error(`DatatableComponent.listenToolbarCommands: Error => ${error}`),
-      () => console.log(`DatatableComponent.listenToolbarCommands: Completed`),
+      () => {
+        //console.log(`DatatableComponent.listenToolbarCommands: Completed`)
+      },
     );
   }
 
@@ -217,7 +226,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
           this.appendData(service);
         },
         (error) => console.error(`DatatableComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
-        () => console.log(`DatatableComponent.subscribeIOEServicesListener: Completed`),
+        () => {
+          //console.log(`DatatableComponent.subscribeIOEServicesListener: Completed`);
+        },
       );
   }
   //#endregion
@@ -229,13 +240,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
   async appendData(service) {
-    console.log(`SERVICE => ${service.state}`);
-
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
-
-    if(service.closed){
-      console.log(`CLOSED: ${oldDataIndex}`);
-    }
 
     if (service.closed && oldDataIndex >= 0) {
       this.totalRawData.splice(oldDataIndex, 1);
@@ -299,7 +304,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
   cancelSelectedTrip() {
     const selectedRow = this.getSelectedRow();
-    console.log(selectedRow);
+    //console.log(selectedRow);
     if (selectedRow) {
       this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
         (results) => {
@@ -310,7 +315,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
           this.loadingData = false;
         },
         () => {
-          console.log(`DatatableComponent.cancelService: Completed`)
+          //console.log(`DatatableComponent.cancelService: Completed`)
           this.loadingData = false;
         },
       );
@@ -321,18 +326,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region ROW + PAGE SELECTION
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    console.log(event.key);
-    switch (event.key) {
-      case 'ArrowUp':
-        this.selectPrevRow();
-        break;
-      case 'ArrowDown':
-        this.selectNextRow();
-        break;
-    }
-  }
 
   selectNextRow() {
     if (this.partialData.length === 0) {

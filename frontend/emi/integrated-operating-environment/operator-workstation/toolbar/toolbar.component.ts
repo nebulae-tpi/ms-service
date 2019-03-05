@@ -184,6 +184,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       this.sendDatatableApplyNextPage();
       return false;
     }));
+    this._hotkeysService.add(new Hotkey(['up'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableSelectPrevRow();
+      return false;
+    }));
+    this._hotkeysService.add(new Hotkey(['down'], (event: KeyboardEvent): boolean => {
+      this.sendDatatableSelectNextRow();
+      return false;
+    }));
   }
 
 
@@ -284,6 +292,22 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     if (this.isThereAnOpenDialog()) return;
     this.page++;
     this.sendDatatableApplyChangePageCommand();
+  }
+  /**
+   * sendDatatableSelectPrevRow
+   * @param $event 
+   */
+  sendDatatableSelectPrevRow($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SELECT_PREV_ROW, args: {} });
+  }
+  /**
+   * sendDatatableSelectNextRow
+   * @param $event 
+   */
+  sendDatatableSelectNextRow($event?) {
+    if (this.isThereAnOpenDialog()) return;
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SELECT_NEXT_ROW, args: {} });
   }
   /**
    * sendDatatableServiceCancelCommand

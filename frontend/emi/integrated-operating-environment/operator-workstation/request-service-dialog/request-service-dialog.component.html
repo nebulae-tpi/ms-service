@@ -50,12 +50,12 @@
                             <mat-button-toggle value="AC">
                                 <mat-icon>ac_unit</mat-icon>
                             </mat-button-toggle>
-                            <mat-button-toggle value="ROOF_RACK">
-                                <mat-icon>grid_on</mat-icon>
-                            </mat-button-toggle>
                             <mat-button-toggle value="TRUNK">
                                 <mat-icon>work</mat-icon>
                             </mat-button-toggle>
+                            <mat-button-toggle value="ROOF_RACK">
+                                <mat-icon>grid_on</mat-icon>
+                            </mat-button-toggle>                            
                             <mat-button-toggle value="PETS">
                                 <mat-icon>pets</mat-icon>
                             </mat-button-toggle>
@@ -69,19 +69,19 @@
 
                     <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
                         <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
-                            <mat-icon class="icon s-40 mr-16">map</mat-icon>
+                            <mat-icon class="icon s-40 mr-16">attach_money</mat-icon>
                         </div>
                         <span fxFlex></span>
                         <mat-button-toggle-group name="destinationOptionsGroup"
                             formControlName="destinationOptionsGroup">
-                            <mat-button-toggle value="AIRPORT">
-                                <mat-icon>local_airport</mat-icon>
+                            <mat-button-toggle value="DEFAULT" selec>
+                                $ {{clientDefaultTip | number}}
                             </mat-button-toggle>
-                            <mat-button-toggle value="BUS_TERMINAL">
-                                <mat-icon>directions_bus</mat-icon>
+                            <mat-button-toggle value="5000">
+                                $ 5,000
                             </mat-button-toggle>
-                            <mat-button-toggle value="OUT_OF_CITY">
-                                <mat-icon>location_city</mat-icon>
+                            <mat-button-toggle value="10000">
+                                $ 10,000
                             </mat-button-toggle>
                         </mat-button-toggle-group>
                     </div>

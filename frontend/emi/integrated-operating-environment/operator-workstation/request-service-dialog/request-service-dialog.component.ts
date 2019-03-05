@@ -66,7 +66,7 @@ import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 
-const SPECIAL_DESTINATION_PRICE_MODS = { 'AIRPORT': 5000, 'BUS_TERMINAL': 5000, 'OUT_OF_CITY': 5000 };
+const SPECIAL_DESTINATION_PRICE_MODS = { '5000': 5000, '10000': 10000};
 
 
 @Component({
@@ -88,6 +88,9 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   clientNameFilterCtrl: FormControl;
   // Stream of filtered client by auto-complete text
   queriedClientsByAutocomplete$: Observable<any[]>;
+  // hotkeys configuration for this form only
+  hotkeys: Hotkey[] = [];
+  clientDefaultTip = 0;
 
 
   constructor(
@@ -101,7 +104,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     private operatorWorkstationService: OperatorWorkstationService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
-    private dialogRef: MatDialogRef<RequestServiceDialogComponent>
+    private dialogRef: MatDialogRef<RequestServiceDialogComponent>,
+    private _hotkeysService: HotkeysService
   ) {
     this.translationLoader.loadTranslations(english, spanish);
   }
@@ -112,12 +116,14 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     this.queryUserRols();
     this.buildRequesServiceForm();
     this.buildClientNameFilterCtrl();
+    this.configureHotkeys();
   }
 
 
   ngOnDestroy() {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
+    this._hotkeysService.remove(this.hotkeys);
   }
 
 
@@ -131,7 +137,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       client: new FormControl(undefined, [Validators.nullValidator]),
       quantity: new FormControl(1, [Validators.min(1), Validators.max(5)]),
       featureOptionsGroup: new FormControl(),
-      destinationOptionsGroup: new FormControl(),
+      destinationOptionsGroup: new FormControl('DEFAULT'),
     });
   }
 
@@ -161,12 +167,14 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
         filter(resp => !resp.errors),
         mergeMap(clientSatellites => from(clientSatellites.data.ServiceClientSatellites)),
         toArray(),
-        tap(x => console.log(JSON.stringify(x)))
       );
   }
 
   onClientSelected(client) {
     this.form.patchValue({ client });
+    if(client){
+      this.clientDefaultTip = client.satelliteInfo.tip;
+    }
   }
 
   /**
@@ -177,7 +185,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     return client ? client.generalInfo.name : '';
   }
 
-  submit(event?) {    
+  submit(event?) {
     this.requestService(this.form.getRawValue());
     this.form.patchValue({ client: null });
     this.dialogRef.close();
@@ -223,7 +231,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
             paymentType,
             requestedFeatures: featureOptionsGroup,
             dropOff: null,
-            dropOffSpecialType: destinationOptionsGroup,
+            //dropOffSpecialType: destinationOptionsGroup,
             fareDiscount,
             fare,
             tip,
@@ -314,10 +322,59 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
    */
   async queryUserRols() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
-    console.log(JSON.stringify(this.userRoles));
   }
   //#endregion
 
+  //#region HOT-KEYS
+  configureHotkeys() {
 
+    this.hotkeys = [
+      new Hotkey(['ctrl+shift+a'], (event: KeyboardEvent): boolean => {
+        this.toggleFeatureOption("AC");
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+s'], (event: KeyboardEvent): boolean => {
+        this.toggleFeatureOption("TRUNK");
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+d'], (event: KeyboardEvent): boolean => {
+        this.toggleFeatureOption("ROOF_RACK");
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+f'], (event: KeyboardEvent): boolean => {
+        this.toggleFeatureOption("PETS");
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+g'], (event: KeyboardEvent): boolean => {
+        this.toggleFeatureOption("BIKE_RACK");
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+z'], (event: KeyboardEvent): boolean => {
+        this.selectSpecialDestinationOption('DEFAULT');
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+x'], (event: KeyboardEvent): boolean => {
+        this.selectSpecialDestinationOption('5000');
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+c'], (event: KeyboardEvent): boolean => {
+        this.selectSpecialDestinationOption('10000');
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+    ];
+    this._hotkeysService.add(this.hotkeys);
+  }
+
+  toggleFeatureOption(feauture) {
+    const currentSelection: String[] = this.form.getRawValue().featureOptionsGroup || [];
+    const featIndex = currentSelection.indexOf(feauture);
+    if (featIndex === -1) currentSelection.push(feauture); else currentSelection.splice(featIndex, 1);
+    this.form.patchValue({ featureOptionsGroup: currentSelection });
+  }
+
+  selectSpecialDestinationOption(specialDest) {
+    this.form.patchValue({ destinationOptionsGroup: specialDest });
+  }
+  //#endregion
 
 }
