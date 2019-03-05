@@ -78,7 +78,6 @@ class ServiceES {
    * @param {*} shiftEvent shift event
    */
   handleShiftEvents$(shiftEvent) {
-    //console.log('handleShiftEvents => ', shiftEvent);
     return of(shiftEvent)
     .pipe(        
       tap(res => {

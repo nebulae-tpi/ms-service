@@ -79,7 +79,7 @@ export const locale = {
         FILTER_TITLE: 'Filtros',
         ONLINE_STATES:{
           true: 'Online',
-          false: 'Offline',
+          false: 'Online',
           null: 'Online/Offline'
         },
         RESET_FILTER: 'Limpiar Filtros'

@@ -50,9 +50,6 @@ class ShiftDA {
     }
     if ( filter.onlineState !== 'null'){ query.online = filter.onlineState == 'true' }
 
-    console.log("FILTER APPLIED ==>", query);
-
-
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
 

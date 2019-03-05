@@ -129,7 +129,6 @@ module.exports = {
 
 
         // SHIFT SECTION
-
         
         ServiceShifts(root, args, context) {
             return RoleValidator.checkPermissions$(

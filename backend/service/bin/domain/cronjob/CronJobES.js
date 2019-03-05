@@ -51,11 +51,11 @@ class CronJobES {
   checkDisconnectedShifts$() {
     return ShiftDA.getShiftsToDisconnect$()
       .pipe(
-        tap(shift => console.log("SHIFT TO SET AS DISCONNECTED => ", JSON.stringify(shift))),
+        // tap(shift => console.log("SHIFT TO SET AS DISCONNECTED => ", JSON.stringify(shift))),
         mergeMap(shift => this.generateEventStoreEvent$("ShiftDisconnected", 1, "Shift", shift._id, { ...shift }, "SYSTEM")),
         mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
-        tap(() => console.log("ALL SHIFTS THAT MATCH WITH THE CONDITIONS WERE DISCONNECTED"))
+        // tap(() => console.log("ALL SHIFTS THAT MATCH WITH THE CONDITIONS WERE DISCONNECTED"))
       )
   }
 
@@ -66,11 +66,11 @@ class CronJobES {
     // console.log("---------- checkClosedShifts$ ------------- ");
     return ShiftDA.getShiftsToClose$()
       .pipe(
-        tap(shift => console.log("SHIFT TO CLOSE => ", JSON.stringify(shift))),
+        // tap(shift => console.log("SHIFT TO CLOSE => ", JSON.stringify(shift))),
         mergeMap(shift => this.generateEventStoreEvent$("ShiftStateChanged", 1, "Shift", shift._id, { ...shift, state: "CLOSED" }, "SYSTEM")),
         mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
-        tap(() => console.log("ALL SHIFTS WERE CLOSED"))
+        // tap(() => console.log("ALL SHIFTS WERE CLOSED"))
       )
   }
 
@@ -80,11 +80,11 @@ class CronJobES {
   checkServicesOnBoardToComplete$() {
     return ServiceDA.findServicesOnboardToComplete$()
       .pipe(
-        tap(service => console.log("SERVICE TO COMPLETE => ", JSON.stringify(service))),
+        // tap(service => console.log("SERVICE TO COMPLETE => ", JSON.stringify(service))),
         mergeMap(service => this.generateEventStoreEvent$("ServiceCompleted", 1, "Service", service._id, {}, "SYSTEM")),
         mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
-        tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE COMPLETED"))
+        // tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE COMPLETED"))
       )
   }
 
@@ -92,11 +92,11 @@ class CronJobES {
     // console.log("-------- checkServicesToClose$ ---------");
     return ServiceDA.findServicesToClose$()
       .pipe(
-        tap(service => console.log("SERVICE TO CLOSE => ", JSON.stringify(service))),
+        // tap(service => console.log("SERVICE TO CLOSE => ", JSON.stringify(service))),
         mergeMap(service => this.generateEventStoreEvent$("ServiceClosed", 1, "Service", service._id, { ...service }, "SYSTEM")),
         mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
-        tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE CLOSED"))
+        // tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE CLOSED"))
       )
   }
 
