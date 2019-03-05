@@ -127,7 +127,6 @@ module.exports = {
             ).toPromise();
         },
 
-
         // SHIFT SECTION
         
         ServiceShifts(root, args, context) {

@@ -39,34 +39,33 @@ class ShiftDA {
     const projection = { stateChanges: 0, onlineChanges: 0 };
     const query = {};
 
-
     if (filter.businessId) { query["businessId"] = filter.businessId; }
     if (filter.driverDocumentId) { query["driver.documentId"] = filter.driverDocumentId; }
     if (filter.driverFullname) { query["driver.fullname"] = { $regex: filter.driverFullname, $options: "i" }; }
     if (filter.vehicleLicensePlate) { query["vehicle.licensePlate"] = { $regex: filter.vehicleLicensePlate, $options: "i" }; }
     if (filter.states && filter.states.length > 0) { query["state"] = { $in: filter.states }; }
     if (filter.initTimestamp && filter.endTimestamp) {
-      query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp};
+      query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp };
     }
-    if ( filter.onlineState !== 'null'){ query.online = filter.onlineState == 'true' }
+    if (filter.onlineState !== 'null') { query.online = filter.onlineState == 'true' }
 
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
 
     return of(initDate)
-    .pipe(
-      map(date => mongoDB.getHistoricalDb(date)),
-      map(db => db.collection(COLLECTION_NAME)),
-      mergeMap(collection => {
-        const cursor = collection
-        .find(query, {projection})
-        .skip(pagination.count * pagination.page)
-        .limit(pagination.count)
-        .sort({ timestamp: pagination.sort });
+      .pipe(
+        map(date => mongoDB.getHistoricalDb(date)),
+        map(db => db.collection(COLLECTION_NAME)),
+        mergeMap(collection => {
+          const cursor = collection
+            .find(query, { projection })
+            .skip(pagination.count * pagination.page)
+            .limit(pagination.count)
+            .sort({ timestamp: pagination.sort });
 
-        return mongoDB.extractAllFromMongoCursor$(cursor);
-      })
-    );
+          return mongoDB.extractAllFromMongoCursor$(cursor);
+        })
+      );
   }
 
 
@@ -82,6 +81,7 @@ class ShiftDA {
     if (filter.initTimestamp && filter.endTimestamp) { 
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp };
     }
+    if ( filter.onlineState !== 'null'){ query.online = filter.onlineState == 'true' }
 
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
@@ -107,23 +107,23 @@ class ShiftDA {
       )
   }
 
-  static getShiftStateChangeListSize$(shiftId){
+  static getShiftStateChangeListSize$(shiftId) {
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
 
     return defer(() => collection.aggregate([
-      { $match : { _id : shiftId } },
-      {        
+      { $match: { _id: shiftId } },
+      {
         $project: {
-          _id: 1,          
+          _id: 1,
           stateChangeListSize: { $cond: { if: { $isArray: "$stateChanges" }, then: { $size: "$stateChanges" }, else: -1 } }
         }
       }
     ])
-    .toArray()
+      .toArray()
     )
-    .pipe(
-      map(result => result ? result[0].stateChangeListSize : 0 )
-    )    
+      .pipe(
+        map(result => result ? result[0].stateChangeListSize : 0)
+      )
   }
 
   
@@ -131,7 +131,7 @@ class ShiftDA {
   static getShiftOnlineChangeList$(shiftId, pagination) {
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
     return defer(() => collection
-      .find( { _id: shiftId } )
+      .find({ _id: shiftId })
       .project({ _id: 1, onlineChanges: { $slice: [pagination.count * pagination.page, pagination.count] } })
       .toArray()
     )
@@ -140,23 +140,23 @@ class ShiftDA {
       )
   }
 
-  static getShiftOnlineChangeListSize$(shiftId){
+  static getShiftOnlineChangeListSize$(shiftId) {
     const collection = mongoDB.getHistoricalDbByYYMM(shiftId.substring(shiftId.length - 4)).collection(COLLECTION_NAME);
 
     return defer(() => collection.aggregate([
-      { $match : { _id : shiftId } },
-      {        
+      { $match: { _id: shiftId } },
+      {
         $project: {
-          _id: 1,          
+          _id: 1,
           onlineChangesListSize: { $cond: { if: { $isArray: "$onlineChanges" }, then: { $size: "$onlineChanges" }, else: -1 } }
         }
       }
     ])
-    .toArray()
+      .toArray()
     )
-    .pipe(
-      map(result => result ? result[0].onlineChangesListSize : 0 ),
-    )    
+      .pipe(
+        map(result => result ? result[0].onlineChangesListSize : 0),
+      )
   }
 
 

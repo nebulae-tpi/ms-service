@@ -84,6 +84,7 @@ export class ShiftDetailComponent implements OnInit, OnDestroy {
         duration: 2000
       });
   }
+  
 
   ngOnDestroy() {
     this.ngUnsubscribe.next();
