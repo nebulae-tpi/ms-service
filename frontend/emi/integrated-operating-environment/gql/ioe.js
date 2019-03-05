@@ -17,7 +17,6 @@ export const IOECancelService = gql`
   }
 `;
 
-
 export const IOEServices = gql`
 query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [String], $viewAllOperators: Boolean, $page: Int, $pageCount: Int, $projections: [String]){
   IOEServices(serviceStatesFilter: $serviceStatesFilter, serviceChannelsFilter : $serviceChannelsFilter, viewAllOperators: $viewAllOperators, page: $page, pageCount: $pageCount, projections: $projections){
