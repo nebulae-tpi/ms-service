@@ -80,18 +80,23 @@
 
               <div fxFlex="100">
                 <div fxLayout="column" fxLayoutAlign="center start">
-                  <div fxFlex="100" formArrayName="states"
-                    *ngFor="let state of filterForm.get('states')['controls'] ; let i = index;">
+                  <div fxFlex="100" formArrayName="states" *ngFor="let state of filterForm.get('states')['controls'] ; let i = index;">
                     <div fxFlex="100" class="ml-12" [formGroupName]="i" fxLayoutAlign="start start">
                       <mat-checkbox fxFlex="100" [formControlName]="'active'">
                         {{ 'SHIFT.SHIFT_STATES.' + state.get('name').value | translate }}
                       </mat-checkbox>
                     </div>
                   </div>
+                
+                  <mat-checkbox *ngIf="filterForm.get('onlineState')" fxFlex="100" class="ml-12"
+                    fxLayoutAlign="start start" [checked]="filterForm.get('onlineState').value == 'true'"
+                    [indeterminate]="filterForm.get('onlineState').value == 'null'" (change)="updateStateValue()">
+                    {{ 'SHIFT.SHIFT_FILTERS.ONLINE_STATES.' + filterForm.get('onlineState').value | translate }}
+                  </mat-checkbox>
+                
                 </div>
-
               </div>
-
+              
             </div>
           </form>
 

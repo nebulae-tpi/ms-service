@@ -77,6 +77,11 @@ export const locale = {
         STATES: 'Estados',
         SHOW_CLOSED: 'Show Closed',
         FILTER_TITLE: 'Filters',
+        ONLINE_STATES:{
+          true: 'Online',
+          false: 'Offline',
+          null: 'Online/Offline'
+        },
         RESET_FILTER: 'Clean Filters'
       },
       SHIFT_STATES: {

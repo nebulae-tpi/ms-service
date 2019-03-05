@@ -8,7 +8,9 @@ export const ServiceDriver = gql`
       lastname
       username
       active
-      blocks
+      # blocks{
+      #   key
+      # }
       documentType
       documentId
       pmr
@@ -28,7 +30,7 @@ export const ServiceDrivers = gql`
       lastname
       username
       active
-      blocks
+      # blocks
       documentType
       documentId
       pmr
@@ -52,7 +54,7 @@ export const ServiceDriverVehicleList = gql`
       businessId
       licensePlate
       active
-      blocks
+      # blocks
       brand
       line
       model
@@ -106,7 +108,9 @@ export const ServiceDriverVehicleAssignedSubscription = gql`
       businessId
       licensePlate
       active
-      blocks
+      # blocks{
+      #   key
+      # }
       brand
       line
       model

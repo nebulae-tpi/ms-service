@@ -62,8 +62,8 @@ export const locale = {
       STATE_CHANGES: {
         TIMESTAMP: 'Hora',
         STATE: 'Estado',
-        ONLINE: 'En línea',
-        OFFLINE: 'Desconectado'
+        ONLINE: 'Online',
+        OFFLINE: 'Offline'
       },
       SHIFT_FILTERS: {
         INIT_TIMESTAMP: 'Fecha Inicial',
@@ -77,6 +77,11 @@ export const locale = {
         STATES: 'Estados',
         SHOW_CLOSED: 'Mostrar Cerrados',
         FILTER_TITLE: 'Filtros',
+        ONLINE_STATES:{
+          true: 'Online',
+          false: 'Offline',
+          null: 'Online/Offline'
+        },
         RESET_FILTER: 'Limpiar Filtros'
       },
       SHIFT_STATES: {

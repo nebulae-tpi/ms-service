@@ -292,7 +292,7 @@ export class DriverListComponent implements OnInit, OnDestroy {
     return this.DriverListservice.getdriverList$(filterInput, paginationInput)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      map(resp => resp.data.ServiceDrivers)
+      map(resp => (resp.data.ServiceDrivers && resp.data.ServiceDrivers) ? resp.data.ServiceDrivers : [] )
     );
   }
 

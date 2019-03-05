@@ -3,8 +3,7 @@ import {
   Component,
   OnInit,
   OnDestroy,
-  ViewChild,
-  ElementRef
+  ViewChild
 } from '@angular/core';
 
 import {
@@ -15,14 +14,12 @@ import {
   FormArray
 } from '@angular/forms';
 
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 
 ////////// RXJS ///////////
 import {
   map,
   mergeMap,
-  switchMap,
-  toArray,
   filter,
   tap,
   takeUntil,
@@ -32,7 +29,7 @@ import {
   take
 } from 'rxjs/operators';
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from 'rxjs';
+import { Subject, of, forkJoin, combineLatest } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -89,6 +86,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
   stateList: string[] = ['AVAILABLE', 'NOT_AVAILABLE', 'BUSY', 'BLOCKED', 'CLOSED'];
   DEFAULT_STATE = ['BLOCKED', 'CLOSED'];
 
+  onlineOptions = ['null', 'true', 'false'];
 
   //////// FORMS //////////
   filterForm: FormGroup;
@@ -106,7 +104,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
   paginator: MatPaginator;
   tableSize: number;
   tablePage = 0;
-  tableCount = 10;
+  tableCount = 25;
 
     // Columns to show in the table
     displayedColumns = [
@@ -231,6 +229,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       driverFullname: [null],
       vehicleLicensePlate: [null],
       states: this.formBuilder.array([]),
+      onlineState: ['null'],
     });
 
 
@@ -292,6 +291,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
               driverFullname: filterValue.driverFullname,
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
               //states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
+              onlineState: filterValue.onlineState ? filterValue.onlineState : 'null' 
             });
 
             if(filterValue.states) {
@@ -342,6 +342,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
           driverFullname: filterValue.driverFullname,
           vehicleLicensePlate: filterValue.vehicleLicensePlate,
           states: filterValue.states.filter(control => control.active === true).map(control => control.name),
+          onlineState: filterValue.onlineState
         };
 
         const paginationInput = {
@@ -402,14 +403,15 @@ export class ShiftListComponent implements OnInit, OnDestroy {
     this.filterForm.reset();
     this.paginator.pageIndex = 0;
     this.tablePage = 0;
-    this.tableCount = 10;
+    this.tableCount = 25;
 
     const startOfMonth = moment().startOf('month');
     const startYesterday = moment().subtract(1, 'day').startOf('day');
     const endOfMonth = moment().endOf('day');
     this.filterForm.patchValue({
       initTimestamp: startYesterday,
-      endTimestamp: endOfMonth
+      endTimestamp: endOfMonth,
+      onlineState: 'null'
     });
 
     while ((this.filterForm.get('states') as FormArray).length !== 0) {
@@ -430,6 +432,12 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       }
     });
 
+  }
+  updateStateValue(){
+    let currentStateAplied = this.filterForm.get('onlineState').value;
+    currentStateAplied = this.onlineOptions[(this.onlineOptions.indexOf(currentStateAplied) + 1) % this.onlineOptions.length];
+    console.log("currentStateAplied ==> ", typeof currentStateAplied, ' ==> ', currentStateAplied);
+    this.filterForm.get('onlineState').setValue(currentStateAplied);
   }
 
   closeShift(shiftId: any){

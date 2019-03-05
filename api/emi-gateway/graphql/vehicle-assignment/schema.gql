@@ -5,6 +5,13 @@ type CommandResponse {
   message: String
 }
 
+type ServiceDriverBlock{
+  key: String
+  notes: String
+  startTime: BigInt
+  endTime: BigInt
+}
+
 type ServiceDriver {
   "Driver ID"
   _id: ID!
@@ -19,7 +26,7 @@ type ServiceDriver {
   "Driver active state"
   active: Boolean!
   "Driver blocks"
-  blocks: [String]
+  blocks: [ServiceDriverBlock]
   "Driver document type"
   documentType: String
   "Driver document ID"
@@ -55,7 +62,7 @@ type ServiceDriverVehicle {
   "Vehicle state"
   active: Boolean
   "vehicle blocks"
-  blocks: [String]
+  blocks: [ServiceDriverVehicleBlock]
   "Vehicle brand"
   brand: String
   "Vehicle line"
@@ -66,6 +73,13 @@ type ServiceDriverVehicle {
   fuelType: String
   "Vehicle features"
   features: [String]
+}
+
+type ServiceDriverVehicleBlock{
+  key: String
+  notes: String
+  startTime: BigInt
+  endTime: BigInt
 }
 
 input ServiceVehicleAssignmentFilterInput {
