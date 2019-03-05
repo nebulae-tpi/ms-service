@@ -5,7 +5,7 @@ const { of } = require("rxjs");
 const { map, mergeMap, catchError } = require('rxjs/operators');
 const broker = require("../../broker/BrokerFactory")();
 const RoleValidator = require('../../tools/RoleValidator');
-const {handleError$} = require('../../tools/GraphqlResponseTools');
+const { handleError$ } = require('../../tools/GraphqlResponseTools');
 
 const INTERNAL_SERVER_ERROR_CODE = 1;
 const PERMISSION_DENIED_ERROR_CODE = 2;
@@ -14,19 +14,19 @@ const PERMISSION_DENIED_ERROR_CODE = 2;
 
 function getResponseFromBackEnd$(response) {
     return of(response)
-    .pipe(
-        map(resp => {
-            if (resp.result.code != 200) {
-                const err = new Error();
-                err.name = 'Error';
-                err.message = resp.result.error;
-                // this[Symbol()] = resp.result.error;
-                Error.captureStackTrace(err, 'Error');
-                throw err;
-            }
-            return resp.data;
-        })
-    );
+        .pipe(
+            map(resp => {
+                if (resp.result.code != 200) {
+                    const err = new Error();
+                    err.name = 'Error';
+                    err.message = resp.result.error;
+                    // this[Symbol()] = resp.result.error;
+                    Error.captureStackTrace(err, 'Error');
+                    throw err;
+                }
+                return resp.data;
+            })
+        );
 }
 
 
@@ -41,19 +41,19 @@ module.exports = {
                 PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
                 ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
             )
-            .pipe(
-                mergeMap(() =>
-                    broker
-                    .forwardAndGetReply$(
-                        "Driver",
-                        "emigateway.graphql.query.ServiceDrivers",
-                        { root, args, jwt: context.encodedToken },
-                        2000
-                    )
-                ),
-                catchError(err => handleError$(err, "ServiceDrivers")),
-                mergeMap(response => getResponseFromBackEnd$(response))
-            ).toPromise();
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Driver",
+                                "emigateway.graphql.query.ServiceDrivers",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceDrivers")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
         },
         ServiceDriversSize(root, args, context) {
             //console.log("Query.ServiceDriversSize", args);
@@ -62,19 +62,19 @@ module.exports = {
                 'Permission denied',
                 ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
             )
-            .pipe(
-                mergeMap(() =>
-                    broker
-                    .forwardAndGetReply$(
-                        "Driver",
-                        "emigateway.graphql.query.ServiceDriversSize",
-                        { root, args, jwt: context.encodedToken },
-                        2000
-                    )
-                ),
-                catchError(err => handleError$(err, "ServiceDriversSize")),
-                mergeMap(response => getResponseFromBackEnd$(response))
-            ).toPromise();
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Driver",
+                                "emigateway.graphql.query.ServiceDriversSize",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceDriversSize")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
         },
         ServiceDriver(root, args, context) {
             //console.log("Query.ServiceDriversSize", args);
@@ -83,45 +83,45 @@ module.exports = {
                 'ms-Service', 'ServiceDriver',
                 PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR" ]
-                )
-            .pipe(
-                mergeMap(() =>
-                    broker
-                    .forwardAndGetReply$(
-                        "Driver",
-                        "emigateway.graphql.query.ServiceDriver",
-                        { root, args, jwt: context.encodedToken },
-                        2000
-                    )
-                ),
-                catchError(err => handleError$(err, "ServiceDriver")),
-                mergeMap(response => getResponseFromBackEnd$(response))
-            ).toPromise();
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Driver",
+                                "emigateway.graphql.query.ServiceDriver",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceDriver")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
         },
         ServiceDriverVehicleList(root, args, context) {
             // console.log("ServiceDriverVehicleList", args);
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles, 'ms-Service', 'ServiceDriverVehicleList',
                 PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR" ]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
             )
-            .pipe(
-                mergeMap(() =>
-                    broker
-                    .forwardAndGetReply$(
-                        "Driver",
-                        "emigateway.graphql.query.serviceDriverVehicleList",
-                        { root, args, jwt: context.encodedToken },
-                        2000
-                    )
-                ),
-                catchError(err => handleError$(err, "ServiceDriverVehicleList")),
-                mergeMap(response => getResponseFromBackEnd$(response))
-            ).toPromise();
+                .pipe(
+                    mergeMap(() =>
+                        broker
+                            .forwardAndGetReply$(
+                                "Driver",
+                                "emigateway.graphql.query.serviceDriverVehicleList",
+                                { root, args, jwt: context.encodedToken },
+                                2000
+                            )
+                    ),
+                    catchError(err => handleError$(err, "ServiceDriverVehicleList")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
+                ).toPromise();
         },
     },
-    
+
 
 
     //// MUTATIONS ///////
@@ -134,44 +134,44 @@ module.exports = {
                 PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied',
                 ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        context.broker.forwardAndGetReply$(
+                            "Driver",
+                            "emigateway.graphql.mutation.assignVehicleToDriver",
+                            { root, args, jwt: context.encodedToken },
+                            2000
+                        )
+                    ),
+                    catchError(err => handleError$(err, "persistBusiness")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
                 )
-              .pipe(
-                mergeMap(() =>
-                  context.broker.forwardAndGetReply$(
-                    "Driver",
-                    "emigateway.graphql.mutation.assignVehicleToDriver",
-                    { root, args, jwt: context.encodedToken },
-                    2000
-                  )
-                ),
-                catchError(err => handleError$(err, "persistBusiness")),
-                mergeMap(response => getResponseFromBackEnd$(response))
-              )
-              .toPromise();
-          },
+                .toPromise();
+        },
 
-          ServiceUnassignVehicleToDriver(root, args, context) {
+        ServiceUnassignVehicleToDriver(root, args, context) {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'unassignVehicleFromDriver',
                 PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR" ]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+            )
+                .pipe(
+                    mergeMap(() =>
+                        context.broker.forwardAndGetReply$(
+                            "Driver",
+                            "emigateway.graphql.mutation.unassignVehicleFromDriver",
+                            { root, args, jwt: context.encodedToken },
+                            2000
+                        )
+                    ),
+                    catchError(err => handleError$(err, "persistBusiness")),
+                    mergeMap(response => getResponseFromBackEnd$(response))
                 )
-              .pipe(
-                mergeMap(() =>
-                  context.broker.forwardAndGetReply$(
-                    "Driver",
-                    "emigateway.graphql.mutation.unassignVehicleFromDriver",
-                    { root, args, jwt: context.encodedToken },
-                    2000
-                  )
-                ),
-                catchError(err => handleError$(err, "persistBusiness")),
-                mergeMap(response => getResponseFromBackEnd$(response))
-              )
-              .toPromise();
-          }          
+                .toPromise();
+        }
     },
     //// SUBSCRIPTIONS ///////
     Subscription: {
@@ -201,7 +201,9 @@ const eventDescriptors = [
         gqlSubscriptionName: 'ServiceDriverVehicleAssignedSubscription',
         dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
         onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
-        onEvent: (evt, descriptor) => console.log(`Event of type  ${descriptor.backendEventName} arraived`),// OPTIONAL, only use if needed
+        onEvent: (evt, descriptor) => {
+            //console.log(`Event of type  ${descriptor.backendEventName} arraived`);
+        },// OPTIONAL, only use if needed
     },
 ];
 

@@ -355,7 +355,7 @@ class ServiceCQRS {
 
   formatServiceToGraphQLSchema(service) {
     const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
-    return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+    return !service ? undefined : { ...service, vehicle: { licensePlate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
   }
 
   //#endregion
