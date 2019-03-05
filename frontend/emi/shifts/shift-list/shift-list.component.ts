@@ -256,7 +256,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
 
   updateFilterDataSubscription() {
     this.listenFilterFormChanges$()
-      .pipe(        
+      .pipe(
         tap(filterData => this.shiftListservice.updateFilterData(filterData) ),
         takeUntil(this.ngUnsubscribe),
       )
@@ -265,7 +265,7 @@ export class ShiftListComponent implements OnInit, OnDestroy {
 
   updatePaginatorDataSubscription() {
     this.listenPaginatorChanges$()
-      .pipe(        
+      .pipe(
         map(pagination => ({ pagination: {page: pagination.pageIndex, count: pagination.pageSize, sort: -1} })),
         tap(paginator => this.shiftListservice.updatePaginatorData(paginator) ),
         takeUntil(this.ngUnsubscribe)
@@ -290,21 +290,21 @@ export class ShiftListComponent implements OnInit, OnDestroy {
               driverDocumentId: filterValue.driverDocumentId,
               driverFullname: filterValue.driverFullname,
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
-              //states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
-              onlineState: filterValue.onlineState ? filterValue.onlineState : 'null' 
+              // states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
+              onlineState: filterValue.onlineState ? filterValue.onlineState : 'null'
             });
 
-            if(filterValue.states) {
-              this.filterForm.setControl('states', this.formBuilder.array([]))
-                filterValue.states.forEach(stateKey => {                
+            if (filterValue.states) {
+              this.filterForm.setControl('states', this.formBuilder.array([]));
+                filterValue.states.forEach(stateKey => {
                     (this.filterForm.get('states') as FormArray).push(
                       new FormGroup({
                         name: new FormControl(stateKey.name),
                         active: new FormControl(stateKey.active)
                       })
-                    );                
+                    );
                 });
-            }  
+            }
 
             this.onInitDateChange();
             this.onEndDateChange();
@@ -432,11 +432,13 @@ export class ShiftListComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.paginator._changePageSize(25);
+
   }
   updateStateValue(){
     let currentStateAplied = this.filterForm.get('onlineState').value;
     currentStateAplied = this.onlineOptions[(this.onlineOptions.indexOf(currentStateAplied) + 1) % this.onlineOptions.length];
-    console.log("currentStateAplied ==> ", typeof currentStateAplied, ' ==> ', currentStateAplied);
+    console.log('currentStateAplied ==> ', typeof currentStateAplied, ' ==> ', currentStateAplied);
     this.filterForm.get('onlineState').setValue(currentStateAplied);
   }
 

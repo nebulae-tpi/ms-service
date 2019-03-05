@@ -4,7 +4,6 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
-  ElementRef
 } from '@angular/core';
 
 import {
@@ -15,14 +14,12 @@ import {
   FormArray
 } from '@angular/forms';
 
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 
 ////////// RXJS ///////////
 import {
   map,
   mergeMap,
-  switchMap,
-  toArray,
   filter,
   tap,
   takeUntil,
@@ -32,24 +29,19 @@ import {
   take
 } from 'rxjs/operators';
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from 'rxjs';
+import { Subject, of, forkJoin, combineLatest } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
   MatPaginator,
   MatSort,
   MatTableDataSource,
-  MatSnackBar,
-  MatDialog
+  MatSnackBar
 } from '@angular/material';
 import { fuseAnimations } from '../../../../core/animations';
 
 //////////// i18n ////////////
-import {
-  TranslateService,
-  LangChangeEvent,
-  TranslationChangeEvent
-} from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
 import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
@@ -66,7 +58,6 @@ import {
 import * as moment from 'moment';
 
 //////////// Other Services ////////////
-import { KeycloakService } from 'keycloak-angular';
 import { ServiceListService } from './service-list.service';
 import { ToolbarService } from '../../../toolbar/toolbar.service';
 
@@ -109,17 +100,8 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   paginator: MatPaginator;
   tableSize: number;
   tablePage = 0;
-  tableCount = 10;
+  tableCount = 25;
 
-  // Columns to show in the table
-  // displayedColumns = [
-  //   "name",
-  //   "state",
-  //   "creationTimestamp",
-  //   "creatorUser",
-  //   "modificationTimestamp",
-  //   "modifierUser"
-  // ];
     // Columns to show in the table
     displayedColumns = [
       'timestamp',
@@ -140,12 +122,9 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private snackBar: MatSnackBar,
     private router: Router,
-    private activatedRouter: ActivatedRoute,
-    private keycloakService: KeycloakService,
     private adapter: DateAdapter<any>,
     private ServiceListservice: ServiceListService,
-    private toolbarService: ToolbarService,
-    private dialog: MatDialog
+    private toolbarService: ToolbarService
   ) {
       this.translationLoader.loadTranslations(english, spanish);
   }
@@ -305,7 +284,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
           if (filterValue) {
             // console.log('loadLastFilters => ', filterValue.initTimestamp.format(), filterValue.endTimestamp.format());
             // console.log('filterValue.states =====> ', filterValue.states);
-          
+
             this.filterForm.patchValue({
               initTimestamp: filterValue.initTimestamp,
               endTimestamp: filterValue.endTimestamp,
@@ -314,23 +293,23 @@ export class ServiceListComponent implements OnInit, OnDestroy {
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
               clientUsername: filterValue.clientUsername,
               clientFullname: filterValue.clientFullname,
-              //states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
-              //states: this.formBuilder.array([]),
+              // states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
+              // states: this.formBuilder.array([]),
               showClosedServices: filterValue.showClosedServices
             });
-            
 
-          if(filterValue.states) {
-            this.filterForm.setControl('states', this.formBuilder.array([]))
-              filterValue.states.forEach(stateKey => {                
+
+          if (filterValue.states) {
+            this.filterForm.setControl('states', this.formBuilder.array([]));
+              filterValue.states.forEach(stateKey => {
                   (this.filterForm.get('states') as FormArray).push(
                     new FormGroup({
                       name: new FormControl(stateKey.name),
                       active: new FormControl(stateKey.active)
                     })
-                  );                
+                  );
               });
-          }            
+          }
 
 
             this.onInitDateChange();
@@ -382,12 +361,10 @@ export class ServiceListComponent implements OnInit, OnDestroy {
 
         return [filterInput, paginationInput];
       }),
-      mergeMap(([filterInput, paginationInput]) => {
-        return forkJoin(
-          this.getserviceList$(filterInput, paginationInput),
-          this.getserviceSize$(filterInput),
-        );
-      }),
+      mergeMap(([filterInput, paginationInput]) => forkJoin(
+        this.getserviceList$(filterInput, paginationInput),
+        this.getserviceSize$(filterInput),
+      )),
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(([list, size]) => {
@@ -433,7 +410,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     this.filterForm.reset();
     this.paginator.pageIndex = 0;
     this.tablePage = 0;
-    this.tableCount = 10;
+    this.tableCount = 25;
 
     const startOfMonth = moment().startOf('month');
     const startYesterday = moment().subtract(1, 'day').startOf('day');
@@ -459,32 +436,29 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       }
     });
 
-    console.log('RAW VALUE ==> ', this.filterForm.getRawValue().states);
+    this.paginator._changePageSize(25);
+
   }
 
   refreshData(){
-    console.log('refresData');
     const driverDocumentId = this.filterForm.get('driverDocumentId').value;
     this.filterForm.get('driverDocumentId').setValue(driverDocumentId);
-
-
-
   }
 
   /**
    * Navigates to the detail page
    */
-  goToDetail(){
+  goToDetail() {
     this.toolbarService.onSelectedBusiness$
-    .pipe(
-      take(1)
-    ).subscribe(selectedBusiness => {
-      if (selectedBusiness == null || selectedBusiness.id == null){
-        this.showSnackBar('SERVICE.SELECT_BUSINESS');
-      }else{
-        this.router.navigate(['service/new']);
-      }
-    });
+      .pipe(
+        take(1)
+      ).subscribe(selectedBusiness => {
+        if (selectedBusiness == null || selectedBusiness.id == null) {
+          this.showSnackBar('SERVICE.SELECT_BUSINESS');
+        } else {
+          this.router.navigate(['service/new']);
+        }
+      });
   }
 
   showSnackBar(message) {

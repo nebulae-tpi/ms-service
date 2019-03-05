@@ -269,8 +269,7 @@ module.exports = {
                     mergeMap(response => getResponseFromBackEnd$(response))
                 ).toPromise();
         },
-    },
-    
+    },    
     
     //// MUTATIONS ///////
     Mutation: {
