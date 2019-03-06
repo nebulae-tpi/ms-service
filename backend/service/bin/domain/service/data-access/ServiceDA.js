@@ -4,10 +4,10 @@ require('datejs');
 
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
-const CollectionName = "Service";
+const COLLECTION_NAME = "Service";
 const DatabaseName = "historical_";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, reduce } = require("rxjs/operators");
+const { map, mergeMap, reduce, tap } = require("rxjs/operators");
 const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
 
@@ -33,7 +33,7 @@ class ServiceDA {
   static getService$(id, businessId) {
     //Get the last four digits to decide in which database we have to look for the information
     const monthYear = id.substr(id.length - 4);
-    const collection = mongoDB.client.db(`${DatabaseName}${monthYear}`).collection(CollectionName);
+    const collection = mongoDB.client.db(`${DatabaseName}${monthYear}`).collection(COLLECTION_NAME);
 
     const query = {
       _id: id      
@@ -69,7 +69,7 @@ class ServiceDA {
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1)
     .pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
-      map(db => db.collection(CollectionName)),
+      map(db => db.collection(COLLECTION_NAME)),
       mergeMap(collection => {
         const cursor = collection
         .find(query, {projection})
@@ -130,8 +130,10 @@ class ServiceDA {
 
     return of(initDate)
     .pipe(
+      tap(date => console.log("getServiceList$ date used ==> ", date)),
       map(date => mongoDB.getHistoricalDb(date)),
-      map(db => db.collection(CollectionName)),
+      tap(db => console.log(`Searching in ==> ${db.databaseName}.${COLLECTION_NAME}`)),
+      map(db => db.collection(COLLECTION_NAME)),
       mergeMap(collection => {
         const cursor = collection
         .find(query, {projection})
@@ -193,14 +195,14 @@ class ServiceDA {
     return of(initDate)
     .pipe(
       map(date => mongoDB.getHistoricalDb(date)),
-      map(db => db.collection(CollectionName)),
+      map(db => db.collection(COLLECTION_NAME)),
       mergeMap(collection => collection.count(query)),
       //reduce((acc, val) => acc + val)
     );
   }
 
   // static closeService$(ServiceId){
-  //   const collection = mongoDB.getHistoricalDbByYYMM(ServiceId.substring(ServiceId.length - 4)).collection(CollectionName);
+  //   const collection = mongoDB.getHistoricalDbByYYMM(ServiceId.substring(ServiceId.length - 4)).collection(COLLECTION_NAME);
   //   return defer(() => collection.updateOne(
   //     { _id: ServiceId },
   //     {

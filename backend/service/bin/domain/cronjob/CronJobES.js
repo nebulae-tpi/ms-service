@@ -1,6 +1,6 @@
 "use strict";
 
-const { of, forkJoin } = require("rxjs");
+const { of, forkJoin, range } = require("rxjs");
 const { tap, mergeMap, catchError, map, mapTo, toArray, delay } = require("rxjs/operators");
 const broker = require("../../tools/broker/BrokerFactory")();
 const Event = require("@nebulae/event-store").Event;
@@ -16,22 +16,6 @@ let instance;
 
 class CronJobES {
   constructor() {
-    // of({})
-    // .pipe(
-    //   delay(4000),
-    //   mergeMap(() => eventSourcing.eventStore.emitEvent$(
-    //     new Event({
-    //       eventType: "PeriodicMonthly",
-    //       eventTypeVersion: 1,
-    //       aggregateType: "Cronjob",
-    //       aggregateId: "1",
-    //       data: {},
-    //       user: "SYSTEM"
-    //     })
-    //   ) )
-    // )
-    // .subscribe()
-
   }
 
   handlePeriodicOneMinute$() {

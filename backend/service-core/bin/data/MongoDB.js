@@ -54,30 +54,10 @@ class MongoDB {
    * Returns an Obserable that resolve to a string log
    */
   createIndexes$() {
-    return Observable.create(async observer => {
-
-      observer.next('Creating index for master.Vehicle => ({ licensePlate: 1 })  ');
-      await this.db.collection('Vehicle').createIndex({ licensePlate: 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
+    return Observable.create(async observer => {    
 
       //observer.next('Creating index for master.Driver => ({ "assignedVehicles": 1 })  ');
-      //await this.db.collection('Driver').createIndex({ "assignedVehicles": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
-
-      const historicalDb = this.getHistoricalDb();
-
-      observer.next(`Creating index for ${historicalDb}.Shift => { "state": 1, "driver.id": 1 }  `);
-      await historicalDb.collection('Shift').createIndex({ "state": 1, "driver.id": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
-
-      observer.next(`Creating index for ${historicalDb}.Shift => { "state": 1, "vehicle.licensePlate": 1 }  `);
-      await historicalDb.collection('Shift').createIndex({ "state": 1, "vehicle.licensePlate": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
-
-      observer.next(`Creating index for ${historicalDb}.Shift => { "vehicle.licensePlate": 1 }  `);
-      await historicalDb.collection('Shift').createIndex({ "vehicle.licensePlate": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));
-
-      observer.next(`Creating index for ${historicalDb}.Shift => { "location":  "2dsphere" }  `);
-      await historicalDb.collection('Shift').createIndex({ "location": "2dsphere" }).catch((err) => console.log(`Failed to create index: ${err}`));
-          
-      observer.next(`Creating index for ${historicalDb}.Service => { "location":  "2dsphere" }  `);
-      await historicalDb.collection('Service').createIndex({ "location": "2dsphere" }).catch((err) => console.log(`Failed to create index: ${err}`));
+      //await this.db.collection('Driver').createIndex({ "assignedVehicles": 1 }).catch((err) => console.log(`Failed to create index: ${err}`));  
           
       observer.next("All indexes created");
       observer.complete();

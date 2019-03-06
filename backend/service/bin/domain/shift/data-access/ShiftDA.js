@@ -54,7 +54,9 @@ class ShiftDA {
 
     return of(initDate)
       .pipe(
+        tap(date => console.log("getShiftList$ date used ==> ", date)),
         map(date => mongoDB.getHistoricalDb(date)),
+        tap(db => console.log(`Searching in ==> ${db.databaseName}.${COLLECTION_NAME}`)),
         map(db => db.collection(COLLECTION_NAME)),
         mergeMap(collection => {
           const cursor = collection

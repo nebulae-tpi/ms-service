@@ -68,15 +68,52 @@ class MongoDB {
    * Create the indexes for historical database
    */
   createIndexesOnHistoricalCollection$() {
-    return Observable.create(async observer => {      
-      const historicalDB = this.getHistoricalDb();
+    return Observable.create(async observer => {
+      const historicalDB = this.getHistoricalDb(undefined, 1);
 
-      observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ timestamp: -1, state: 1, closed: 1, businessId: 1, "driver.documentId": 1})`);
+      // INDEXES FOR COLLECTION 'Service' IN HISTORICAL RELATED DB
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ timestamp: -1, state: 1, closed: 1, businessId: 1, "driver.documentId": 1 })`);
       await historicalDB.collection("Service").createIndex({ timestamp: -1, state: 1, closed: 1, businessId: 1, "driver.documentId": 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));      
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ timestamp: -1, state: 1, closed: 1, "driver.documentId": 1 }, { background: true })`);
+      await historicalDB.collection("Service").createIndex({ timestamp: -1, state: 1, closed: 1, "driver.documentId": 1 }, { background: true })
         .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ businessId: 1, closed: 1, "request.ownerOperatorId": 1 }, { background: true })`);
+      await historicalDB.collection("Service").createIndex({ businessId: 1, closed: 1, "request.ownerOperatorId": 1 }, { background: true })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ state: 1, "driver.id": 1 }, { background: true })`);
+      await historicalDB.collection("Service").createIndex({ state: 1, "driver.id": 1 }, { background: true })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ location: "2dsphere" })`);
+      await historicalDB.collection("Service").createIndex({ location: "2dsphere" })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      // los de sebas 
+      // INDEXES FOR COLLECTION 'Shift' IN HISTORICAL RELATED DB
 
       observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ timestamp: -1, state: 1, businessId: 1, "driver.documentId": 1, "vehicle.licensePlate": 1, online: 1 })`);
       await historicalDB.collection("Shift").createIndex({ timestamp: -1, state: 1, businessId: 1, "driver.documentId": 1, "vehicle.licensePlate": 1, online: 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ state: 1, "driver.id": 1 })`);
+      await historicalDB.collection('Shift').createIndex({ state: 1, "driver.id": 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ state: 1, "vehicle.licensePlate": 1 })`);
+      await historicalDB.collection('Shift').createIndex({ state: 1, "vehicle.licensePlate": 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ "vehicle.licensePlate": 1 })  `);
+      await historicalDB.collection('Shift').createIndex({ "vehicle.licensePlate": 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ location: "2dsphere" })`);
+      await historicalDB.collection('Shift').createIndex({ location: "2dsphere" })
         .catch((err) => console.log(`Failed to create index: ${err}`));
 
       // TODO indexes for historical DBs
@@ -92,9 +129,7 @@ class MongoDB {
    * @param {Int} monthsToAdd 
    */
   getHistoricalDb(date = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), monthsToAdd = 0) {
-    if (monthsToAdd != 0) {
-      date.add(-1).month();
-    }
+    if (monthsToAdd != 0) { date.add(monthsToAdd).month(); }
     const historicalDbName = `historical_${dateFormat(date, "yymm")}`;
     if (!this.historicalDbs[historicalDbName]) {
       this.historicalDbs[historicalDbName] = this.client.db(historicalDbName);
