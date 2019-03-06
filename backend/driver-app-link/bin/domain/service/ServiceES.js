@@ -34,12 +34,13 @@ class ServiceES {
         const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
         const localHour = localDate.getHours();
         const extendedDistanceHours = (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4").split('_').map(h => parseInt(h));
-        let maxDistance;
+        let maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
         if (extendedDistanceHours.includes(localHour)) {
-            maxDistance = parseInt(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500");
-        } else {
-            maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
-        }
+            let extendedDistance = parseInt(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500");
+            if(extendedDistance && extendedDistance > maxDistance){
+                maxDistance = extendedDistance;
+            }
+        } 
 
         const minDistance = data.client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
