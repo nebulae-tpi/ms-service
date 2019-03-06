@@ -56,7 +56,7 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
       tip,
       route{ lat, lng, timestamp },
     state,
-      StateChanges{ state, timestamp, location{ lat, lng, timestamp }, notes },
+    stateChanges{ state, timestamp, location{ lat, lng, timestamp }, notes },
     location{ lat, lng, timestamp },
     vehicle{
       licensePlate
@@ -112,7 +112,7 @@ export const IOEServiceSubscription = gql`
         tip,
         route{ lat, lng, timestamp },
       state,
-        StateChanges{ state, timestamp, location{ lat, lng, timestamp }, notes },
+      stateChanges{ state, timestamp, location{ lat, lng, timestamp }, notes },
       location{ lat, lng, timestamp },
       vehicle{
         licensePlate

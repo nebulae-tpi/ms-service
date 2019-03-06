@@ -45,7 +45,7 @@ type IOEService{
     "current service state: REQUESTED,ASSIGNED,ARRIVED,ON_BOARD,DONE,CANCELLED_CLIENT,CANCELLED_DRIVER,"
     state: String
     "All state changes"
-    StateChanges: [IOEStateChange]
+    stateChanges: [IOEStateChange]
     "current location"
     location: IOEPoint
     "vehicle info"
