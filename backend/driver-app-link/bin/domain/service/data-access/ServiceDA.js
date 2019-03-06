@@ -37,9 +37,9 @@ class ServiceDA {
     ).pipe(filter(val => val));
   }
 
-  static addShiftToActiveOffers$(_id, shiftId, distance, referred = false) {
+  static addShiftToActiveOffers$(_id, shiftId, distance, referred = false, driverId = "", driverUsername = "", licensePlate = "") {
     const update = { $set: {} };
-    update["$set"][`offer.shifts.${shiftId}`] = { active: true, offerTs: Date.now(), distance, referred };
+    update["$set"][`offer.shifts.${shiftId}`] = { active: true, offerTs: Date.now(), distance, referred, driverId, driverUsername, licensePlate };
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
@@ -51,10 +51,10 @@ class ServiceDA {
 
   static updateOfferParamsAndfindById$(_id, fieldsToSet = undefined, fieldsToIncrement = undefined, projection = undefined) {
     const update = {};
-    if(fieldsToSet){
+    if (fieldsToSet) {
       update['$set'] = fieldsToSet;
     }
-    if(fieldsToIncrement){
+    if (fieldsToIncrement) {
       update['$inc'] = fieldsToIncrement;
     }
     return defer(

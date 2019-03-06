@@ -31,7 +31,16 @@ class ServiceES {
     handleServiceRequested$({ aid, data }) {
         //console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
 
-        const maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
+        const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+        const localHour = localDate.getHours();
+        const extendedDistanceHours = (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4").split('_').map(h => parseInt(h));
+        let maxDistance;
+        if (extendedDistanceHours.includes(localHour)) {
+            maxDistance = parseInt(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500");
+        } else {
+            maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
+        }
+
         const minDistance = data.client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
         const referrerDriverDocumentId = data.client.referrerDriverDocumentId;
@@ -61,17 +70,27 @@ class ServiceES {
 
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId })}`);
 
-            await timer(200).toPromise();// time for the service to be persisted 
 
-            let service = await ServiceDA.updateOfferParamsAndfindById$(
-                serviceId,
-                {
-                    offer: {
-                        searchCount: 0,
-                        shifts: {},
-                        params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan }
-                    }
-                }).toPromise();
+
+            let service = undefined;
+            let retries = 0;
+            while (!service && retries < 5) {
+                retries++;
+                await timer(200).toPromise();// time for the service to be persisted 
+                service = await ServiceDA.updateOfferParamsAndfindById$(
+                    serviceId,
+                    {
+                        offer: {
+                            searchCount: 0,
+                            shifts: {},
+                            params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan }
+                        }
+                    }).toPromise();
+            }
+            if (!service) {
+                throw new Error(`Service not found when trying to offer at imperativeServiceOfferAlgorithm; serviceId=${serviceId}; retries=${retries}`);
+            }
+
             obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
@@ -86,7 +105,7 @@ class ServiceES {
                     Object.keys(service.offer.shifts),
                     service.offer.params.maxDistance,
                     0,//min distance form mongo is always zero
-                    { "driver": 1 }
+                    { "driver": 1, "vehicle": 1 }
                 ).toPromise();
 
                 shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
@@ -111,7 +130,7 @@ class ServiceES {
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
                         const shift = shifts[i];
                         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
-                        await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true).toPromise();
+                        await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
                         await driverAppLinkBroker.sendServiceEventToDrivers$(
                             shift.businessId,
                             shift.driver.username,
@@ -211,7 +230,6 @@ class ServiceES {
      */
     handleServiceArrived$({ aid, data }) {
         //console.log(`ServiceES: handleServiceArrived: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
-        
         return of({}).pipe(
             delay(300),
             mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 })),
