@@ -35,6 +35,8 @@ export class OperatorWorkstationService {
   public static TOOLBAR_COMMAND_SERVICE_CANCEL = 2001;
   public static TOOLBAR_COMMAND_SERVICE_ASSIGN = 2002;
 
+  public static TOOLBAR_COMMAND_TOOLBAR_SET_MAX_PAGINATION = 3000;
+
   /**
    * layout dimension observable
    */

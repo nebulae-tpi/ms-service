@@ -20,6 +20,17 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="state_time_span">
+          <th mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>{{ 'TABLE.HEADERS.STATE_TIME' | translate }}</th>
+          <td mat-cell *matCellDef="let service" fxHide fxShow.gt-sm>
+            <div class="td-container">
+              <div class="td-content">{{service.state_time_span}}</div>
+              <div class="td-spacer">{{service.state_time_span}}</div>
+              <span>&nbsp;</span>
+            </div>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="creation_timestamp">
           <th mat-header-cell *matHeaderCellDef>{{ 'TABLE.HEADERS.CREATION_TIMESTAMP' | translate }}</th>
           <td mat-cell *matCellDef="let service">
@@ -86,16 +97,7 @@
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="state_time_span">
-          <th mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>{{ 'TABLE.HEADERS.STATE_TIME' | translate }}</th>
-          <td mat-cell *matCellDef="let service" fxHide fxShow.gt-sm>
-            <div class="td-container">
-              <div class="td-content">{{service.state_time_span}}</div>
-              <div class="td-spacer">{{service.state_time_span}}</div>
-              <span>&nbsp;</span>
-            </div>
-          </td>
-        </ng-container>
+       
 
         <!-- <ng-container matColumnDef="distance">
             <th mat-header-cell *matHeaderCellDef>{{ 'TABLE.HEADERS.DISTANCE' | translate }}</th>

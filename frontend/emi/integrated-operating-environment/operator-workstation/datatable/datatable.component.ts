@@ -31,7 +31,7 @@ import {
   distinctUntilChanged,
 } from "rxjs/operators";
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from "rxjs";
+import { Subject, from, of, forkJoin, Observable, concat, timer } from "rxjs";
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -53,15 +53,11 @@ import { locale as english } from "../../i18n/en";
 import { locale as spanish } from "../../i18n/es";
 import { FuseTranslationLoaderService } from "../../../../../core/services/translation-loader.service";
 
-
-import * as moment from "moment";
-
 //////////// Other Services ////////////
 import { KeycloakService } from "keycloak-angular";
 import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from "../../../../toolbar/toolbar.service";
 import { SelectionModel } from "@angular/cdk/collections";
-import { from } from "zen-observable";
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -82,7 +78,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   DATA TABLE VARS
   */
   // columns to display
-  displayedColumns: string[] = ['state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta'];//'state_time_span'
+  displayedColumns: string[] = ['state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span'];
   //Partial data: this is what is displayed to the user
   partialData = [];
   //total data source
@@ -99,9 +95,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
   private pageCount = 0;
   //current selected service id
   private selectedServiceId = undefined;
-
-
-
   selection = new SelectionModel(false, []);
 
   //current user roles
@@ -133,6 +126,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     this.listenToolbarCommands();
     this.subscribeIOEServicesListener();
     await this.resetData();
+    this.registerTimer();
   }
 
 
@@ -153,6 +147,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
   //#region LISTENERS
+  /**
+   * Listen layout (size and distribution) changes
+   */
   listenLayoutChanges() {
     this.operatorWorkstationService.layoutChanges$.pipe(
       filter(e => e && e.layout),
@@ -174,6 +171,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Listen commands send by the command bar
+   */
   listenToolbarCommands() {
     this.operatorWorkstationService.toolbarCommands$.pipe(
       debounceTime(10),
@@ -189,8 +189,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER:
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE:
-            this.page = args.page;
-            await this.recalculatePartialData();
+            if (this.page !== args.page) {
+              this.page = args.page;
+              await this.recalculatePartialData();
+            }
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT:
             break;
@@ -210,11 +212,14 @@ export class DatatableComponent implements OnInit, OnDestroy {
       },
       (error) => console.error(`DatatableComponent.listenToolbarCommands: Error => ${error}`),
       () => {
-        //console.log(`DatatableComponent.listenToolbarCommands: Completed`)
+        console.log(`DatatableComponent.listenToolbarCommands: Completed`)
       },
     );
   }
 
+  /**
+   * Listen to real-time service changes
+   */
   subscribeIOEServicesListener() {
     this.operatorWorkstationService.listenIOEService$(this.businessId, this.userId)
       .pipe(
@@ -227,21 +232,47 @@ export class DatatableComponent implements OnInit, OnDestroy {
         },
         (error) => console.error(`DatatableComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
         () => {
-          //console.log(`DatatableComponent.subscribeIOEServicesListener: Completed`);
+          console.log(`DatatableComponent.subscribeIOEServicesListener: Completed`);
+        },
+      );
+  }
+
+  /**
+   * Register a second by second timer available for multiple maintenance tasks
+   */
+  registerTimer() {
+    timer(5000, 1000)
+      .pipe(
+        mergeMap(i => forkJoin(
+          this.refreshTimeRelatedPartialData()
+        )),
+        takeUntil(this.ngUnsubscribe),
+      )
+      .subscribe(
+        (_: any) => { },
+        (error) => console.error(`DatatableComponent.registerTimer: Error => ${JSON.stringify(error)}`),
+        () => {
+          console.log(`DatatableComponent.registerTimer: Completed`);
         },
       );
   }
   //#endregion
 
+  /**
+   * Loads the entire data from DB
+   */
   async resetData() {
     this.totalRawData = await this.queryAllDataFromServer();
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
     await this.recalculatePartialData();
   }
 
+  /**
+   * Adds (or removes in case of closing services) services
+   * @param service 
+   */
   async appendData(service) {
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
-
     if (service.closed && oldDataIndex >= 0) {
       this.totalRawData.splice(oldDataIndex, 1);
     } else if (oldDataIndex >= 0) {
@@ -249,20 +280,27 @@ export class DatatableComponent implements OnInit, OnDestroy {
     } else {
       this.totalRawData.unshift(service);
     }
-
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
     await this.recalculatePartialData();
   }
 
+  /**
+   * Recarlculate the data partial data (the visible part at the table)
+   */
   async recalculatePartialData() {
     this.totalData.sort((s1, s2) => { return s2.timestamp < s1.timestamp ? 1 : 0 });
     const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);
     const skip = this.page * this.pageCount;
     this.partialData = filteredData.slice(skip, skip + this.pageCount);
-    // console.log(this.partialData.map(x => x.state))
+    let maxPage = Math.floor(filteredData.length / this.pageCount);
+    maxPage = (filteredData.length % this.pageCount !== 0) || (maxPage == 0) ? maxPage + 1 : maxPage;
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_TOOLBAR_SET_MAX_PAGINATION, args: { maxPage } });
   }
 
 
+  /**
+   * Queries bit by bit all the services from the server
+   */
   async queryAllDataFromServer() {
     const data = [];
     let moreDataAvailable = true;
@@ -281,27 +319,71 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
 
-  convertServiceToTableFormat({ id, state, timestamp, client, pickUp, pickUpETA, vehicle, driver }) {
-    let eta = pickUpETA ? Math.floor((pickUpETA - Date.now()) / 60000) : null;
-    eta = (eta !== null && eta < 0) ? 0 : eta;
+  /**
+   * Converts the service to the datatabke model
+   * @param service
+   */
+  convertServiceToTableFormat(service) {
+
     return {
-      selected: this.selectedServiceId === id ? ">" : "",
-      id,
-      state,
-      'creation_timestamp': timestamp,
-      'client_name': client.fullname,
-      'pickup_addr': pickUp.addressLine1,
-      'pickup_neig': pickUp.neighborhood,
-      'vehicle_plate': vehicle.licensePlate,
-      eta,
-      'state_time_span': '00:00:00',
-      'distance': 0.00
+      selected: this.selectedServiceId === service.id ? ">" : "",
+      id: service.id,
+      state: service.state,
+      'creation_timestamp': service.timestamp,
+      'client_name': service.client ? service.client.fullname : '-',
+      'pickup_addr': service.pickUp ? service.pickUp.addressLine1 : '-',
+      'pickup_neig': service.pickUp ? service.pickUp.neighborhood : '-',
+      'vehicle_plate': service.vehicle ? service.vehicle.licensePlate : '-',
+      eta: this.calcServiceEta(service),
+      'state_time_span': this.calcServiceStateTimeSpan(service),
+      'distance': 0.00,
+      serviceRef: service
     };
   }
+
+  //#region TIME-RELATED DATE REFRESH
+  refreshTimeRelatedPartialData() {
+    return from(this.partialData).pipe(
+      tap(pd => {
+        pd.state_time_span = this.calcServiceStateTimeSpan(pd.serviceRef);
+        pd.eta = this.calcServiceEta(pd.serviceRef);
+      })
+    );
+  }
+
+  calcServiceStateTimeSpan(service) {
+    const latestState = service.stateChanges ? service.stateChanges.filter(pds => pds.state === service.state).pop() : undefined;
+    if (latestState) {
+      const diff = Date.now() - latestState.timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const seconds = ((diff % 60000) / 1000).toFixed(0);
+      return `${minutes > 9 ? minutes : '0' + minutes}m${seconds.length > 1 ? seconds : '0' + seconds}s`;
+    } else {
+      return '---'
+    }
+  }
+
+  calcServiceEta(service) {
+    if (!service.pickUpETA) {
+      return '---'
+    }
+
+    let diff = service.pickUpETA ? service.pickUpETA - Date.now() : 0;
+    diff = (diff !== null && diff < 0) ? 0 : diff;
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = ((diff % 60000) / 1000).toFixed(0);
+    return `${minutes > 9 ? minutes : '0' + minutes}m${seconds.length > 1 ? seconds : '0' + seconds}s`;
+  }
+
+  //#endregion
 
 
   //#region SERVICE ACTIONS
 
+  /**
+   * Cancel selected service
+   */
   cancelSelectedTrip() {
     const selectedRow = this.getSelectedRow();
     //console.log(selectedRow);
@@ -326,6 +408,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region ROW + PAGE SELECTION
+
 
   selectNextRow() {
     if (this.partialData.length === 0) {

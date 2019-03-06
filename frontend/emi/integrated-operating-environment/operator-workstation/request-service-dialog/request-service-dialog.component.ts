@@ -66,7 +66,7 @@ import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 
-const SPECIAL_DESTINATION_PRICE_MODS = { '5000': 5000, '10000': 10000};
+const SPECIAL_DESTINATION_PRICE_MODS = { '5000': 5000, '10000': 10000 };
 
 
 @Component({
@@ -172,7 +172,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
   onClientSelected(client) {
     this.form.patchValue({ client });
-    if(client){
+    if (client) {
       this.clientDefaultTip = client.satelliteInfo.tip;
     }
   }
@@ -361,6 +361,26 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
         this.selectSpecialDestinationOption('10000');
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+1'], (event: KeyboardEvent): boolean => {
+        this.setQuantity(1);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+2'], (event: KeyboardEvent): boolean => {
+        this.setQuantity(2);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+3'], (event: KeyboardEvent): boolean => {
+        this.setQuantity(3);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+4'], (event: KeyboardEvent): boolean => {
+        this.setQuantity(4);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+5'], (event: KeyboardEvent): boolean => {
+        this.setQuantity(5);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
     ];
     this._hotkeysService.add(this.hotkeys);
   }
@@ -370,6 +390,10 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     const featIndex = currentSelection.indexOf(feauture);
     if (featIndex === -1) currentSelection.push(feauture); else currentSelection.splice(featIndex, 1);
     this.form.patchValue({ featureOptionsGroup: currentSelection });
+  }
+
+  setQuantity(quantity) {
+    this.form.patchValue({ quantity });
   }
 
   selectSpecialDestinationOption(specialDest) {

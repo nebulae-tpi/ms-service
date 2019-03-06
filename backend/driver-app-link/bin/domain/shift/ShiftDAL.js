@@ -24,7 +24,8 @@ class ShiftDAL {
 
     constructor() {
         this.handlers = {
-            "ShiftLocationReported": this.handleShiftLocationReported$
+            "ShiftLocationReported": this.handleShiftLocationReported$,
+            "ShiftDisconnected": this.handleShiftDisconnected$
         };
     }
 
@@ -70,6 +71,21 @@ class ShiftDAL {
 
     /**
      * process event and forwards the right data to the drivers
+     * @param {Event} ShiftDisconnected
+     */
+    handleShiftDisconnected$({ data, authToken }) {
+        if (!data._id) throw new Error(`Driver-app sent ShiftDisconnected without _id:  ${JSON.stringify(data)}`);
+
+        return eventSourcing.eventStore.emitEvent$(
+            ShiftDAL.generateEventStoreEvent$("ShiftDisconnected", 1, "Shift", data._id, {}, authToken.preferred_username)
+        ).pipe(
+            mapTo(` - Sent ShiftDisconnected for shift._id=${data._id}: ${JSON.stringify(data)}`)
+        );
+    }
+
+
+    /**
+     * process event and forwards the right data to the drivers
      * @param {Event} shiftStartedEvt
      */
     handleShiftLocationReported$({ data, authToken }) {
@@ -77,9 +93,9 @@ class ShiftDAL {
         if (!data.location.lng || !data.location.lat) throw new Error(`Driver-app sent ShiftLocationReported without valid location:  ${JSON.stringify(data)}`);
 
         //Check if the location is in the Colombian territory,otherwise the location is not going to be processed and an error will be thrown.
-        if(
-            (data.location.lat < -3.867790 || data.location.lat > 12.373907) || 
-            (data.location.lng < -78.793839 || data.location.lng > -66.965140)){
+        if (
+            (data.location.lat < -3.867790 || data.location.lat > 12.373907) ||
+            (data.location.lng < -78.793839 || data.location.lng > -66.965140)) {
             console.log(`WARNING - handleShiftLocationReported (Invalid location reported): ${JSON.stringify(data)} `);
             return throwError(ERROR_23212(data.location));
         }
@@ -112,6 +128,17 @@ class ShiftDAL {
                 serviceId
             }
         });
+    }
+
+    static generateEventStoreEvent$(eventType, eventVersion, aggregateType, aggregateId, data, user) {
+        return of(new Event({
+            eventType: eventType,
+            eventTypeVersion: eventVersion,
+            aggregateType: aggregateType,
+            aggregateId: aggregateId,
+            data: data,
+            user: user
+        }))
     }
 
 

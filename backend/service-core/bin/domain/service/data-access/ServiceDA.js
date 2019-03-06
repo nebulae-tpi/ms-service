@@ -87,7 +87,7 @@ class ServiceDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
         {
-          $set: { pickUpETA }
+          $set: { pickUpETA, lastModificationTimestamp: Date.now() }
         },
         { upsert: false }
       )
@@ -305,7 +305,7 @@ class ServiceDA {
     return defer(() => collection.updateOne(
       { _id },
       {
-        $set: { closed: true },
+        $set: { closed: true, lastModificationTimestamp: Date.now() },
         $unset: { location: "" }
       }
     ));

@@ -88,6 +88,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   //current user roles
   userRoles = undefined
   page = 0;
+  maxPage = 0;
 
   /**
    * open RequestServiceDialogComponent reference
@@ -114,6 +115,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.queryUserRols();
     this.listenLayoutChanges();
+    this.listenToolbarCommands();
     this.configureHotkeys();
   }
 
@@ -127,18 +129,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
 
 
-  onCheckInboxChange($event) {
-    this.operatorWorkstationService.publishLayoutCommand(
-      {
-        code: this.isInboxVisible
-          ? OperatorWorkstationService.LAYOUT_COMMAND_SHOW_INBOX
-          : OperatorWorkstationService.LAYOUT_COMMAND_HIDE_INBOX,
-        args: []
-      }
-    )
-  }
 
-
+  //#region Events/Commands listeners
   listenLayoutChanges() {
     this.operatorWorkstationService.layoutChanges$.pipe(
       filter(e => e && e.layout),
@@ -154,6 +146,35 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       () => console.log(`toolbar.listenLayoutChanges.ngOnInit: Completed`),
     );
   }
+
+  /**
+   * Listen commands send by the command bar
+   */
+  listenToolbarCommands() {
+    this.operatorWorkstationService.toolbarCommands$.pipe(
+      debounceTime(10),
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe(
+      async ({ code, args }) => {
+        switch (code) {
+          case OperatorWorkstationService.TOOLBAR_COMMAND_TOOLBAR_SET_MAX_PAGINATION:
+            this.maxPage = args.maxPage;
+            if ((this.page + 1) >= this.maxPage) {
+              this.page = this.maxPage - 1;
+              this.sendDatatableApplyChangePageCommand();
+            }
+            break;
+        }
+      },
+      (error) => console.error(`DatatableComponent.listenToolbarCommands: Error => ${error}`),
+      () => {
+        console.log(`DatatableComponent.listenToolbarCommands: Completed`)
+      },
+    );
+  }
+  //#endregion
+
+  //#region HOT KEYS COFIG
 
   configureHotkeys() {
     this._hotkeysService.add(new Hotkey(['+', 's'], (event: KeyboardEvent): boolean => {
@@ -194,6 +215,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     }));
   }
 
+  //#endregion
+
+  //#region ACTIONS
 
   /**
    * displays request service dialog
@@ -257,7 +281,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableApplyChangePageCommand($event?) {
     if (this.isThereAnOpenDialog()) return;
-    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE, args: {page:this.page} });
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE, args: { page: this.page } });
   }
   /**
    * sendDatatableApplyChangePageCountCommand
@@ -289,7 +313,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    * @param $event 
    */
   sendDatatableApplyNextPage($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog() || (this.page + 1) >= this.maxPage) return;
     this.page++;
     this.sendDatatableApplyChangePageCommand();
   }
@@ -338,8 +362,21 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     return (this.requestServiceDialogRef !== undefined);
   }
 
+  onCheckInboxChange($event) {
+    this.operatorWorkstationService.publishLayoutCommand(
+      {
+        code: this.isInboxVisible
+          ? OperatorWorkstationService.LAYOUT_COMMAND_SHOW_INBOX
+          : OperatorWorkstationService.LAYOUT_COMMAND_HIDE_INBOX,
+        args: []
+      }
+    )
+  }
+
+  //#endregion
 
 
+  //#region OTHER/TOOLS
   /**
    * Shows a message snackbar on the bottom of the page
    * @param messageKey Key of the message to i18n
@@ -373,6 +410,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.userRoles = await this.keycloakService.getUserRoles(true);
   }
 
+  //#endregion
 
 
 }
