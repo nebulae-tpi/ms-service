@@ -95,9 +95,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
   private pageCount = 0;
   //current selected service id
   private selectedServiceId = undefined;
-
-
-
   selection = new SelectionModel(false, []);
 
   //current user roles
@@ -192,8 +189,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER:
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE:
-            this.page = args.page;
-            await this.recalculatePartialData();
+            if (this.page !== args.page) {
+              this.page = args.page;
+              await this.recalculatePartialData();
+            }
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT:
             break;
@@ -274,7 +273,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
    */
   async appendData(service) {
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
-
     if (service.closed && oldDataIndex >= 0) {
       this.totalRawData.splice(oldDataIndex, 1);
     } else if (oldDataIndex >= 0) {
@@ -282,7 +280,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
     } else {
       this.totalRawData.unshift(service);
     }
-
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
     await this.recalculatePartialData();
   }
@@ -295,7 +292,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
     const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);
     const skip = this.page * this.pageCount;
     this.partialData = filteredData.slice(skip, skip + this.pageCount);
-    // console.log(this.partialData.map(x => x.state))
+    let maxPage = Math.floor(filteredData.length / this.pageCount);
+    maxPage = (filteredData.length % this.pageCount !== 0) || (maxPage == 0) ? maxPage + 1 : maxPage;
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_TOOLBAR_SET_MAX_PAGINATION, args: { maxPage } });
   }
 
 
@@ -358,14 +357,14 @@ export class DatatableComponent implements OnInit, OnDestroy {
       const diff = Date.now() - latestState.timestamp;
       const minutes = Math.floor(diff / 60000);
       const seconds = ((diff % 60000) / 1000).toFixed(0);
-      return `${minutes > 9 ? minutes : '0'+minutes }m${seconds.length > 1 ?  seconds : '0'+seconds}s`;
+      return `${minutes > 9 ? minutes : '0' + minutes}m${seconds.length > 1 ? seconds : '0' + seconds}s`;
     } else {
       return '---'
     }
   }
 
   calcServiceEta(service) {
-    if(!service.pickUpETA ){
+    if (!service.pickUpETA) {
       return '---'
     }
 
@@ -374,7 +373,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
     const minutes = Math.floor(diff / 60000);
     const seconds = ((diff % 60000) / 1000).toFixed(0);
-    return `${minutes > 9 ? minutes : '0'+minutes }m${seconds.length > 1 ?  seconds : '0'+seconds}s`;
+    return `${minutes > 9 ? minutes : '0' + minutes}m${seconds.length > 1 ? seconds : '0' + seconds}s`;
   }
 
   //#endregion
