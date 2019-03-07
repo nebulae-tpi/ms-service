@@ -184,7 +184,7 @@ class ServiceDAL {
                 'ServiceCompleted',
                 {
                     location: { type: 'Point', coordinates: [location.lng, location.lat] },
-                    timestamp
+                    timestamp: timestamp || Date.now()
                 },
                 authToken))), //Build and send event (event-sourcing)
             mapTo(` - Sent ServiceCompleted for service._id=${_id}: ${JSON.stringify(data)}`)

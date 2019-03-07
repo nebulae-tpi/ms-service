@@ -89,7 +89,7 @@ class CronJobES {
     return ServiceDA.findServicesOnboardToComplete$()
       .pipe(
         // tap(service => console.log("SERVICE TO COMPLETE => ", JSON.stringify(service))),
-        mergeMap(service => this.generateEventStoreEvent$("ServiceCompleted", 1, "Service", service._id, {}, "SYSTEM")),
+        mergeMap(service => this.generateEventStoreEvent$("ServiceCompleted", 1, "Service", service._id, { timestamp : Date.now() }, "SYSTEM")),
         mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
         toArray(),
         // tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE COMPLETED"))

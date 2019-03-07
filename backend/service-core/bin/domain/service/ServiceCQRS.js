@@ -315,7 +315,9 @@ class ServiceCQRS {
         'Service',
         request.id,
         'ServiceCompleted',
-        {},
+        {
+          timestamp : Date.now()
+        },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       //tap(x => ServiceCQRS.log(`ServiceCQRS.reportServiceAsCompleted RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
