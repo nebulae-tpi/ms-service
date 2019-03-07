@@ -103,7 +103,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   // current user roles
   userRoles = undefined;
   userDetails = undefined;
-  businessId = undefined;
+  // businessId = undefined;
   userId = undefined;
 
   @Input('selectedBusinessId') selectedBusinessId: any;
@@ -148,8 +148,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
   async queryUserSpecs() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
     this.userDetails = await this.keycloakService.loadUserProfile();
-    this.businessId = this.userDetails.attributes.businessId[0];
-    this.userId = this.userDetails.attributes.userId[0];
+    // this.businessId = this.userDetails.attributes.businessId[0];
+    console.log('###$$$$$ ', this.userDetails.attributes);
+    this.userId = this.userDetails.attributes.userId ? this.userDetails.attributes.userId[0]: undefined;
   }
 
   //#region LISTENERS
@@ -232,7 +233,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Listen to real-time service changes
    */
   subscribeIOEServicesListener() {
-    this.operatorWorkstationService.listenIOEService$(this.businessId, this.seeAllOperation ? null : this.userId )
+    this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId )
       .pipe(
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
