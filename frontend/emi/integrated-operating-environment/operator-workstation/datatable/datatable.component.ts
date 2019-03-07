@@ -218,7 +218,12 @@ export class DatatableComponent implements OnInit, OnDestroy {
             this.seeAllOperation = args[0];
             this.resetDataAndSubscriptions();
             break;
-
+          case OperatorWorkstationService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
+            // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
+            this.selectedBusinessId = args[0];
+            this.resetData();
+            this.resetDataAndSubscriptions();            
+            break;
         }
         // console.log({ code, args });
       },
@@ -479,7 +484,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   resetDataAndSubscriptions(){
     this.ngUnsubscribeIOEServiceListener.next();
     this.resetData();
-    this.subscribeIOEServicesListener();
+    if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }    
   }
   //#endregion
 

@@ -182,8 +182,7 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
       .pipe(
         tap(bu => {
           this.selectedBusinessId = bu ? bu.id : null;
-          this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH, args: [] });
-          console.log('BUSINESS SELECTED ==>', bu);
+          this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED, args: [this.selectedBusinessId] });
         }),
         takeUntil(this.ngUnsubscribe)
       )
