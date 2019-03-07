@@ -117,23 +117,26 @@ class ServiceCQRS {
    */
   cancelService$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.cancelService RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ServiceCQRS", "cancelService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
-      mapTo(args),
-      tap(request => this.validateServiceCancellationRequestInput(request)),
-      mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
-      tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
-      tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
-      mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
-        'Service',
-        request.id,
-        request.authorType === 'CLIENT' ? 'ServiceCancelledByClient' : request.authorType === 'DRIVER' ? 'ServiceCancelledByDriver' : 'ServiceCancelledByOperator',
-        { reason: request.reason, notes: request.notes },
-        authToken))), //Build and send event (event-sourcing)
-      mapTo(this.buildCommandAck()), // async command acknowledge
-      //tap(x => ServiceCQRS.log(`ServiceCQRS.cancelService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-      catchError(err => GraphqlResponseTools.handleError$(err, true))
-    );
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles, "ioe.ServiceCQRS", "cancelService", PERMISSION_DENIED,
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"])
+      .pipe(
+        mapTo(args),
+        tap(request => this.validateServiceCancellationRequestInput(request)),
+        mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
+        tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
+        tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
+        mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+          'Service',
+          request.id,
+          request.authorType === 'CLIENT' ? 'ServiceCancelledByClient' : request.authorType === 'DRIVER' ? 'ServiceCancelledByDriver' : 'ServiceCancelledByOperator',
+          { reason: request.reason, notes: request.notes },
+          authToken))), //Build and send event (event-sourcing)
+        mapTo(this.buildCommandAck()), // async command acknowledge
+        //tap(x => ServiceCQRS.log(`ServiceCQRS.cancelService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err, true))
+      );
   }
 
   // /**  
