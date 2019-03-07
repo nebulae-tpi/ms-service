@@ -121,7 +121,8 @@
           "BUSINESS-OWNER",
           "BUSINESS-ADMIN",
           "SATELLITE",
-          "OPERATOR"
+          "OPERATOR",
+          "OPERATION-SUPERVISOR"
         ],
         "default": false
       }
