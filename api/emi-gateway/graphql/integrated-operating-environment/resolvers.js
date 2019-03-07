@@ -81,7 +81,6 @@ module.exports = {
       ).toPromise();
     },
 
-
     IOEReportServicePickupETA: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', READ_WRITE_ROLES).pipe(
         switchMapTo(

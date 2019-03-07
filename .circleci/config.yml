@@ -195,7 +195,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/service/
             export DOCKERHUB_IMAGE=service.backend.service
-            export DOCKERHUB_TAG=0.4.7
+            export DOCKERHUB_TAG=0.4.8
             gitChanged backend/service || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service/
             gitChanged backend/service || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/service || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
@@ -278,7 +278,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/integrated-operating-environment/
             export DOCKERHUB_IMAGE=service.backend.integratedoperatingenvironment
-            export DOCKERHUB_TAG=1.1.2  # integrated-operating-environment integrated-operating-environment integrated-operating-environment integrated-operating-environment 
+            export DOCKERHUB_TAG=1.1.3  # integrated-operating-environment integrated-operating-environment integrated-operating-environment integrated-operating-environment 
             gitChanged backend/integrated-operating-environment || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/integrated-operating-environment/
             gitChanged backend/integrated-operating-environment || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/integrated-operating-environment || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
