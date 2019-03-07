@@ -20,10 +20,21 @@ table {
   max-width: 28px;
 }
 
-.mat-row-selected {
-  background: silver  
+
+
+.services-table {
+
+  .item {
+      position: relative;
+      cursor: pointer;
+  }
+
 }
 
+
+.mat-row-selected {
+  background: silver
+}
 
 .td-container {
   position: relative;

@@ -1,6 +1,9 @@
 export const locale = {
   lang: 'en',
   data: {
+    WORKSTATION: {
+      BUSINESS_UNIT_REQUIRED: 'Business Unit Required'
+    },
     TOOLBAR: {
       REFRESH: 'REFRESH',
       REQUEST: 'REQUEST',
@@ -12,6 +15,9 @@ export const locale = {
         CANCEL: 'Cancel',
       },
       VIEW: 'View',
+      VIEWS: {
+        ALL_OPERATION: 'All Operation'
+      },
       FILTERS_LBL : 'Filters',
       FILTERS: {
         REQUESTED: 'Requested',
@@ -67,6 +73,7 @@ export const locale = {
     ERRORS: {
       1: 'Internal server error',
       2: 'Permission denied',
+      3: 'Business Unit Required, Please Select One',
       23200: 'Insufficient data. Client, collection point and payment are required',
       23201: 'Invalid customer name',
       23202: 'Tip type for invalid customer (Cash, Virtual wallet)',

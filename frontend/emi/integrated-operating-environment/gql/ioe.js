@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-// MUTATIONS 
+// MUTATIONS
 export const IOERequestService = gql`
   mutation IOERequestService($client: IOEClientInput!, $pickUp: IOELocationInput!, $paymentType: String!, $requestedFeatures: [String], $dropOff: IOELocationInput, $dropOffSpecialType: String, $fareDiscount: Float, $fare: Int, $tip: Int, $request: RequestInput){
     IOERequestService(client: $client, pickUp: $pickUp, paymentType: $paymentType, requestedFeatures: $requestedFeatures, dropOff: $dropOff, dropOffSpecialType: $dropOffSpecialType, fareDiscount: $fareDiscount, fare: $fare, tip: $tip,  request: $request){
@@ -18,8 +18,8 @@ export const IOECancelService = gql`
 `;
 
 export const IOEServices = gql`
-query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [String], $viewAllOperators: Boolean, $page: Int, $pageCount: Int, $projections: [String]){
-  IOEServices(serviceStatesFilter: $serviceStatesFilter, serviceChannelsFilter : $serviceChannelsFilter, viewAllOperators: $viewAllOperators, page: $page, pageCount: $pageCount, projections: $projections){
+query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [String], $viewAllOperators: Boolean, $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
+  IOEServices(serviceStatesFilter: $serviceStatesFilter, serviceChannelsFilter : $serviceChannelsFilter, viewAllOperators: $viewAllOperators, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
     id,
     closed,
       businessId,
@@ -35,7 +35,7 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
         tipType,
         referrerDriverDocumentId,
         offerMinDistance,
-        offerMaxDistance,      
+        offerMaxDistance,
     },
     pickUp{
       marker{ lat, lng, timestamp },
@@ -75,7 +75,7 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
 // SUBSCRIPTION
 export const IOEServiceSubscription = gql`
   subscription($businessId: String, $operatorId: String){
-    IOEService(businessId: $businessId, operatorId: $operatorId){    
+    IOEService(businessId: $businessId, operatorId: $operatorId){
       id,
       closed,
         businessId,
@@ -91,7 +91,7 @@ export const IOEServiceSubscription = gql`
           tipType,
           referrerDriverDocumentId,
           offerMinDistance,
-          offerMaxDistance,      
+          offerMaxDistance,
       },
       pickUp{
         marker{ lat, lng, timestamp },

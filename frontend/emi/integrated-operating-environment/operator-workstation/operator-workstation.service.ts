@@ -31,7 +31,8 @@ export class OperatorWorkstationService {
   public static TOOLBAR_COMMAND_DATATABLE_APPLY_CHANNEL_FILTER = 1005;
   public static TOOLBAR_COMMAND_DATATABLE_SELECT_PREV_ROW = 1006;
   public static TOOLBAR_COMMAND_DATATABLE_SELECT_NEXT_ROW = 1007;
-  
+  public static TOOLBAR_COMMAND_DATATABLE_SEE_ALL_OPERATION_CHANGED = 1008;
+
   public static TOOLBAR_COMMAND_SERVICE_CANCEL = 2001;
   public static TOOLBAR_COMMAND_SERVICE_ASSIGN = 2002;
 
@@ -53,7 +54,8 @@ export class OperatorWorkstationService {
   /**
    * Publish layout change
    */
-  publishLayoutChange(type: number, toolbarWidth: number, toolbarHeight: number, datatableWidth: number, datatableHeight: number, inboxWidth: number = undefined, inboxHeight: number = undefined) {
+  // tslint:disable-next-line:max-line-length
+  publishLayoutChange(type: number, toolbarWidth: number, toolbarHeight: number, datatableWidth: number, datatableHeight: number, inboxWidth?: number, inboxHeight?: number) {
     this.layoutChanges$.next(
       {
         layout: {
@@ -115,7 +117,7 @@ export class OperatorWorkstationService {
 
   /**
    * send a request service command to the server
-   * @param IOERequest 
+   * @param IOERequest
    */
   requestService$(IOERequest: any) {
     return this.gateway.apollo
@@ -139,7 +141,7 @@ export class OperatorWorkstationService {
 
   /**
    * send a cancel service command to the server
-   * @param IOECommand 
+   * @param IOECommand
    */
   cancelService$(IOECommand: any) {
     return this.gateway.apollo
@@ -158,14 +160,14 @@ export class OperatorWorkstationService {
 
   /**
    * Query all services filtered
-   * @param IOERequest 
+   * @param IOERequest
    */
-  queryServices$(serviceStatesFilter, serviceChannelsFilter, viewAllOperators, page, pageCount, projections) {
+  queryServices$(serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, projections) {
     return this.gateway.apollo
       .query<any>({
         query: IOEServices,
         variables: {
-          serviceStatesFilter, serviceChannelsFilter, viewAllOperators, page, pageCount, projections
+          serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, projections
         },
         fetchPolicy: 'network-only',
         errorPolicy: 'all'

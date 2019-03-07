@@ -6,16 +6,16 @@ import {
   ViewChild,
   ElementRef,
   HostListener
-} from "@angular/core";
+} from '@angular/core';
 
 import {
   FormBuilder,
   FormGroup,
   FormControl,
   Validators
-} from "@angular/forms";
+} from '@angular/forms';
 
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
 import {
@@ -30,9 +30,9 @@ import {
   debounceTime,
   distinctUntilChanged,
   take
-} from "rxjs/operators";
+} from 'rxjs/operators';
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from "rxjs";
+import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -41,26 +41,26 @@ import {
   MatTableDataSource,
   MatSnackBar,
   MatDialog
-} from "@angular/material";
-import { fuseAnimations } from "../../../../core/animations";
+} from '@angular/material';
+import { fuseAnimations } from '../../../../core/animations';
 
 //////////// i18n ////////////
 import {
   TranslateService,
   LangChangeEvent,
   TranslationChangeEvent
-} from "@ngx-translate/core";
-import { locale as english } from "../i18n/en";
-import { locale as spanish } from "../i18n/es";
-import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
+} from '@ngx-translate/core';
+import { locale as english } from '../i18n/en';
+import { locale as spanish } from '../i18n/es';
+import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
 
 
-import * as moment from "moment";
+import * as moment from 'moment';
 
 //////////// Other Services ////////////
-import { KeycloakService } from "keycloak-angular";
+import { KeycloakService } from 'keycloak-angular';
 import { OperatorWorkstationService } from './operator-workstation.service';
-import { ToolbarService } from "../../../toolbar/toolbar.service";
+import { ToolbarService } from '../../../toolbar/toolbar.service';
 
 
 export interface Tile {
@@ -86,10 +86,10 @@ const SCREEN_HEIGHT_WASTE = 110;
   providers: []
 })
 export class OperatorWorkstationComponent implements OnInit, OnDestroy {
-  //Subject to unsubscribe 
+  // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
 
-  toolbarRows: number = 6;
+  toolbarRows = 6;
   toolbarCols: number;
   inboxCols: number;
   inboxRows: number;
@@ -99,7 +99,10 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
   screenCols: number;
   horizontalLayout: boolean;
   layoutType: number;
-  showInbox: boolean = false;
+  showInbox = false;
+
+  selectedBusinessId: any;
+  userIsSupervisor = false;
 
 
   constructor(
@@ -121,6 +124,8 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.listenLayoutCommnads();
+    this.listenBusinessChanges();
+    this.loadUserRoles();
   }
 
   ngOnDestroy() {
@@ -140,7 +145,7 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
     return this.layoutType === OperatorWorkstationService.LAYOUT_NO_INBOX;
   }
 
-  
+
   @HostListener('window:resize', ['$event'])
   onResize(event?) {
     this.recalculateLayout();
@@ -170,6 +175,25 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
       (error) => console.error(`operator-workstation.listenLayoutChanges.ngOnInit: Error => ${error}`),
       () => console.log(`operator-workstation.listenLayoutChanges.ngOnInit: Completed`),
     );
+  }
+
+  listenBusinessChanges() {
+    this.toolbarService.onSelectedBusiness$
+      .pipe(
+        tap(bu => {
+          this.selectedBusinessId = bu ? bu.id : null;
+          this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH, args: [] });
+          console.log('BUSINESS SELECTED ==>', bu);
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe();
+  }
+
+  loadUserRoles(){
+    const userRoles = this.keycloakService.getUserRoles(true);
+    this.userIsSupervisor = userRoles.includes('OPERATION-SUPERVISOR');
+    console.log('USER ROLES ==> ', this.userIsSupervisor );
   }
 
 

@@ -1,6 +1,9 @@
 export const locale = {
   lang: 'es',
   data: {
+    WORKSTATION: {
+      BUSINESS_UNIT_REQUIRED: 'Unidad De Negocio Requerida *'
+    },
     TOOLBAR: {
       REFRESH: 'REFRESCAR',
       REQUEST: 'SOLICITAR',
@@ -12,6 +15,9 @@ export const locale = {
         CANCEL: 'Cancelar',
       },
       VIEW: 'Ver',
+      VIEWS: {
+        ALL_OPERATION: 'Toda la Operación'
+      },
       FILTERS_LBL : 'Filtros',
       FILTERS: {
         REQUESTED: 'Solicitado',
@@ -67,6 +73,7 @@ export const locale = {
     ERRORS: {
       1: 'Error interno del servidor',
       2: 'Permiso denegado',
+      3: 'Unida de Negocio Requerida, por favor Selecciona una',
       23200: 'Datos insuficientes. Cliente, punto de recogida y pago son obligatorios',
       23201: 'Nombre del cliente inválido',
       23202: 'Tipo de propina para cliente inválida (Efectivo, Billetera virtual)',

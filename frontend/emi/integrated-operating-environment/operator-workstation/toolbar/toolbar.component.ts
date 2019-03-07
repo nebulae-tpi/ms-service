@@ -5,17 +5,18 @@ import {
   OnDestroy,
   ViewChild,
   ElementRef,
-  HostListener
-} from "@angular/core";
+  HostListener,
+  Input
+} from '@angular/core';
 
 import {
   FormBuilder,
   FormGroup,
   FormControl,
   Validators
-} from "@angular/forms";
+} from '@angular/forms';
 
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
 import {
@@ -30,9 +31,9 @@ import {
   debounceTime,
   distinctUntilChanged,
   take
-} from "rxjs/operators";
+} from 'rxjs/operators';
 
-import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from "rxjs";
+import { Subject, fromEvent, of, forkJoin, Observable, concat, combineLatest } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -43,29 +44,29 @@ import {
   MatDialog,
   MatDialogConfig,
   MatDialogRef
-} from "@angular/material";
-import { fuseAnimations } from "../../../../../core/animations";
+} from '@angular/material';
+import { fuseAnimations } from '../../../../../core/animations';
 
 //////////// i18n ////////////
 import {
   TranslateService,
   LangChangeEvent,
   TranslationChangeEvent
-} from "@ngx-translate/core";
-import { locale as english } from "../../i18n/en";
-import { locale as spanish } from "../../i18n/es";
-import { FuseTranslationLoaderService } from "../../../../../core/services/translation-loader.service";
+} from '@ngx-translate/core';
+import { locale as english } from '../../i18n/en';
+import { locale as spanish } from '../../i18n/es';
+import { FuseTranslationLoaderService } from '../../../../../core/services/translation-loader.service';
 
 
-import * as moment from "moment";
+import * as moment from 'moment';
 
 //////////// Other Services ////////////
-import { KeycloakService } from "keycloak-angular";
+import { KeycloakService } from 'keycloak-angular';
 import { OperatorWorkstationService } from '../operator-workstation.service';
-import { ToolbarService } from "../../../../toolbar/toolbar.service";
+import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
-import { RequestServiceDialogComponent } from '../request-service-dialog/request-service-dialog.component'
-import { OperatorWorkstationComponent } from "../operator-workstation.component";
+import { RequestServiceDialogComponent } from '../request-service-dialog/request-service-dialog.component';
+import { OperatorWorkstationComponent } from '../operator-workstation.component';
 
 const REQUEST_SERVICE_DIALOG_MAX_DIMENSION = [400, 400];
 
@@ -79,14 +80,22 @@ const REQUEST_SERVICE_DIALOG_MAX_DIMENSION = [400, 400];
   providers: []
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
-  //Subject to unsubscribe 
+
+  // selected business in toolbar
+  @Input('selectedBusinessId') selectedBusinessId: any;
+  // user is supervisor
+  @Input('userIsSupervisor') userIsSupervisor: any;
+
+
+  // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
-  //weather or not the inbox should be visible
-  isInboxVisible: boolean = false;
+  // weather or not the inbox should be visible
+  isInboxVisible = false;
+  supervisorWatchinAllOperation = false;
   // current layout
   private layout = undefined;
-  //current user roles
-  userRoles = undefined
+  // current user roles
+  userRoles = undefined;
   page = 0;
   maxPage = 0;
 
@@ -168,7 +177,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       },
       (error) => console.error(`DatatableComponent.listenToolbarCommands: Error => ${error}`),
       () => {
-        console.log(`DatatableComponent.listenToolbarCommands: Completed`)
+        console.log(`DatatableComponent.listenToolbarCommands: Completed`);
       },
     );
   }
@@ -178,11 +187,17 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   configureHotkeys() {
     this._hotkeysService.add(new Hotkey(['+', 's'], (event: KeyboardEvent): boolean => {
-      this.showRequestServiceDialog();
+      if (this.selectedBusinessId){
+        this.showRequestServiceDialog();
+      } else {
+        this.showMessageSnackbar('ERRORS.3');
+      }
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['r'], (event: KeyboardEvent): boolean => {
-      this.sendDatatableRefreshCommand();
+      if (this.selectedBusinessId){
+        this.sendDatatableRefreshCommand();
+      }
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['c'], (event: KeyboardEvent): boolean => {
@@ -221,12 +236,12 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   /**
    * displays request service dialog
-   * @param $event 
+   * @param $event
    */
   showRequestServiceDialog($event?) {
-    if (this.isThereAnOpenDialog()) return;
-    if (!this.userRoles.includes('OPERATOR') || this.userRoles.includes('OPERATION-SUPERVISOR')) {
-      this.showMessageSnackbar("ERRORS.2")
+    if (this.isThereAnOpenDialog()) { return; }
+    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')) {
+      this.showMessageSnackbar('ERRORS.2');
       return;
     }
 
@@ -242,6 +257,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     dialogConfig.width = `${width}px`;
     dialogConfig.height = `${height}px`;
     dialogConfig.autoFocus = true;
+    console.log('DIALOG CONFIG ==> ', dialogConfig);
 
     this.requestServiceDialogRef = this.dialog.open(RequestServiceDialogComponent, dialogConfig);
     this.requestServiceDialogRef.afterClosed().subscribe(
@@ -252,107 +268,107 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Sends the command to refresh datatable 
-   * @param $event 
+   * Sends the command to refresh datatable
+   * @param $event
    */
   sendDatatableRefreshCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH, args: [] });
   }
   /**
    * sendDatatableApplyChannelFilterCommand
-   * @param $event 
+   * @param $event
    */
   sendDatatableApplyChannelFilterCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_CHANNEL_FILTER, args: [] });
   }
   /**
    * sendDatatableApplyServiceFilterCommand
-   * @param $event 
+   * @param $event
    */
   sendDatatableApplyServiceFilterCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_SERVICE_FILTER, args: [] });
   }
   /**
    * sendDatatableApplyChangePageCommand
-   * @param $event 
+   * @param $event
    */
   sendDatatableApplyChangePageCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE, args: { page: this.page } });
   }
   /**
    * sendDatatableApplyChangePageCountCommand
-   * @param $event 
+   * @param $event
    */
   sendDatatableApplyChangePageCountCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANGE_PAGE_COUNT, args: [] });
   }
   /**
    * sendDatatableFocusCommand
-   * @param $event 
+   * @param $event
    */
   sendDatatableFocusCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_FOCUS, args: [] });
   }
   /**
    * sendDatatableApplyPrevPage
-   * @param $event 
+   * @param $event
    */
   sendDatatableApplyPrevPage($event?) {
-    if (this.isThereAnOpenDialog() || this.page <= 0) return;
+    if (this.isThereAnOpenDialog() || this.page <= 0) { return; }
     this.page--;
     this.sendDatatableApplyChangePageCommand();
   }
   /**
    * sendDatatableApplyPrevPage
-   * @param $event 
+   * @param $event
    */
   sendDatatableApplyNextPage($event?) {
-    if (this.isThereAnOpenDialog() || (this.page + 1) >= this.maxPage) return;
+    if (this.isThereAnOpenDialog() || (this.page + 1) >= this.maxPage) { return; }
     this.page++;
     this.sendDatatableApplyChangePageCommand();
   }
   /**
    * sendDatatableSelectPrevRow
-   * @param $event 
+   * @param $event
    */
   sendDatatableSelectPrevRow($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SELECT_PREV_ROW, args: {} });
   }
   /**
    * sendDatatableSelectNextRow
-   * @param $event 
+   * @param $event
    */
   sendDatatableSelectNextRow($event?) {
-    if (this.isThereAnOpenDialog()) return;
+    if (this.isThereAnOpenDialog()) { return; }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SELECT_NEXT_ROW, args: {} });
   }
   /**
    * sendDatatableServiceCancelCommand
-   * @param $event 
+   * @param $event
    */
   sendDatatableServiceCancelCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
-    if (!this.userRoles.includes('OPERATOR') || this.userRoles.includes('OPERATION-SUPERVISOR')) {
-      this.showMessageSnackbar("ERRORS.2")
+    if (this.isThereAnOpenDialog()) { return; }
+    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')) {
+      this.showMessageSnackbar('ERRORS.2');
       return;
     }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_CANCEL, args: [] });
   }
   /**
    * sendDatatableServiceAssignCommand
-   * @param $event 
+   * @param $event
    */
   sendDatatableServiceAssignCommand($event?) {
-    if (this.isThereAnOpenDialog()) return;
-    if (!this.userRoles.includes('OPERATOR') || this.userRoles.includes('OPERATION-SUPERVISOR')) {
-      this.showMessageSnackbar("ERRORS.2")
+    if (this.isThereAnOpenDialog()) { return; }
+    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')) {
+      this.showMessageSnackbar('ERRORS.2');
       return;
     }
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_SERVICE_ASSIGN, args: [] });
@@ -370,7 +386,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           : OperatorWorkstationService.LAYOUT_COMMAND_HIDE_INBOX,
         args: []
       }
-    )
+    );
+  }
+
+  onCheckViewAllOperationChange($event) {
+    this.operatorWorkstationService.publishToolbarCommand({
+      code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SEE_ALL_OPERATION_CHANGED,
+      args: [this.supervisorWatchinAllOperation]
+    });
   }
 
   //#endregion
@@ -394,8 +417,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
     this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey] : "",
-        detailMessageKey ? data[detailMessageKey] : "",
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
         {
           duration: 2000
         }
