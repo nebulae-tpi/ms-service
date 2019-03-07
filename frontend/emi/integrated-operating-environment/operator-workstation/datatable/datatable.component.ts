@@ -5,17 +5,18 @@ import {
   OnDestroy,
   ViewChild,
   ElementRef,
-  HostListener
-} from "@angular/core";
+  HostListener,
+  Input
+} from '@angular/core';
 
 import {
   FormBuilder,
   FormGroup,
   FormControl,
   Validators
-} from "@angular/forms";
+} from '@angular/forms';
 
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
 import {
@@ -29,9 +30,9 @@ import {
   startWith,
   debounceTime,
   distinctUntilChanged,
-} from "rxjs/operators";
+} from 'rxjs/operators';
 
-import { Subject, from, of, forkJoin, Observable, concat, timer } from "rxjs";
+import { Subject, from, of, forkJoin, Observable, concat, timer } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -40,24 +41,24 @@ import {
   MatTableDataSource,
   MatSnackBar,
   MatDialog
-} from "@angular/material";
-import { fuseAnimations } from "../../../../../core/animations";
+} from '@angular/material';
+import { fuseAnimations } from '../../../../../core/animations';
 
 //////////// i18n ////////////
 import {
   TranslateService,
   LangChangeEvent,
   TranslationChangeEvent
-} from "@ngx-translate/core";
-import { locale as english } from "../../i18n/en";
-import { locale as spanish } from "../../i18n/es";
-import { FuseTranslationLoaderService } from "../../../../../core/services/translation-loader.service";
+} from '@ngx-translate/core';
+import { locale as english } from '../../i18n/en';
+import { locale as spanish } from '../../i18n/es';
+import { FuseTranslationLoaderService } from '../../../../../core/services/translation-loader.service';
 
 //////////// Other Services ////////////
-import { KeycloakService } from "keycloak-angular";
+import { KeycloakService } from 'keycloak-angular';
 import { OperatorWorkstationService } from '../operator-workstation.service';
-import { ToolbarService } from "../../../../toolbar/toolbar.service";
-import { SelectionModel } from "@angular/cdk/collections";
+import { ToolbarService } from '../../../../toolbar/toolbar.service';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -68,40 +69,45 @@ import { SelectionModel } from "@angular/cdk/collections";
   providers: []
 })
 export class DatatableComponent implements OnInit, OnDestroy {
-  //Subject to unsubscribe 
+  // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
+  // Subject to unsubscrtibe
+  private ngUnsubscribeIOEServiceListener = new Subject();
   private loadingData = false;
-  //current table max height
-  tableHeight: number = 400;
+  // current table max height
+  tableHeight = 400;
 
   /*
   DATA TABLE VARS
   */
   // columns to display
   displayedColumns: string[] = ['state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span'];
-  //Partial data: this is what is displayed to the user
+  // Partial data: this is what is displayed to the user
   partialData = [];
-  //total data source
+  // total data source
   totalData = [];
-  //total RAW data source
+  // total RAW data source
   totalRawData = [];
-  //service state filters
+  // service state filters
   serviceStateFilters = [];
-  //factor to calucllates how many rows per display
+  // factor to calucllates how many rows per display
   private paginationFactor = 1;
-  //current page index
+  // current page index
   private page = 0;
-  //items per page
+  // items per page
   private pageCount = 0;
-  //current selected service id
+  // current selected service id
   private selectedServiceId = undefined;
   selection = new SelectionModel(false, []);
 
-  //current user roles
-  userRoles = undefined
-  userDetails = undefined
-  businessId = undefined
-  userId = undefined
+  // current user roles
+  userRoles = undefined;
+  userDetails = undefined;
+  businessId = undefined;
+  userId = undefined;
+
+  @Input('selectedBusinessId') selectedBusinessId: any;
+  seeAllOperation = false;
 
 
   constructor(
@@ -159,14 +165,14 @@ export class DatatableComponent implements OnInit, OnDestroy {
     ).subscribe(
       (layout) => {
         this.tableHeight = layout.datatable.height;
-        this.pageCount = parseInt(`${(this.tableHeight / 30) * this.paginationFactor}`)
-        //console.log(`Layout = ${JSON.stringify(layout)}`);
-        //console.log(`pageCount = ${this.pageCount}`);
+        this.pageCount = parseInt(`${(this.tableHeight / 30) * this.paginationFactor}`, 10);
+        // console.log(`Layout = ${JSON.stringify(layout)}`);
+        // console.log(`pageCount = ${this.pageCount}`);
         this.recalculatePartialData();
       },
       (error) => console.error(`DatatableComponent.listenLayoutChanges: Error => ${error}`),
       () => {
-        //console.log(`DatatableComponent.listenLayoutChanges: Completed`)
+        // console.log(`DatatableComponent.listenLayoutChanges: Completed`)
       },
     );
   }
@@ -207,12 +213,17 @@ export class DatatableComponent implements OnInit, OnDestroy {
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SELECT_NEXT_ROW:
             this.selectNextRow();
             break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SEE_ALL_OPERATION_CHANGED:
+            this.seeAllOperation = args[0];
+            this.resetDataAndSubscriptions();
+            break;
+
         }
-        //console.log({ code, args });
+        // console.log({ code, args });
       },
       (error) => console.error(`DatatableComponent.listenToolbarCommands: Error => ${error}`),
       () => {
-        console.log(`DatatableComponent.listenToolbarCommands: Completed`)
+        console.log(`DatatableComponent.listenToolbarCommands: Completed`);
       },
     );
   }
@@ -221,10 +232,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Listen to real-time service changes
    */
   subscribeIOEServicesListener() {
-    this.operatorWorkstationService.listenIOEService$(this.businessId, this.userId)
+    this.operatorWorkstationService.listenIOEService$(this.businessId, this.seeAllOperation ? null : this.userId )
       .pipe(
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
+        takeUntil(this.ngUnsubscribeIOEServiceListener)
       )
       .subscribe(
         (service: any) => {
@@ -262,14 +274,15 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Loads the entire data from DB
    */
   async resetData() {
-    this.totalRawData = await this.queryAllDataFromServer();
+    this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
+    console.log('totalRawData.length ==> ', this.totalData.length );
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
     await this.recalculatePartialData();
   }
 
   /**
    * Adds (or removes in case of closing services) services
-   * @param service 
+   * @param service
    */
   async appendData(service) {
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
@@ -288,12 +301,12 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Recarlculate the data partial data (the visible part at the table)
    */
   async recalculatePartialData() {
-    this.totalData.sort((s1, s2) => { return s2.timestamp < s1.timestamp ? 1 : 0 });
+    this.totalData.sort((s1, s2) => s2.timestamp < s1.timestamp ? 1 : 0);
     const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);
     const skip = this.page * this.pageCount;
-    this.partialData = filteredData.slice(skip, skip + this.pageCount);
+    this.partialData = filteredData.slice(skip, skip + this.pageCount).map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
     let maxPage = Math.floor(filteredData.length / this.pageCount);
-    maxPage = (filteredData.length % this.pageCount !== 0) || (maxPage == 0) ? maxPage + 1 : maxPage;
+    maxPage = (filteredData.length % this.pageCount !== 0) || (maxPage === 0) ? maxPage + 1 : maxPage;
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_TOOLBAR_SET_MAX_PAGINATION, args: { maxPage } });
   }
 
@@ -307,7 +320,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     let page = 0;
     while (moreDataAvailable) {
       console.log(`datatable.queryAllDataFromServer: nextPage=${page}`);
-      const gqlResult = await this.operatorWorkstationService.queryServices$([], [], false, page++, 10, undefined).toPromise();
+      const gqlResult = await this.operatorWorkstationService.queryServices$([], [], this.seeAllOperation, this.selectedBusinessId,  page++, 10, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices);
       } else {
@@ -326,7 +339,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   convertServiceToTableFormat(service) {
 
     return {
-      selected: this.selectedServiceId === service.id ? ">" : "",
+      selected: this.selectedServiceId === service.id ? '>' : '',
       id: service.id,
       state: service.state,
       'creation_timestamp': service.timestamp,
@@ -359,13 +372,13 @@ export class DatatableComponent implements OnInit, OnDestroy {
       const seconds = ((diff % 60000) / 1000).toFixed(0);
       return `${minutes > 9 ? minutes : '0' + minutes}m${seconds.length > 1 ? seconds : '0' + seconds}s`;
     } else {
-      return '---'
+      return '---';
     }
   }
 
   calcServiceEta(service) {
     if (!service.pickUpETA) {
-      return '---'
+      return '---';
     }
 
     let diff = service.pickUpETA ? service.pickUpETA - Date.now() : 0;
@@ -386,7 +399,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
    */
   cancelSelectedTrip() {
     const selectedRow = this.getSelectedRow();
-    //console.log(selectedRow);
+    // console.log(selectedRow);
     if (selectedRow) {
       this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
         (results) => {
@@ -397,7 +410,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
           this.loadingData = false;
         },
         () => {
-          //console.log(`DatatableComponent.cancelService: Completed`)
+          // console.log(`DatatableComponent.cancelService: Completed`)
           this.loadingData = false;
         },
       );
@@ -424,7 +437,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
         this.selectedServiceId = this.partialData[currenSelectedIndex + 1].id;
       }
     }
-    this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? ">" : "", }));
+    this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
   }
   selectPrevRow() {
     if (this.partialData.length === 0) {
@@ -436,7 +449,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     } else {
       this.selectedServiceId = this.partialData[currenSelectedIndex - 1].id;
     }
-    this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? ">" : "", }));
+    this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
   }
   async selectPrevPage() {
     if (this.page <= 0) {
@@ -452,8 +465,20 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
 
   getSelectedRow() {
-    const currenSelectedIndex = this.partialData.findIndex(s => s.id === this.selectedServiceId);
-    return currenSelectedIndex === -1 ? undefined : this.partialData[currenSelectedIndex];
+    // const currenSelectedIndex = this.partialData.findIndex(s => s.id === this.selectedServiceId);
+    // return currenSelectedIndex === -1 ? undefined : this.partialData[currenSelectedIndex];
+    return this.partialData.find(s => s.id === this.selectedServiceId);
+  }
+
+  onRowSelected(serviceRow){
+    this.selectedServiceId = serviceRow.serviceRef.id;
+    this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
+  }
+
+  resetDataAndSubscriptions(){
+    this.ngUnsubscribeIOEServiceListener.next();
+    this.resetData();
+    this.subscribeIOEServicesListener();
   }
   //#endregion
 

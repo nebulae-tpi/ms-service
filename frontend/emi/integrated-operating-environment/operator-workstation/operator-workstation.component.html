@@ -3,23 +3,22 @@
 
   <mat-grid-list *ngIf="isHorizontalWithInboxLayout()" [cols]=[screenCols] rowHeight="10px" gutterSize="0px">
     <mat-grid-tile [colspan]=[toolbarCols] [rowspan]=[toolbarRows]>
-      <toolbar fxFlex="100"></toolbar>
+      <toolbar fxFlex="100" [selectedBusinessId]="selectedBusinessId" [userIsSupervisor]="userIsSupervisor" ></toolbar>
     </mat-grid-tile>
     <mat-grid-tile [colspan]=[inboxCols] [rowspan]=[inboxRows] >
       <inbox fxFlex="100"></inbox>
     </mat-grid-tile>
     <mat-grid-tile [colspan]=[datatableCols] [rowspan]=[datatableRows] >
-      <datatable fxFlex="100"></datatable>
+      <datatable [selectedBusinessId]="selectedBusinessId" fxFlex="100"></datatable>
     </mat-grid-tile>
   </mat-grid-list>
 
-
   <mat-grid-list *ngIf="isVerticalWithInboxLayout()" [cols]=[screenCols] rowHeight="10px" gutterSize="0px">
     <mat-grid-tile [colspan]=[toolbarCols] [rowspan]=[toolbarRows] >
-      <toolbar fxFlex="100"></toolbar>
+      <toolbar [selectedBusinessId]="selectedBusinessId" [userIsSupervisor]="userIsSupervisor" fxFlex="100"></toolbar>
     </mat-grid-tile>
     <mat-grid-tile [colspan]=[datatableCols] [rowspan]=[datatableRows] >
-      <datatable fxFlex="100"></datatable>
+      <datatable [selectedBusinessId]="selectedBusinessId" fxFlex="100"></datatable>
     </mat-grid-tile>
     <mat-grid-tile [colspan]=[inboxCols] [rowspan]=[inboxRows] >
       <inbox fxFlex="100"></inbox>
@@ -28,12 +27,14 @@
 
   <mat-grid-list *ngIf="isNoInboxLayout()" [cols]=[screenCols] rowHeight="10px" gutterSize="0px">
     <mat-grid-tile [colspan]=[toolbarCols] [rowspan]=[toolbarRows] >
-      <toolbar fxFlex="100"></toolbar>
+      <toolbar [selectedBusinessId]="selectedBusinessId" [userIsSupervisor]="userIsSupervisor" fxFlex="100"></toolbar>
     </mat-grid-tile>
     <mat-grid-tile [colspan]=[datatableCols] [rowspan]=[datatableRows] >
-      <datatable fxFlex="100"></datatable>
+      <datatable [selectedBusinessId]="selectedBusinessId" fxFlex="100"></datatable>
     </mat-grid-tile>
   </mat-grid-list>
+
+
 
 
 </div>
