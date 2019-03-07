@@ -63,7 +63,11 @@ module.exports = {
                 ).toPromise();
         },
         ServiceClientSatellites(root, args, context) {
-            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceClientSatellites', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["OPERATOR"])
+            return RoleValidator.checkPermissions$(
+                context.authToken.realm_access.roles,
+                'ms-' + 'Service', 'ServiceClientSatellites',
+                PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
+                ["OPERATOR", "OPERATION-SUPERVISOR"])
                 .pipe(
                     mergeMap(() =>
                         broker

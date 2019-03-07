@@ -58,7 +58,7 @@ class ClientCQRS {
       "Client",
       "getSatelliteClients",
       PERMISSION_DENIED,
-      ["OPERATOR"]
+      ["OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isOperator = roles["OPERATOR"];
