@@ -388,74 +388,93 @@ export class DatatableComponent implements OnInit, OnDestroy {
         const offerSpanPercentage = Math.floor((((Date.now() - service.lastStateChangeTimeStamp)/10)) / this.offerSpan);
         // (50 *100)/200 ==> 25%
         // (quiantity*100)/total = %
-        if (service.state == 'REQUESTED'){
-          if (offerSpanPercentage < 50) {
-            service.style = {
-              state: { bgColor: 'yellow', fontColor: 'black'},
-              tTrans: { fontColor: 'black'}
-            }
-          } else if (offerSpanPercentage > 50) {
-            service.style = {
-              state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
-              tTrans: { fontColor: 'red' }
-            }
-          }
-        }
 
-        if (service.state == 'CANCELLED_SYSTEM') {
-          if (offerSpanPercentage < 18) { // APROX 20 seconds
-            service.style = {
-              state: {
-                bgColor: this.toggleState ? 'red' : 'white',
-                fontColor: this.toggleState ? 'black' : 'red',
-                fontBold: true
-              },
-              tTrans: {
-                fontColor: 'red'
+        switch (service.state) {
+          case 'REQUESTED':
+            if (offerSpanPercentage < 50) {
+              service.style = {
+                state: { bgColor: 'yellow', fontColor: 'black' },
+                tTrans: { fontColor: 'black' }
+              }
+            } else if (offerSpanPercentage > 50) {
+              service.style = {
+                state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
+                tTrans: { fontColor: 'red' }
               }
             }
-          } else if (offerSpanPercentage > 18 && offerSpanPercentage < 50) {
-            service.style = {
-              state: { bgColor: 'red', fontColor: 'black', fontBold: true },
-              tTrans: { fontColor: 'red' }
+            break;
+
+          case 'CANCELLED_SYSTEM':
+            if (offerSpanPercentage < 18) { // APROX 20 seconds
+              service.style = {
+                state: {
+                  bgColor: this.toggleState ? 'red' : 'white',
+                  fontColor: this.toggleState ? 'black' : 'red',
+                  fontBold: true
+                },
+                tTrans: { fontColor: 'red' }
+              }
+            } else if (offerSpanPercentage > 18 && offerSpanPercentage < 50) {
+              service.style = {
+                state: { bgColor: 'red', fontColor: 'black', fontBold: true },
+                tTrans: { fontColor: 'red' }
+              }
             }
-          }
-          else if (offerSpanPercentage > 50) {
-            service.style = {
-              state: { bgColor: 'white', fontColor: 'red', fontBold: true },
-              tTrans: { fontColor: 'black' }
+            else if (offerSpanPercentage > 50) {
+              service.style = {
+                state: { bgColor: 'white', fontColor: 'red', fontBold: true },
+                tTrans: { fontColor: 'black' }
+              }
             }
-          }
+            break;
+
+          case 'ASSIGNED':
+            const delayThreshold = 120000;
+            const etaTime = service.serviceRef.pickUpETA;
+            if (etaTime && Date.now() < etaTime) {
+              service.style = {
+                state: { bgColor: 'green', fontColor: 'black' },
+                tTrans: {}
+              }
+            } else if (etaTime && Date.now() < (etaTime + delayThreshold)) {
+              service.style = {
+                state: { bgColor: 'yellow', fontColor: 'black', fontBold: true },
+                tTrans: {}
+              }
+            }
+            else if (etaTime && Date.now() > (etaTime + delayThreshold)) {
+              service.style = {
+                state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
+                tTrans: {}
+              }
+            }
+            break;
+
+          case 'CANCELLED_OPERATOR':
+            service.style = {
+              state: { bgColor: 'white', fontColor: 'red' },
+              tTrans: {}
+            }
+            break;
+
+          case 'CANCELLED_DRIVER':
+            service.style = {
+              state: { bgColor: 'white', fontColor: 'red' },
+              tTrans: {}
+            }
+            break;
+          case 'CANCELLED_CLIENT':
+            service.style = {
+              state: { bgColor: 'white', fontColor: 'red' },
+              tTrans: {}
+            }
+            break;
+
+          default:
+            service.style = { state: {}, tTrans: {} }
+            break;
         }
 
-        if (service.state == 'ASSIGNED') {
-          const delayThreshold = 120000;
-          const etaTime = service.serviceRef.pickUpETA;
-          if (etaTime && Date.now() < etaTime) {
-            service.style = {
-              state: { bgColor: 'green', fontColor: 'black' },
-              tTrans: {}
-            }
-          } else if (etaTime && Date.now() < (etaTime + delayThreshold)) {
-            service.style = {
-              state: { bgColor: 'yellow', fontColor: 'black', fontBold: true },
-              tTrans: {}
-            }
-          }
-          else if (etaTime && Date.now() > (etaTime + delayThreshold)) {
-            service.style = {
-              state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
-              tTrans: {}
-            }
-          }
-        }
-
-        if (service.state == 'CANCELLED_OPERATOR' || service.state == 'CANCELLED_DRIVER' || service.state == 'CANCELLED_CLIENT' ) {
-          service.style = {
-            state: { bgColor: 'white', fontColor: 'red' },
-            tTrans: {}
-          }
-        }
       })
     )
   }
