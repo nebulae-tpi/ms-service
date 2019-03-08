@@ -106,6 +106,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
   // businessId = undefined;
   userId = undefined;
 
+  // offer span in seconds
+  offerSpan = 120;
+
   @Input('selectedBusinessId') selectedBusinessId: any;
   seeAllOperation = false;
 
@@ -262,7 +265,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
     timer(5000, 1000)
       .pipe(
         mergeMap(i => forkJoin(
-          this.refreshTimeRelatedPartialData()
+          this.refreshTimeRelatedPartialData(),
+          this.updateStylesVariablesForPartialData$()
         )),
         takeUntil(this.ngUnsubscribe),
       )
@@ -343,11 +347,14 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * @param service
    */
   convertServiceToTableFormat(service) {
+    const lastServiceVersion = this.partialData.find(e => e.id === service.id);
+    const lastStateChange = service.stateChanges ? service.stateChanges.filter(pds => pds.state === service.state).pop() : undefined;
 
     return {
       selected: this.selectedServiceId === service.id ? '>' : '',
       id: service.id,
       state: service.state,
+      style: lastServiceVersion ? lastServiceVersion.style : { state: {}, tTrans: {} },
       'creation_timestamp': service.timestamp,
       'client_name': service.client ? service.client.fullname : '-',
       'pickup_addr': service.pickUp ? service.pickUp.addressLine1 : '-',
@@ -356,6 +363,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       eta: this.calcServiceEta(service),
       'state_time_span': this.calcServiceStateTimeSpan(service),
       'distance': 0.00,
+      lastStateChangeTimeStamp: lastStateChange ?  lastStateChange.timestamp : undefined,
       serviceRef: service
     };
   }
@@ -368,6 +376,88 @@ export class DatatableComponent implements OnInit, OnDestroy {
         pd.eta = this.calcServiceEta(pd.serviceRef);
       })
     );
+  }
+
+  updateStylesVariablesForPartialData$(){
+    return from(this.partialData)
+    .pipe(
+      tap(service => {
+        const offerSpanPercentage = Math.floor((((Date.now() - service.lastStateChangeTimeStamp)/10)) / this.offerSpan);
+        // (50 *100)/200 ==> 25%
+        // (quiantity*100)/total = %
+        if (service.state == 'REQUESTED'){
+          if (offerSpanPercentage < 50) {
+            service.style = {
+              state: { bgColor: 'yellow', fontColor: 'black'},
+              tTrans: { fontColor: 'black'}
+            }
+          } else if (offerSpanPercentage > 50) {
+            service.style = {
+              state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
+              tTrans: { fontColor: 'red' }
+            }
+          }
+        }
+
+        if (service.state == 'CANCELLED_SYSTEM') {
+          if (offerSpanPercentage < 18) { // APROX 20 seconds
+            service.style = {
+              state: {
+                toogle: !service.style.state.toogle,
+                bgColor: service.style.state.toogle ? 'red' : 'white',
+                fontColor: service.style.state.toogle ? 'black' : 'red',
+                fontBold: true
+              },
+              tTrans: {
+                fontColor: 'red'
+              }
+            }
+          } else if (offerSpanPercentage > 18 && offerSpanPercentage < 50) {
+            service.style = {
+              state: { bgColor: 'red', fontColor: 'black', fontBold: true },
+              tTrans: { fontColor: 'red' }
+            }
+          }
+          else if (offerSpanPercentage > 50) {
+            service.style = {
+              state: { bgColor: 'white', fontColor: 'red', fontBold: true },
+              tTrans: { fontColor: 'black' }
+            }
+          }
+        }
+
+        if (service.state == 'ASSIGNED') {
+          const delayThreshold = 120000;
+          // const secondsAfterAssignment = Math.floor((Date.now() - service.lastStateChangeTimeStamp)/1000);
+          if (service.eta && Date.now() < service.eta) {
+            service.style = {
+              state: { bgColor: 'green', fontColor: 'black' },
+              tTrans: {}
+            }
+          } else if (service.eta && Date.now() < (service.eta + delayThreshold)) {
+            service.style = {
+              state: { bgColor: 'yellow', fontColor: 'black', fontBold: true },
+              tTrans: {}
+            }
+          }
+          else if (service.eta && Date.now() > (service.eta + delayThreshold)) {
+            service.style = {
+              state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
+              tTrans: {}
+            }
+          }
+        }
+
+        if (service.state == 'CANCELLED_OPERATOR' || service.state == 'CANCELLED_DRIVER' || service.state == 'CANCELLED_CLIENT' ) {
+          service.style = {
+            state: { bgColor: 'white', fontColor: 'red' },
+            tTrans: {}
+          }
+        }
+
+
+      })
+    )
   }
 
   calcServiceStateTimeSpan(service) {
@@ -477,6 +567,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
   onRowSelected(serviceRow){
+    console.log(serviceRow);
     this.selectedServiceId = serviceRow.serviceRef.id;
     this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
   }
