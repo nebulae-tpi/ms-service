@@ -113,6 +113,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
   seeAllOperation = false;
   // used to togle background and font color
   toggleState = false;
+  // delay Threshold
+  delayThreshold = 120000;
 
 
   constructor(
@@ -429,22 +431,21 @@ export class DatatableComponent implements OnInit, OnDestroy {
             break;
 
           case 'ASSIGNED':
-            const delayThreshold = 120000;
             const etaTime = service.serviceRef.pickUpETA;
-            if (etaTime && Date.now() < etaTime) {
-              service.style = {
-                state: { bgColor: 'green', fontColor: 'black' },
-                tTrans: {}
-              }
-            } else if (etaTime && Date.now() < (etaTime + delayThreshold)) {
+            if (etaTime && Date.now() < (etaTime + this.delayThreshold)) {
               service.style = {
                 state: { bgColor: 'yellow', fontColor: 'black' },
                 tTrans: {}
               }
             }
-            else if (etaTime && Date.now() > (etaTime + delayThreshold)) {
+            else if (etaTime && Date.now() > (etaTime + this.delayThreshold)) {
               service.style = {
                 state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
+                tTrans: {}
+              }
+            }else{
+              service.style = {
+                state: { bgColor: 'green', fontColor: 'black' },
                 tTrans: {}
               }
             }
