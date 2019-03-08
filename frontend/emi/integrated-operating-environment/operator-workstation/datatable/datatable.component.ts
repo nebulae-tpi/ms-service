@@ -432,7 +432,12 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
           case 'ASSIGNED':
             const etaTime = service.serviceRef.pickUpETA;
-            if (etaTime && Date.now() < (etaTime + this.delayThreshold)) {
+            if ( !etaTime || etaTime && Date.now() < etaTime) {
+              service.style = {
+                state: { bgColor: 'green', fontColor: 'black' },
+                tTrans: {}
+              }
+            } else if (etaTime && Date.now() < (etaTime + this.delayThreshold)) {
               service.style = {
                 state: { bgColor: 'yellow', fontColor: 'black' },
                 tTrans: {}
@@ -441,11 +446,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
             else if (etaTime && Date.now() > (etaTime + this.delayThreshold)) {
               service.style = {
                 state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
-                tTrans: {}
-              }
-            }else{
-              service.style = {
-                state: { bgColor: 'green', fontColor: 'black' },
                 tTrans: {}
               }
             }
