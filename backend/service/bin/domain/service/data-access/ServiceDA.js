@@ -130,9 +130,9 @@ class ServiceDA {
 
     return of(initDate)
     .pipe(
-      tap(date => console.log("getServiceList$ date used ==> ", date)),
+      // tap(date => console.log("getServiceList$ date used ==> ", date)),
       map(date => mongoDB.getHistoricalDb(date)),
-      tap(db => console.log(`Searching in ==> ${db.databaseName}.${COLLECTION_NAME}`)),
+      // tap(db => console.log(`Searching in ==> ${db.databaseName}.${COLLECTION_NAME}`)),
       map(db => db.collection(COLLECTION_NAME)),
       mergeMap(collection => {
         const cursor = collection

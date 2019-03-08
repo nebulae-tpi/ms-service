@@ -454,8 +454,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
             tTrans: {}
           }
         }
-
-
       })
     )
   }
