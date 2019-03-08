@@ -438,7 +438,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
               }
             } else if (etaTime && Date.now() < (etaTime + delayThreshold)) {
               service.style = {
-                state: { bgColor: 'yellow', fontColor: 'black', fontBold: true },
+                state: { bgColor: 'yellow', fontColor: 'black' },
                 tTrans: {}
               }
             }
