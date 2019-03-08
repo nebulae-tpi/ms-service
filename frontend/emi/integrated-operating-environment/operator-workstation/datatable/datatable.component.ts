@@ -111,6 +111,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
   @Input('selectedBusinessId') selectedBusinessId: any;
   seeAllOperation = false;
+  // used to togle background and font color
+  toggleState = false;
 
 
   constructor(
@@ -379,6 +381,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
   updateStylesVariablesForPartialData$(){
+    this.toggleState = !this.toggleState;
     return from(this.partialData)
     .pipe(
       tap(service => {
@@ -403,9 +406,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
           if (offerSpanPercentage < 18) { // APROX 20 seconds
             service.style = {
               state: {
-                toogle: !service.style.state.toogle,
-                bgColor: service.style.state.toogle ? 'red' : 'white',
-                fontColor: service.style.state.toogle ? 'black' : 'red',
+                bgColor: this.toggleState ? 'red' : 'white',
+                fontColor: this.toggleState ? 'black' : 'red',
                 fontBold: true
               },
               tTrans: {
@@ -428,19 +430,19 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
         if (service.state == 'ASSIGNED') {
           const delayThreshold = 120000;
-          // const secondsAfterAssignment = Math.floor((Date.now() - service.lastStateChangeTimeStamp)/1000);
-          if (service.eta && Date.now() < service.eta) {
+          const etaTime = service.serviceRef.pickUpETA;
+          if (etaTime && Date.now() < etaTime) {
             service.style = {
               state: { bgColor: 'green', fontColor: 'black' },
               tTrans: {}
             }
-          } else if (service.eta && Date.now() < (service.eta + delayThreshold)) {
+          } else if (etaTime && Date.now() < (etaTime + delayThreshold)) {
             service.style = {
               state: { bgColor: 'yellow', fontColor: 'black', fontBold: true },
               tTrans: {}
             }
           }
-          else if (service.eta && Date.now() > (service.eta + delayThreshold)) {
+          else if (etaTime && Date.now() > (etaTime + delayThreshold)) {
             service.style = {
               state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
               tTrans: {}
