@@ -206,6 +206,26 @@
           "PLATFORM-ADMIN"
         ],
         "default": false
+      },
+      {
+        "groupId": "integrated-operating-environment",
+        "id": "gods-eye",
+        "icon": "visibility",
+        "translate": {
+          "en": "God's Eye",
+          "es": "Ojo de Dios"
+        },
+        "path": "integrated-operating-environment",
+        "navURL": "/integrated-operating-environment/gods-eye",
+        "loadChildren": "./main/content/integrated-operating-environment/integrated-operating-environment.module#IntegratedOperatingEnvironmentModule",
+        "priority": 900,
+        "roles": [
+          "OPERATOR",
+          "OPERATION-SUPERVISOR",
+          "BUSINESS-OWNER",
+          "PLATFORM-ADMIN"
+        ],
+        "default": false
       }
     ],
     "preBuildCommands": [

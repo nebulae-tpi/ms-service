@@ -1,0 +1,14 @@
+<div fxFlex="100" [fxLayout]="cardsContainerLayout" class="cards-container"   [style.min-height.px]="cardsContainerHeight"  >
+    <mat-card *ngFor="let card of cards" [style.width.px]="cardWidth" [style.max-width.px]="cardWidth"  [style.height.px]="cardHeight" [style.max-height.px]="cardHeight"  fxFlex>
+        <mat-card-header>
+            <mat-card-title>{{card.shortcutCode}}</mat-card-title>
+            <div mat-card-avatar>
+                <mat-icon>{{card.icon}}</mat-icon>
+            </div>
+        </mat-card-header>
+        <mat-card-content>
+            {{card.text}}
+        </mat-card-content>
+    </mat-card>
+
+</div>

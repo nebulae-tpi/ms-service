@@ -1,0 +1,40 @@
+<div class="page-layout blank p-24" fusePerfectScrollbar>
+
+
+  <mat-grid-list *ngIf="isHorizontalWithStatsLayout()" [cols]=[screenCols] rowHeight="10px" gutterSize="0px">
+    <mat-grid-tile [colspan]=[toolbarCols] [rowspan]=[toolbarRows]>
+      <ge-toolbar fxFlex="100" [selectedBusinessId]="selectedBusinessId" [userIsSupervisor]="userIsSupervisor" ></ge-toolbar>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]=[statsCols] [rowspan]=[statsRows] >
+      <stats fxFlex="100"></stats>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]=[mapCols] [rowspan]=[mapRows] >
+      <map [selectedBusinessId]="selectedBusinessId" fxFlex="100"></map>
+    </mat-grid-tile>
+  </mat-grid-list>
+
+  <mat-grid-list *ngIf="isVerticalWithStatsLayout()" [cols]=[screenCols] rowHeight="10px" gutterSize="0px">
+    <mat-grid-tile [colspan]=[toolbarCols] [rowspan]=[toolbarRows] >
+      <ge-toolbar [selectedBusinessId]="selectedBusinessId" [userIsSupervisor]="userIsSupervisor" fxFlex="100"></ge-toolbar>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]=[mapCols] [rowspan]=[mapRows] >
+      <map [selectedBusinessId]="selectedBusinessId" fxFlex="100"></map>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]=[statsCols] [rowspan]=[statsRows] >
+      <stats fxFlex="100"></stats>
+    </mat-grid-tile>
+  </mat-grid-list>
+
+  <mat-grid-list *ngIf="isNoStatsLayout()" [cols]=[screenCols] rowHeight="10px" gutterSize="0px">
+    <mat-grid-tile [colspan]=[toolbarCols] [rowspan]=[toolbarRows] >
+      <ge-toolbar [selectedBusinessId]="selectedBusinessId" [userIsSupervisor]="userIsSupervisor" fxFlex="100"></ge-toolbar>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan]=[mapCols] [rowspan]=[mapRows] >
+      <map [selectedBusinessId]="selectedBusinessId" fxFlex="100"></map>
+    </mat-grid-tile>
+  </mat-grid-list>
+
+
+
+
+</div>

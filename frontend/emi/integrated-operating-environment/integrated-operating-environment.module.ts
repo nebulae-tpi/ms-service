@@ -5,15 +5,23 @@ import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 import { ToolbarService } from '../../toolbar/toolbar.service';
-import { ToolbarComponent } from './operator-workstation/toolbar/toolbar.component';
 import { HotkeyModule, HotkeysService } from 'angular2-hotkeys';
 
 import { IntegratedOperatingEnvironmentService } from './integrated-operating-environment.service';
+
 import { OperatorWorkstationService } from './operator-workstation/operator-workstation.service';
 import { OperatorWorkstationComponent } from './operator-workstation/operator-workstation.component';
-import { InboxComponent } from './operator-workstation/inbox/inbox.component';
-import { DatatableComponent } from './operator-workstation/datatable/datatable.component';
-import { RequestServiceDialogComponent } from './operator-workstation/request-service-dialog/request-service-dialog.component';
+import { ToolbarComponent as WorkstationToolbarComponent } from './operator-workstation/toolbar/toolbar.component';
+import { InboxComponent as WorkstationInboxComponent } from './operator-workstation/inbox/inbox.component';
+import { DatatableComponent as WorkstationDatatableComponent } from './operator-workstation/datatable/datatable.component';
+import { RequestServiceDialogComponent as WorkstationRequestServiceDialogComponent } from './operator-workstation/request-service-dialog/request-service-dialog.component';
+
+import { GodsEyeService } from './gods-eye/gods-eye.service';
+import { GodsEyeComponent } from './gods-eye/gods-eye.component';
+import { ToolbarComponent as GodsEyeToolbarComponent } from './gods-eye/toolbar/toolbar.component';
+import { StatsComponent as GodsEyeStatsComponent } from './gods-eye/stats/stats.component';
+import { MapComponent as GodsEyeMapComponent } from './gods-eye/map/map.component';
+
 
 
 const routes: Routes = [
@@ -24,6 +32,10 @@ const routes: Routes = [
   {
     path: 'operator-workstation',
     component: OperatorWorkstationComponent,
+  },
+  {
+    path: 'gods-eye',
+    component: GodsEyeComponent,
   }
 ];
 
@@ -37,13 +49,18 @@ const routes: Routes = [
   ],
   declarations: [
     OperatorWorkstationComponent,
-    ToolbarComponent,
-    InboxComponent,
-    DatatableComponent,
-    RequestServiceDialogComponent,
+    WorkstationToolbarComponent,
+    WorkstationInboxComponent,
+    WorkstationDatatableComponent,
+    WorkstationRequestServiceDialogComponent,
+
+    GodsEyeComponent,
+    GodsEyeToolbarComponent,
+    GodsEyeStatsComponent,
+    GodsEyeMapComponent
   ],
-  entryComponents: [RequestServiceDialogComponent],
-  providers: [OperatorWorkstationService, HotkeysService, DatePipe]
+  entryComponents: [WorkstationRequestServiceDialogComponent],
+  providers: [OperatorWorkstationService, GodsEyeService, HotkeysService, DatePipe]
 })
 
 export class IntegratedOperatingEnvironmentModule { }
