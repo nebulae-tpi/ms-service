@@ -6,8 +6,10 @@ const { mergeMap, map, mapTo, filter, catchError, tap } = require('rxjs/operator
 const mqtt = require('mqtt');
 
 
-const INCOMING_SHIFT_MSG_TOPIC = "+/driver-app/shift/server";
-const INCOMING_SERVICE_MSG_TOPIC = "+/driver-app/service/server";
+// const INCOMING_SHIFT_MSG_TOPIC = "+/driver-app/shift/server";
+// const INCOMING_SERVICE_MSG_TOPIC = "+/driver-app/service/server";
+const INCOMING_SHIFT_MSG_TOPIC = process.env.INCOMING_SHIFT_MSG_TOPIC || "+/driver-app/shift/server";
+const INCOMING_SERVICE_MSG_TOPIC = process.env.INCOMING_SERVICE_MSG_TOPIC || "+/driver-app/service/server";
 /**
  * Singleton instance
  */
