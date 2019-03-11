@@ -6,8 +6,11 @@ const { mergeMap, map, mapTo, filter, catchError, tap } = require('rxjs/operator
 const mqtt = require('mqtt');
 
 
-const INCOMING_SHIFT_MSG_TOPIC = "+/driver-app/shift/server";
-const INCOMING_SERVICE_MSG_TOPIC = "+/driver-app/service/server";
+
+// const INCOMING_SHIFT_MSG_TOPIC = "+/driver-app/shift/server";
+// const INCOMING_SERVICE_MSG_TOPIC = "+/driver-app/service/server";
+const INCOMING_SHIFT_MSG_TOPIC = process.env.INCOMING_SHIFT_MSG_TOPIC || "+/driver-app/shift/server";
+const INCOMING_SERVICE_MSG_TOPIC = process.env.INCOMING_SERVICE_MSG_TOPIC || "+/driver-app/service/server";
 /**
  * Singleton instance
  */
@@ -47,6 +50,9 @@ class DriverAppLinkBroker {
             });
             obs.next(`DriverAppLinkBroker Mqtt connected: ${this.url}:${this.port} { clientId:${this.clientId}, username:${this.user} }`);
             this.mqttClient.on('message', (topic, message) => {
+                console.log(`################################### TOPIC: ${topic} ###################################`);
+                console.log(`${message} \n \n`);
+
                 const msg = JSON.parse(message);
                 if (msg && msg.att && msg.att.sId && msg.att.un && msg.t && msg.data) {
                     // message is Buffer

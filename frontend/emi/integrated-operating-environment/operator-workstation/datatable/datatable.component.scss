@@ -33,7 +33,7 @@ table {
 
 
 .mat-row-selected {
-  background: silver
+  background: silver;
 }
 
 .td-container {
@@ -46,7 +46,35 @@ table {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .td-spacer {
   height: 0;
   overflow: hidden;
+}
+.bg-red{
+  background: #FFCECE;
+}
+.bg-yellow{
+  background: #FFFBCC; 
+}
+.bg-green{
+  background: #D5FFCE;  
+}
+.bg-white{
+  background: #FFFFFF;
+}
+.font-black{
+  color: #000000;
+}
+.font-yellow{
+  color: #FFCE14;
+}
+.font-red{
+  color: #BF0025;
+}
+.font-white{
+  color: #FFFFFF;
+}
+.font-bold{
+  font-weight: bold;
 }

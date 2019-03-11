@@ -1,6 +1,6 @@
 'use strict';
 
-const MQTT = require('async-mqtt');
+const MQTT = require('mqtt');
 const Rx = require('rxjs');
 const uuidv4 = require('uuid/v4');
 const {

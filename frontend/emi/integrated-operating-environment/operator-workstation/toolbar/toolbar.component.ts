@@ -85,6 +85,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   @Input('selectedBusinessId') selectedBusinessId: any;
   // user is supervisor
   @Input('userIsSupervisor') userIsSupervisor: any;
+  // Last refresh command sent timestamp
+  lastRefreshCommandSentTimestamp = 0;
 
 
   // Subject to unsubscribe
@@ -195,7 +197,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['r'], (event: KeyboardEvent): boolean => {
-      if (this.selectedBusinessId){
+      if (this.selectedBusinessId){        
         this.sendDatatableRefreshCommand();
       }
       return false;
@@ -272,7 +274,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    * @param $event
    */
   sendDatatableRefreshCommand($event?) {
-    if (this.isThereAnOpenDialog()) { return; }
+    if (this.isThereAnOpenDialog() || (this.lastRefreshCommandSentTimestamp + 2000) > Date.now()) { return; }
+    this.lastRefreshCommandSentTimestamp = Date.now();
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH, args: [] });
   }
   /**
