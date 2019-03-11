@@ -117,6 +117,7 @@ module.exports = {
       ).toPromise();
     },
   },
+  
   //// SUBSCRIPTIONS ///////
   Subscription: {
     IOEService: {

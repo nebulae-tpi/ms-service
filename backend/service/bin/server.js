@@ -42,6 +42,6 @@ const start = () => {
     );
 };
 
-start();
 
+start();
 
