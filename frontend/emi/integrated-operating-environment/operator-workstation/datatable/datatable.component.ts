@@ -497,7 +497,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
   calcServiceEta(service) {
-    if (!service.pickUpETA || service.state.includes('CANCELLED')) {
+    if (!service.pickUpETA || service.state === 'DONE' || service.state.includes('CANCELLED') ) {
       return '---';
     }
 
