@@ -163,7 +163,6 @@ class ServiceES {
 
             }
             if (needToBeCancelledBySystem) {
-                console.log("Se va a cancelar un servicio por el sistema ==> ", serviceId );
                 await eventSourcing.eventStore.emitEvent$(
                     ServiceES.buildEventSourcingEvent(
                         'Service',
