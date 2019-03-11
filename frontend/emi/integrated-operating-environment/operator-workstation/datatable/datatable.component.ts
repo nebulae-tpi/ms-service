@@ -114,7 +114,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   // used to togle background and font color
   toggleState = false;
   // delay Threshold
-  delayThreshold = 60000 * 10; // ten minutes
+  delayThreshold = 60000 * 5; // five minutes
 
 
   constructor(
@@ -413,7 +413,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
             break;
 
           case 'CANCELLED_SYSTEM':
-            if (offerSpanPercentage < 18) { // APROX 20 seconds
+            if (offerSpanPercentage < 25) { // APROX 30 seconds
               service.style = {
                 state: {
                   bgColor: this.toggleState ? 'red' : 'white',
@@ -424,8 +424,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
               }
             } else {
               service.style = {
-                state: { bgColor: 'red', fontColor: 'black', fontBold: true },
-                tTrans: { fontColor: 'red' }
+                state: { bgColor: 'white', fontColor: 'red' },
+                tTrans: { }
               }            
             }
             break;
