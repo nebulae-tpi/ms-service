@@ -245,8 +245,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Listen to real-time service changes
    */
   subscribeIOEServicesListener() {
-    this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId )
+    of(this.selectedBusinessId)
       .pipe(
+        filter(selectedBusiness => selectedBusiness && selectedBusiness.id),
+        mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId )),
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
         takeUntil(this.ngUnsubscribeIOEServiceListener)
