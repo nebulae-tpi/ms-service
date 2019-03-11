@@ -500,6 +500,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     if (!service.pickUpETA || service.state === 'DONE' || service.state.includes('CANCELLED') ) {
       return '---';
     }
+    
 
     let diff = service.pickUpETA ? service.pickUpETA - Date.now() : 0;
     diff = (diff !== null && diff < 0) ? 0 : diff;
