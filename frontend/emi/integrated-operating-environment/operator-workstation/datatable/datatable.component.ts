@@ -114,7 +114,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   // used to togle background and font color
   toggleState = false;
   // delay Threshold
-  delayThreshold = 120000;
+  delayThreshold = 60000 * 10; // ten minutes
 
 
   constructor(
@@ -402,7 +402,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
               }
             } else if (offerSpanPercentage > 50) {
               service.style = {
-                state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
+                state: { 
+                  bgColor: this.toggleState ? 'yellow' : 'white',
+                  fontColor: this.toggleState ? 'red' : 'black',
+                  fontBold: true
+                },
                 tTrans: { fontColor: 'red' }
               }
             }
@@ -418,17 +422,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
                 },
                 tTrans: { fontColor: 'red' }
               }
-            } else if (offerSpanPercentage > 18 && offerSpanPercentage < 50) {
+            } else {
               service.style = {
                 state: { bgColor: 'red', fontColor: 'black', fontBold: true },
                 tTrans: { fontColor: 'red' }
-              }
-            }
-            else if (offerSpanPercentage > 50) {
-              service.style = {
-                state: { bgColor: 'white', fontColor: 'red', fontBold: true },
-                tTrans: { fontColor: 'black' }
-              }
+              }            
             }
             break;
 
@@ -441,13 +439,17 @@ export class DatatableComponent implements OnInit, OnDestroy {
               }
             } else if (etaTime && Date.now() < (etaTime + this.delayThreshold)) {
               service.style = {
-                state: { bgColor: 'yellow', fontColor: 'black' },
+                state: { bgColor: 'red', fontColor: 'black' },
                 tTrans: {}
               }
             }
             else if (etaTime && Date.now() > (etaTime + this.delayThreshold)) {
               service.style = {
-                state: { bgColor: 'yellow', fontColor: 'red', fontBold: true },
+                state: { 
+                  bgColor: this.toggleState ? 'red' : 'white',
+                  fontColor: this.toggleState ? 'black' : 'red',
+                  fontBold: true
+                },
                 tTrans: {}
               }
             }
