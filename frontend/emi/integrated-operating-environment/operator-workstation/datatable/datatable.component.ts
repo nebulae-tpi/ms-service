@@ -247,7 +247,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   subscribeIOEServicesListener() {
     of(this.selectedBusinessId)
       .pipe(
-        filter(selectedBusiness => selectedBusiness && selectedBusiness.id),
+        filter(selectedBusinessId => selectedBusinessId),
         mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId )),
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
