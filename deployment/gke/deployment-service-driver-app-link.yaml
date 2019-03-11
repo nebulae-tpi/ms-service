@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: driver-app-link
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: driver-app-link
@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.driverapplink:2.8.8 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: DOCKERHUB/service.backend.driverapplink:2.8.9 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
