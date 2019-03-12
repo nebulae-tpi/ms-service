@@ -68,6 +68,9 @@ class DriverAppLinkBroker {
                 }
 
             });
+            this.mqttClient.on('error', (arg1) => {
+                console.error(`error: ${JSON.stringify(arg1)}`);
+            });
             obs.next(`DriverAppLinkBroker Mqtt onMessage linked to rx.subject`);
             this.listeningTopics.forEach(topic => {
                 this.mqttClient.subscribe(topic, {qos: 1});
