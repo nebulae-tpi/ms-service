@@ -61,8 +61,9 @@ import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
 
 //////////// MAPS ////////////
-import { MapRef } from './entities/agmMapRef';
-import { MarkerRef, ClientPoint, MarkerRefOriginalInfoWindowContent } from './entities/markerRef';
+// import { MapRef } from './entities/agmMapRef';
+// import { MarkerRef, ClientPoint, MarkerRefOriginalInfoWindowContent } from './entities/markerRef';
+
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -75,7 +76,8 @@ import { MarkerRef, ClientPoint, MarkerRefOriginalInfoWindowContent } from './en
 export class MapComponent implements OnInit, OnDestroy {
 
   //map itseld
-  map: MapRef;
+  map: google.maps.Map;
+  bounds: google.maps.LatLngBounds;
   @ViewChild('gmap') gmapElement: any;
   mapTypes = [
     google.maps.MapTypeId.HYBRID,
@@ -134,6 +136,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     await this.queryUserSpecs();
+    this.initMap();
     this.listenLayoutChanges();
     this.listenToolbarCommands();
     this.subscribeIOEServicesListener();
@@ -155,7 +158,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.userRoles = await this.keycloakService.getUserRoles(true);
     this.userDetails = await this.keycloakService.loadUserProfile();
     // this.businessId = this.userDetails.attributes.businessId[0];
-    console.log('###$$$$$ ', this.userDetails.attributes);
+    //console.log('###$$$$$ ', this.userDetails.attributes);
     this.userId = this.userDetails.attributes.userId ? this.userDetails.attributes.userId[0] : undefined;
   }
 
@@ -203,7 +206,7 @@ export class MapComponent implements OnInit, OnDestroy {
             if (this.zoom !== args.zoom) {
               await this.recalculatePartialData();
             }
-            break;                    
+            break;
           case GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
             // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
             this.selectedBusinessId = args[0];
@@ -267,15 +270,16 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   async resetData() {
     this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
-    console.log('totalRawData.length ==> ', this.totalData.length);
     this.totalData = this.totalRawData.map(s => this.convertServiceToMapFormat(s));
+    console.log('totalRawData.length ==> ', this.totalRawData.length);
+    console.log('totalData.length ==> ', this.totalData.length);
     await this.recalculatePartialData();
   }
 
-  resetDataAndSubscriptions(){
+  resetDataAndSubscriptions() {
     this.ngUnsubscribeIOEServiceListener.next();
     this.resetData();
-    if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }    
+    if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
   }
 
   /**
@@ -298,8 +302,13 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Recarlculate the data partial data (the visible part at the table)
    */
-  async recalculatePartialData() {    
-    const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);                
+  async recalculatePartialData() {
+    const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);
+    this.partialData.filter(d => d.marker).forEach(d => d.marker.setMap(null));
+    this.partialData = filteredData;
+    this.partialData.filter(d => d.marker).forEach(d => d.marker.setMap(this.map));
+    console.log('partialData.length ==> ', this.partialData.length);
+    //this.partialData.forEach(x => console.log(x.marker));
   }
 
 
@@ -329,22 +338,36 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param service
    */
   convertServiceToMapFormat(service) {
+    const location = service.location ? service.location : service.pickUp;
+    let fillColor = '#FFB6C1';
+    switch(service.state){
+      case 'REQUESTED': fillColor = '#fff622'; break;
+      case 'ASSIGNED': fillColor = '#00ff00'; break;
+      case 'ARRIVED': fillColor = '#0000FF'; break;
+      case 'ON_BOARD': fillColor = '#000088'; break;
+      case 'CANCELLED_SYSTEM': fillColor = '#ff0000'; break;
+    }
+    const marker = new google.maps.Marker({
+      position: new google.maps.LatLng(location.marker.lat, location.marker.lng),
+      icon: {
+        //path: google.maps.SymbolPath.CIRCLE,
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        fillOpacity: 1,
+        fillColor,
+        strokeOpacity: 1.0,
+        strokeColor: '#000000',
+        strokeWeight: 0.5, 
+        scale: 4 //pixels,        
+      }
+    });
 
     return {
-      selected: this.selectedServiceId === service.id ? '>' : '',
-      id: service.id,
-      state: service.state,
-      'creation_timestamp': service.timestamp,
-      'client_name': service.client ? service.client.fullname : '-',
-      'pickup_addr': service.pickUp ? service.pickUp.addressLine1 : '-',
-      'pickup_neig': service.pickUp ? service.pickUp.neighborhood : '-',
-      'vehicle_plate': service.vehicle ? service.vehicle.licensePlate : '-',
-      eta: this.calcServiceEta(service),
-      'state_time_span': this.calcServiceStateTimeSpan(service),
-      'distance': 0.00,
+      marker,
       serviceRef: service
     };
   }
+
+
 
   //#region TIME-RELATED DATE REFRESH
   refreshTimeRelatedPartialData() {
@@ -383,8 +406,18 @@ export class MapComponent implements OnInit, OnDestroy {
 
   //#endregion
 
+  initMap() {
+    this.map = new google.maps.Map(this.gmapElement.nativeElement, {
+      center: new google.maps.LatLng(6.164719, -75.601595),
+      zoom: 15,
+      streetViewControl: true,
+      fullscreenControl: true,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+  }
 
-  //#region SERVICE ACTIONS
+  //#region MAPS
+
 
 
   //#endregion
