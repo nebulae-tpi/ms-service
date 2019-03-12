@@ -50,6 +50,7 @@ class DriverAppLinkBroker {
             });
             obs.next(`DriverAppLinkBroker Mqtt connected: ${this.url}:${this.port} { clientId:${this.clientId}, username:${this.user} }`);
             this.mqttClient.on('message', (topic, message) => {
+
                 console.log(`################################### TOPIC: ${topic} ###################################`);
                 console.log(`${message} \n \n`);
 
