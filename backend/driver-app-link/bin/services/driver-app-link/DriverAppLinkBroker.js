@@ -223,7 +223,7 @@ module.exports = () => {
             {
                 url: process.env.DRIVER_APP_MQTT_SERVER_URL,
                 port: process.env.DRIVER_APP_MQTT_SERVER_PORT,
-                clientId: process.env.DRIVER_APP_MQTT_SERVER_CLIENT_ID,
+                clientId: `${process.env.DRIVER_APP_MQTT_SERVER_CLIENT_ID}-${uuidv4()}`,
                 user: process.env.DRIVER_APP_MQTT_SERVER_USER,
                 password: process.env.DRIVER_APP_MQTT_SERVER_PASSWORD,
             }
