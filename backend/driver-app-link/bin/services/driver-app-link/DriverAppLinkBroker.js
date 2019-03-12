@@ -57,10 +57,12 @@ class DriverAppLinkBroker {
                 const msg = JSON.parse(message);
                 if (msg && msg.att && msg.att.sId && msg.att.un && msg.t && msg.data) {
                     // message is Buffer
+	            /**
                     this.incomingMessages$.next({
                         topic: topic,
                         ...msg
                     });
+		    /**/
                 } else {
                     console.error(`WARNING: invalid incoming message structure: ${message}`);
                 }
