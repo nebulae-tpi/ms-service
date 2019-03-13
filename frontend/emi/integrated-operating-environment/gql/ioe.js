@@ -61,7 +61,7 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
     vehicle{
       licensePlate
     },
-    driver{ fullname, document, id },
+    driver{ fullname, documentId, id },
     lastModificationTimestamp,
       request{
       sourceChannel, destChannel,
@@ -117,7 +117,7 @@ export const IOEServiceSubscription = gql`
       vehicle{
         licensePlate
       },
-      driver{ fullname, document, id },
+      driver{ fullname, documentId, id },
       lastModificationTimestamp,
         request{
         sourceChannel, destChannel,

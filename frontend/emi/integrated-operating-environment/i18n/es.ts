@@ -41,6 +41,7 @@ export const locale = {
         STATE: 'Estado',
         CREATION_TIMESTAMP: 'Hora',
         CLIENT_NAME: 'Cliente',
+        DRIVER_DOC_ID: 'Conductor',
         PICKUP_ADDR: 'Dir. Recogida',
         NEIGHBORHOOD: 'Barrio',
         VEHICLE_PLATE: 'Placa',

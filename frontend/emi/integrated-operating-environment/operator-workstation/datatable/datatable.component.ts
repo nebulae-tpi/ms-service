@@ -81,7 +81,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   DATA TABLE VARS
   */
   // columns to display
-  displayedColumns: string[] = ['state', 'creation_timestamp', 'client_name', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span'];
+  displayedColumns: string[] = ['state', 'creation_timestamp', 'client_name', 'driverDocumentId', 'pickup_addr', 'pickup_neig', 'vehicle_plate', 'eta', 'state_time_span'];
   // Partial data: this is what is displayed to the user
   partialData = [];
   // total data source
@@ -362,6 +362,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       state: service.state,
       style: lastServiceVersion ? lastServiceVersion.style : { state: {}, tTrans: {} },
       'creation_timestamp': service.timestamp,
+      driverDocumentId: service.driver ? service.driver.documentId : '---',
       'client_name': service.client ? service.client.fullname : '-',
       'pickup_addr': service.pickUp ? service.pickUp.addressLine1 : '-',
       'pickup_neig': service.pickUp ? service.pickUp.neighborhood : '-',
@@ -496,12 +497,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
     }
   }
 
-  calcServiceEta(service) {
-    if (!service.pickUpETA || service.state === 'DONE' || service.state.includes('CANCELLED') ) {
+  calcServiceEta(service) {    
+    if (!service.pickUpETA || service.state !== 'ASSIGNED' ) {
       return '---';
     }
-    
-
+             
     let diff = service.pickUpETA ? service.pickUpETA - Date.now() : 0;
     diff = (diff !== null && diff < 0) ? 0 : diff;
 

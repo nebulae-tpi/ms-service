@@ -142,7 +142,7 @@ type IOEDriver {
     "Driver fullname"
     fullname: String
     "document"
-    document: String
+    documentId: String
     "driver id"
     id: String
 }
