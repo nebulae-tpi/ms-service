@@ -50,24 +50,30 @@ class DriverAppLinkBroker {
             });
             obs.next(`DriverAppLinkBroker Mqtt connected: ${this.url}:${this.port} { clientId:${this.clientId}, username:${this.user} }`);
             this.mqttClient.on('message', (topic, message) => {
+
                 console.log(`################################### TOPIC: ${topic} ###################################`);
                 console.log(`${message} \n \n`);
 
                 const msg = JSON.parse(message);
                 if (msg && msg.att && msg.att.sId && msg.att.un && msg.t && msg.data) {
                     // message is Buffer
+	            /**/
                     this.incomingMessages$.next({
                         topic: topic,
                         ...msg
                     });
+		    /**/
                 } else {
                     console.error(`WARNING: invalid incoming message structure: ${message}`);
                 }
 
             });
+            this.mqttClient.on('error', (arg1) => {
+                console.error(`error: ${JSON.stringify(arg1)}`);
+            });
             obs.next(`DriverAppLinkBroker Mqtt onMessage linked to rx.subject`);
             this.listeningTopics.forEach(topic => {
-                this.mqttClient.subscribe(topic);
+                this.mqttClient.subscribe(topic, {qos: 1});
                 obs.next(`DriverAppLinkBroker Mqtt listenning to ${topic}`);
             });
             obs.complete();
