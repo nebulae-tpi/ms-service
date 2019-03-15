@@ -280,6 +280,19 @@ class ServiceDA {
     );
   }
 
+  /**
+   * Finds the open services requested by the client
+   */
+  static findCurrentServicesRequestedByClient$(clientId, projection = undefined) {
+    const explorePastMonth = Date.today().getDate() <= 2;
+    const query = { "state": { "$in": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "client.id": clientId };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection }))))
+    );
+  }
+
 
   /**
    * Finds an historical service by driver

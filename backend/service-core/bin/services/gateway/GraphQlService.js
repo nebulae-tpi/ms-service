@@ -1,8 +1,10 @@
 "use strict";
 
 const { ShiftCQRS } = require("../../domain/shift");
+const { ShiftClientCQRS } = require("../../domain/shift");
 const { DriverCQRS } = require("../../domain/driver");
 const { ServiceCQRS } = require("../../domain/service");
+const { ServiceClientCQRS } = require("../../domain/service");
 const broker = require("../../tools/broker/BrokerFactory")();
 const { of, from } = require("rxjs");
 const jsonwebtoken = require("jsonwebtoken");
@@ -163,7 +165,15 @@ class GraphQlService {
         aggregateType: "Shift",
         messageType: "drivergateway.graphql.mutation.stopShift"
       },     
-      
+      // CLIENT
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.CurrentServices"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.NearbyVehicles"
+      },
       //DRIVER
       {
         aggregateType: "Driver",
@@ -246,6 +256,32 @@ class GraphQlService {
       "drivergateway.graphql.query.DriverAssignedVehicles": {
         fn: DriverCQRS.queryDriverAssignedVehicles$,
         obj: DriverCQRS
+      },
+
+      // CLIENT
+      "clientgateway.graphql.query.NearbyVehicles": {
+        fn: ShiftClientCQRS.queryNearbyVehicles$,
+        obj: ShiftClientCQRS
+      },
+      "clientgateway.graphql.query.CurrentServices": {
+        fn: ServiceClientCQRS.queryClientCurrentServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.HistoricalClientServices": {
+        fn: ServiceClientCQRS.queryHistoricalClientServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.mutation.RequestService": {
+        fn: ServiceClientCQRS.requestServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.mutation.CancelServiceByClient": {
+        fn: ServiceClientCQRS.cancelServicebyClient$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.NearbyVehicles": {
+        fn: ServiceClientCQRS.queryNearbyVehicles$,
+        obj: ServiceClientCQRS
       },
 
       // SERVICES

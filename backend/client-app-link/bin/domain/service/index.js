@@ -2,25 +2,25 @@
 
 const Rx = require('rxjs');
 const ServiceCQRS = require("./ServiceCQRS")();
-const ServiceClientCQRS = require("./ServiceClientCQRS")();
 const ServiceES = require("./ServiceES")();
-const DataAcess = require("./data-access/");
+const ServiceDAL = require("./ServiceDAL")();
+const DataAccess = require("./data-access/");
 
 module.exports = {
   /**
    * domain start workflow
    */
-  start$: Rx.concat(DataAcess.start$),
-  /**
-   * @returns {ServiceES}
-   */
-  ServiceES,
+  start$: Rx.concat(DataAccess.start$, ServiceDAL.start$()),
   /**
    * @returns {ServiceCQRS}
    */
   ServiceCQRS,
   /**
-   * @returns {ServiceClientCQRS}
+   * @returns {ServiceES}
    */
-  ServiceClientCQRS
+  ServiceES,
+  /**
+   * @returns {ServiceDAL}
+   */
+  ServiceDAL,
 };

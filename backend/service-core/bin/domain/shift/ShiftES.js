@@ -153,9 +153,9 @@ class ShiftES {
 
         return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
             filter(shift => shift && !shift.online),
+            mergeMap(shift => iif(() => shift.serviceId, eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(shift.serviceId, data.location))), of('')),
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
-
     }
 
     /**
@@ -176,6 +176,25 @@ class ShiftES {
 
 
     //#region Object builders
+
+    /**
+     * Builds a Event-Sourcing Event of type ShiftConnected
+     * @param {*} shiftId 
+     * @returns {Event}
+     */
+    buildServiceLocationReportedEsEvent(serviceId, location) {
+        return new Event({
+            aggregateType: 'Service',
+            aggregateId: serviceId,
+            eventType: 'ServiceLocationReported',
+            eventTypeVersion: 1,
+            user,
+            data: {
+                serviceId: serviceId,
+                location: location
+            }
+        });
+    }
 
     /**
      * Builds a Event-Sourcing Event of type ShiftConnected

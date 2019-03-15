@@ -9,7 +9,8 @@ const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 
-const { ServiceDA, ShiftDA } = require('./data-access')
+const { ServiceDA, ShiftDA } = require('./data-access');
+const CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC = "client-gateway-materialized-view-updates";
 
 /**
  * Singleton instance
@@ -19,7 +20,58 @@ let instance;
 class ServiceES {
 
     constructor() {
+        this.serviceClientUpdatedEventEmitter$ = new Subject();
+        this.startServiceClientEventEmitter();
     }
+
+    startServiceClientEventEmitter(){
+        this.serviceClientUpdatedEventEmitter$
+        .pipe(
+            filter(serviceId => {
+              return serviceId != null;
+            }),
+            groupBy(serviceId => serviceId),
+            mergeMap(group$ => group$.pipe(debounceTime(600))),
+            mergeMap(serviceId => this.sendServiceUpdatedEvent$(serviceId)),
+        ).subscribe(
+          (result) => {},
+          (err) => { console.log(err) },
+          () => { }
+        );
+    }
+
+    /**
+     * Sends an event with the service data is updated.
+     * @param {*} serviceId 
+     */
+    sendServiceUpdatedEvent$(serviceId){
+        return of(serviceId)
+        .pipe(
+            mergeMap(serviceId => 
+                // Error isolation: If an error ocurrs, it is not going to affect the stream
+                ServiceDA.getService$(serviceId)
+                .pipe(
+                filter(service => service),
+                map(service => this.formatServiceToGraphQLSchema(service)),          
+                mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)),
+                catchError(error => {
+                    console.log('An error ocurred while a service updated event was being processed: ', error);
+                    return of('Error: ', error)
+                }),
+                )
+            )
+        );
+    }  
+
+    //#region GraphQL response formatters
+
+    formatServiceToGraphQLSchema(service) {
+        const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
+
+        return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+    }
+
+    //#endregion
 
     /**
      * Handles EventSourcing Event ServiceRequested
@@ -28,7 +80,12 @@ class ServiceES {
      */
     handleServiceRequested$({ data }) {
         //console.log(`*** ServiceES: handleServiceRequested: `, data); //DEBUG: DELETE LINE
-        return ServiceDA.insertService$(data);
+        return ServiceDA.insertService$(data)
+        // .pipe(
+        //     tap(() => {
+        //         this.serviceClientUpdatedEventEmitter$.next(data._id);
+        //     }),
+        // );
     }
 
 

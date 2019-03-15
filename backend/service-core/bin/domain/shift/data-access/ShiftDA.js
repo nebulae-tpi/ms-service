@@ -21,7 +21,46 @@ class ShiftDA {
     });
   }
 
+  static findNearbyVehicles$(businessId, location, requestedFeatures = [], maxDistance = 3000, minDistance = 0) {
+    const explorePastMonth = true; //Date.today().getDate() <= 1; TODO:  FIX!!!!
 
+    const query = {
+      businessId,
+      state: "AVAILABLE",
+      online: true,      
+    };
+
+    if(requestedFeatures && requestedFeatures.length > 0){
+      query['vehicle.features'] = { $all: requestedFeatures };
+    }
+
+    const aggregateQuery = [
+      {$geoNear: {
+        near: location,
+        distanceField: "dist.calculated",
+        maxDistance: maxDistance,
+        minDistance: minDistance,
+        query,
+        includeLocs: "dist.location",
+        num: 20,
+        spherical: true
+      }},
+      {$project: {location: 1}},
+      { $limit: 50 },
+    ]
+
+
+
+    //console.log(JSON.stringify(aggregateQuery));
+
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection('Shift')),
+      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.aggregate(
+        aggregateQuery
+      ))))
+    );
+  }
 
 
   /**

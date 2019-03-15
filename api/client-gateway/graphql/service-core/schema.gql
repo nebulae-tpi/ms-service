@@ -1,0 +1,190 @@
+"Async CMD server acknowledge"
+type CommandAck {
+   "message accepted by the server"
+   accepted: Boolean
+}
+
+"Vehicle info"
+type Vehicle {
+   "License plate"
+   plate: String
+}
+
+"Driver info"
+type Driver {
+   "Driver fullname"
+   fullname: String
+   "username"
+   username: String
+}
+
+"Driver's shift info"
+type Shift {
+   "Shift ID"
+   _id: String
+   "shift's state"
+   state: String,
+   "shift's vehicle"
+   vehicle: Vehicle
+   "shift's Driver"
+   driver: Driver
+}
+
+
+"Client info"
+type Client {
+   "Full name"
+   fullname: String
+   "Tip given to the client. Eg. satellites"
+   tip: BigInt,
+   "Tiping type"
+   tipType: String
+}
+
+"Geo  "
+type Point {
+   "Latitude"
+   lat: Float
+   "Longitude"
+   lng: Float
+}
+
+"Geo point"
+input PointInput {
+   "Latitude"
+   lat: Float
+   "Longitude"
+   lng: Float
+}
+
+"Location info."
+type Location {
+   "Accurate location, Exact marker point: Lat,Lng"
+   marker: Point
+   "Non-Accurate location, describes an area"
+   polygon: [Point]
+   "City name"
+   city: String
+   "Zone name"
+   zone: String
+   "Neighborhood name"
+   neighborhood: String
+   "Street address 1"
+   addressLine1: String
+   "Street address 2"
+   addressLine2: String
+   "location notes"
+   notes: String
+}
+
+"Service info"
+type Service {
+   "Service Identifier"
+   _id: String
+   "Service created timestamp."
+   timestamp: BigInt
+   "Service vehicle"
+   vehicle: Vehicle
+   "Passenger pick up location"
+   pickUp: Location
+   "Passenger drop off location"
+   dropOff: Location
+   "dropOff especial type eg: AIRPORT, BUS_TERMINAL, OUT_OF_CITY"
+   dropOffSpecialType: String
+   "Service verification code"
+   verificationCode: String
+   "Requested features keys"
+   requestedFeatures: [String]
+   "Payment type key"
+   paymentType: String
+   "Applicable fare discount"
+   fareDiscount: Float
+   "pre calculated fare"
+   fare: BigInt
+   "Tip given to the driver"
+   tip: BigInt
+   "Exact route taken by the driver"
+   route: [Point]   
+   "current service state"
+   state: String
+}
+
+"Client info"
+input ClientInput {
+    "Client ID"
+    id: String
+    "Full name"
+    fullname: String
+    "user name"
+    username: String
+}
+
+"Location info"
+input LocationInput {
+    "Accurate location, Exact marker point: Lat,Lng"
+    marker: PointInput
+    "Non-Accurate location, describes an area"
+    polygon: [PointInput]
+    "City name"
+    city: String
+    "Zone name"
+    zone: String
+    "Neighborhood name"
+    neighborhood: String
+    "Street address 1"
+    addressLine1: String
+    "Street address 2"
+    addressLine2: String
+    "location notes"
+    notes: String
+}
+
+type Query {   
+   "Get client nearby vehicles"
+   NearbyVehicles(clientLocation: PointInput!, ratioMts: Int, filters: [String]): [Point] 
+   "Get current services requested by the client"
+   CurrentServices: [Services] @requireAuth
+   "Get the latest trips requested by the client"
+   HistoricalClientServices(
+      year: Int
+      month: Int
+      page: Int,
+      count: Int
+   ): [Service] @requireAuth 
+}
+
+type Mutation {
+   "Request a new service"
+   RequestService(
+      "client info"
+      client: ClientInput!
+      "Passenger pick up location"
+      pickUp: LocationInput!
+      "Payment type key"
+      paymentType: String!
+      "Requested features keys"
+      requestedFeatures: [String]
+      "Passenger drop off location"
+      dropOff: LocationInput
+      "Tip given to the driver"
+      tip: Int
+   ): CommandAck @requireAuth
+
+   "Cancel a requested service"
+   CancelServiceByClient(
+      "Service Identifier"
+      id: String!
+      "cancellation reason"
+      reason: String!
+      "cancellation additional notes"
+      notes: String        
+   ): CommandAck @requireAuth
+}
+
+
+type Subscription {
+  "This events is triggered when a Service is updated"
+  ClientServiceUpdatedSubscription: Service @requireAuth
+}
+
+
