@@ -81,9 +81,7 @@ class ShiftCQRS {
    * @param {*} shift 
    */
   formatShiftLocationToGraphQLSchema(shift) {    
-    return (!shift) ? undefined : {
-      location: { lng: shift.location.coordinates[0], lat: shift.location.coordinates[1] }
-    };
+    return (!shift) ? undefined : { lng: shift.location.coordinates[0], lat: shift.location.coordinates[1] };
   }
 
   
