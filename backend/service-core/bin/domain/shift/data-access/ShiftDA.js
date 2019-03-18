@@ -33,20 +33,21 @@ class ShiftDA {
       query['vehicle.features'] = { $all: vehicleRequestedFilters };
     }
 
-    const aggregateQuery = [{
-      $geoNear: {
-        near: location,
-        distanceField: "dist.calculated",
-        maxDistance: maxDistance,
-        minDistance: 0,
-        query,
-        includeLocs: "dist.location",
-        num: 20,
-        spherical: true
-      }
-    },
-        {$project: {location: 1}}
-      ]
+    const aggregateQuery = [
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [ location.lng , location.lat ] },
+          distanceField: "dist.calculated",
+          maxDistance: maxDistance,
+          minDistance: 0,
+          query,
+          includeLocs: "dist.location",
+          num: 20,
+          spherical: true
+        }
+    }, {
+      $project: {location: 1}
+    }];
 
     console.log('Query => ', JSON.stringify(aggregateQuery));
 
