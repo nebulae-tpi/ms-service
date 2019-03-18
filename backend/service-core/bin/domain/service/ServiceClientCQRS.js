@@ -50,7 +50,7 @@ class ServiceClientCQRS {
   queryClientCurrentServices$({ root, args, jwt }, authToken) {
     const { clientId } = authToken;
     //ServiceCQRS.log(`ServiceCQRS.queryClientCurrentServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryClientCurrentServices", PERMISSION_DENIED, ["CLIENT"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceClientCQRS", "queryClientCurrentServices", PERMISSION_DENIED, ["CLIENT"]).pipe(
       mergeMap(() => ServiceDA.findCurrentServicesRequestedByClient$(clientId)),
       map(service => this.formatServiceToGraphQLSchema(service)),
       //tap(x => ServiceCQRS.log(`ServiceCQRS.queryClientCurrentServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
@@ -85,24 +85,6 @@ class ServiceClientCQRS {
       toArray(),
       first(arr => arr, []),
       //tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalClientServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINEs
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-      catchError(err => GraphqlResponseTools.handleError$(err, true))
-    );
-  }
-
-  /**
-   * queries the open services associated with the client
-   * @param {*} param0 
-   * @param {*} authToken 
-   */
-  queryCurrentClientService$({ root, args, jwt }, authToken) {
-    const { clientId } = authToken;
-    //ServiceCQRS.log(`ServiceCQRS.queryCurrentClientService RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryCurrentClientService", PERMISSION_DENIED, ["CLIENT"]).pipe(
-      mergeMap(() => ServiceDA.findCurrentServicesRequestedByClient$(clientId)),
-      map(service => this.formatServiceToGraphQLSchema(service)),
-      toArray(),
-      //tap(x => ServiceCQRS.log(`ServiceCQRS.queryAssignedService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
