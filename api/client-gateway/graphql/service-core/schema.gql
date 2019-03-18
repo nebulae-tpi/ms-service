@@ -123,7 +123,7 @@ type Service {
    state: String
 }
 
-"Client info"
+"Client info."
 input ClientInput {
     "Client ID"
     id: String
@@ -194,7 +194,6 @@ type Mutation {
       notes: String        
    ): CommandAck @requireAuth
 }
-
 
 type Subscription {
   "This events is triggered when a Service is updated"
