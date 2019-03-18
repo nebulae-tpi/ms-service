@@ -22,7 +22,7 @@ class ShiftDA {
   }
 
   static findNearbyVehicles$(location, vehicleRequestedFilters, maxDistance) {
-    const explorePastMonth = true; //Date.today().getDate() <= 1; TODO:  FIX!!!!
+    const explorePastMonth = false; //Date.today().getDate() <= 1; TODO:  FIX!!!!
     
     const query = {
       state: "AVAILABLE",
