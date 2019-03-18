@@ -21,44 +21,48 @@ class ShiftDA {
     });
   }
 
-  static findNearbyVehicles$(businessId, location, requestedFeatures = [], maxDistance = 3000, minDistance = 0) {
+  static findNearbyVehicles$(location, vehicleRequestedFilters, maxDistance) {
     const explorePastMonth = true; //Date.today().getDate() <= 1; TODO:  FIX!!!!
-
+    
     const query = {
-      businessId,
       state: "AVAILABLE",
       online: true,      
     };
 
-    if(requestedFeatures && requestedFeatures.length > 0){
-      query['vehicle.features'] = { $all: requestedFeatures };
+    if(vehicleRequestedFilters && vehicleRequestedFilters.length > 0){
+      query['vehicle.features'] = { $all: vehicleRequestedFilters };
     }
 
-    const aggregateQuery = [
-      {$geoNear: {
+    const aggregateQuery = [{
+      $geoNear: {
         near: location,
         distanceField: "dist.calculated",
         maxDistance: maxDistance,
-        minDistance: minDistance,
+        minDistance: 0,
         query,
         includeLocs: "dist.location",
         num: 20,
         spherical: true
-      }},
-      {$project: {location: 1}},
-      { $limit: 50 },
-    ]
+      }
+    },
+        {$project: {location: 1}}
+      ]
 
-
-
-    //console.log(JSON.stringify(aggregateQuery));
+    console.log('Query => ', JSON.stringify(aggregateQuery));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection('Shift')),
-      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.aggregate(
-        aggregateQuery
-      ))))
+      mergeMap(collection =>
+        defer(() =>
+    
+          collection.aggregate(
+            aggregateQuery
+          ).toArray()
+          //)
+        )
+      ),
+
     );
   }
 

@@ -1,5 +1,8 @@
 'use strict'
 
+const withFilter = require("graphql-subscriptions").withFilter;
+const PubSub = require("graphql-subscriptions").PubSub;
+const pubsub = new PubSub();
 const { of, Observable, bindNodeCallback } = require('rxjs');
 const { map, tap, mergeMap, switchMapTo } = require('rxjs/operators');
 
@@ -38,9 +41,9 @@ module.exports = {
       ).toPromise();
     },
     NearbyVehicles: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'NearbyVehicles', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', []).pipe(
+      return of('').pipe(
         switchMapTo(
-          broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.NearbyVehicles", { root, args, jwt: context.encodedToken }, 2000)
+          broker.forwardAndGetReply$("Shift", "clientgateway.graphql.query.NearbyVehicles", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();

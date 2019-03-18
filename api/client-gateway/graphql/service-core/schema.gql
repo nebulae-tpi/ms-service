@@ -57,6 +57,20 @@ input PointInput {
    lng: Float
 }
 
+# "Vehicles Filter Input"
+# input VehicleFilterInput {
+#    "Vehicle air conditioning"
+#    vehicleAirConditioning: Boolean
+#    "Vehicle large trunk"
+#    vehicleLargeTrunk: Boolean
+#    "Vehicle VIP"
+#    vehicleVip: Boolean
+#    "Vehicle lugagge carrier"
+#    vehicleLuggageCarrier: Boolean
+#    "Driver language"
+#    driverLanguage: String
+# }
+
 "Location info."
 type Location {
    "Accurate location, Exact marker point: Lat,Lng"
@@ -141,9 +155,9 @@ input LocationInput {
 
 type Query {   
    "Get client nearby vehicles"
-   NearbyVehicles(clientLocation: PointInput!, ratioMts: Int, filters: [String]): [Point] 
+   NearbyVehicles(clientLocation: PointInput!, filters: [String]): [Point] 
    "Get current services requested by the client"
-   CurrentServices: [Services] @requireAuth
+   CurrentServices: [Service] @requireAuth
    "Get the latest trips requested by the client"
    HistoricalClientServices(
       year: Int

@@ -3,7 +3,7 @@
 
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
-const { of, interval, forkJoin } = require("rxjs");
+const { of, interval, forkJoin, from, iif } = require("rxjs");
 const { mapTo, mergeMap, catchError, map, toArray, mergeMapTo, tap } = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
@@ -55,23 +55,28 @@ class ShiftCQRS {
    * Gets Open shift
    */
   queryNearbyVehicles$({ root, args, jwt }, authToken) {
-    const { driverId } = authToken;
-    
-    const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
-    
-    //ShiftCQRS.log(`ShiftCQRS.queryNearbyVehicles RQST: ${JSON.stringify({ driverId, })}`); //DEBUG: DELETE LINE
+    ShiftCQRS.log(`ShiftClientCQRS.queryNearbyVehicles RQST: ${JSON.stringify({ args })}`); //DEBUG: DELETE LINE
 
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftClientCQRS", "queryNearbyVehicles", PERMISSION_DENIED, ["CLIENT"]).pipe(
-      mergeMapTo(ShiftDA.findNearbyVehicles$(driverId, deviceIdentifier)),
-      map(shift => this.formatShiftLocationToGraphQLSchema(shift)),
-      toArray(),
-      //tap(x => ShiftCQRS.log(`ShiftCQRS.queryNearbyVehicles RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+    const ratioMts = parseInt(process.env.NEARBY_VEHICLES_RATIOMTS || 1500);
+
+    return of('queryNearbyVehicles').pipe(
+      mergeMapTo(ShiftDA.findNearbyVehicles$(args.clientLocation, args.filters, ratioMts)),
+      mergeMap(vehicles =>         
+        iif(() => vehicles != null && vehicles.length > 0,      
+          from(vehicles)
+          .pipe(
+            map(vehicle => this.formatShiftLocationToGraphQLSchema(vehicle)),
+            toArray()
+          ),
+          of([])
+      )),
+      //tap(x => ShiftClientCQRS.log(`ShiftClientCQRS.queryNearbyVehicles RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
   }
 
-    /**
+  /**
    * Format shift achieve graphql scehma compilance
    * @param {*} shift 
    */

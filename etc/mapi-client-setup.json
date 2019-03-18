@@ -1,0 +1,8 @@
+[
+    {
+        "name": "service-core",
+        "type": "graphql",        
+        "src": "api/client-gateway/graphql/service-core",
+        "preBuildCommands": []
+    }
+]

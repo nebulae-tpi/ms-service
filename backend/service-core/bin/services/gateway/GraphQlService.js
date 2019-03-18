@@ -51,12 +51,13 @@ class GraphQlService {
     aggregateType,
     messageType,
     onErrorHandler,
-    onCompleteHandler
+    onCompleteHandler,
+    requireAuth = true
   }) {
     const handler = this.functionMap[messageType];
     const subscription = broker
       .getMessageListener$([aggregateType], [messageType]).pipe(
-        mergeMap(message => this.verifyRequest$(message)),
+        mergeMap(message => this.verifyRequest$(message, requireAuth)),
         mergeMap(request => ( request.failedValidations.length > 0)
           ? of(request.errorResponse)
           : of(request).pipe(
@@ -93,20 +94,23 @@ class GraphQlService {
    * @param {any} request request message
    * @returns { Rx.Observable< []{request: any, failedValidations: [] }>}  Observable object that containg the original request and the failed validations
    */
-  verifyRequest$(request) {
+  verifyRequest$(request, requireAuth = true) {
     return of(request).pipe(
       //decode and verify the jwt token
       mergeMap(message =>
         of(message).pipe(
-          map(message => ({ authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey), message, failedValidations: [] })),
+          map(message => ({ authToken: requireAuth ? jsonwebtoken.verify(message.data.jwt, jwtPublicKey): null, message, failedValidations: [] })),
           catchError(err =>
-            handleError$(err).pipe(
-              map(response => ({
-                errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
-                failedValidations: ['JWT']
-              }
-              ))
-            )
+            {
+              console.log('Verify requ3est');
+              return handleError$(err).pipe(
+                map(response => ({
+                  errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
+                  failedValidations: ['JWT']
+                }
+                ))
+              )
+            }
           )
         )
       )
@@ -171,8 +175,21 @@ class GraphQlService {
         messageType: "clientgateway.graphql.query.CurrentServices"
       },
       {
+        aggregateType: "Shift",
+        messageType: "clientgateway.graphql.query.NearbyVehicles",
+        requireAuth: false
+      },
+      {
         aggregateType: "Service",
-        messageType: "clientgateway.graphql.query.NearbyVehicles"
+        messageType: "clientgateway.graphql.query.HistoricalClientServices"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.RequestService"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.CancelServiceByClient"
       },
       //DRIVER
       {
@@ -258,6 +275,9 @@ class GraphQlService {
         obj: DriverCQRS
       },
 
+
+
+      
       // CLIENT
       "clientgateway.graphql.query.NearbyVehicles": {
         fn: ShiftClientCQRS.queryNearbyVehicles$,
@@ -277,10 +297,6 @@ class GraphQlService {
       },
       "clientgateway.graphql.mutation.CancelServiceByClient": {
         fn: ServiceClientCQRS.cancelServicebyClient$,
-        obj: ServiceClientCQRS
-      },
-      "clientgateway.graphql.query.NearbyVehicles": {
-        fn: ServiceClientCQRS.queryNearbyVehicles$,
         obj: ServiceClientCQRS
       },
 
