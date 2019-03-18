@@ -1,8 +1,10 @@
 "use strict";
 
 const { ShiftCQRS } = require("../../domain/shift");
+const { ShiftClientCQRS } = require("../../domain/shift");
 const { DriverCQRS } = require("../../domain/driver");
 const { ServiceCQRS } = require("../../domain/service");
+const { ServiceClientCQRS } = require("../../domain/service");
 const broker = require("../../tools/broker/BrokerFactory")();
 const { of, from } = require("rxjs");
 const jsonwebtoken = require("jsonwebtoken");
@@ -49,12 +51,13 @@ class GraphQlService {
     aggregateType,
     messageType,
     onErrorHandler,
-    onCompleteHandler
+    onCompleteHandler,
+    requireAuth = true
   }) {
     const handler = this.functionMap[messageType];
     const subscription = broker
       .getMessageListener$([aggregateType], [messageType]).pipe(
-        mergeMap(message => this.verifyRequest$(message)),
+        mergeMap(message => this.verifyRequest$(message, requireAuth)),
         mergeMap(request => ( request.failedValidations.length > 0)
           ? of(request.errorResponse)
           : of(request).pipe(
@@ -91,20 +94,23 @@ class GraphQlService {
    * @param {any} request request message
    * @returns { Rx.Observable< []{request: any, failedValidations: [] }>}  Observable object that containg the original request and the failed validations
    */
-  verifyRequest$(request) {
+  verifyRequest$(request, requireAuth = true) {
     return of(request).pipe(
       //decode and verify the jwt token
       mergeMap(message =>
         of(message).pipe(
-          map(message => ({ authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey), message, failedValidations: [] })),
+          map(message => ({ authToken: requireAuth ? jsonwebtoken.verify(message.data.jwt, jwtPublicKey): null, message, failedValidations: [] })),
           catchError(err =>
-            handleError$(err).pipe(
-              map(response => ({
-                errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
-                failedValidations: ['JWT']
-              }
-              ))
-            )
+            {
+              console.log('Verify requ3est');
+              return handleError$(err).pipe(
+                map(response => ({
+                  errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
+                  failedValidations: ['JWT']
+                }
+                ))
+              )
+            }
           )
         )
       )
@@ -163,7 +169,28 @@ class GraphQlService {
         aggregateType: "Shift",
         messageType: "drivergateway.graphql.mutation.stopShift"
       },     
-      
+      // CLIENT
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.CurrentServices"
+      },
+      {
+        aggregateType: "Shift",
+        messageType: "clientgateway.graphql.query.NearbyVehicles",
+        requireAuth: false
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.HistoricalClientServices"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.RequestService"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.CancelServiceByClient"
+      },
       //DRIVER
       {
         aggregateType: "Driver",
@@ -246,6 +273,31 @@ class GraphQlService {
       "drivergateway.graphql.query.DriverAssignedVehicles": {
         fn: DriverCQRS.queryDriverAssignedVehicles$,
         obj: DriverCQRS
+      },
+
+
+
+      
+      // CLIENT
+      "clientgateway.graphql.query.NearbyVehicles": {
+        fn: ShiftClientCQRS.queryNearbyVehicles$,
+        obj: ShiftClientCQRS
+      },
+      "clientgateway.graphql.query.CurrentServices": {
+        fn: ServiceClientCQRS.queryClientCurrentServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.HistoricalClientServices": {
+        fn: ServiceClientCQRS.queryHistoricalClientServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.mutation.RequestService": {
+        fn: ServiceClientCQRS.requestServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.mutation.CancelServiceByClient": {
+        fn: ServiceClientCQRS.cancelServicebyClient$,
+        obj: ServiceClientCQRS
       },
 
       // SERVICES
