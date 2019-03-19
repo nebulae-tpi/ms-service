@@ -48,7 +48,7 @@ type VehiclePoint {
    point: Point!
 }
 
-"Geo  "
+"Geo point"
 type Point {
    "Latitude"
    lat: Float
