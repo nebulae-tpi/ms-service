@@ -68,7 +68,8 @@ export const locale = {
       REQUEST_DIALOG: {
         TITLE: 'Request a Service',
         SATELLITE_CLIENT_PLACEHOLDER: 'Client',
-        REQUEST_BTN_LBL: 'Request'
+        REQUEST_BTN_LBL: 'Request',
+        CLIENT_LIST_TITLE: 'Doormen'
       }
     },
     ERRORS: {

@@ -22,6 +22,13 @@ export const ServiceClientSatellites = gql`
         tip
         offerMinDistance
         offerMaxDistance
+        clientAgreements{
+          clientId
+          clientName
+          documentId
+          tip
+          tipType
+        }
       }
       location{
         lat

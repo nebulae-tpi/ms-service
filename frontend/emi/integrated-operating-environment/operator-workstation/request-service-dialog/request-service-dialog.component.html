@@ -8,7 +8,7 @@
 
                     <h2 mat-dialog-title fxFlex="100">{{ 'SERVICES.REQUEST_DIALOG.TITLE' | translate }}</h2>
 
-                    <mat-form-field fxFlex="100">
+                    <mat-form-field fxFlex="95">
                         <input matInput [formControl]="clientNameFilterCtrl" name="clientNameFilterCtrl"
                             placeholder="{{ 'SERVICES.REQUEST_DIALOG.SATELLITE_CLIENT_PLACEHOLDER' | translate }}"
                             [matAutocomplete]="auto" cdkFocusInitial>
@@ -19,26 +19,40 @@
                                 <mat-icon>person_pin_circle</mat-icon>
                                 <span class="text-boxed text-uppercase">{{ client.generalInfo ? client.generalInfo.name: '' }} </span>
                             </mat-option>
-                        </mat-autocomplete>
+                        </mat-autocomplete>                        
                     </mat-form-field>
+                  
+                    <div *ngIf="doorMenOptions"
+                        class="pr-12 pl-12" fxFlex="100">
+                        <!-- <div class="pb-8 pt-8"> {{ 'SERVICES.REQUEST_DIALOG.CLIENT_LIST_TITLE' | translate }} </div> -->
+                        <mat-chip-list>
+                            <mat-chip *ngFor="let doorman of doorMenOptions; index as i" color="primary"
+                                [selected]="selectedIndexDoorman == i" class="doorman-chip" (click)="onDoormanChipselected(i+1)">
+                                {{ i+1 + ': ' + doorman.clientName  }}
+                            </mat-chip>
+                        </mat-chip-list>
+                    </div>
 
 
                     <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider>
                     <div fxFlex="100" fxLayout="row" fxLayoutAlign="center center">
                         <mat-dialog-actions>
-                            <button [disabled]="!form.controls['client'].value || !clientNameFilterCtrl.value" fxFlex="80" mat-raised-button color="accent" type="submit">
+                            <button [disabled]="!form.controls['client'].value || !clientNameFilterCtrl.value 
+                                || (doorMenOptions && selectedIndexDoorman == -1 ) 
+                                || doorMenOptions && selectedIndexDoorman >= doorMenOptions.length"
+                                fxFlex="80" mat-raised-button color="primary" type="submit">
                                 {{ 'SERVICES.REQUEST_DIALOG.REQUEST_BTN_LBL' | translate }}
                             </button>
                         </mat-dialog-actions>
                     </div>
 
                     <mat-divider style="visibility:  hidden; height: 20px;" fxFlex="100"></mat-divider>
-                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
+                    <div fxFlex="95" fxLayout="row" fxLayoutAlign="space-between center">
                         <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
                             <mat-icon class="icon s-40 mr-16">local_taxi</mat-icon>
                             <span>{{form.controls['quantity'].value}}</span>
                         </div>
-                        <mat-slider max="5" min="1" step="1" thumbLabel="true" tickInterval="1"
+                        <mat-slider max="5" min="1" step="1" thumbLabel="true" tickInterval="1" [color]="primary"
                             formControlName="quantity" fxFlex="70">
                         </mat-slider>
                     </div>
@@ -47,20 +61,20 @@
                     <div fxFlex="100" fxLayout="row" fxLayoutAlign="end center">
                         <mat-button-toggle-group name="featureOptionsGroup" formControlName="featureOptionsGroup"
                             multiple="true">
-                            <mat-button-toggle value="AC">
-                                <mat-icon>ac_unit</mat-icon>
+                            <mat-button-toggle  value="AC">
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('AC') }">ac_unit</mat-icon>
                             </mat-button-toggle>
                             <mat-button-toggle value="TRUNK">
-                                <mat-icon>work</mat-icon>
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('TRUNK') }">work</mat-icon>
                             </mat-button-toggle>
                             <mat-button-toggle value="ROOF_RACK">
-                                <mat-icon>grid_on</mat-icon>
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('ROOF_RACK') }">grid_on</mat-icon>
                             </mat-button-toggle>                            
                             <mat-button-toggle value="PETS">
-                                <mat-icon>pets</mat-icon>
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('PETS') }">pets</mat-icon>
                             </mat-button-toggle>
                             <mat-button-toggle value="BIKE_RACK">
-                                <mat-icon>motorcycle</mat-icon>
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('BIKE_RACK') }">motorcycle</mat-icon>
                             </mat-button-toggle>
                         </mat-button-toggle-group>
                     </div>
@@ -74,13 +88,13 @@
                         <span fxFlex></span>
                         <mat-button-toggle-group name="destinationOptionsGroup"
                             formControlName="destinationOptionsGroup">
-                            <mat-button-toggle value="DEFAULT" selec>
+                            <mat-button-toggle value="DEFAULT" selec class="text-bold">
                                 $ {{clientDefaultTip | number}}
                             </mat-button-toggle>
-                            <mat-button-toggle value="5000">
+                            <mat-button-toggle value="5000" class="text-bold">
                                 $ 5,000
                             </mat-button-toggle>
-                            <mat-button-toggle value="10000">
+                            <mat-button-toggle value="10000" class="text-bold">
                                 $ 10,000
                             </mat-button-toggle>
                         </mat-button-toggle-group>
