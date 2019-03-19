@@ -41,6 +41,13 @@ type Client {
    tipType: String
 }
 
+type VehiclePoint {
+   "Vehicle ID"
+   vehicleId: String!
+   "Vehicle Geopoint"
+   point: Point!
+}
+
 "Geo  "
 type Point {
    "Latitude"
@@ -155,7 +162,7 @@ input LocationInput {
 
 type Query {   
    "Get client nearby vehicles"
-   NearbyVehicles(clientLocation: PointInput!, filters: [String]): [Point] 
+   NearbyVehicles(clientLocation: PointInput!, filters: [String]): [VehiclePoint] 
    "Get current services requested by the client"
    CurrentServices: [Service] @requireAuth
    "Get the latest trips requested by the client"

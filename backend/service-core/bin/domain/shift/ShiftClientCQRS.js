@@ -80,12 +80,9 @@ class ShiftCQRS {
    * Format shift achieve graphql scehma compilance
    * @param {*} shift 
    */
-  formatShiftLocationToGraphQLSchema(shift) {    
-    return (!shift) ? undefined : { lng: shift.location.coordinates[0], lat: shift.location.coordinates[1] };
+  formatShiftLocationToGraphQLSchema(shift) {
+    return (!shift) ? undefined : { vehicleId: shift.vehicle.id, point: { lng: shift.location.coordinates[0], lat: shift.location.coordinates[1] } };
   }
-
-  
-
 
   /**
    * Build regular Command Accepted ACK

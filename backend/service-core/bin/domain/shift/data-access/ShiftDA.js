@@ -22,7 +22,7 @@ class ShiftDA {
   }
 
   static findNearbyVehicles$(location, vehicleRequestedFilters, maxDistance) {
-    const explorePastMonth = false; //Date.today().getDate() <= 1; TODO:  FIX!!!!
+    const explorePastMonth = false; // Date.today().getDate() <= 1; TODO:  FIX!!!!
     
     const query = {
       state: "AVAILABLE",
@@ -46,7 +46,7 @@ class ShiftDA {
           spherical: true
         }
     }, {
-      $project: {location: 1}
+      $project: {location: 1, vehicle: 1}
     }];
 
     console.log('Query => ', JSON.stringify(aggregateQuery));
