@@ -49,11 +49,11 @@ class ServiceClientCQRS {
 
   queryClientCurrentServices$({ root, args, jwt }, authToken) {
     const { clientId } = authToken;
-    //ServiceCQRS.log(`ServiceCQRS.queryClientCurrentServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    console.log(`ServiceCQRS.queryClientCurrentServices RQST: ${JSON.stringify(authToken)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceClientCQRS", "queryClientCurrentServices", PERMISSION_DENIED, ["CLIENT"]).pipe(
       mergeMap(() => ServiceDA.findCurrentServicesRequestedByClient$(clientId)),
       map(service => this.formatServiceToGraphQLSchema(service)),
-      //tap(x => ServiceCQRS.log(`ServiceCQRS.queryClientCurrentServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      //tap(x => ServiceCQRS.log(`ServiceCQRS.queryClientCurrentServices RESP: ${JSON.stringify(x)}`)), //DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
