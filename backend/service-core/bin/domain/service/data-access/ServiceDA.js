@@ -308,6 +308,20 @@ class ServiceDA {
     );
   }
 
+    /**
+   * Finds an historical service by client
+   */
+  static findHistoricalServiceByClient$(clientId, year, month, page, count, projection = undefined) {
+    const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
+    const query = { "state": { "$nin": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "client.id": clientId };
+    const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
+    return defer(() =>
+      mongoDB.extractAllFromMongoCursor$(
+        bd.collection(CollectionName).find(query, process).sort({ timestamp: -1 }).skip(page * count).limit(count)
+      )
+    );
+  }
+
 
   /**
    * set the service to closed and removes the current location to save index space
