@@ -20,10 +20,64 @@ class ShiftES {
 
     constructor() {
     }
+    
+    handleShiftStarted$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+    handleShiftStateChanged$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+    handleShiftConnected$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+    handleShiftDisconnected$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+    handleShiftStopped$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+    handleShiftVehicleBlockRemoved$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+  
+    handleShiftVehicleBlockAdded$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
 
 
-    //#region Object builders
-    //#endregion
+    handleShiftDriverBlockRemoved$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+
+    handleShiftDriverBlockAdded$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+    handleShiftLocationReported$(evt) {
+        return this.transmitEventToFrontEnd$(evt)
+    }
+
+
+    transmitEventToFrontEnd$(shiftEvent) {
+        return of(shiftEvent).pipe(
+            delay(1000),
+            mergeMap(evt => ShiftDA.findById$(evt.aid)),
+            map(shift => this.formatShiftToGraphqlIOEShift(shift)),
+            mergeMap(ioeShift => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEShift`, ioeShift))
+        );
+    }
+
+    formatShiftToGraphqlIOEShift(shift) {
+        const location = (!shift || !shift.location || !shift.location.coordinates) ? undefined : { lng: shift.location.coordinates[0], lat: shift.location.coordinates[1] };
+        return !shift ? undefined : { ...shift, location, id: shift._id };
+    }
 }
 
 /**

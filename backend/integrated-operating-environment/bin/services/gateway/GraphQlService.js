@@ -147,6 +147,14 @@ class GraphQlService {
     console.log("GraphQl Service starting ...");
     return [
       // //SHIFT
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.IOEShift"
+      },   
+      {
+        aggregateType: "Shift",
+        messageType: "emigateway.graphql.query.IOEShifts"
+      },   
       // {
       //   aggregateType: "Shift",
       //   messageType: "drivergateway.graphql.query.OpenShift"
@@ -217,6 +225,14 @@ class GraphQlService {
   generateFunctionMap() {
     //SHIFT
     return {
+      "emigateway.graphql.query.IOEShift": {
+        fn: ShiftCQRS.queryShift$,
+        obj: ShiftCQRS
+      },
+      "emigateway.graphql.query.IOEShifts": {
+        fn: ShiftCQRS.queryShifts$,
+        obj: ShiftCQRS
+      },
       // "drivergateway.graphql.query.OpenShift": {
       //   fn: ShiftCQRS.queryOpenShift$,
       //   obj: ShiftCQRS

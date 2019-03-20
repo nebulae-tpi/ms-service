@@ -49,6 +49,22 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
+    IOEShift: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'IOEShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', READ_ROLES).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Shift", "emigateway.graphql.query.IOEShift", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
+    IOEShifts: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'IOEShifts', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', READ_ROLES).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Shift", "emigateway.graphql.query.IOEShifts", { root, args, jwt: context.encodedToken }, 3000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
   },
 
 
@@ -130,6 +146,16 @@ module.exports = {
           return businessOk && operatorOk;
         }
       )
+    },
+    IOEShift: {
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          return pubsub.asyncIterator("IOEShift");
+        },
+        (payload, variables, context, info) => {
+          return !variables.businessId ? true : payload.IOEShift.businessId === variables.businessId;
+        }
+      )
     }
   }
 
@@ -142,6 +168,15 @@ const eventDescriptors = [
   {
     backendEventName: 'IOEService',
     gqlSubscriptionName: 'IOEService',
+    dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
+    onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
+    onEvent: (evt, descriptor) => {
+      //console.log(`Event of type  ${descriptor.backendEventName} HERE!!!!`);
+    },// OPTIONAL, only use if needed
+  },
+  {
+    backendEventName: 'IOEShift',
+    gqlSubscriptionName: 'IOEShift',
     dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
     onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
     onEvent: (evt, descriptor) => {

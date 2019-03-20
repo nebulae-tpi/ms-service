@@ -60,6 +60,29 @@ type IOEService{
     closed: Boolean
 }
 
+"Shift info"
+type IOEShift{
+    "shift identifier"
+    id: String
+    "Business ID"
+    businessId: String
+    "Creation timestamp"
+    timestamp: BigInt
+    "current shift state: AVIALABLE, NOT_AVAILBALE, BUSY, CLOSED"
+    state: String
+    "online flag"
+    online: Boolean
+    "Last received communication"
+    lastReceivedComm: BigInt
+    "Driver info"
+    driver: IOEDriver
+    "Vehicle info"
+    vehicle: IOEVehicle
+    "current location"
+    location: IOEPoint
+}
+
+
 "Request metadata"
 type Request{
     "request SOURCE channel: Eg. IVT | SAT | WHATSAPP | APP_CLIENT | OPERATOR"
@@ -95,9 +118,9 @@ type IOEClient {
     "user name"
     username: String
     "Tip given to the client. Eg. satellites"
-    tip: Int,
+    tip: Int
     "Tiping type"
-    tipType: String,
+    tipType: String
     "drivers document, this is the one who referred this client"
     referrerDriverDocumentId: String
     "custom offer min distance in radious"
@@ -115,7 +138,7 @@ input IOEClientInput {
     "user name"
     username: String
     "Tip given to the client. Eg. satellites"
-    tip: Int,
+    tip: Int
     "Tiping type"
     tipType: String
     "Tip Client ID"
@@ -130,9 +153,20 @@ input IOEClientInput {
 
 "Vehicle info"
 type IOEVehicle {
+    "vehicle identification"
+    id: String
     "License plate"
     licensePlate: String
+    "Vehicle features"
+    features: [String]
+    "brand"
+    brand: String
+    "line"
+    line: String
+    "model -  year"
+    model: Int
 }
+
 "Vehicle info"
 input IOEVehicleInput {
     "License plate"
@@ -147,6 +181,10 @@ type IOEDriver {
     documentId: String
     "driver id"
     id: String
+    "Phone number"
+    phone: Int
+    "user name"
+    username: String
 }
 "Driver info"
 input IOEDriverInput {
@@ -228,7 +266,7 @@ type IOEStateChange{
     "state timestamp"
     timestamp: BigInt
     "location"
-    location: IOEPoint,
+    location: IOEPoint
     "notes"
     notes: String
 }
@@ -247,13 +285,26 @@ type Query{
         pageCount: Int
         projections: [String]
     ): [IOEService]
+    "Gets a Shift by its ID"
+    IOEShift(id: String): IOEShift
+    "Gets multiple shifts at once"
+    IOEShifts(
+        shiftStatesFilter: [String]
+        businessId: String
+        page: Int
+        pageCount: Int
+        projections: [String]
+    ): [IOEShift]
 }
 
 
 type Subscription {
   "IOE Services events"
   IOEService(businessId: String, operatorId: String): IOEService
+  "IOE Shift events"
+  IOEShift(businessId: String): IOEShift
 }
+
 
 type Mutation {
     "Request a new service"

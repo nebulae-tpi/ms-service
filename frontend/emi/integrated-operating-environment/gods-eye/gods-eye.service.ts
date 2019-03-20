@@ -6,7 +6,8 @@ import {
 import { GatewayService } from '../../../../api/gateway.service';
 import * as moment from 'moment';
 import {
-  IOEServices, IOEServiceSubscription
+  IOEServices, IOEServiceSubscription,
+  IOEShifts, IOEShiftSubscription,
 } from '../gql/ioe.js';
 
 
@@ -23,7 +24,7 @@ export class GodsEyeService {
   public static TOOLBAR_COMMAND_MAP_FOCUS = 1000;
   public static TOOLBAR_COMMAND_MAP_REFRESH = 1001;
   public static TOOLBAR_COMMAND_MAP_CHANGE_ZOOM = 1002;
-  
+
   public static TOOLBAR_COMMAND_MAP_APPLY_SERVICE_FILTER = 1004;
   public static TOOLBAR_COMMAND_MAP_APPLY_CHANNEL_FILTER = 1005;
   public static TOOLBAR_COMMAND_MAP_SEE_ALL_OPERATION_CHANGED = 1008;
@@ -117,6 +118,35 @@ export class GodsEyeService {
         query: IOEServiceSubscription,
         variables: {
           businessId, operatorId
+        }
+      });
+  }
+
+  /**
+   * Query all services filtered
+   * @param IOERequest
+   */
+  queryShifts$(shiftStatesFilter, businessId, page, pageCount, projections) {
+    return this.gateway.apollo
+      .query<any>({
+        query: IOEShifts,
+        variables: {
+          shiftStatesFilter, businessId, page, pageCount, projections
+        },
+        fetchPolicy: 'network-only',
+        errorPolicy: 'all'
+      });
+  }
+
+  /**
+   * Event triggered when a business is created, updated or deleted.
+   */
+  listenIOEShift$(businessId): Observable<any> {
+    return this.gateway.apollo
+      .subscribe({
+        query: IOEShiftSubscription,
+        variables: {
+          businessId
         }
       });
   }

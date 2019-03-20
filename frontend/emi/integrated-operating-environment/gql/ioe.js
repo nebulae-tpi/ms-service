@@ -18,8 +18,8 @@ export const IOECancelService = gql`
 `;
 
 export const IOEServices = gql`
-query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [String], $viewAllOperators: Boolean, $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
-  IOEServices(serviceStatesFilter: $serviceStatesFilter, serviceChannelsFilter : $serviceChannelsFilter, viewAllOperators: $viewAllOperators, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
+query IOEServices($serviceStatesFilter: [String], $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
+  IOEServices(serviceStatesFilter: $serviceStatesFilter, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
     id,
     closed,
       businessId,
@@ -68,6 +68,22 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
         creationOperatorId, creationOperatorUsername,
         ownerOperatorId, ownerOperatorUsername
     }
+  }
+}
+`;
+
+export const IOEShifts = gql`
+query IOEShifts($shiftStatesFilter: [String], $shiftChannelsFilter: [String], $viewAllOperators: Boolean, $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
+  IOEShifts(shiftStatesFilter: $shiftStatesFilter, shiftChannelsFilter : $shiftChannelsFilter, viewAllOperators: $viewAllOperators, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
+    id,
+    businessId,
+    timestamp,            
+    state,        
+    online,
+    lastReceivedComm,
+    driver{ fullname, documentId, id, phone ,username},
+    vehicle{ id, licensePlate,features, brand,line, model },
+    location{ lat, lng, timestamp },
   }
 }
 `;
@@ -124,6 +140,21 @@ export const IOEServiceSubscription = gql`
           creationOperatorId, creationOperatorUsername,
           ownerOperatorId, ownerOperatorUsername
       }
+    }
+  }
+`;
+export const IOEShiftSubscription = gql`
+  subscription($businessId: String, $operatorId: String){
+    IOEShift(businessId: $businessId, operatorId: $operatorId){
+      id,
+      businessId,
+      timestamp,            
+      state,        
+      online,
+      lastReceivedComm,
+      driver{ fullname, documentId, id, phone ,username},
+      vehicle{ id, licensePlate,features, brand,line, model },
+      location{ lat, lng, timestamp },
     }
   }
 `;

@@ -126,16 +126,16 @@ class EventStoreService {
     return {
 
       //SHIFT 
-      // ShiftStarted: { fn: ShiftES.handleShiftStarted$, obj: ShiftES },
-      // ShiftStateChanged: { fn: ShiftES.handleShiftStateChanged$, obj: ShiftES },
-      // ShiftConnected: { fn: ShiftES.handleShiftConnected$, obj: ShiftES },
-      // ShiftDisconnected: { fn: ShiftES.handleShiftDisconnected$, obj: ShiftES },
-      // ShiftStopped: { fn: ShiftES.handleShiftStopped$, obj: ShiftES },
-      // ShiftVehicleBlockRemoved: { fn: ShiftES.handleShiftVehicleBlockRemoved$, obj: ShiftES },
-      // ShiftVehicleBlockAdded: { fn: ShiftES.handleShiftVehicleBlockAdded$, obj: ShiftES },
-      // ShiftDriverBlockRemoved: { fn: ShiftES.handleShiftDriverBlockRemoved$, obj: ShiftES },
-      // ShiftDriverBlockAdded: { fn: ShiftES.handleShiftDriverBlockAdded$, obj: ShiftES },
-      // ShiftLocationReported: { fn: ShiftES.handleShiftLocationReported$, obj: ShiftES },
+      ShiftStarted: { fn: ShiftES.handleShiftStarted$, obj: ShiftES },
+      ShiftStateChanged: { fn: ShiftES.handleShiftStateChanged$, obj: ShiftES },
+      ShiftConnected: { fn: ShiftES.handleShiftConnected$, obj: ShiftES },
+      ShiftDisconnected: { fn: ShiftES.handleShiftDisconnected$, obj: ShiftES },
+      ShiftStopped: { fn: ShiftES.handleShiftStopped$, obj: ShiftES },
+      ShiftVehicleBlockRemoved: { fn: ShiftES.handleShiftVehicleBlockRemoved$, obj: ShiftES },
+      ShiftVehicleBlockAdded: { fn: ShiftES.handleShiftVehicleBlockAdded$, obj: ShiftES },
+      ShiftDriverBlockRemoved: { fn: ShiftES.handleShiftDriverBlockRemoved$, obj: ShiftES },
+      ShiftDriverBlockAdded: { fn: ShiftES.handleShiftDriverBlockAdded$, obj: ShiftES },
+      ShiftLocationReported: { fn: ShiftES.handleShiftLocationReported$, obj: ShiftES },
       //DRIVER
       // DriverBlockRemoved: { fn: DriverES.handleDriverBlockRemoved$, obj: DriverES },
       // DriverBlockAdded: { fn: DriverES.handleDriverBlockAdded$, obj: DriverES },
@@ -165,16 +165,16 @@ class EventStoreService {
   generateAggregateEventsArray() {
     return [
       //SHIFT
-      // { aggregateType: "Shift", eventType: "ShiftStarted" },
-      // { aggregateType: "Shift", eventType: "ShiftStateChanged" },
-      // { aggregateType: "Shift", eventType: "ShiftConnected" },
-      // { aggregateType: "Shift", eventType: "ShiftDisconnected" },
-      // { aggregateType: "Shift", eventType: "ShiftStopped" },
-      // { aggregateType: "Shift", eventType: "ShiftVehicleBlockRemoved" },
-      // { aggregateType: "Shift", eventType: "ShiftVehicleBlockAdded" },
-      // { aggregateType: "Shift", eventType: "ShiftDriverBlockRemoved" },
-      // { aggregateType: "Shift", eventType: "ShiftDriverBlockAdded" },
-      // { aggregateType: "Shift", eventType: "ShiftLocationReported" },
+      { aggregateType: "Shift", eventType: "ShiftStarted" },
+      { aggregateType: "Shift", eventType: "ShiftStateChanged" },
+      { aggregateType: "Shift", eventType: "ShiftConnected" },
+      { aggregateType: "Shift", eventType: "ShiftDisconnected" },
+      { aggregateType: "Shift", eventType: "ShiftStopped" },
+      { aggregateType: "Shift", eventType: "ShiftVehicleBlockRemoved" },
+      { aggregateType: "Shift", eventType: "ShiftVehicleBlockAdded" },
+      { aggregateType: "Shift", eventType: "ShiftDriverBlockRemoved" },
+      { aggregateType: "Shift", eventType: "ShiftDriverBlockAdded" },
+      { aggregateType: "Shift", eventType: "ShiftLocationReported" },
       // //VEHICLE
       // { aggregateType: "Vehicle", eventType: "VehicleBlockRemoved" },
       // { aggregateType: "Vehicle", eventType: "VehicleBlockAdded" },

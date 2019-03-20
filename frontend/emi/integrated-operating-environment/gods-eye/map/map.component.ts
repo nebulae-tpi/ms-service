@@ -235,7 +235,7 @@ export class MapComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (service: any) => {
-          this.appendData(service);
+          this.applyService(service);
         },
         (error) => console.error(`MapComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
         () => {
@@ -286,7 +286,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * Adds (or removes in case of closing services) services
    * @param service
    */
-  async appendData(service) {
+  async applyService(service) {
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
     if (service.closed && oldDataIndex >= 0) {
       this.totalRawData.splice(oldDataIndex, 1);
