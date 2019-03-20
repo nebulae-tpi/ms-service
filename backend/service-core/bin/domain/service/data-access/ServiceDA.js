@@ -280,6 +280,19 @@ class ServiceDA {
     );
   }
 
+  /**
+   * Finds the open services requested by the client
+   */
+  static findCurrentServicesRequestedByClient$(clientId, projection = undefined) {
+    const explorePastMonth = Date.today().getDate() <= 2;
+    const query = { "state": { "$in": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "client.id": clientId };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection }))))
+    );
+  }
+
 
   /**
    * Finds an historical service by driver
@@ -287,6 +300,20 @@ class ServiceDA {
   static findHistoricalServiceByDriver$(driverId, year, month, page, count, projection = undefined) {
     const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
     const query = { "state": { "$nin": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "driver.id": driverId };
+    const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
+    return defer(() =>
+      mongoDB.extractAllFromMongoCursor$(
+        bd.collection(CollectionName).find(query, process).sort({ timestamp: -1 }).skip(page * count).limit(count)
+      )
+    );
+  }
+
+    /**
+   * Finds an historical service by client
+   */
+  static findHistoricalServiceByClient$(clientId, year, month, page, count, projection = undefined) {
+    const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
+    const query = { "state": { "$nin": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "client.id": clientId };
     const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
     return defer(() =>
       mongoDB.extractAllFromMongoCursor$(

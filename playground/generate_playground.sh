@@ -9,6 +9,9 @@ nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://gi
 # API - Driver-GateWay composition
 nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/driver-gateway --api-id=driver-gateway --output-dir=driver-gateway  --setup-file=../etc/mapi-driver-setup.json
 
+# API - Client-GateWay composition
+nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/client-gateway --api-id=client-gateway --output-dir=client-gateway  --setup-file=../etc/mapi-client-setup.json
+
 #   STACK COMPOSITION: BUSINESS_MGR + USER_MGR + DRIVER + VEHICLE + SERVICE
 nebulae compose-ui development --shell-type=FUSE2_ANGULAR --shell-repo=https://github.com/nebulae-tpi/emi --frontend-id=emi --output-dir=emi  --setup-file="../etc/mfe-setup.json,../../ms-business-management/etc/mfe-setup.json,../../ms-user-management/etc/mfe-setup.json,../../ms-vehicle/etc/mfe-setup.json,../../ms-driver/etc/mfe-setup.json"
 nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-tpi/emi-gateway --api-id=emi-gateway --output-dir=emi-gateway  --setup-file="../etc/mapi-setup.json,../../ms-business-management/etc/mapi-setup.json,../../ms-user-management/etc/emi-mapi-setup.json,../../ms-vehicle/etc/mapi-setup.json,../../ms-driver/etc/mapi-setup.json"

@@ -41,6 +41,7 @@ export const locale = {
         STATE: 'State',
         CREATION_TIMESTAMP: 'Time',
         CLIENT_NAME: 'Cliet',
+        DRIVER_DOC_ID: 'Driver',
         PICKUP_ADDR: 'Pickup Addr',
         NEIGHBORHOOD: 'neighborhood',
         VEHICLE_PLATE: 'Vehicle',
@@ -67,7 +68,8 @@ export const locale = {
       REQUEST_DIALOG: {
         TITLE: 'Request a Service',
         SATELLITE_CLIENT_PLACEHOLDER: 'Client',
-        REQUEST_BTN_LBL: 'Request'
+        REQUEST_BTN_LBL: 'Request',
+        CLIENT_LIST_TITLE: 'Doormen'
       }
     },
     ERRORS: {

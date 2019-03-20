@@ -194,6 +194,10 @@ class EventStoreService {
         fn: ClientES.handleClientSatelliteEnabled$,
         obj: ClientES
       },
+      ClientSatelliteInfoUpdated: {
+        fn: ClientES.handleClientSatelliteInfoUpdated$,
+        obj: ClientES
+      },
       //SERVICE
       ServiceRequested: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceAssigned: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
@@ -301,6 +305,10 @@ class EventStoreService {
       {
         aggregateType: "Client",
         eventType: "ClientSatelliteEnabled"
+      },
+      {
+        aggregateType: "Client",
+        eventType: "ClientSatelliteInfoUpdated"
       },
       //SERVICE
       { aggregateType: "Service", eventType: "ServiceRequested" },

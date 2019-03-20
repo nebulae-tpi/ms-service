@@ -51,8 +51,8 @@ class DriverAppLinkBroker {
             obs.next(`DriverAppLinkBroker Mqtt connected: ${this.url}:${this.port} { clientId:${this.clientId}, username:${this.user} }`);
             this.mqttClient.on('message', (topic, message) => {
 
-                console.log(`################################### TOPIC: ${topic} ###################################`);
-                console.log(`${message} \n \n`);
+                // console.log(`################################### TOPIC: ${topic} ###################################`);
+                // console.log(`${message} \n \n`);
 
                 const msg = JSON.parse(message);
                 if (msg && msg.att && msg.att.sId && msg.att.un && msg.t && msg.data) {
@@ -223,7 +223,7 @@ module.exports = () => {
             {
                 url: process.env.DRIVER_APP_MQTT_SERVER_URL,
                 port: process.env.DRIVER_APP_MQTT_SERVER_PORT,
-                clientId: process.env.DRIVER_APP_MQTT_SERVER_CLIENT_ID,
+                clientId: `${process.env.DRIVER_APP_MQTT_SERVER_CLIENT_ID}-${uuidv4()}`,
                 user: process.env.DRIVER_APP_MQTT_SERVER_USER,
                 password: process.env.DRIVER_APP_MQTT_SERVER_PASSWORD,
             }

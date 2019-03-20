@@ -33,7 +33,10 @@ class ClientES {
         )
     }
 
-
+    handleClientSatelliteInfoUpdated$({ aid, data}){
+        console.log("handleClientSatelliteInfoUpdated$", aid, data);
+        return ClientDA.updateClientSatelliteInfo$(aid, data);
+    }
 }
 
 

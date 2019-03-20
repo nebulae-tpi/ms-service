@@ -86,7 +86,7 @@ class ServiceDAL {
      */
     handleServicePickUpETAReported$({ data, ts, authToken }) {
         const { _id, eta } = data;
-        console.log(`ServiceDAL: handleServicePickUpETAReported: ${JSON.stringify(data)}`); //DEBUG: DELETE LINE
+        // console.log(`ServiceDAL: handleServicePickUpETAReported: ${JSON.stringify(data)}`); //DEBUG: DELETE LINE
 
         return ServiceDA.findById$(_id, { "_id": 1 }).pipe(
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(

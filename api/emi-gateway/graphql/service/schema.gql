@@ -134,6 +134,16 @@ type ServiceClientSatelliteInfo {
   offerMinDistance: Int
   "Maximum broadcasting radius"
   offerMaxDistance: Int
+  "Client Agreement list"
+  clientAgreements: [ClientClientAsociated]
+}
+
+type ClientClientAsociated {
+  clientId: String
+  clientName: String
+  documentId: String
+  tip: Int
+  tipType: String
 }
 
 type ServiceClientSatelliteLocation {

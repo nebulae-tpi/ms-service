@@ -117,7 +117,9 @@ input IOEClientInput {
     "Tip given to the client. Eg. satellites"
     tip: Int,
     "Tiping type"
-    tipType: String,
+    tipType: String
+    "Tip Client ID"
+    tipClientId: String
     "drivers document, this is the one who referred this client"
     referrerDriverDocumentId: String
     "custom offer min distance in radious"
@@ -142,7 +144,7 @@ type IOEDriver {
     "Driver fullname"
     fullname: String
     "document"
-    document: String
+    documentId: String
     "driver id"
     id: String
 }
