@@ -149,10 +149,17 @@ class ShiftES {
         if (aid === undefined) return of({});//DEBUG: DELETE LINE
 
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        //console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        
+        console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
         return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
-            filter(shift => shift && !shift.online),
+            filter(shift => {
+                console.log('Shift => ', (shift && !shift.online));
+                if(shift){
+                    console.log('Shift online  => ', shift.online);
+                }
+                return shift && !shift.online;
+            }),
             mergeMap(shift => iif(() => shift.serviceId, eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(shift.serviceId, data.location))), of('')),
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );

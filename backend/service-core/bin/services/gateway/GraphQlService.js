@@ -102,7 +102,6 @@ class GraphQlService {
           map(message => ({ authToken: requireAuth ? jsonwebtoken.verify(message.data.jwt, jwtPublicKey): null, message, failedValidations: [] })),
           catchError(err =>
             {
-              console.log('Verify requ3est');
               return handleError$(err).pipe(
                 map(response => ({
                   errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
