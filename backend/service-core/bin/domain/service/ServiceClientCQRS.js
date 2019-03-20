@@ -3,7 +3,7 @@
 
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
-const { of, interval, forkJoin, } = require("rxjs");
+const { of, interval, forkJoin, throwError, iif } = require("rxjs");
 const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first, toArray } = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
@@ -18,7 +18,7 @@ const {
   INTERNAL_SERVER_ERROR_CODE,
   PERMISSION_DENIED,
   ERROR_23100, ERROR_23101, ERROR_23102, ERROR_23103, ERROR_23104, ERROR_23105,
-  ERROR_23200, ERROR_23201, ERROR_23202, ERROR_23203, ERROR_23204, ERROR_23205, ERROR_23206, ERROR_23207, ERROR_23208, ERROR_23209, ERROR_23210, ERROR_23211,
+  ERROR_23200, ERROR_23201, ERROR_23202, ERROR_23203, ERROR_23204, ERROR_23205, ERROR_23206, ERROR_23207, ERROR_23208, ERROR_23209, ERROR_23210, ERROR_23211, ERROR_23212,
   ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229,
 } = require("../../tools/customError");
 
@@ -99,9 +99,17 @@ class ServiceClientCQRS {
    */
   requestServices$({ root, args, jwt }, authToken) {
     const { id } = args;
-    //ServiceCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
     .pipe(
+      //TODO: Remove client of the request service ??  
+      mergeMap(() => 
+        ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, {_id: 1})
+        .pipe(
+          toArray(),
+          mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
+        )
+      ),    
       mapTo(args),
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
@@ -116,6 +124,30 @@ class ServiceClientCQRS {
    * cancelService
    */
   cancelServicebyClient$({ root, args, jwt }, authToken) {
+    //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
+      mapTo(args),
+      tap(request => this.validateServiceCancellationRequestInput({...request, authorType: 'CLIENT'})),
+      mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
+      tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
+      tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
+      mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+        'Service',
+        request.id,
+        'ServiceCancelledByClient',
+        { reason: request.reason, notes: request.notes },
+        authToken))), //Build and send event (event-sourcing)
+      mapTo(this.buildCommandAck()), // async command acknowledge
+      //tap(x => ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err, true))
+    );
+  }
+  
+  /**  
+   * cancelService
+   */
+  changeServiceState$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
       mapTo(args),
@@ -151,7 +183,7 @@ class ServiceClientCQRS {
     if (client.tipType && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.tipType) == -1) throw ERROR_23202; // invalid tip type
     if (client.tip && (client.tip < 0 || client.tip > 10000)) throw ERROR_23203; // invalid tip amount
     if (!pickUp.marker && !pickUp.polygon) throw ERROR_23204; // pickUp location undefined
-    if (!pickUp.addressLine1) throw ERROR_23205; //  pickup address not specified
+    // if (!pickUp.addressLine1) throw ERROR_23205; //  pickup address not specified
     if (VALID_SERVICE_PAYMENT_TYPES.indexOf(paymentType) == -1) throw ERROR_23206; // invalid payment type
     if (requestedFeatures && requestedFeatures.filter(v => VALID_SERVICE_REQUEST_FEATURES.indexOf(v) == -1).length > 0) throw ERROR_23207; // invalid requested Features    
     if (dropOff && !dropOff.marker && !dropOff.polygon) throw ERROR_23208; // dropOff location undefined
@@ -199,8 +231,8 @@ class ServiceClientCQRS {
    * @returns {Event}
    */
   buildServiceRequestedEsEvent(authToken, request) {
-
-    let { requestedFeatures, fareDiscount, fare, pickUp, tip, dropOff } = request;
+    // All of the request performed by a client must have a fare discount of 0.1 (10%)
+    let { requestedFeatures, fare, pickUp, tip, dropOff, fareDiscount= 0.1 } = request;
 
     pickUp = !pickUp ? undefined : {
       ...pickUp,
@@ -296,7 +328,9 @@ class ServiceClientCQRS {
   formatServiceToGraphQLSchema(service) {
     const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
 
-    return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+    const location = (!service || !service.location) ? undefined: { lng: service.location.coordinates[0], lat: service.location.coordinates[1] };
+
+    return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, location: location };
   }
 
 

@@ -102,7 +102,6 @@ class GraphQlService {
           map(message => ({ authToken: requireAuth ? jsonwebtoken.verify(message.data.jwt, jwtPublicKey): null, message, failedValidations: [] })),
           catchError(err =>
             {
-              console.log('Verify requ3est');
               return handleError$(err).pipe(
                 map(response => ({
                   errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
@@ -190,6 +189,10 @@ class GraphQlService {
       {
         aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.CancelServiceByClient"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.ChangeServiceState"
       },
       //DRIVER
       {
@@ -299,6 +302,10 @@ class GraphQlService {
         fn: ServiceClientCQRS.cancelServicebyClient$,
         obj: ServiceClientCQRS
       },
+      "clientgateway.graphql.mutation.ChangeServiceState": {
+        fn: ServiceClientCQRS.changeServiceState$,
+        obj: ServiceClientCQRS
+      },      
 
       // SERVICES
       "emigateway.graphql.query.ServiceCoreService": {

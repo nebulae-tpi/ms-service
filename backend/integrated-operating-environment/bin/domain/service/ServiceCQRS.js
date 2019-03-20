@@ -72,7 +72,7 @@ class ServiceCQRS {
    * @param {*} authToken 
    */
   queryServices$({ root, args, jwt }, authToken) {
-    //ServiceCQRS.log(`ServiceCQRS.queryServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    ServiceCQRS.log(`ServiceCQRS.queryServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ServiceCQRS", "queryServices", PERMISSION_DENIED, READ_ROLES).pipe(
       mapTo(args),
       mergeMap(({ serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, projections }) => ServiceDA.findByFilters$(
@@ -86,7 +86,7 @@ class ServiceCQRS {
       )),
       map(service => this.formatServiceToGraphQLSchema(service)),
       toArray(),
-      //tap(x => ServiceCQRS.log(`ServiceCQRS.queryServices RESP: ${x.length}`)),//DEBUG: DELETE LINE
+      tap(x => ServiceCQRS.log(`ServiceCQRS.queryServices RESP: ${x.length}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );

@@ -86,6 +86,7 @@ module.exports = {
   ERROR_23209: new CustomError('RequestServicesError', `RequestServices`, 23209, 'valor de descuento de tarifa no válido'),
   ERROR_23210: new CustomError('RequestServicesError', `RequestServices`, 23210, 'valor de tarifa no válido'),
   ERROR_23211: new CustomError('RequestServicesError', `RequestServices`, 23211, 'valor de propina no válido'),
+  ERROR_23212: new CustomError('RequestServicesError', `RequestServices`, 23212, 'El cliente ya tiene una solicitud de servicio pendiente.'),
 
   ERROR_23220: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23220, 'Datos insuficientes. ID, tipo de autor y razón son obligatorios'),
   ERROR_23221: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23221, 'Tipo de Autor inválido'),
