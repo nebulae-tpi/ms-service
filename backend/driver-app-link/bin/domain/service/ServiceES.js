@@ -29,7 +29,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ aid, data }) {
-        //console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
 
         const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
         const localHour = localDate.getHours();
@@ -71,7 +71,7 @@ class ServiceES {
 
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId })}`);
 
-
+            console.log(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId })}`);
 
             let service = undefined;
             let retries = 0;
@@ -93,6 +93,7 @@ class ServiceES {
             }
 
             obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+            console.log(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
@@ -112,6 +113,7 @@ class ServiceES {
                 shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
                 obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
+                console.log(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
                 if (service.client && service.client.referrerDriverDocumentId) {
                     const priorityShift = shifts.filter(sh => sh.driver.documentId === service.client.referrerDriverDocumentId)[0];
@@ -124,6 +126,7 @@ class ServiceES {
 
                 shifts = shifts.filter(s => s.referred || (s.dist.calculated > service.offer.params.minDistance));
                 obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
+                console.log(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
                 const offerSearchThreshold = offerSearchSpan + Date.now();
 
@@ -131,6 +134,7 @@ class ServiceES {
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
                         const shift = shifts[i];
                         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
+                        console.log(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
                         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
                         await driverAppLinkBroker.sendServiceEventToDrivers$(
                             shift.businessId,
@@ -147,6 +151,7 @@ class ServiceES {
                 } else {
                     if (service.offer.params.minDistance !== 0) {
                         obs.next(`no shifts found on searched area, will remove minDistance on next search`);
+                        console.log(`no shifts found on searched area, will remove minDistance on next search`);
                         service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, { "offer.params.minDistance": 0 }, { "offer.searchCount": 1 }).toPromise();
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
@@ -162,6 +167,7 @@ class ServiceES {
                 }
 
             }
+            console.log('needToOffer => ', needToOffer);
             if (needToBeCancelledBySystem) {
                 await eventSourcing.eventStore.emitEvent$(
                     ServiceES.buildEventSourcingEvent(
