@@ -2,7 +2,7 @@
 
 
 const { of, iif, forkJoin, Observable, Subject } = require("rxjs");
-const { mapTo, mergeMap, mergeMapTo, map, toArray,  groupBy, debounceTime, filter } = require('rxjs/operators');
+const { mapTo, mergeMap, tap, mergeMapTo, map, toArray,  groupBy, debounceTime, filter, catchError } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -49,11 +49,11 @@ class ServiceES {
         .pipe(
             mergeMap(serviceId => 
                 // Error isolation: If an error ocurrs, it is not going to affect the stream
-                ServiceDA.getService$(serviceId)
+                ServiceDA.findById$(serviceId)
                 .pipe(
                 filter(service => service),
                 map(service => this.formatServiceToGraphQLSchema(service)),          
-                mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)),
+                mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ClientServiceUpdatedSubscription', service)),
                 catchError(error => {
                     console.log('An error ocurred while a service updated event was being processed: ', error);
                     return of('Error: ', error)
@@ -62,6 +62,15 @@ class ServiceES {
             )
         );
     }  
+
+    /**
+     * Queue the service events and group them by its id to reduce the 
+     * amount of push data from the server to the clients
+     * @param {*} service 
+     */
+    queueAndGroupServiceEvent(service) {
+        this.serviceClientUpdatedEventEmitter$.next(service._id);
+    }
 
     //#region GraphQL response formatters
 
@@ -81,13 +90,10 @@ class ServiceES {
     handleServiceRequested$({ data }) {
         //console.log(`*** ServiceES: handleServiceRequested: `, data); //DEBUG: DELETE LINE
         return ServiceDA.insertService$(data)
-        // .pipe(
-        //     tap(() => {
-        //         this.serviceClientUpdatedEventEmitter$.next(data._id);
-        //     }),
-        // );
+        .pipe(
+            tap(() => this.queueAndGroupServiceEvent(data))
+        );
     }
-
 
     /**
      * Handles EventSourcing Event ServiceAssigned
@@ -98,6 +104,7 @@ class ServiceES {
         //console.log(`*** ServiceES: handleServiceAssigned: `, data); //DEBUG: DELETE LINE
         const { shiftId, driver, vehicle, skipPersist } = data;
         return iif(() => skipPersist, of({}), ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)).pipe(
+            tap(() => this.queueAndGroupServiceEvent({_id: aid})),
             mergeMap(persistResult =>
                 eventSourcing.eventStore.emitEvent$(
                     ServiceES.buildEventSourcingEvent(
@@ -121,7 +128,10 @@ class ServiceES {
     handleServicePickUpETAReported$({ aid, data }) {
         //console.log(`*** ServiceES: handleServicePickUpETAReported: `, data); //DEBUG: DELETE LINE
         const { eta } = data;
-        return ServiceDA.setPickUpETA$(aid, eta);
+        return ServiceDA.setPickUpETA$(aid, eta)
+        .pipe(
+            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
+        );
     }
 
     /**
@@ -132,7 +142,10 @@ class ServiceES {
     handleServiceLocationReported$({ aid, data }) {
         //console.log(`*** ServiceES: handleServiceLocationReported: `, aid, data); //DEBUG: DELETE LINE
         const { location } = data;
-        return ServiceDA.appendLocation$(aid, location);
+        return ServiceDA.appendLocation$(aid, location)
+        .pipe(
+            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
+        );
     }
 
     /**
@@ -143,7 +156,10 @@ class ServiceES {
     handleServiceArrived$({ aid, data }) {
         //console.log(`*** ServiceES: handleServiceArrived: `, aid, data); //DEBUG: DELETE LINE
         const { location, timestamp } = data;
-        return ServiceDA.appendstate$(aid, 'ARRIVED', location, timestamp);
+        return ServiceDA.appendstate$(aid, 'ARRIVED', location, timestamp)
+        .pipe(
+            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
+        );
     }
 
     /**
@@ -154,7 +170,10 @@ class ServiceES {
     handleServicePassengerBoarded$({ aid, data }) {
         //console.log(`*** ServiceES: handleServicePassengerBoarded: `, data); //DEBUG: DELETE LINE
         const { location, timestamp } = data;
-        return ServiceDA.appendstate$(aid, 'ON_BOARD', location, timestamp);
+        return ServiceDA.appendstate$(aid, 'ON_BOARD', location, timestamp)
+        .pipe(
+            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
+        );
     }
 
     /**
@@ -166,6 +185,7 @@ class ServiceES {
         //console.log(`*** ServiceES: handleServiceCompleted: `, data); //DEBUG: DELETE LINE
         const { location, timestamp } = data;
         return ServiceDA.appendstateAndReturnService$(aid, 'DONE', location, timestamp, { shiftId: 1 }).pipe(
+            tap(({ shiftId }) => this.queueAndGroupServiceEvent({_id: aid})),
             mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
             mergeMap(shift =>
                 eventSourcing.eventStore.emitEvent$(
@@ -189,7 +209,10 @@ class ServiceES {
      */
     handleServiceClosed$({ aid }) {
         //console.log(`*** ServiceES: handleServiceClosed: `, aid); //DEBUG: DELETE LINE
-        return ServiceDA.closeService$(aid);
+        return ServiceDA.closeService$(aid)
+        .pipe(
+            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
+        );
     }
 
     /**
@@ -200,7 +223,10 @@ class ServiceES {
     handleServiceDropOffETAReported$({ aid, data }) {
         //console.log(`*** ServiceES: handleServiceDropOffETAReported: `, data); //DEBUG: DELETE LINE
         const { eta } = data;
-        return ServiceDA.setPickUpETA$(aid, eta);
+        return ServiceDA.setPickUpETA$(aid, eta)
+        .pipe(
+            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
+        );
     }
 
 
@@ -251,6 +277,7 @@ class ServiceES {
     handleCancellation$(serviceId, cancelStateType, reason, notes, location, timestamp, user) {
         //console.log(`*** ServiceES: handleCancellation: `, serviceId, cancelStateType, timestamp); //DEBUG: DELETE LINE
         return ServiceDA.setCancelStateAndReturnService$(serviceId, cancelStateType, location, reason, notes, timestamp, { shiftId: 1 }).pipe(
+            tap(service => this.queueAndGroupServiceEvent({_id: serviceId})),
             filter(({ shiftId }) => shiftId),
             mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
             mergeMap(shift =>

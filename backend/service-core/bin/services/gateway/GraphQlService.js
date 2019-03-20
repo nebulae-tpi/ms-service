@@ -191,6 +191,10 @@ class GraphQlService {
         aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.CancelServiceByClient"
       },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.ChangeServiceState"
+      },
       //DRIVER
       {
         aggregateType: "Driver",
@@ -299,6 +303,10 @@ class GraphQlService {
         fn: ServiceClientCQRS.cancelServicebyClient$,
         obj: ServiceClientCQRS
       },
+      "clientgateway.graphql.mutation.ChangeServiceState": {
+        fn: ServiceClientCQRS.changeServiceState$,
+        obj: ServiceClientCQRS
+      },      
 
       // SERVICES
       "emigateway.graphql.query.ServiceCoreService": {

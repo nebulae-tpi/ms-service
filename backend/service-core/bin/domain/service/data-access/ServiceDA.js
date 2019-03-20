@@ -24,7 +24,7 @@ class ServiceDA {
   }
 
   /**
-   * Gets Driver by its _id.
+   * Gets service by its _id.
    * @returns {Observable}
    */
   static findById$(_id, projection = undefined) {

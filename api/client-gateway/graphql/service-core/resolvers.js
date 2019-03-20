@@ -72,7 +72,15 @@ module.exports = {
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
-    }
+    },
+    ChangeServiceState: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'ChangeServiceState', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.ChangeServiceState", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
   },
 
   //// SUBSCRIPTIONS ///////
@@ -96,4 +104,53 @@ module.exports = {
         )
     }
   }
-}
+};
+
+//// SUBSCRIPTIONS SOURCES ////
+
+const eventDescriptors = [
+  {
+      backendEventName: 'ClientServiceUpdatedSubscription',
+      gqlSubscriptionName: 'ClientServiceUpdatedSubscription',
+      dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
+      onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
+      onEvent: (evt, descriptor) => {
+          //console.log(`Event of type  ${descriptor.backendEventName} arraived`);
+      },// OPTIONAL, only use if needed
+  },
+];
+
+
+/**
+* Connects every backend event to the right GQL subscription
+*/
+eventDescriptors.forEach(descriptor => {
+  broker
+      .getMaterializedViewsUpdates$([descriptor.backendEventName])
+      .subscribe(
+          evt => {
+              if (descriptor.onEvent) {
+                  descriptor.onEvent(evt, descriptor);
+              }
+              const payload = {};
+              payload[descriptor.gqlSubscriptionName] = descriptor.dataExtractor ? descriptor.dataExtractor(evt) : evt.data
+              pubsub.publish(descriptor.gqlSubscriptionName, payload);
+          },
+
+          error => {
+              if (descriptor.onError) {
+                  descriptor.onError(error, descriptor);
+              }
+              console.error(
+                  `Error listening ${descriptor.gqlSubscriptionName}`,
+                  error
+              );
+          },
+
+          () =>
+              console.log(
+                  `${descriptor.gqlSubscriptionName} listener STOPPED`
+              )
+      );
+});
+

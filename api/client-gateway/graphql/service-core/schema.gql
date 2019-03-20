@@ -14,8 +14,6 @@ type Vehicle {
 type Driver {
    "Driver fullname"
    fullname: String
-   "username"
-   username: String
 }
 
 "Driver's shift info"
@@ -106,6 +104,8 @@ type Service {
    timestamp: BigInt
    "Service vehicle"
    vehicle: Vehicle
+   "driver info"
+   driver: Driver
    "Passenger pick up location"
    pickUp: Location
    "Passenger drop off location"
@@ -200,11 +200,19 @@ type Mutation {
       "cancellation additional notes"
       notes: String        
    ): CommandAck @requireAuth
+
+   "Change the service state"
+   ChangeServiceState(
+      "Service Identifier"
+      id: String!
+      "New service state"
+      newState: String!
+   ): CommandAck @requireAuth
 }
 
 type Subscription {
   "This events is triggered when a Service is updated"
-  ClientServiceUpdatedSubscription: Service @requireAuth
+  ClientServiceUpdatedSubscription: Service
 }
 
 
