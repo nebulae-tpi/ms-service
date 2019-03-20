@@ -92,6 +92,9 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   hotkeys: Hotkey[] = [];
   clientDefaultTip = 0;
 
+  selectedIndexDoorman = -1;
+  doorMenOptions: any[];
+
 
   constructor(
     private formBuilder: FormBuilder,
@@ -136,7 +139,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     this.form = new FormGroup({
       client: new FormControl(undefined, [Validators.nullValidator]),
       quantity: new FormControl(1, [Validators.min(1), Validators.max(5)]),
-      featureOptionsGroup: new FormControl(),
+      featureOptionsGroup: new FormControl([]),
       destinationOptionsGroup: new FormControl('DEFAULT'),
     });
   }
@@ -151,6 +154,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       tap((selected) => {
         if (typeof selected === 'string' || selected instanceof String) {
+          this.doorMenOptions = undefined;
+          this.selectedIndexDoorman=-1;
           this.form.patchValue({ client: null });
         }
       }),
@@ -171,9 +176,14 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   }
 
   onClientSelected(client) {
+    this.doorMenOptions = (client.satelliteInfo && client.satelliteInfo.clientAgreements ) ? client.satelliteInfo.clientAgreements: undefined;
     this.form.patchValue({ client });
-    if (client) {
-      this.clientDefaultTip = client.satelliteInfo.tip;
+    if (client) {  
+      this.clientDefaultTip = !this.doorMenOptions ? client.satelliteInfo.tip : 0;
+      if(this.doorMenOptions && this.doorMenOptions.length == 1 ){
+        this.selectedIndexDoorman = 0;
+        this.clientDefaultTip = this.doorMenOptions[0].tip;
+      }      
     }
   }
 
@@ -199,48 +209,50 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     return range(1, quantity || 1)
       .pipe(
         filter(() => client != null),
-        map(requestNumber => {
-          return {
-            client: {
-              id: client._id,
-              fullname: client.generalInfo.name,
-              username: client.auth ? client.auth.username : null,
-              tip: (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
-                ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
-                : client.satelliteInfo
-                  ? client.satelliteInfo.tip
-                  : 0,
-              tipType: client.satelliteInfo ? client.satelliteInfo.tipType : '',
-              referrerDriverDocumentId: client.satelliteInfo ? client.satelliteInfo.referrerDriverDocumentId : null,
-              offerMinDistance: client.satelliteInfo ? client.satelliteInfo.offerMinDistance : null,
-              offerMaxDistance: client.satelliteInfo ? client.satelliteInfo.offerMaxDistance : null,
+        map(requestNumber => ({
+          client: {
+            id: client._id,
+            fullname: client.generalInfo.name,
+            username: client.auth ? client.auth.username : null,
+            tip: (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
+              ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
+              : client.satelliteInfo
+                ? client.satelliteInfo.tip
+                : 0,
+            tipType: this.doorMenOptions 
+              ? this.doorMenOptions[this.selectedIndexDoorman].tipType
+              : client.satelliteInfo ? client.satelliteInfo.tipType : '',
+            tipClientId: this.doorMenOptions ? this.doorMenOptions[this.selectedIndexDoorman].clientId : client._id,
+            referrerDriverDocumentId: client.satelliteInfo ? client.satelliteInfo.referrerDriverDocumentId : null,
+            offerMinDistance: client.satelliteInfo ? client.satelliteInfo.offerMinDistance : null,
+            offerMaxDistance: client.satelliteInfo ? client.satelliteInfo.offerMaxDistance : null,
+          },
+          pickUp: {
+            marker: {
+              lat: client.location.lat,
+              lng: client.location.lng,
             },
-            pickUp: {
-              marker: {
-                lat: client.location.lat,
-                lng: client.location.lng,
-              },
-              polygon: null,
-              city: client.generalInfo.city,
-              zone: client.generalInfo.zone,
-              neighborhood: client.generalInfo.neighborhood,
-              addressLine1: client.generalInfo.addressLine1,
-              addressLine2: client.generalInfo.addressLine2,
-              notes: client.generalInfo.notes
-            },
-            paymentType,
-            requestedFeatures: featureOptionsGroup,
-            dropOff: null,
-            //dropOffSpecialType: destinationOptionsGroup,
-            fareDiscount,
-            fare,
-            tip,
-            request: {
-              sourceChannel: 'OPERATOR',
-              destChannel: 'DRIVER_APP',
-            }
-          };
-        }),
+            polygon: null,
+            city: client.generalInfo.city,
+            zone: client.generalInfo.zone,
+            neighborhood: client.generalInfo.neighborhood,
+            addressLine1: client.generalInfo.addressLine1,
+            addressLine2: client.generalInfo.addressLine2,
+            notes: client.generalInfo.notes
+          },
+          paymentType,
+          requestedFeatures: featureOptionsGroup,
+          dropOff: null,
+          //dropOffSpecialType: destinationOptionsGroup,
+          fareDiscount,
+          fare,
+          tip,
+          request: {
+            sourceChannel: 'OPERATOR',
+            destChannel: 'DRIVER_APP',
+          }
+        })),
+        tap(rqst => console.log('Enviando REQUEST ==> ', rqst)),
         mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
         takeUntil(this.ngUnsubscribe)
       )
@@ -255,6 +267,13 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
           console.log('Error ==> ', error);
         }
       );
+  }
+
+
+
+  onDoormanChipselected(chipIndex: number){
+    this.selectedIndexDoorman = chipIndex-1;
+    this.clientDefaultTip = this.selectedIndexDoorman >= this.doorMenOptions.length ? 0 : this.doorMenOptions[this.selectedIndexDoorman].tip;
   }
 
 
@@ -361,26 +380,52 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
         this.selectSpecialDestinationOption('10000');
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      // Quantity selection
+      new Hotkey(['ctrl+shift+left'], (event: KeyboardEvent): boolean => {
+        this.addQuantity(-1);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+right'], (event: KeyboardEvent): boolean => {
+        this.addQuantity(1);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),      
+      // doormen selection
       new Hotkey(['ctrl+shift+1'], (event: KeyboardEvent): boolean => {
-        this.setQuantity(1);
+        this.onDoormanChipselected(1);
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+2'], (event: KeyboardEvent): boolean => {
-        this.setQuantity(2);
+        this.onDoormanChipselected(2);
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+3'], (event: KeyboardEvent): boolean => {
-        this.setQuantity(3);
+        this.onDoormanChipselected(3);
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+4'], (event: KeyboardEvent): boolean => {
-        this.setQuantity(4);
+        this.onDoormanChipselected(4);
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+5'], (event: KeyboardEvent): boolean => {
-        this.setQuantity(5);
+        this.onDoormanChipselected(5);
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+6'], (event: KeyboardEvent): boolean => {
+        this.onDoormanChipselected(6);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+7'], (event: KeyboardEvent): boolean => {
+        this.onDoormanChipselected(7);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+8'], (event: KeyboardEvent): boolean => {
+        this.onDoormanChipselected(8);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+shift+9'], (event: KeyboardEvent): boolean => {
+        this.onDoormanChipselected(9);
+        return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT'])
     ];
     this._hotkeysService.add(this.hotkeys);
   }
@@ -392,8 +437,14 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     this.form.patchValue({ featureOptionsGroup: currentSelection });
   }
 
-  setQuantity(quantity) {
-    this.form.patchValue({ quantity });
+  addQuantity(quantityaddition) {
+    let newQuantity = this.form.get('quantity').value + quantityaddition;
+    newQuantity = (newQuantity === 6 && quantityaddition === 1)
+      ? 1
+      : (newQuantity === 0 && quantityaddition === -1) ? 5 : newQuantity
+
+    
+    this.form.patchValue({ quantity: newQuantity });
   }
 
   selectSpecialDestinationOption(specialDest) {

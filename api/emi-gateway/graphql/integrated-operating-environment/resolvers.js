@@ -27,12 +27,10 @@ function getResponseFromBackEnd$(response) {
     }));
 }
 
-
 const READ_WRITE_ROLES = ["OPERATOR", "OPERATION-SUPERVISOR"];
 const READ_ROLES = ["PLATFORM-ADMIN", "BUSINESS-OWNER", "OPERATOR", "OPERATION-SUPERVISOR"];
 
 module.exports = {
-
   Query: {
     IOEService: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'IOEService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', READ_ROLES).pipe(

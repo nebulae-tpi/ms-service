@@ -257,7 +257,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       : this.layout.total.height - 10;
 
     dialogConfig.width = `${width}px`;
-    dialogConfig.height = `${height}px`;
+    dialogConfig.height = `${height+50}px`;
     dialogConfig.autoFocus = true;
     console.log('DIALOG CONFIG ==> ', dialogConfig);
 

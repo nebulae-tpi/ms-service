@@ -91,6 +91,28 @@ class ClientDA {
     );
   }
 
+      /**
+   * modifies the satellite info of the indicated Client 
+   * @param {*} id  Client ID
+   * @param {*} ClientSatelliteInfo  New general information of the Client
+   */
+  static updateClientSatelliteInfo$(id, ClientSatelliteInfo) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    return defer(()=>
+        collection.findOneAndUpdate(
+          { _id: id },
+          {
+            $set: { satelliteInfo: ClientSatelliteInfo.satelliteInfo }
+          },{
+            returnOriginal: false
+          }
+        )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
+    );
+  }
+
 
 
 }

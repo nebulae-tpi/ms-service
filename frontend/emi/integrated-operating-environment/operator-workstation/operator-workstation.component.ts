@@ -192,7 +192,6 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
   loadUserRoles(){
     const userRoles = this.keycloakService.getUserRoles(true);
     this.userIsSupervisor = userRoles.includes('OPERATION-SUPERVISOR');
-    console.log('USER ROLES ==> ', this.userIsSupervisor );
   }
 
 
