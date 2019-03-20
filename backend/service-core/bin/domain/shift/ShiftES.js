@@ -153,7 +153,15 @@ class ShiftES {
         console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
         return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
-            mergeMap(shift => iif(() => shift.serviceId, eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(shift.serviceId, data.location)).pipe(mapTo(shift))), of(shift)),
+            mergeMap(shift => {
+                if(shift.serviceId){
+                    return eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(shift.serviceId, data.location)).pipe(mapTo(shift));
+                }else{
+                    return of(shift)
+                }
+            }
+                //if(() => shift.serviceId, eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(shift.serviceId, data.location)).pipe(mapTo(shift))), of(shift)
+            ),
             filter(shift => shift && !shift.online),         
             mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
