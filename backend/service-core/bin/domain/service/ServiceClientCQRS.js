@@ -99,14 +99,15 @@ class ServiceClientCQRS {
    */
   requestServices$({ root, args, jwt }, authToken) {
     const { id } = args;
-    // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
     .pipe(
       //TODO: Remove client of the request service ??  
       mergeMap(() => 
-        ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId)
+        ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, {_id: 1})
         .pipe(
-          mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of(args)))
+          toArray(),
+          mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
         )
       ),    
       mapTo(args),
@@ -327,7 +328,9 @@ class ServiceClientCQRS {
   formatServiceToGraphQLSchema(service) {
     const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
 
-    return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+    const location = (!service || !service.location) ? undefined: { lng: service.location.coordinates[0], lat: service.location.coordinates[1] };
+
+    return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, location: location };
   }
 
 
