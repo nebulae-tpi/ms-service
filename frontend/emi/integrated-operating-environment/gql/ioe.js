@@ -63,18 +63,30 @@ query IOEServices($serviceStatesFilter: [String], $businessId: String, $page: In
     },
     driver{ fullname, documentId, id },
     lastModificationTimestamp,
-      request{
+    request{
       sourceChannel, destChannel,
-        creationOperatorId, creationOperatorUsername,
-        ownerOperatorId, ownerOperatorUsername
+      creationOperatorId, creationOperatorUsername,
+      ownerOperatorId, ownerOperatorUsername
+    },
+    offer{
+      searchCount,
+      offerCount,
+      shifts,
+      params{
+        minDistance,
+        maxDistance,
+        offerTotalSpan,
+        offerSearchSpan,
+        offerShiftSpan
+      }
     }
   }
 }
 `;
 
 export const IOEShifts = gql`
-query IOEShifts($shiftStatesFilter: [String], $shiftChannelsFilter: [String], $viewAllOperators: Boolean, $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
-  IOEShifts(shiftStatesFilter: $shiftStatesFilter, shiftChannelsFilter : $shiftChannelsFilter, viewAllOperators: $viewAllOperators, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
+query IOEShifts($shiftStatesFilter: [String], $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
+  IOEShifts(shiftStatesFilter: $shiftStatesFilter, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
     id,
     businessId,
     timestamp,            
@@ -135,17 +147,29 @@ export const IOEServiceSubscription = gql`
       },
       driver{ fullname, documentId, id },
       lastModificationTimestamp,
-        request{
+      request{
         sourceChannel, destChannel,
           creationOperatorId, creationOperatorUsername,
           ownerOperatorId, ownerOperatorUsername
+      },
+      offer{
+        searchCount,
+        offerCount,
+        shifts,
+        params{
+          minDistance,
+          maxDistance,
+          offerTotalSpan,
+          offerSearchSpan,
+          offerShiftSpan
+        }
       }
     }
   }
 `;
 export const IOEShiftSubscription = gql`
-  subscription($businessId: String, $operatorId: String){
-    IOEShift(businessId: $businessId, operatorId: $operatorId){
+  subscription($businessId: String){
+    IOEShift(businessId: $businessId){
       id,
       businessId,
       timestamp,            

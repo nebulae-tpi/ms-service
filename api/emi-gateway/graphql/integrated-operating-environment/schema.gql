@@ -58,6 +58,8 @@ type IOEService{
     request: Request
     "closed flag"
     closed: Boolean
+    "service offer info"
+    offer: Offer
 }
 
 "Shift info"
@@ -97,6 +99,27 @@ type Request{
     ownerOperatorId: String
     "operator's username who own this request"
     ownerOperatorUsername: String
+}
+
+"Offer metadata"
+type Offer{
+    "Offer search count"
+    searchCount: Int
+    "Offer count"
+    offerCount: Int
+    "Shifts ids this service have been offer to"
+    shifts: [String]
+    "Offer params"
+    params: OfferParams
+}
+
+"Offer parameters"
+type OfferParams{
+    minDistance: Int
+	maxDistance: Int
+	offerTotalSpan: Int
+	offerSearchSpan: Int
+	offerShiftSpan: Int	
 }
 
 "Request metadata"

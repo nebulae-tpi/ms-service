@@ -1,8 +1,8 @@
 'use strict'
 
 
-const { of, interval, forkJoin, empty, merge } = require("rxjs");
-const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
+const { of, interval, forkJoin, empty, merge, iif } = require("rxjs");
+const { mapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -34,13 +34,13 @@ class ShiftES {
      * @param {Event} shiftStateChangedEvt 
      */
     handleShiftStateChanged$({ aid, data, user }) {
-        //console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
+        //console.log(`ShiftES.handleShiftStateChanged: ${JSON.stringify({ aid, data,user })}`); //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateShiftStateAndGetOnlineFlag$(aid, data.state).pipe(
             filter(shift => shift && !shift.online),
             filter(shift => ["AVAILABLE", "NO_AVAILABLE", "BUSY"].includes(data.state)),//filter by the only states that can asure the device is online
-            mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
+            mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
     }
 
@@ -50,7 +50,6 @@ class ShiftES {
      */
     handleShiftConnected$({ aid }) {
         //console.log(`ShiftES.handleShiftConnected: ${JSON.stringify({ aid })}`); //DEBUG: DELETE LINE
-
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         return ShiftDA.updateShiftOnlineFlag$(aid, true);
@@ -146,16 +145,15 @@ class ShiftES {
      * @param {Event} shiftLocationReportedEvt
      */
     handleShiftLocationReported$({ aid, data, user }) {
-        if (aid === undefined) return of({});//DEBUG: DELETE LINE
-
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
-        
-        console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data })}`); //DEBUG: DELETE LINE
 
+        //console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data, user })}`); //DEBUG: DELETE LINE
         return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
-            mergeMap(shift => iif(() => shift.serviceId, eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(shift.serviceId, data.location)).pipe(mapTo(shift))), of(shift)),
-            filter(shift => shift && !shift.online),         
-            mergeMapTo(eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
+            mergeMap(shift => iif(() => data.serviceId,
+                eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(data.serviceId, data.location, user)).pipe(mapTo(shift)),
+                of(shift))),
+            filter(shift => shift && !shift.online),
+            mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
     }
 
@@ -183,7 +181,7 @@ class ShiftES {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    buildServiceLocationReportedEsEvent(serviceId, location) {
+    buildServiceLocationReportedEsEvent(serviceId, location, user = 'SYSTEM') {
         return new Event({
             aggregateType: 'Service',
             aggregateId: serviceId,

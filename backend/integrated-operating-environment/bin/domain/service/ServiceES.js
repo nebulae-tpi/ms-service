@@ -142,6 +142,24 @@ class ServiceES {
         return this.transmitEventToFrontEnd$(evt);
     }
 
+    /**
+     * Handles EventSourcing Event ServiceOfferUpdated
+     * @param {Event} evt 
+     * @returns {Observable}
+     */
+    handleServiceOfferUpdated$(evt) {
+        return this.transmitEventToFrontEnd$(evt);
+    }
+
+    /**
+     * Handles EventSourcing Event ServiceOfferedToShift
+     * @param {Event} evt 
+     * @returns {Observable}
+     */
+    handleServiceOfferedToShift$(evt) {
+        return this.transmitEventToFrontEnd$(evt);
+    }
+
 
     transmitEventToFrontEnd$(serviceEvent) {
         return of(serviceEvent).pipe(
@@ -154,7 +172,8 @@ class ServiceES {
 
     formatServiceToGraphqlIOEService(service) {
         const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
-        return !service ? undefined : { ...service, vehicle: { licensePlate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+        const offer = !service.offer ? undefined : { ...service.offer, shifts : !service.offer.shifts ? [] :  Object.keys(service.offer.shifts) };
+        return !service ? undefined : { ...service, vehicle: { licensePlate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, offer };
     }
 
 }

@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Shift";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, first, filter } = require("rxjs/operators");
+const { map, mergeMap, first, filter, take } = require("rxjs/operators");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
 
 class ShiftDA {
@@ -36,7 +36,7 @@ class ShiftDA {
    * Finds shift by filters
    */
   static findByFilters$(businessId, states, page, count, projection = undefined) {
-    const query = { "businessId": businessId};
+    const query = { "businessId": businessId };
     if (states && states.length > 0) {
       query.state = { "$in": states };
     }

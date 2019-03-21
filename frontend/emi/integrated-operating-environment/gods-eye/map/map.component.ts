@@ -86,10 +86,10 @@ export class MapComponent implements OnInit, OnDestroy {
     google.maps.MapTypeId.TERRAIN
   ];
 
-  // Subject to unsubscribe
+  // Subjects to unsubscribe
   private ngUnsubscribe = new Subject();
-  // Subject to unsubscrtibe
   private ngUnsubscribeIOEServiceListener = new Subject();
+  private ngUnsubscribeIOEShiftListener = new Subject();
   //map height
   mapHeight = 400;
 
@@ -139,15 +139,20 @@ export class MapComponent implements OnInit, OnDestroy {
     this.initMap();
     this.listenLayoutChanges();
     this.listenToolbarCommands();
-    this.subscribeIOEServicesListener();
     await this.resetData();
+    this.subscribeIOEServicesListener();
+    this.subscribeIOEShiftsListener();
     this.registerTimer();
   }
 
 
   ngOnDestroy() {
     this.ngUnsubscribe.next();
+    this.ngUnsubscribeIOEServiceListener.next();
+    this.ngUnsubscribeIOEShiftListener.next();
     this.ngUnsubscribe.complete();
+    this.ngUnsubscribeIOEServiceListener.complete();
+    this.ngUnsubscribeIOEShiftListener.complete();
   }
 
 
@@ -235,11 +240,37 @@ export class MapComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (service: any) => {
-          this.applyService(service);
+          service.type = 'SERVICE';
+          console.log(service.offer);
+          this.applyHotUpdate(service);
         },
         (error) => console.error(`MapComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
         () => {
           console.log(`MapComponent.subscribeIOEServicesListener: Completed`);
+        },
+      );
+  }
+
+  /**
+   * Listen to real-time shift changes
+   */
+  subscribeIOEShiftsListener() {
+    this.godsEyeService.listenIOEShift$(this.selectedBusinessId)
+      .pipe(
+        tap(x => console.log(x)),
+        filter(v => v),
+        map(subscription => subscription.data.IOEShift),
+        takeUntil(this.ngUnsubscribe),
+        takeUntil(this.ngUnsubscribeIOEShiftListener)
+      )
+      .subscribe(
+        (shift: any) => {
+          shift.type = 'SHIFT';
+          this.applyHotUpdate(shift);
+        },
+        (error) => console.error(`MapComponent.subscribeIOEShiftsListener: Error => ${error}`),
+        () => {
+          console.log(`MapComponent.subscribeIOEShiftsListener: Completed`);
         },
       );
   }
@@ -257,7 +288,7 @@ export class MapComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (_: any) => { },
-        (error) => console.error(`MapComponent.registerTimer: Error => ${JSON.stringify(error)}`),
+        (error) => console.error(`MapComponent.registerTimer: Error => ${error}`),
         () => {
           console.log(`MapComponent.registerTimer: Completed`);
         },
@@ -270,7 +301,7 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   async resetData() {
     this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
-    this.totalData = this.totalRawData.map(s => this.convertServiceToMapFormat(s));
+    this.totalData = this.totalRawData.map(hu => hu.type === 'SERVICE' ? this.convertServiceToMapFormat(hu) : this.convertShiftToMapFormat(hu));
     console.log('totalRawData.length ==> ', this.totalRawData.length);
     console.log('totalData.length ==> ', this.totalData.length);
     await this.recalculatePartialData();
@@ -278,24 +309,25 @@ export class MapComponent implements OnInit, OnDestroy {
 
   resetDataAndSubscriptions() {
     this.ngUnsubscribeIOEServiceListener.next();
+    this.ngUnsubscribeIOEShiftListener.next();
     this.resetData();
     if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
   }
 
   /**
-   * Adds (or removes in case of closing services) services
-   * @param service
+   * Adds (or removes in case of closing services/shift) services/shifts
+   * @param hotUpdate
    */
-  async applyService(service) {
-    const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
-    if (service.closed && oldDataIndex >= 0) {
+  async applyHotUpdate(hotUpdate) {
+    const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === hotUpdate.id);
+    if (hotUpdate.closed && oldDataIndex >= 0) {
       this.totalRawData.splice(oldDataIndex, 1);
     } else if (oldDataIndex >= 0) {
-      this.totalRawData[oldDataIndex] = service;
+      this.totalRawData[oldDataIndex] = hotUpdate;
     } else {
-      this.totalRawData.unshift(service);
+      this.totalRawData.unshift(hotUpdate);
     }
-    this.totalData = this.totalRawData.map(s => this.convertServiceToMapFormat(s));
+    this.totalData = this.totalRawData.map(hu => hu.type === 'SERVICE' ? this.convertServiceToMapFormat(hu) : this.convertShiftToMapFormat(hu));
     await this.recalculatePartialData();
   }
 
@@ -320,27 +352,43 @@ export class MapComponent implements OnInit, OnDestroy {
     let moreDataAvailable = true;
     let page = 0;
     while (moreDataAvailable) {
-      console.log(`map.queryAllDataFromServer: nextPage=${page}`);
+      console.log(`map.queryServices: nextPage=${page}`);
       const gqlResult = await this.godsEyeService.queryServices$([], [], this.seeAllOperation, this.selectedBusinessId, page++, 10, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
-        data.push(...gqlResult.data.IOEServices);
+        data.push(...gqlResult.data.IOEServices.map(v => ({...v, type:'SERVICE'})));
+      } else {
+        moreDataAvailable = false;
+      }
+    }
+    console.log(`map.queryServices: totalCount=${data.length}`);
+
+
+    moreDataAvailable = true;
+    page = 0;
+    while (moreDataAvailable) {
+      console.log(`map.queryShifts: nextPage=${page}`);
+      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE','NOT_AVAILABLE','BUSY'], this.selectedBusinessId, page++, 10, undefined).toPromise();
+      if (gqlResult && gqlResult.data && gqlResult.data.IOEShifts && gqlResult.data.IOEShifts.length > 0) {
+        data.push(...gqlResult.data.IOEShifts.map(v => ({...v, type:'SHIFT'})));
       } else {
         moreDataAvailable = false;
       }
     }
     console.log(`map.queryAllDataFromServer: totalCount=${data.length}`);
+
+
     return data;
   }
 
 
   /**
-   * Converts the service to the datatabke model
+   * Converts the service to the datatable model
    * @param service
    */
   convertServiceToMapFormat(service) {
     const location = service.location ? service.location : service.pickUp;
     let fillColor = '#FFB6C1';
-    switch(service.state){
+    switch (service.state) {
       case 'REQUESTED': fillColor = '#fff622'; break;
       case 'ASSIGNED': fillColor = '#00ff00'; break;
       case 'ARRIVED': fillColor = '#0000FF'; break;
@@ -356,14 +404,46 @@ export class MapComponent implements OnInit, OnDestroy {
         fillColor,
         strokeOpacity: 1.0,
         strokeColor: '#000000',
-        strokeWeight: 0.5, 
+        strokeWeight: 0.5,
         scale: 4 //pixels,        
       }
     });
 
     return {
       marker,
-      serviceRef: service
+      ref: service,
+      id: service.id
+    };
+  }
+  /**
+   * Converts the shift to the datatable model
+   * @param shift
+   */
+  convertShiftToMapFormat(shift) {
+    const location = shift.location;
+    let fillColor = '#FFB6C1';
+    switch (shift.state) {
+      case 'AVAILABLE': fillColor = '#00ff00'; break;
+      case 'NOT_AVAILABLE': fillColor = '#ff0000'; break;
+      case 'BUSY': fillColor = '#0000FF'; break;
+    }
+    const marker = new google.maps.Marker({
+      position: new google.maps.LatLng(location.lat, location.lng),
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillOpacity: 1,
+        fillColor,
+        strokeOpacity: 1.0,
+        strokeColor: '#000000',
+        strokeWeight: 0.5,
+        scale: 4 //pixels,        
+      }
+    });
+
+    return {
+      marker,
+      ref: shift,
+      id: shift.id
     };
   }
 
@@ -373,8 +453,10 @@ export class MapComponent implements OnInit, OnDestroy {
   refreshTimeRelatedPartialData() {
     return from(this.partialData).pipe(
       tap(pd => {
-        pd.state_time_span = this.calcServiceStateTimeSpan(pd.serviceRef);
-        pd.eta = this.calcServiceEta(pd.serviceRef);
+        if (pd.type === 'SERVICE') {
+          pd.state_time_span = this.calcServiceStateTimeSpan(pd.serviceRef);
+          pd.eta = this.calcServiceEta(pd.serviceRef);
+        }
       })
     );
   }

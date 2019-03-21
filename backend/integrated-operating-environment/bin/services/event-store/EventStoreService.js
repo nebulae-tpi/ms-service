@@ -156,6 +156,8 @@ class EventStoreService {
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperator$, obj: ServiceES },
       ServiceCancelledBySystem: { fn: ServiceES.handleServiceCancelledBySystem$, obj: ServiceES },
       ServiceClosed: { fn: ServiceES.handleServiceClosed$, obj: ServiceES },
+      ServiceOfferUpdated: { fn: ServiceES.handleServiceOfferUpdated$, obj: ServiceES },
+      ServiceOfferedToShift: { fn: ServiceES.handleServiceOfferedToShift$, obj: ServiceES },
     };
   }
 
@@ -195,6 +197,8 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" },      
       { aggregateType: "Service", eventType: "ServiceCancelledBySystem" },      
       { aggregateType: "Service", eventType: "ServiceClosed" },      
+      { aggregateType: "Service", eventType: "ServiceOfferUpdated" },      
+      { aggregateType: "Service", eventType: "ServiceOfferedToShift" },      
     ]
   }
 }

@@ -2,7 +2,7 @@
 
 
 const { of, interval, forkJoin, empty, merge } = require("rxjs");
-const { mergeMapTo, tap, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
+const { mergeMapTo, tap, mergeMap, delay, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -10,6 +10,8 @@ const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 
 const { ShiftDA, VehicleDA, DriverDA, ServiceDA } = require('./data-access')
+
+const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 
 /**
  * Singleton instance

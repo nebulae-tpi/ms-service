@@ -272,6 +272,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
 
   onDoormanChipselected(chipIndex: number){
+    console.log('onDoormanChipselected', chipIndex);
     this.selectedIndexDoorman = chipIndex-1;
     this.clientDefaultTip = this.selectedIndexDoorman >= this.doorMenOptions.length ? 0 : this.doorMenOptions[this.selectedIndexDoorman].tip;
   }
@@ -391,39 +392,39 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       }, ['INPUT', 'TEXTAREA', 'SELECT']),      
       // doormen selection
       new Hotkey(['ctrl+shift+1'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(1);
+        this.selectedIndexDoorman=0;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+2'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(2);
+        this.selectedIndexDoorman=1;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+3'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(3);
+        this.selectedIndexDoorman=2;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+4'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(4);
+        this.selectedIndexDoorman=3;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+5'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(5);
+        this.selectedIndexDoorman=4;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+6'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(6);
+        this.selectedIndexDoorman=5;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+7'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(7);
+        this.selectedIndexDoorman=6;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+8'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(8);
+        this.selectedIndexDoorman=7;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+9'], (event: KeyboardEvent): boolean => {
-        this.onDoormanChipselected(9);
+        this.selectedIndexDoorman=8;
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT'])
     ];
