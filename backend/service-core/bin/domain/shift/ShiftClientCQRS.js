@@ -55,7 +55,7 @@ class ShiftCQRS {
    * Gets Open shift
    */
   queryNearbyVehicles$({ root, args, jwt }, authToken) {
-    ShiftCQRS.log(`ShiftClientCQRS.queryNearbyVehicles RQST: ${JSON.stringify({ args })}`); //DEBUG: DELETE LINE
+    //ShiftCQRS.log(`ShiftClientCQRS.queryNearbyVehicles RQST: ${JSON.stringify({ args })}`); //DEBUG: DELETE LINE
 
     const ratioMts = parseInt(process.env.NEARBY_VEHICLES_RATIOMTS || 1500);
 

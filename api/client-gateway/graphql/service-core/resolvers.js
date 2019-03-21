@@ -91,15 +91,19 @@ module.exports = {
                 return pubsub.asyncIterator("ClientServiceUpdatedSubscription");
             },
             (payload, variables, context, info) => {
-                const businessId = payload.ClientServiceUpdatedSubscription.businessId;
-                const serviceClientId = payload.ClientServiceUpdatedSubscription.client.id;
+              if(payload.ClientServiceUpdatedSubscription.closed){
+                return false
+              }
 
-                if (context.authToken.realm_access.roles.includes("CLIENT")) {
-                  // context.authToken.businessId === businessId && 
-                  return context.authToken.clientId === serviceClientId;
-                }
+              const businessId = payload.ClientServiceUpdatedSubscription.businessId;
+              const serviceClientId = payload.ClientServiceUpdatedSubscription.client.id;
 
-                return false;
+              if (context.authToken.realm_access.roles.includes("CLIENT")) {
+                // context.authToken.businessId === businessId && 
+                return context.authToken.clientId === serviceClientId;
+              }
+
+              return false;
             }
         )
     }

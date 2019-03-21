@@ -144,25 +144,49 @@ class ServiceClientCQRS {
     );
   }
   
-  /**  
-   * cancelService
+  // /**  
+  //  * cancelService
+  //  */
+  // changeServiceState$({ root, args, jwt }, authToken) {
+  //   //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+  //   return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
+  //     mapTo(args),
+  //     tap(request => this.validateServiceCancellationRequestInput({...request, authorType: 'CLIENT'})),
+  //     mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
+  //     tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
+  //     tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
+  //     mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+  //       'Service',
+  //       request.id,
+  //       'ServiceCancelledByClient',
+  //       { reason: request.reason, notes: request.notes },
+  //       authToken))), //Build and send event (event-sourcing)
+  //     mapTo(this.buildCommandAck()), // async command acknowledge
+  //     //tap(x => ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+  //     mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+  //     catchError(err => GraphqlResponseTools.handleError$(err, true))
+  //   );
+  // }
+
+
+    /**  
+   * reportServiceAsArrived
    */
   changeServiceState$({ root, args, jwt }, authToken) {
-    //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
+    //ServiceCQRS.log(`ServiceCQRS.reportServiceAsArrived RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceClientCQRS", "changeServiceState", PERMISSION_DENIED, ["CLIENT"]).pipe(
       mapTo(args),
-      tap(request => this.validateServiceCancellationRequestInput({...request, authorType: 'CLIENT'})),
-      mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
+      mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
-      tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
+      tap(({ service, request }) => { if (!service.open) throw ERROR_23224; }),// service is already closed
       mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
         request.id,
-        'ServiceCancelledByClient',
-        { reason: request.reason, notes: request.notes },
+        'ServiceArrived',
+        {},
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-      //tap(x => ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      //tap(x => ServiceCQRS.log(`ServiceCQRS.reportServiceAsArrived RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -238,7 +262,8 @@ class ServiceClientCQRS {
       ...pickUp,
       marker: pickUp.marker ? { type: "Point", coordinates: [pickUp.marker.lng, pickUp.marker.lat] } : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
-      addressLine1: pickUp.addressLine1 ? pickUp.addressLine1: 'Solicitud aplicativo', // TODO: Eliminar cuando todas las app conductor esten actualizadas
+      addressLine1: pickUp.addressLine1 ? pickUp.addressLine1: 'Solicitud', // TODO: Eliminar cuando todas las app conductor esten actualizadas
+      neighborhood: (pickUp.addressLine1 ? pickUp.neighborhood: 'aplicativo'), // TODO: Eliminar cuando todas las app conductor esten actualizadas
     };
     dropOff = !dropOff ? undefined : {
       ...dropOff,
