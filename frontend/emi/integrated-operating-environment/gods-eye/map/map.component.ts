@@ -386,10 +386,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param service
    */
   convertServiceToMapFormat(service) {
-    let location = service.location ? service.location : service.pickUp;
-    if (!location) {
-      location = { marker: { lat: 0, lng: 0 } };
-    }
+    let location = service.location ? service.location : service.pickUp.marker;
     let fillColor = '#FFB6C1';
     switch (service.state) {
       case 'REQUESTED': fillColor = '#fff622'; break;
@@ -399,7 +396,7 @@ export class MapComponent implements OnInit, OnDestroy {
       case 'CANCELLED_SYSTEM': fillColor = '#ff0000'; break;
     }
     const marker = new google.maps.Marker({
-      position: new google.maps.LatLng(location.marker.lat, location.marker.lng),
+      position: new google.maps.LatLng(location.lat, location.lng),
       icon: {
         //path: google.maps.SymbolPath.CIRCLE,
         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
