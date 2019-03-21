@@ -11,7 +11,8 @@
         <mat-icon>format_list_bulleted</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.ACTIONS_LBL' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId && userIsSupervisor" mat-button [matMenuTriggerFor]="view_menu">
+    <button *ngIf="selectedBusinessId && (userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin)"
+        mat-button [matMenuTriggerFor]="view_menu">
         <mat-icon>visibility</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.VIEW' | translate }}</span>
     </button>
 
@@ -19,7 +20,7 @@
         <mat-icon>filter_list</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId && false" mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
+    <button *ngIf="selectedBusinessId" mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
         <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
     </button>
 
@@ -86,24 +87,40 @@
 <mat-menu #channels_menu="matMenu" overlapTrigger=false>
     <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>person</mat-icon>
-        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.OPERATORS' | translate }}</mat-checkbox>
+        <mat-checkbox (change)="updateChannelFilters($event, 'OPERATOR', false)" [checked]="channelsFilter.includes('OPERATOR')">
+            {{ 'TOOLBAR.CHANNELS.OPERATORS' | translate }}
+        </mat-checkbox>
     </button>
     <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-icon>phone_iphone</mat-icon>
+        <mat-checkbox (change)="updateChannelFilters($event, 'CLIENT', true)" [checked]="channelsFilter.includes('CLIENT')">
+            {{ 'TOOLBAR.CHANNELS.CLIENTS' | translate }}
+        </mat-checkbox>
+    </button>
+    <!-- <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>call</mat-icon>
-        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.IVR' | translate }}</mat-checkbox>
+        <mat-checkbox (change)="updateChannelFilters($event, 'IVR')" [checked]="channelsFilter.includes('IVR')">
+            {{ 'TOOLBAR.CHANNELS.IVR' | translate }}
+        </mat-checkbox>
     </button>
     <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>tablet</mat-icon>
-        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.SATELLITES' | translate }}</mat-checkbox>
+        <mat-checkbox (change)="updateChannelFilters($event, 'SATELLITE')" [checked]="channelsFilter.includes('SATELLITE')">
+            {{ 'TOOLBAR.CHANNELS.SATELLITES' | translate }}
+        </mat-checkbox>
     </button>
     <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>chat</mat-icon>
-        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.WHATSAPP' | translate }}</mat-checkbox>
+        <mat-checkbox (change)="updateChannelFilters($event, 'WHATSAPP')" [checked]="channelsFilter.includes('WHATSAPP')">
+            {{ 'TOOLBAR.CHANNELS.WHATSAPP' | translate }}
+        </mat-checkbox>
     </button>
     <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>chat</mat-icon>
-        <mat-checkbox>{{ 'TOOLBAR.CHANNELS.FACEBOOK_MSG' | translate }}</mat-checkbox>
-    </button>
+        <mat-checkbox (change)="updateChannelFilters($event, 'FACEBOOK_MSG')" [checked]="channelsFilter.includes('FACEBOOK_MSG')">
+            {{ 'TOOLBAR.CHANNELS.FACEBOOK_MSG' | translate }}
+        </mat-checkbox>
+    </button> -->
 </mat-menu>
 
 <mat-menu #pagination_menu="matMenu" overlapTrigger=false>
@@ -118,14 +135,14 @@
     <button *ngIf="false" mat-menu-item [matMenuTriggerFor]="filter_menu" fxHide fxShow.lt-md (click)="$event.stopPropagation()">
         <mat-icon>filter_list</mat-icon> <span>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
     </button>
-    <button *ngIf="false" mat-menu-item [matMenuTriggerFor]="channels_menu" fxHide fxShow.lt-md (click)="$event.stopPropagation()">
+    <button mat-menu-item [matMenuTriggerFor]="channels_menu" fxHide fxShow.lt-md (click)="$event.stopPropagation()">
         <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
     </button>
     <button *ngIf="false" mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>move_to_inbox</mat-icon>
         <mat-checkbox (change)="onCheckInboxChange($event)" [(ngModel)]="isInboxVisible">Inbox</mat-checkbox>
     </button>
-    <button *ngIf="userIsSupervisor" mat-menu-item (click)="$event.stopPropagation()">
+    <button *ngIf="userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin" mat-menu-item (click)="$event.stopPropagation()">
         <!-- <mat-icon>ballot</mat-icon> -->
         <mat-checkbox (change)="onCheckViewAllOperationChange($event)" [(ngModel)]="supervisorWatchinAllOperation">
           {{ 'TOOLBAR.VIEWS.ALL_OPERATION' | translate }}</mat-checkbox>

@@ -115,6 +115,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
   toggleState = false;
   // delay Threshold
   delayThreshold = 60000 * 5; // five minutes
+  // selected filters to filter services
+  channelsFilter: String[] = ['OPERATOR'];
 
 
   constructor(
@@ -155,8 +157,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
   async queryUserSpecs() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
     this.userDetails = await this.keycloakService.loadUserProfile();
-    // this.businessId = this.userDetails.attributes.businessId[0];
-    console.log('###$$$$$ ', this.userDetails.attributes);
     this.userId = this.userDetails.attributes.userId ? this.userDetails.attributes.userId[0]: undefined;
   }
 
@@ -225,6 +225,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
             this.seeAllOperation = args[0];
             this.resetDataAndSubscriptions();
             break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED:
+            this.channelsFilter = args[0];
+            this.resetDataAndSubscriptions();
+            break;
+            
           case OperatorWorkstationService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
             // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
             this.selectedBusinessId = args[0];
@@ -258,9 +263,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
           this.appendData(service);
         },
         (error) => console.error(`DatatableComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
-        () => {
-          console.log(`DatatableComponent.subscribeIOEServicesListener: Completed`);
-        },
+        () => {},
       );
   }
 
@@ -290,9 +293,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Loads the entire data from DB
    */
   async resetData() {
-    this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
-    console.log('totalRawData.length ==> ', this.totalData.length );
+    this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];    
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
+
     await this.recalculatePartialData();
   }
 
@@ -317,10 +320,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Recarlculate the data partial data (the visible part at the table)
    */
   async recalculatePartialData() {
-    this.totalData.sort((s1, s2) => s2.timestamp < s1.timestamp ? 1 : 0);
+    this.totalData.sort((s1, s2) => s2.timestamp < s1.timestamp ? 1 : 0);  
     const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);
     const skip = this.page * this.pageCount;
-    this.partialData = filteredData.slice(skip, skip + this.pageCount).map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
+    this.partialData = filteredData.slice(skip, skip + this.pageCount).map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));    
     let maxPage = Math.floor(filteredData.length / this.pageCount);
     maxPage = (filteredData.length % this.pageCount !== 0) || (maxPage === 0) ? maxPage + 1 : maxPage;
     this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_TOOLBAR_SET_MAX_PAGINATION, args: { maxPage } });
@@ -333,15 +336,14 @@ export class DatatableComponent implements OnInit, OnDestroy {
   async queryAllDataFromServer() {
     const data = [];
     let moreDataAvailable = true;
-    let page = 0;
+    let page = 0;    
     while (moreDataAvailable) {
       console.log(`datatable.queryAllDataFromServer: nextPage=${page}`);
-      const gqlResult = await this.operatorWorkstationService.queryServices$([], [], this.seeAllOperation, this.selectedBusinessId,  page++, 10, undefined).toPromise();
+      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId,  page++, 10, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices);
-      } else {
-        moreDataAvailable = false;
       }
+      moreDataAvailable = (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length == 10);   
     }
     console.log(`datatable.queryAllDataFromServer: totalCount=${data.length}`);
     return data;

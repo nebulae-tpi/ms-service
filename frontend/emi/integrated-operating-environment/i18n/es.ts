@@ -30,6 +30,7 @@ export const locale = {
       CHANNELS_LBL: 'Canales',
       CHANNELS: {
         OPERATORS: 'Operadores',
+        CLIENTS: 'Clientes',
         IVR: 'IVR',
         SATELLITES: 'Satélites',
         WHATSAPP: 'Whatsapp',
