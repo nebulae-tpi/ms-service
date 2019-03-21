@@ -172,8 +172,9 @@ class ServiceES {
 
     formatServiceToGraphqlIOEService(service) {
         const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
+        const location = (!service || !service.location || !service.location.coordinates) ? undefined : { lng: service.location.coordinates[0], lat: service.location.coordinates[1] };
         const offer = !service.offer ? undefined : { ...service.offer, shifts : !service.offer.shifts ? [] :  Object.keys(service.offer.shifts) };
-        return !service ? undefined : { ...service, vehicle: { licensePlate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, offer };
+        return !service ? undefined : { ...service, vehicle: { licensePlate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, offer,location };
     }
 
 }

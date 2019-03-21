@@ -60,7 +60,7 @@ class ServiceCQRS {
       mapTo(args),
       mergeMap(() => ServiceDA.findById$(id)),
       map(service => this.formatServiceToGraphQLSchema(service)),
-    //  tap(x => ServiceCQRS.log(`ServiceCQRS.queryService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      //  tap(x => ServiceCQRS.log(`ServiceCQRS.queryService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -105,7 +105,7 @@ class ServiceCQRS {
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
-     // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
@@ -358,7 +358,9 @@ class ServiceCQRS {
 
   formatServiceToGraphQLSchema(service) {
     const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
-    return !service ? undefined : { ...service, vehicle: { licensePlate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+    const location = (!service || !service.location || !service.location.coordinates) ? undefined : { lng: service.location.coordinates[0], lat: service.location.coordinates[1] };
+    const offer = !service.offer ? undefined : { ...service.offer, shifts: !service.offer.shifts ? [] : Object.keys(service.offer.shifts) };
+    return !service ? undefined : { ...service, vehicle: { licensePlate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, offer, location };
   }
 
   //#endregion
