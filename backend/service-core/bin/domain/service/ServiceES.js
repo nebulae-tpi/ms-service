@@ -147,9 +147,10 @@ class ServiceES {
         return ServiceDA.appendLocation$(aid, location)
         .pipe(
             tap(result => {
-                if(result.nModified > 0){
+                console.log('result.nModified => ', result.nModified);
+                //if(result.nModified > 0) {
                     this.queueAndGroupServiceEvent({_id: aid});
-                }                
+                //}                
             })
         );
     }
