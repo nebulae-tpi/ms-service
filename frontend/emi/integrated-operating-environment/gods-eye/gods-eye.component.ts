@@ -248,5 +248,4 @@ export class GodsEyeComponent implements OnInit, OnDestroy {
       !this.showStats ? undefined : this.statsRows * rowHeight,
     );
   }
-
 }
