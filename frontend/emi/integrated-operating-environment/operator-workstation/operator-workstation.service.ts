@@ -179,12 +179,12 @@ export class OperatorWorkstationService {
   /**
    * Event triggered when a business is created, updated or deleted.
    */
-  listenIOEService$(businessId, operatorId): Observable<any> {
+  listenIOEService$(businessId, operatorId, statesFilter, channelsFilter ): Observable<any> {
     return this.gateway.apollo
       .subscribe({
         query: IOEServiceSubscription,
         variables: {
-          businessId, operatorId
+          businessId, operatorId, statesFilter, channelsFilter
         }
       });
   }

@@ -144,7 +144,8 @@ module.exports = {
         (payload, variables, context, info) => {
           const businessOk = !variables.businessId ? true : payload.IOEService.businessId === variables.businessId;
           const operatorOk = !variables.operatorId ? true : payload.IOEService.request && payload.IOEService.request.ownerOperatorId === variables.operatorId;
-          return businessOk && operatorOk;
+          const channelFilter = (payload.IOEService.request && variables.channelsFilter && variables.channelsFilter.includes(payload.IOEService.request.sourceChannel) );
+          return businessOk && operatorOk && channelFilter;
         }
       )
     },

@@ -117,6 +117,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
   delayThreshold = 60000 * 5; // five minutes
   // selected filters to filter services
   channelsFilter: String[] = ['OPERATOR'];
+  // selected state filters
+  statesFilter: String[] = [];
 
 
   constructor(
@@ -253,7 +255,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     of(this.selectedBusinessId)
       .pipe(
         filter(selectedBusinessId => selectedBusinessId),
-        mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId )),
+        mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId, this.statesFilter, this.channelsFilter )),
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
         takeUntil(this.ngUnsubscribeIOEServiceListener)

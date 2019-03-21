@@ -102,8 +102,8 @@ query IOEShifts($shiftStatesFilter: [String], $businessId: String, $page: Int, $
 
 // SUBSCRIPTION
 export const IOEServiceSubscription = gql`
-  subscription($businessId: String, $operatorId: String){
-    IOEService(businessId: $businessId, operatorId: $operatorId){
+  subscription($businessId: String, $operatorId: String, $statesFilter: [String], $channelsFilter: [String]){
+    IOEService(businessId: $businessId, operatorId: $operatorId, statesFilter: $statesFilter, channelsFilter: $channelsFilter ){
       id,
       closed,
         businessId,
