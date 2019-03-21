@@ -27,6 +27,7 @@ function getResponseFromBackEnd$(response) {
     }));
 }
 
+
 const READ_WRITE_ROLES = ["OPERATOR", "OPERATION-SUPERVISOR"];
 const READ_ROLES = ["PLATFORM-ADMIN", "BUSINESS-OWNER", "OPERATOR", "OPERATION-SUPERVISOR"];
 
