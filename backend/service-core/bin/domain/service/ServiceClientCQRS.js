@@ -262,9 +262,9 @@ class ServiceClientCQRS {
       ...pickUp,
       marker: pickUp.marker ? { type: "Point", coordinates: [pickUp.marker.lng, pickUp.marker.lat] } : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
-      addressLine1: pickUp.addressLine1 ? pickUp.addressLine1: 'Solicitud', // TODO: Eliminar cuando todas las app conductor esten actualizadas
-      zone: (pickUp.addressLine1 ? pickUp.zone: 'Solicitud'), // TODO: Eliminar cuando todas las app conductor esten actualizadas
-      neighborhood: (pickUp.addressLine1 ? pickUp.neighborhood: 'aplicativo'), // TODO: Eliminar cuando todas las app conductor esten actualizadas
+      // addressLine1: pickUp.addressLine1 ? pickUp.addressLine1: 'Solicitud', // TODO: Eliminar cuando todas las app conductor esten actualizadas
+      // zone: (pickUp.addressLine1 ? pickUp.zone: 'Solicitud'), // TODO: Eliminar cuando todas las app conductor esten actualizadas
+      // neighborhood: (pickUp.addressLine1 ? pickUp.neighborhood: 'aplicativo'), // TODO: Eliminar cuando todas las app conductor esten actualizadas
     };
     dropOff = !dropOff ? undefined : {
       ...dropOff,
