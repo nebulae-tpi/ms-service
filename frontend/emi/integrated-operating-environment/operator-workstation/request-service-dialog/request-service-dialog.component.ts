@@ -176,7 +176,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   }
 
   onClientSelected(client) {
-    this.doorMenOptions = (client.satelliteInfo && client.satelliteInfo.clientAgreements ) ? client.satelliteInfo.clientAgreements: undefined;
+    this.doorMenOptions = (client.satelliteInfo && client.satelliteInfo.clientAgreements && client.satelliteInfo.clientAgreements.length > 0 ) ? client.satelliteInfo.clientAgreements: undefined;
+    console.log(' this.doorMenOptions',  this.doorMenOptions);
     this.form.patchValue({ client });
     if (client) {  
       this.clientDefaultTip = !this.doorMenOptions ? client.satelliteInfo.tip : 0;
@@ -274,7 +275,9 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   onDoormanChipselected(chipIndex: number){
     console.log('onDoormanChipselected', chipIndex);
     this.selectedIndexDoorman = chipIndex-1;
-    this.clientDefaultTip = this.selectedIndexDoorman >= this.doorMenOptions.length ? 0 : this.doorMenOptions[this.selectedIndexDoorman].tip;
+    this.clientDefaultTip = (this.doorMenOptions && this.selectedIndexDoorman >= this.doorMenOptions.length)
+      ? 0
+      : this.doorMenOptions[this.selectedIndexDoorman].tip;
   }
 
 
