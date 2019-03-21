@@ -20,7 +20,7 @@
         <mat-icon>filter_list</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId" mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
+    <button *ngIf="selectedBusinessId && (userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin)" mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
         <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
     </button>
 
