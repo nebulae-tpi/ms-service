@@ -60,14 +60,32 @@ class ServiceDA {
     );
   }
 
-  /**
+  // /**
+  //  * appends location
+  //  * @returns {Observable}
+  //  */
+  // static appendLocation$(_id, location) {
+  //   return defer(
+  //     () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+  //       { _id },
+  //       {
+  //         $set: { location, lastModificationTimestamp: Date.now() },
+  //         $push: (!location || !location.coordinates) ? undefined : { "route.coordinates": location.coordinates }
+  //       },
+  //       { upsert: false }
+  //     )
+  //   );
+  // }
+
+    /**
    * appends location
    * @returns {Observable}
    */
   static appendLocation$(_id, location) {
+    const query = { "_id": _id, "state": { "$in": ["ASSIGNED", "ARRIVED", "ON_BOARD"] }};
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
-        { _id },
+        query,
         {
           $set: { location, lastModificationTimestamp: Date.now() },
           $push: (!location || !location.coordinates) ? undefined : { "route.coordinates": location.coordinates }

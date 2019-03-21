@@ -129,18 +129,20 @@ type Service {
    "current service state"
    state: String
    "Location point"
-   location: Point
+   location: Point   
+   "Service last modification timestamp."
+   lastModificationTimestamp: BigInt
 }
 
-"Client info."
-input ClientInput {
-    "Client ID"
-    id: String
-    "Full name"
-    fullname: String
-    "user name"
-    username: String
-}
+# "Client info."
+# input ClientInput {
+#     "Client ID"
+#     id: String
+#     "Full name"
+#     fullname: String
+#     "user name"
+#     username: String
+# }
 
 "Location info"
 input LocationInput {
@@ -179,8 +181,8 @@ type Query {
 type Mutation {
    "Request a new service"
    RequestService(
-      "client info"
-      client: ClientInput!
+      # "client info"
+      # client: ClientInput!
       "Passenger pick up location"
       pickUp: LocationInput!
       "Payment type key"

@@ -178,10 +178,10 @@ class ServiceClientCQRS {
    * @param {*} service request input params
    */
   validateServiceRequestInput({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }) {
-    if (!client || !pickUp || !paymentType || !businessId) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
-    if (!client.fullname || client.fullname.trim().length > 50 || client.fullname.trim().length < 4) throw ERROR_23201; // invalid client name
-    if (client.tipType && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.tipType) == -1) throw ERROR_23202; // invalid tip type
-    if (client.tip && (client.tip < 0 || client.tip > 10000)) throw ERROR_23203; // invalid tip amount
+    if (!pickUp || !paymentType || !businessId) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
+    //if (!client.fullname || client.fullname.trim().length > 50 || client.fullname.trim().length < 4) throw ERROR_23201; // invalid client name
+    if (client && client.tipType && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.tipType) == -1) throw ERROR_23202; // invalid tip type
+    if (client && client.tip && (client.tip < 0 || client.tip > 10000)) throw ERROR_23203; // invalid tip amount
     if (!pickUp.marker && !pickUp.polygon) throw ERROR_23204; // pickUp location undefined
     // if (!pickUp.addressLine1) throw ERROR_23205; //  pickup address not specified
     if (VALID_SERVICE_PAYMENT_TYPES.indexOf(paymentType) == -1) throw ERROR_23206; // invalid payment type
@@ -238,6 +238,7 @@ class ServiceClientCQRS {
       ...pickUp,
       marker: pickUp.marker ? { type: "Point", coordinates: [pickUp.marker.lng, pickUp.marker.lat] } : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+      addressLine1: pickUp.addressLine1 ? pickUp.addressLine1: 'Solicitud aplicativo', // TODO: Eliminar cuando todas las app conductor esten actualizadas
     };
     dropOff = !dropOff ? undefined : {
       ...dropOff,
@@ -263,7 +264,8 @@ class ServiceClientCQRS {
           id: authToken.clientId,
           businessId: authToken.businessId,
           username: authToken.preferred_username,
-          ...request.client,
+          fullname: authToken.name,
+          //...request.client,
         },
         _id,
         businessId: authToken.businessId,
@@ -284,10 +286,10 @@ class ServiceClientCQRS {
         request: {
           sourceChannel: "CLIENT",
           destChannel: "DRIVER_APP",
-          creationOperatorId: authToken.userId,
-          creationOperatorUsername: authToken.preferred_username,
-          ownerOperatorId: authToken.userId,
-          ownerOperatorUsername: authToken.preferred_username,
+          // creationOperatorId: authToken.userId,
+          // creationOperatorUsername: authToken.preferred_username,
+          // ownerOperatorId: authToken.userId,
+          // ownerOperatorUsername: authToken.preferred_username,
         }
       }
     });
