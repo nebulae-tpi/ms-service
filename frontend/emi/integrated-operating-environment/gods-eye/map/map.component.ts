@@ -355,7 +355,7 @@ export class MapComponent implements OnInit, OnDestroy {
       console.log(`map.queryServices: nextPage=${page}`);
       const gqlResult = await this.godsEyeService.queryServices$([], [], this.seeAllOperation, this.selectedBusinessId, page++, 10, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
-        data.push(...gqlResult.data.IOEServices.map(v => ({...v, type:'SERVICE'})));
+        data.push(...gqlResult.data.IOEServices.map(v => ({ ...v, type: 'SERVICE' })));
       } else {
         moreDataAvailable = false;
       }
@@ -367,9 +367,9 @@ export class MapComponent implements OnInit, OnDestroy {
     page = 0;
     while (moreDataAvailable) {
       console.log(`map.queryShifts: nextPage=${page}`);
-      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE','NOT_AVAILABLE','BUSY'], this.selectedBusinessId, page++, 10, undefined).toPromise();
+      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 10, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEShifts && gqlResult.data.IOEShifts.length > 0) {
-        data.push(...gqlResult.data.IOEShifts.map(v => ({...v, type:'SHIFT'})));
+        data.push(...gqlResult.data.IOEShifts.map(v => ({ ...v, type: 'SHIFT' })));
       } else {
         moreDataAvailable = false;
       }
@@ -386,7 +386,10 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param service
    */
   convertServiceToMapFormat(service) {
-    const location = service.location ? service.location : service.pickUp;
+    let location = service.location ? service.location : service.pickUp;
+    if (!location) {
+      location = { marker: { lat: 0, lng: 0 } };
+    }
     let fillColor = '#FFB6C1';
     switch (service.state) {
       case 'REQUESTED': fillColor = '#fff622'; break;
@@ -420,7 +423,10 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param shift
    */
   convertShiftToMapFormat(shift) {
-    const location = shift.location;
+    let location = shift.location;
+    if (!location) {
+      location = { marker: { lat: 0, lng: 0 } };
+    }
     let fillColor = '#FFB6C1';
     switch (shift.state) {
       case 'AVAILABLE': fillColor = '#00ff00'; break;
