@@ -9,5 +9,6 @@ export class IntegratedOperatingEnvironmentService {
   constructor(private gateway: GatewayService) {
   }   
   
+  
 
 }

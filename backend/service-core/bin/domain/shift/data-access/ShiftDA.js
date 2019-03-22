@@ -49,7 +49,7 @@ class ShiftDA {
       $project: {location: 1, vehicle: 1}
     }];
 
-    console.log('Query => ', JSON.stringify(aggregateQuery));
+    // console.log('Query => ', JSON.stringify(aggregateQuery));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
