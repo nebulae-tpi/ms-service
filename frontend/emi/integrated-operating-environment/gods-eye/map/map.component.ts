@@ -457,15 +457,15 @@ export class MapComponent implements OnInit, OnDestroy {
           }
         });
 
-        marker.addListener('click', function () {
-          infowindow.open(this.map, marker);
-        });
-        var contentString = `<div id="content">
+      marker.addListener('click', function () {
+        infowindow.open(this.map, marker);
+      });
+      var contentString = `<div id="content">
               ${service.client.fullname}
               </div>`;
-        var infowindow = new google.maps.InfoWindow({
-          content: contentString
-        });
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
     }
 
     if (oldMap) {
@@ -487,12 +487,25 @@ export class MapComponent implements OnInit, OnDestroy {
     if (!location) {
       location = { marker: { lat: 0, lng: 0 } };
     }
-    let fillColor = '#FFB6C1';
-    switch (shift.state) {
-      case 'AVAILABLE': fillColor = '#00ff00'; break;
-      case 'NOT_AVAILABLE': fillColor = '#ff0000'; break;
-      case 'BUSY': fillColor = '#0000FF'; break;
+    let fillColor = '#000000';
+    let strokeColor = '#000000';
+    let strokeWeight = 0.5;
+    if (shift.online) {
+      switch (shift.state) {
+        case 'AVAILABLE': fillColor = '#00ff00'; break;
+        case 'NOT_AVAILABLE': fillColor = '#ff0000'; break;
+        case 'BUSY': fillColor = '#0000FF'; break;
+      }
+    } else {
+      fillColor = '#FFFFFF';
+      strokeWeight = 2;
+      switch (shift.state) {
+        case 'AVAILABLE': strokeColor = '#00ff00'; break;
+        case 'NOT_AVAILABLE': strokeColor = '#ff0000'; break;
+        case 'BUSY': strokeColor = '#0000FF'; break;
+      }
     }
+
 
     const position = new google.maps.LatLng(location.lat, location.lng);
 
@@ -502,6 +515,8 @@ export class MapComponent implements OnInit, OnDestroy {
       marker.setPosition(position);
       //console.log(marker.getIcon());
       marker.getIcon().fillColor = fillColor;
+      marker.getIcon().strokeColor = strokeColor;
+      marker.getIcon().strokeWeight = strokeWeight;
     } else {
       marker = new google.maps.Marker({
         position,
@@ -510,8 +525,8 @@ export class MapComponent implements OnInit, OnDestroy {
           fillOpacity: 1,
           fillColor,
           strokeOpacity: 1.0,
-          strokeColor: '#000000',
-          strokeWeight: 0.5,
+          strokeColor,
+          strokeWeight,
           scale: 4 //pixels,        
         }
       });
