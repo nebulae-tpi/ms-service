@@ -93,18 +93,12 @@ export class MapComponent implements OnInit, OnDestroy {
   //map height
   mapHeight = 400;
 
-  // Partial data: this is what is displayed to the user
-  partialData = [];
-  // total data source
-  totalData = [];
-  // total RAW data source
-  totalRawData = [];
+  // markers
+  pins = {};
   // current selected service id
   private selectedServiceId = undefined;
   //current zoom
   zoom = 1.0;
-  //user selected service filter
-  serviceStateFilters = [];
   //flag indicating if this compoment is loading data from server
   loadingData = false;
 
@@ -114,6 +108,8 @@ export class MapComponent implements OnInit, OnDestroy {
   // businessId = undefined;
   userId = undefined;
   seeAllOperation = false;
+  channelFilter = ["OPERATOR", "CLIENT"];
+  stateFilter = ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER", "CANCELLED_SYSTEM", "DONE"];
 
   @Input('selectedBusinessId') selectedBusinessId: any;
 
@@ -215,7 +211,6 @@ export class MapComponent implements OnInit, OnDestroy {
           case GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
             // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
             this.selectedBusinessId = args[0];
-            this.resetData();
             this.resetDataAndSubscriptions();
             break;
         }
@@ -232,7 +227,10 @@ export class MapComponent implements OnInit, OnDestroy {
    * Listen to real-time service changes
    */
   subscribeIOEServicesListener() {
-    this.godsEyeService.listenIOEService$(this.selectedBusinessId, null)
+    if (!this.selectedBusinessId) {
+      return;
+    }
+    this.godsEyeService.listenIOEService$(this.selectedBusinessId, null, this.stateFilter, this.channelFilter)
       .pipe(
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
@@ -241,7 +239,6 @@ export class MapComponent implements OnInit, OnDestroy {
       .subscribe(
         (service: any) => {
           service.type = 'SERVICE';
-          console.log(service.offer);
           this.applyHotUpdate(service);
         },
         (error) => console.error(`MapComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
@@ -255,9 +252,11 @@ export class MapComponent implements OnInit, OnDestroy {
    * Listen to real-time shift changes
    */
   subscribeIOEShiftsListener() {
+    if (!this.selectedBusinessId) {
+      return;
+    }
     this.godsEyeService.listenIOEShift$(this.selectedBusinessId)
       .pipe(
-        tap(x => console.log(x)),
         filter(v => v),
         map(subscription => subscription.data.IOEShift),
         takeUntil(this.ngUnsubscribe),
@@ -282,7 +281,7 @@ export class MapComponent implements OnInit, OnDestroy {
     timer(5000, 1000)
       .pipe(
         mergeMap(i => forkJoin(
-          this.refreshTimeRelatedPartialData()
+
         )),
         takeUntil(this.ngUnsubscribe),
       )
@@ -300,47 +299,55 @@ export class MapComponent implements OnInit, OnDestroy {
    * Loads the entire data from DB
    */
   async resetData() {
-    this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
-    this.totalData = this.totalRawData.map(hu => hu.type === 'SERVICE' ? this.convertServiceToMapFormat(hu) : this.convertShiftToMapFormat(hu));
-    console.log('totalRawData.length ==> ', this.totalRawData.length);
-    console.log('totalData.length ==> ', this.totalData.length);
+    Object.keys(this.pins).forEach(k => this.removePin(this.pins[k]));
+
+    const totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
+    totalRawData.forEach(raw => {
+      this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
+      this.pins[raw.id].marker.setMap(this.map)
+    });
     await this.recalculatePartialData();
   }
 
-  resetDataAndSubscriptions() {
+  async resetDataAndSubscriptions() {
     this.ngUnsubscribeIOEServiceListener.next();
     this.ngUnsubscribeIOEShiftListener.next();
-    this.resetData();
-    if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
+    await this.resetData();
+    this.subscribeIOEServicesListener();
+    this.subscribeIOEShiftsListener();
   }
 
   /**
    * Adds (or removes in case of closing services/shift) services/shifts
-   * @param hotUpdate
+   * @param raw
    */
-  async applyHotUpdate(hotUpdate) {
-    const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === hotUpdate.id);
-    if (hotUpdate.closed && oldDataIndex >= 0) {
-      this.totalRawData.splice(oldDataIndex, 1);
-    } else if (oldDataIndex >= 0) {
-      this.totalRawData[oldDataIndex] = hotUpdate;
+  async applyHotUpdate(raw) {
+    const oldPin = this.pins[raw.id];
+    if (raw.closed || raw.state === 'CLOSED') {
+      if (oldPin) {
+        this.removePin(oldPin);
+      }
+    } else if (oldPin) {
+      this.removePin(oldPin);
+      this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
+      this.pins[raw.id].marker.setMap(this.map)
     } else {
-      this.totalRawData.unshift(hotUpdate);
+      this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
+      this.pins[raw.id].marker.setMap(this.map)
     }
-    this.totalData = this.totalRawData.map(hu => hu.type === 'SERVICE' ? this.convertServiceToMapFormat(hu) : this.convertShiftToMapFormat(hu));
     await this.recalculatePartialData();
+  }
+
+  removePin(pin) {
+    pin.marker.setMap(null);
+    delete this.pins[pin.id];
   }
 
   /**
    * Recarlculate the data partial data (the visible part at the table)
    */
   async recalculatePartialData() {
-    const filteredData = this.totalData.filter(s => this.serviceStateFilters.length === 0 ? true : this.serviceStateFilters.indexOf(s.state) !== -1);
-    this.partialData.filter(d => d.marker).forEach(d => d.marker.setMap(null));
-    this.partialData = filteredData;
-    this.partialData.filter(d => d.marker).forEach(d => d.marker.setMap(this.map));
-    console.log('partialData.length ==> ', this.partialData.length);
-    //this.partialData.forEach(x => console.log(x.marker));
+
   }
 
 
@@ -353,7 +360,7 @@ export class MapComponent implements OnInit, OnDestroy {
     let page = 0;
     while (moreDataAvailable) {
       console.log(`map.queryServices: nextPage=${page}`);
-      const gqlResult = await this.godsEyeService.queryServices$([], [], this.seeAllOperation, this.selectedBusinessId, page++, 10, undefined).toPromise();
+      const gqlResult = await this.godsEyeService.queryServices$([], this.channelFilter, this.seeAllOperation, this.selectedBusinessId, page++, 20, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices.map(v => ({ ...v, type: 'SERVICE' })));
       } else {
@@ -367,7 +374,7 @@ export class MapComponent implements OnInit, OnDestroy {
     page = 0;
     while (moreDataAvailable) {
       console.log(`map.queryShifts: nextPage=${page}`);
-      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 10, undefined).toPromise();
+      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 20, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEShifts && gqlResult.data.IOEShifts.length > 0) {
         data.push(...gqlResult.data.IOEShifts.map(v => ({ ...v, type: 'SHIFT' })));
       } else {
@@ -386,28 +393,48 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param service
    */
   convertServiceToMapFormat(service) {
-    let location = service.location ? service.location : service.pickUp.marker;
+    let location = service.pickUp.marker;
     let fillColor = '#FFB6C1';
+
     switch (service.state) {
-      case 'REQUESTED': fillColor = '#fff622'; break;
+      case 'REQUESTED': fillColor = '#f5ff8e'; break;
       case 'ASSIGNED': fillColor = '#00ff00'; break;
-      case 'ARRIVED': fillColor = '#0000FF'; break;
-      case 'ON_BOARD': fillColor = '#000088'; break;
+      case 'ARRIVED': fillColor = '#0000FF'; location = service.location; break;
+      case 'ON_BOARD': fillColor = '#000088'; location = service.location; break;
       case 'CANCELLED_SYSTEM': fillColor = '#ff0000'; break;
+      case 'DONE': fillColor = '#00174f'; location = service.location; break;
     }
-    const marker = new google.maps.Marker({
-      position: new google.maps.LatLng(location.lat, location.lng),
-      icon: {
-        //path: google.maps.SymbolPath.CIRCLE,
-        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-        fillOpacity: 1,
-        fillColor,
-        strokeOpacity: 1.0,
-        strokeColor: '#000000',
-        strokeWeight: 0.5,
-        scale: 4 //pixels,        
-      }
-    });
+
+    //console.log(service.id, service.state, service.offer.params.maxDistance);
+
+
+    const fillOpacity = service.state === 'REQUESTED'
+      ? 0.05 + (0.004 * ((Date.now() - service.timestamp) / 1000))
+      : service.state === 'DONE' ? 0 : 1;
+      
+    const marker = service.state === 'REQUESTED'
+      ? new google.maps.Circle({
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: '#FF0000',
+        fillOpacity,
+        center: new google.maps.LatLng(location.lat, location.lng),
+        radius: (service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000,
+      })
+      : new google.maps.Marker({
+        position: new google.maps.LatLng(location.lat, location.lng),
+        icon: {
+          //path: google.maps.SymbolPath.CIRCLE,
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          fillOpacity,
+          fillColor,
+          strokeOpacity: 1.0,
+          strokeColor: '#000000',
+          strokeWeight: 1,
+          scale: 4 //pixels,        
+        }
+      });
 
     return {
       marker,
@@ -454,51 +481,158 @@ export class MapComponent implements OnInit, OnDestroy {
 
   //#region TIME-RELATED DATE REFRESH
   refreshTimeRelatedPartialData() {
-    return from(this.partialData).pipe(
-      tap(pd => {
-        if (pd.type === 'SERVICE') {
-          pd.state_time_span = this.calcServiceStateTimeSpan(pd.serviceRef);
-          pd.eta = this.calcServiceEta(pd.serviceRef);
-        }
-      })
-    );
+
   }
 
-  calcServiceStateTimeSpan(service) {
-    const latestState = service.stateChanges ? service.stateChanges.filter(pds => pds.state === service.state).pop() : undefined;
-    if (latestState) {
-      const diff = Date.now() - latestState.timestamp;
-      const minutes = Math.floor(diff / 60000);
-      const seconds = ((diff % 60000) / 1000).toFixed(0);
-      return `${minutes > 9 ? minutes : '0' + minutes}m${seconds.length > 1 ? seconds : '0' + seconds}s`;
-    } else {
-      return '---';
-    }
-  }
 
-  calcServiceEta(service) {
-    if (!service.pickUpETA) {
-      return '---';
-    }
-
-    let diff = service.pickUpETA ? service.pickUpETA - Date.now() : 0;
-    diff = (diff !== null && diff < 0) ? 0 : diff;
-
-    const minutes = Math.floor(diff / 60000);
-    const seconds = ((diff % 60000) / 1000).toFixed(0);
-    return `${minutes > 9 ? minutes : '0' + minutes}m${seconds.length > 1 ? seconds : '0' + seconds}s`;
-  }
 
   //#endregion
 
   initMap() {
+    const styledMapType = new google.maps.StyledMapType(
+      [
+        { elementType: 'geometry', stylers: [{ color: '#f2f2f2' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#523735' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f1e6' }] },
+        {
+          featureType: "poi",
+          elementType: "labels",
+          stylers: [
+            { visibility: "off" }
+          ]
+        },
+        // {
+        //   featureType: 'administrative',
+        //   elementType: 'geometry.stroke',
+        //   stylers: [{ color: '#c9b2a6' }, { "visibility": "off" }]
+        // },
+        // {
+        //   featureType: 'administrative.land_parcel',
+        //   elementType: 'geometry.stroke',
+        //   stylers: [{ color: '#dcd2be' }, { "visibility": "off" }]
+        // },
+        // {
+        //   featureType: 'administrative.land_parcel',
+        //   elementType: 'labels.text.fill',
+        //   stylers: [{ color: '#ae9e90' }, { "visibility": "off" }]
+        // },
+        // {
+        //   featureType: 'landscape.natural',
+        //   elementType: 'geometry',
+        //   stylers: [{ color: '#dfd2ae' }]
+        // },
+        // {
+        //   featureType: 'poi',
+        //   elementType: 'geometry',
+        //   stylers: [{ color: '#dfd2ae' }, { "visibility": "off" }]
+        // },
+        // {
+        //   featureType: 'poi',
+        //   elementType: 'labels.text.fill',
+        //   stylers: [{ color: '#93817c' }, { "visibility": "off" }]
+        // },
+        // {
+        //   featureType: 'poi.park',
+        //   elementType: 'geometry.fill',
+        //   stylers: [{ color: '#a5b076' }, { "visibility": "off" }]
+        // },
+        // {
+        //   featureType: 'poi.park',
+        //   elementType: 'labels.text.fill',
+        //   stylers: [{ color: '#447530' }]
+        // },
+        {
+          featureType: 'road',
+          elementType: 'geometry',
+          stylers: [{ color: '#f5f1e6' }]
+        },
+        {
+          featureType: 'road.arterial',
+          elementType: 'geometry',
+          stylers: [{ color: '#fdfcf8' }]
+        },
+        {
+          featureType: 'road.highway',
+          elementType: 'geometry',
+          stylers: [{ color: '#f8c967' }]
+        },
+        {
+          featureType: 'road.highway',
+          elementType: 'geometry.stroke',
+          stylers: [{ color: '#e9bc62' }]
+        },
+        {
+          featureType: 'road.highway.controlled_access',
+          elementType: 'geometry',
+          stylers: [{ color: '#e98d58' }]
+        },
+        {
+          featureType: 'road.highway.controlled_access',
+          elementType: 'geometry.stroke',
+          stylers: [{ color: '#db8555' }]
+        },
+        {
+          featureType: 'road.local',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#806b63' }]
+        },
+        {
+          featureType: 'transit.line',
+          elementType: 'geometry',
+          stylers: [{ color: '#dfd2ae' }]
+        },
+        {
+          featureType: 'transit.line',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#8f7d77' }]
+        },
+        {
+          featureType: 'transit.line',
+          elementType: 'labels.text.stroke',
+          stylers: [{ color: '#ebe3cd' }]
+        },
+        {
+          featureType: 'transit.station',
+          elementType: 'geometry',
+          stylers: [{ color: '#dfd2ae' }]
+        },
+        {
+          featureType: 'water',
+          elementType: 'geometry.fill',
+          stylers: [{ color: '#b9d3c2' }]
+        },
+        {
+          featureType: 'water',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#92998d' }]
+        }
+      ],
+      { name: 'Styled Map' });
     this.map = new google.maps.Map(this.gmapElement.nativeElement, {
-      center: new google.maps.LatLng(6.164719, -75.601595),
+      center: new google.maps.LatLng(3.415718, -76.526693),
       zoom: 15,
-      streetViewControl: true,
+      streetViewControl: false,
       fullscreenControl: true,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
     });
+
+    this.map.mapTypes.set('styled_map', styledMapType);
+    this.map.setMapTypeId('styled_map');
+  }
+
+  currentLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        if (this.map) {
+          this.map.setCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        }
+      });
+    } else {
+      alert('Geolocation is not supported by this browser.');
+    }
   }
 
   //#region MAPS
