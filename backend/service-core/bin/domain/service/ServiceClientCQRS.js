@@ -48,7 +48,7 @@ class ServiceClientCQRS {
 
 
   queryClientCurrentServices$({ root, args, jwt }, authToken) {
-    const { clientId } = authToken;
+    const clientId = authToken.clientId || '-1';
     console.log(`ServiceCQRS.queryClientCurrentServices RQST: ${JSON.stringify(authToken)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceClientCQRS", "queryClientCurrentServices", PERMISSION_DENIED, ["CLIENT"]).pipe(
       mergeMap(() => ServiceDA.findCurrentServicesRequestedByClient$(clientId)),
@@ -111,7 +111,7 @@ class ServiceClientCQRS {
         )
       ),    
       mapTo(args),
-      tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
+      tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId } })),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
      // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
@@ -202,7 +202,7 @@ class ServiceClientCQRS {
    * @param {*} service request input params
    */
   validateServiceRequestInput({ businessId, client, pickUp, paymentType, requestedFeatures, dropOff, fareDiscount, fare, tip }) {
-    if (!pickUp || !paymentType || !businessId) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
+    if (!client || !client.id || !pickUp || !paymentType || !businessId) throw ERROR_23200; // insuficient data: businessId, client, pickup and payment are mandatory 
     //if (!client.fullname || client.fullname.trim().length > 50 || client.fullname.trim().length < 4) throw ERROR_23201; // invalid client name
     if (client && client.tipType && VALID_SERVICE_CLIENT_TIP_TYPES.indexOf(client.tipType) == -1) throw ERROR_23202; // invalid tip type
     if (client && client.tip && (client.tip < 0 || client.tip > 10000)) throw ERROR_23203; // invalid tip amount
@@ -287,11 +287,11 @@ class ServiceClientCQRS {
         pickUp,
         dropOff,
         client: {
-          id: authToken.clientId,
-          businessId: authToken.businessId,
+          // id: authToken.clientId,
+          // businessId: authToken.businessId,
           username: authToken.preferred_username,
           fullname: authToken.name,
-          //...request.client,
+          ...request.client,
         },
         _id,
         businessId: authToken.businessId,

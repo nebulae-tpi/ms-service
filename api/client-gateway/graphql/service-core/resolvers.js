@@ -91,7 +91,7 @@ module.exports = {
                 return pubsub.asyncIterator("ClientServiceUpdatedSubscription");
             },
             (payload, variables, context, info) => {
-              if(payload.ClientServiceUpdatedSubscription.closed){
+              if(payload.ClientServiceUpdatedSubscription.closed || !context.authToken.clientId){
                 return false
               }
 
