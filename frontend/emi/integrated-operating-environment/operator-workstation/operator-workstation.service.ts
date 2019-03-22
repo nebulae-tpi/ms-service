@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import {
-  debounceTime
+  debounceTime, tap
 } from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
 import * as moment from 'moment';
@@ -33,6 +33,7 @@ export class OperatorWorkstationService {
   public static TOOLBAR_COMMAND_DATATABLE_SELECT_NEXT_ROW = 1007;
   public static TOOLBAR_COMMAND_DATATABLE_SEE_ALL_OPERATION_CHANGED = 1008;
   public static TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED = 1009;
+  public static TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED = 1010;
 
   public static TOOLBAR_COMMAND_SERVICE_CANCEL = 2001;
   public static TOOLBAR_COMMAND_SERVICE_ASSIGN = 2002;
@@ -178,12 +179,12 @@ export class OperatorWorkstationService {
   /**
    * Event triggered when a business is created, updated or deleted.
    */
-  listenIOEService$(businessId, operatorId): Observable<any> {
+  listenIOEService$(businessId, operatorId, statesFilter, channelsFilter ): Observable<any> {
     return this.gateway.apollo
       .subscribe({
         query: IOEServiceSubscription,
         variables: {
-          businessId, operatorId
+          businessId, operatorId, statesFilter, channelsFilter
         }
       });
   }

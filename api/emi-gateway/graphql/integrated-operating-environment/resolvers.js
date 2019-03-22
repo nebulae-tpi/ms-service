@@ -6,6 +6,8 @@ const pubsub = new PubSub();
 const { of, Observable, bindNodeCallback } = require('rxjs');
 const { map, tap, mergeMap, switchMapTo } = require('rxjs/operators');
 
+
+
 const broker = require("../../broker/BrokerFactory")();
 const RoleValidator = require('../../tools/RoleValidator');
 
@@ -26,6 +28,8 @@ function getResponseFromBackEnd$(response) {
       return resp.data;
     }));
 }
+
+
 
 const READ_WRITE_ROLES = ["OPERATOR", "OPERATION-SUPERVISOR"];
 const READ_ROLES = ["PLATFORM-ADMIN", "BUSINESS-OWNER", "OPERATOR", "OPERATION-SUPERVISOR"];
@@ -132,6 +136,7 @@ module.exports = {
     },
   },
   
+
   //// SUBSCRIPTIONS ///////
   Subscription: {
     IOEService: {
@@ -142,7 +147,8 @@ module.exports = {
         (payload, variables, context, info) => {
           const businessOk = !variables.businessId ? true : payload.IOEService.businessId === variables.businessId;
           const operatorOk = !variables.operatorId ? true : payload.IOEService.request && payload.IOEService.request.ownerOperatorId === variables.operatorId;
-          return businessOk && operatorOk;
+          const channelFilter = (payload.IOEService.request && variables.channelsFilter && variables.channelsFilter.includes(payload.IOEService.request.sourceChannel) );
+          return businessOk && operatorOk && channelFilter;
         }
       )
     },

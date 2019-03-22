@@ -142,12 +142,12 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceLocationReported$({ aid, data }) {
-        console.log(`*** ServiceES: handleServiceLocationReported: `, aid, data); //DEBUG: DELETE LINE
+        // console.log(`*** ServiceES: handleServiceLocationReported: `, aid, data); //DEBUG: DELETE LINE
         const { location } = data;
         return ServiceDA.appendLocation$(aid, location)
         .pipe(
             tap(result => {
-                console.log('result.nModified => ', result.nModified);
+                // console.log('result.nModified => ', result.nModified);
                 //if(result.nModified > 0) {
                     this.queueAndGroupServiceEvent({_id: aid});
                 //}                

@@ -4,9 +4,9 @@
     </button>
     
 
-    <button *ngIf="selectedBusinessId" mat-button [matMenuTriggerFor]="actions_menu">
+    <!-- <button *ngIf="selectedBusinessId" mat-button [matMenuTriggerFor]="actions_menu">
         <mat-icon>format_list_bulleted</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.ACTIONS_LBL' | translate }}</span>
-    </button>
+    </button> -->
 
     <button *ngIf="selectedBusinessId && userIsSupervisor" mat-button [matMenuTriggerFor]="view_menu">
         <mat-icon>visibility</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.VIEW' | translate }}</span>
@@ -27,15 +27,7 @@
     <span fxFlex></span>
 
     <div *ngIf="selectedBusinessId" fxLayoutGap="2px grid">
-        <button mat-button fxFlex="30px" (click)="sendMapApplyPrevPage()">
-            <mat-icon>keyboard_arrow_left</mat-icon>
-        </button>
-        <button mat-button fxFlex="30px">
-            <span>{{page+1}} / {{maxPage}}</span>
-        </button>
-        <button mat-button fxFlex="30px" (click)="sendMapApplyNextPage()">
-            <mat-icon>keyboard_arrow_right</mat-icon>
-        </button>
+        
     </div>
 
 </div>

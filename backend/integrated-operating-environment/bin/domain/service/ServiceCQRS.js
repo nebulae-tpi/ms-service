@@ -72,7 +72,7 @@ class ServiceCQRS {
    * @param {*} authToken 
    */
   queryServices$({ root, args, jwt }, authToken) {
-    ServiceCQRS.log(`ServiceCQRS.queryServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    // ServiceCQRS.log(`ServiceCQRS.queryServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ServiceCQRS", "queryServices", PERMISSION_DENIED, READ_ROLES).pipe(
       mapTo(args),
       mergeMap(({ serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, projections }) => ServiceDA.findByFilters$(

@@ -115,6 +115,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
   toggleState = false;
   // delay Threshold
   delayThreshold = 60000 * 5; // five minutes
+  // selected filters to filter services
+  channelsFilter: String[] = ['OPERATOR'];
+  // selected state filters
+  statesFilter: String[] = [];
 
 
   constructor(
@@ -155,9 +159,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   async queryUserSpecs() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
     this.userDetails = await this.keycloakService.loadUserProfile();
-    // this.businessId = this.userDetails.attributes.businessId[0];
-    console.log('###$$$$$ ', this.userDetails.attributes);
-    this.userId = this.userDetails.attributes.userId ? this.userDetails.attributes.userId[0]: undefined;
+    this.userId = this.userDetails.attributes.userId ? this.userDetails.attributes.userId[0] : undefined;
   }
 
   //#region LISTENERS
@@ -225,11 +227,16 @@ export class DatatableComponent implements OnInit, OnDestroy {
             this.seeAllOperation = args[0];
             this.resetDataAndSubscriptions();
             break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED:
+            this.channelsFilter = args[0];
+            this.resetDataAndSubscriptions();
+            break;
+
           case OperatorWorkstationService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
             // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
             this.selectedBusinessId = args[0];
             this.resetData();
-            this.resetDataAndSubscriptions();            
+            this.resetDataAndSubscriptions();
             break;
         }
         // console.log({ code, args });
@@ -248,7 +255,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     of(this.selectedBusinessId)
       .pipe(
         filter(selectedBusinessId => selectedBusinessId),
-        mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId )),
+        mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId, this.statesFilter, this.channelsFilter)),
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
         takeUntil(this.ngUnsubscribeIOEServiceListener)
@@ -258,9 +265,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
           this.appendData(service);
         },
         (error) => console.error(`DatatableComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
-        () => {
-          console.log(`DatatableComponent.subscribeIOEServicesListener: Completed`);
-        },
+        () => { },
       );
   }
 
@@ -291,8 +296,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
    */
   async resetData() {
     this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
-    console.log('totalRawData.length ==> ', this.totalData.length );
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
+
     await this.recalculatePartialData();
   }
 
@@ -302,8 +307,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
    */
   async appendData(service) {
     const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
-    if (service.closed && oldDataIndex >= 0) {
-      this.totalRawData.splice(oldDataIndex, 1);
+    if (service.closed) {
+      if (oldDataIndex >= 0) {
+        this.totalRawData.splice(oldDataIndex, 1);
+      }
     } else if (oldDataIndex >= 0) {
       this.totalRawData[oldDataIndex] = service;
     } else {
@@ -336,12 +343,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
     let page = 0;
     while (moreDataAvailable) {
       console.log(`datatable.queryAllDataFromServer: nextPage=${page}`);
-      const gqlResult = await this.operatorWorkstationService.queryServices$([], [], this.seeAllOperation, this.selectedBusinessId,  page++, 10, undefined).toPromise();
+      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId, page++, 10, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices);
-      } else {
-        moreDataAvailable = false;
       }
+      moreDataAvailable = (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length == 10);
     }
     console.log(`datatable.queryAllDataFromServer: totalCount=${data.length}`);
     return data;
@@ -370,7 +376,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       eta: this.calcServiceEta(service),
       'state_time_span': this.calcServiceStateTimeSpan(service),
       'distance': 0.00,
-      lastStateChangeTimeStamp: lastStateChange ?  lastStateChange.timestamp : undefined,
+      lastStateChangeTimeStamp: lastStateChange ? lastStateChange.timestamp : undefined,
       serviceRef: service
     };
   }
@@ -385,104 +391,104 @@ export class DatatableComponent implements OnInit, OnDestroy {
     );
   }
 
-  updateStylesVariablesForPartialData$(){
+  updateStylesVariablesForPartialData$() {
     this.toggleState = !this.toggleState;
     return from(this.partialData)
-    .pipe(
-      tap(service => {
-        const offerSpanPercentage = Math.floor((((Date.now() - service.lastStateChangeTimeStamp)/10)) / this.offerSpan);
-        // (50 *100)/200 ==> 25%
-        // (quiantity*100)/total = %
+      .pipe(
+        tap(service => {
+          const offerSpanPercentage = Math.floor((((Date.now() - service.lastStateChangeTimeStamp) / 10)) / this.offerSpan);
+          // (50 *100)/200 ==> 25%
+          // (quiantity*100)/total = %
 
-        switch (service.state) {
-          case 'REQUESTED':
-            if (offerSpanPercentage < 50) {
-              service.style = {
-                state: { bgColor: 'yellow', fontColor: 'black' },
-                tTrans: { fontColor: 'black' }
+          switch (service.state) {
+            case 'REQUESTED':
+              if (offerSpanPercentage < 50) {
+                service.style = {
+                  state: { bgColor: 'yellow', fontColor: 'black' },
+                  tTrans: { fontColor: 'black' }
+                }
+              } else if (offerSpanPercentage > 50) {
+                service.style = {
+                  state: {
+                    bgColor: this.toggleState ? 'yellow' : 'white',
+                    fontColor: this.toggleState ? 'red' : 'black',
+                    fontBold: true
+                  },
+                  tTrans: { fontColor: 'red' }
+                }
               }
-            } else if (offerSpanPercentage > 50) {
-              service.style = {
-                state: { 
-                  bgColor: this.toggleState ? 'yellow' : 'white',
-                  fontColor: this.toggleState ? 'red' : 'black',
-                  fontBold: true
-                },
-                tTrans: { fontColor: 'red' }
-              }
-            }
-            break;
+              break;
 
-          case 'CANCELLED_SYSTEM':
-            if (offerSpanPercentage < 25) { // APROX 30 seconds
-              service.style = {
-                state: {
-                  bgColor: this.toggleState ? 'red' : 'white',
-                  fontColor: this.toggleState ? 'black' : 'red',
-                  fontBold: true
-                },
-                tTrans: { fontColor: 'red' }
+            case 'CANCELLED_SYSTEM':
+              if (offerSpanPercentage < 25) { // APROX 30 seconds
+                service.style = {
+                  state: {
+                    bgColor: this.toggleState ? 'red' : 'white',
+                    fontColor: this.toggleState ? 'black' : 'red',
+                    fontBold: true
+                  },
+                  tTrans: { fontColor: 'red' }
+                }
+              } else {
+                service.style = {
+                  state: { bgColor: 'white', fontColor: 'red' },
+                  tTrans: {}
+                }
               }
-            } else {
+              break;
+
+            case 'ASSIGNED':
+              const etaTime = service.serviceRef.pickUpETA;
+              if (!etaTime || etaTime && Date.now() < etaTime) {
+                service.style = {
+                  state: { bgColor: 'green', fontColor: 'black' },
+                  tTrans: {}
+                }
+              } else if (etaTime && Date.now() < (etaTime + this.delayThreshold)) {
+                service.style = {
+                  state: { bgColor: 'red', fontColor: 'black' },
+                  tTrans: {}
+                }
+              }
+              else if (etaTime && Date.now() > (etaTime + this.delayThreshold)) {
+                service.style = {
+                  state: {
+                    bgColor: this.toggleState ? 'red' : 'white',
+                    fontColor: this.toggleState ? 'black' : 'red',
+                    fontBold: true
+                  },
+                  tTrans: {}
+                }
+              }
+              break;
+
+            case 'CANCELLED_OPERATOR':
               service.style = {
                 state: { bgColor: 'white', fontColor: 'red' },
-                tTrans: { }
-              }            
-            }
-            break;
-
-          case 'ASSIGNED':
-            const etaTime = service.serviceRef.pickUpETA;
-            if ( !etaTime || etaTime && Date.now() < etaTime) {
-              service.style = {
-                state: { bgColor: 'green', fontColor: 'black' },
                 tTrans: {}
               }
-            } else if (etaTime && Date.now() < (etaTime + this.delayThreshold)) {
+              break;
+
+            case 'CANCELLED_DRIVER':
               service.style = {
-                state: { bgColor: 'red', fontColor: 'black' },
+                state: { bgColor: 'white', fontColor: 'red' },
                 tTrans: {}
               }
-            }
-            else if (etaTime && Date.now() > (etaTime + this.delayThreshold)) {
+              break;
+            case 'CANCELLED_CLIENT':
               service.style = {
-                state: { 
-                  bgColor: this.toggleState ? 'red' : 'white',
-                  fontColor: this.toggleState ? 'black' : 'red',
-                  fontBold: true
-                },
+                state: { bgColor: 'white', fontColor: 'red' },
                 tTrans: {}
               }
-            }
-            break;
+              break;
 
-          case 'CANCELLED_OPERATOR':
-            service.style = {
-              state: { bgColor: 'white', fontColor: 'red' },
-              tTrans: {}
-            }
-            break;
+            default:
+              service.style = { state: {}, tTrans: {} }
+              break;
+          }
 
-          case 'CANCELLED_DRIVER':
-            service.style = {
-              state: { bgColor: 'white', fontColor: 'red' },
-              tTrans: {}
-            }
-            break;
-          case 'CANCELLED_CLIENT':
-            service.style = {
-              state: { bgColor: 'white', fontColor: 'red' },
-              tTrans: {}
-            }
-            break;
-
-          default:
-            service.style = { state: {}, tTrans: {} }
-            break;
-        }
-
-      })
-    )
+        })
+      )
   }
 
   calcServiceStateTimeSpan(service) {
@@ -497,11 +503,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
     }
   }
 
-  calcServiceEta(service) {    
-    if (!service.pickUpETA || service.state !== 'ASSIGNED' ) {
+  calcServiceEta(service) {
+    if (!service.pickUpETA || service.state !== 'ASSIGNED') {
       return '---';
     }
-             
+
     let diff = service.pickUpETA ? service.pickUpETA - Date.now() : 0;
     diff = (diff !== null && diff < 0) ? 0 : diff;
 
@@ -591,16 +597,16 @@ export class DatatableComponent implements OnInit, OnDestroy {
     return this.partialData.find(s => s.id === this.selectedServiceId);
   }
 
-  onRowSelected(serviceRow){
+  onRowSelected(serviceRow) {
     console.log(serviceRow);
     this.selectedServiceId = serviceRow.serviceRef.id;
     this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
   }
 
-  resetDataAndSubscriptions(){
+  resetDataAndSubscriptions() {
     this.ngUnsubscribeIOEServiceListener.next();
     this.resetData();
-    if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }    
+    if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
   }
   //#endregion
 

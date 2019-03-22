@@ -44,12 +44,14 @@ class ServiceDA {
     }
     if (channels && channels.length > 0) {
       query["request.sourceChannel"] = { "$in": channels };
+    }else{
+      query["request.sourceChannel"] = { "$in": ['UNDEFINED'] };
     }
     if (operatorId) {
       query["request.ownerOperatorId"] = operatorId;
     }
     //console.log({ businessId, states, channels, operatorId, page, count, projection });
-    //console.log(JSON.stringify(query, null, 1));
+    // console.log('MONGO FILTERS ==>', JSON.stringify(query, null, 1));
 
     const explorePastMonth = false; // TODO: solucionar// Date.today().getDate() <= 1;
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(

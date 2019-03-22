@@ -18,8 +18,8 @@ export const IOECancelService = gql`
 `;
 
 export const IOEServices = gql`
-query IOEServices($serviceStatesFilter: [String], $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
-  IOEServices(serviceStatesFilter: $serviceStatesFilter, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
+query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [String], $viewAllOperators: Boolean, $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
+  IOEServices(serviceStatesFilter: $serviceStatesFilter, serviceChannelsFilter : $serviceChannelsFilter, viewAllOperators: $viewAllOperators, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
     id,
     closed,
       businessId,
@@ -93,7 +93,7 @@ query IOEShifts($shiftStatesFilter: [String], $businessId: String, $page: Int, $
     state,        
     online,
     lastReceivedComm,
-    driver{ fullname, documentId, id, phone ,username},
+    driver{ fullname, documentId, id ,username},
     vehicle{ id, licensePlate,features, brand,line, model },
     location{ lat, lng, timestamp },
   }
@@ -102,8 +102,8 @@ query IOEShifts($shiftStatesFilter: [String], $businessId: String, $page: Int, $
 
 // SUBSCRIPTION
 export const IOEServiceSubscription = gql`
-  subscription($businessId: String, $operatorId: String){
-    IOEService(businessId: $businessId, operatorId: $operatorId){
+  subscription($businessId: String, $operatorId: String, $statesFilter: [String], $channelsFilter: [String]){
+    IOEService(businessId: $businessId, operatorId: $operatorId, statesFilter: $statesFilter, channelsFilter: $channelsFilter ){
       id,
       closed,
         businessId,
@@ -176,7 +176,7 @@ export const IOEShiftSubscription = gql`
       state,        
       online,
       lastReceivedComm,
-      driver{ fullname, documentId, id, phone ,username},
+      driver{ fullname, documentId, id ,username},
       vehicle{ id, licensePlate,features, brand,line, model },
       location{ lat, lng, timestamp },
     }

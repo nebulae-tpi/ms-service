@@ -19,7 +19,6 @@ class CronJobES {
   }
 
   handlePeriodicOneMinute$() {
-    console.log("------- handlePeriodicOneMinute$ ----------");
     return forkJoin(
       this.checkDisconnectedShifts$(),
       //this.checkClosedShifts$(),
@@ -28,7 +27,6 @@ class CronJobES {
   }
 
   handlePeriodicFiveMinutes$() {
-    console.log("------- handlePeriodicFiveMinutes$ ----------");
     return forkJoin(
       //this.checkDisconnectedShifts$(),
       //this.checkClosedShifts$(),
@@ -37,7 +35,6 @@ class CronJobES {
   }
 
   handlePeriodicFifteenMinutes$() {
-    console.log("------- handlePeriodicFifteenMinutes$ ----------");
     return forkJoin(
       this.checkServicesOnBoardToComplete$(),
       this.checkClosedShifts$(),
@@ -46,10 +43,9 @@ class CronJobES {
   }
 
   handlePeriodicMonthly$(){
-    console.log("------- handlePeriodicMonthly$ ----------");
     return MongoDB.createIndexesOnHistoricalCollection$()
     .pipe(
-      tap(r => console.log(r))
+      tap(indexCreationResult => console.log(indexCreationResult))
     );
   }
 

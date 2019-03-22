@@ -101,6 +101,14 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   page = 0;
   maxPage = 0;
 
+  // selected filters to filter services
+  channelsFilter: String[] = ['OPERATOR'];
+
+  isBusinessOwner= false;
+  isPlatformAdmin= false;
+  isSysAdmin= false;
+
+
   /**
    * open RequestServiceDialogComponent reference
    */
@@ -434,6 +442,23 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   async queryUserRols() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
+    this.isBusinessOwner= this.userRoles.includes('BUSINESS-OWNER');
+    this.isPlatformAdmin= this.userRoles.includes('PLATFORM-ADMIN');
+    this.isSysAdmin= this.userRoles.includes('SYSADMIN');
+  }
+
+  updateChannelFilters(event, channel, activateViewAllOperation){
+
+    this.channelsFilter = event.checked
+      ? [...this.channelsFilter, channel]
+      : this.channelsFilter.filter(ch => ch  != channel)
+
+    this.operatorWorkstationService.publishToolbarCommand({
+      code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED,
+      args: [this.channelsFilter]
+    });
+
+    
   }
 
   //#endregion
