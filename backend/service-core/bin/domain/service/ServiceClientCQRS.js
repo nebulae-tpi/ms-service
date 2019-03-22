@@ -110,8 +110,8 @@ class ServiceClientCQRS {
           mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
         )
       ),    
-      mapTo(args),
-      tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId } })),
+      mapTo({ ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId } }),
+      tap(request => this.validateServiceRequestInput(request)),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
      // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
