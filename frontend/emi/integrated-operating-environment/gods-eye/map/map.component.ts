@@ -328,9 +328,7 @@ export class MapComponent implements OnInit, OnDestroy {
         this.removePin(oldPin);
       }
     } else if (oldPin) {
-      this.removePin(oldPin);
-      this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
-      this.pins[raw.id].marker.setMap(this.map)
+      this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw, oldPin) : this.convertShiftToMapFormat(raw, oldPin);
     } else {
       this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
       this.pins[raw.id].marker.setMap(this.map)
@@ -392,7 +390,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * Converts the service to the datatable model
    * @param service
    */
-  convertServiceToMapFormat(service) {
+  convertServiceToMapFormat(service, oldPin = undefined) {
     let location = service.pickUp.marker;
     let fillColor = '#FFB6C1';
 
@@ -411,30 +409,68 @@ export class MapComponent implements OnInit, OnDestroy {
     const fillOpacity = service.state === 'REQUESTED'
       ? 0.05 + (0.004 * ((Date.now() - service.timestamp) / 1000))
       : service.state === 'DONE' ? 0 : 1;
-      
-    const marker = service.state === 'REQUESTED'
-      ? new google.maps.Circle({
-        strokeColor: '#FF0000',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: '#FF0000',
-        fillOpacity,
-        center: new google.maps.LatLng(location.lat, location.lng),
-        radius: (service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000,
-      })
-      : new google.maps.Marker({
-        position: new google.maps.LatLng(location.lat, location.lng),
-        icon: {
-          //path: google.maps.SymbolPath.CIRCLE,
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+    const position = new google.maps.LatLng(location.lat, location.lng);
+
+    const needsReplace = (oldPin && oldPin.ref.state === 'REQUESTED' && service.state !== 'REQUESTED');
+    let oldMap;
+    if (needsReplace) {
+      oldMap = oldPin.marker.getMap();
+      oldPin.marker.setMap(null);
+      delete oldPin.marker;
+      delete oldPin.ref;
+    }
+
+    let marker;
+    if (oldPin && !needsReplace) {
+      marker = oldPin.marker;
+      if (service.state === 'REQUESTED') {
+        marker.setCenter(position);
+        marker.fillOpacity = fillOpacity;
+        marker.setRadius((service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000);
+      } else {
+        marker.setPosition(position);
+        marker.getIcon().fillColor = fillColor;
+        marker.getIcon().fillOpacity = fillOpacity;
+      }
+    } else {
+      marker = service.state === 'REQUESTED'
+        ? new google.maps.Circle({
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: '#FF0000',
           fillOpacity,
-          fillColor,
-          strokeOpacity: 1.0,
-          strokeColor: '#000000',
-          strokeWeight: 1,
-          scale: 4 //pixels,        
-        }
-      });
+          center: position,
+          radius: (service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000,
+        })
+        : new google.maps.Marker({
+          position,
+          icon: {
+            //path: google.maps.SymbolPath.CIRCLE,
+            path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
+            fillOpacity,
+            fillColor,
+            strokeOpacity: 1.0,
+            strokeColor: '#000000',
+            strokeWeight: 1,
+            scale: 4 //pixels,        
+          }
+        });
+
+        marker.addListener('click', function () {
+          infowindow.open(this.map, marker);
+        });
+        var contentString = `<div id="content">
+              ${service.client.fullname}
+              </div>`;
+        var infowindow = new google.maps.InfoWindow({
+          content: contentString
+        });
+    }
+
+    if (oldMap) {
+      marker.setMap(oldMap);
+    }
 
     return {
       marker,
@@ -446,7 +482,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * Converts the shift to the datatable model
    * @param shift
    */
-  convertShiftToMapFormat(shift) {
+  convertShiftToMapFormat(shift, oldPin = undefined) {
     let location = shift.location;
     if (!location) {
       location = { marker: { lat: 0, lng: 0 } };
@@ -457,18 +493,40 @@ export class MapComponent implements OnInit, OnDestroy {
       case 'NOT_AVAILABLE': fillColor = '#ff0000'; break;
       case 'BUSY': fillColor = '#0000FF'; break;
     }
-    const marker = new google.maps.Marker({
-      position: new google.maps.LatLng(location.lat, location.lng),
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        fillOpacity: 1,
-        fillColor,
-        strokeOpacity: 1.0,
-        strokeColor: '#000000',
-        strokeWeight: 0.5,
-        scale: 4 //pixels,        
-      }
-    });
+
+    const position = new google.maps.LatLng(location.lat, location.lng);
+
+    let marker;
+    if (oldPin) {
+      marker = oldPin.marker;
+      marker.setPosition(position);
+      //console.log(marker.getIcon());
+      marker.getIcon().fillColor = fillColor;
+    } else {
+      marker = new google.maps.Marker({
+        position,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillOpacity: 1,
+          fillColor,
+          strokeOpacity: 1.0,
+          strokeColor: '#000000',
+          strokeWeight: 0.5,
+          scale: 4 //pixels,        
+        }
+      });
+
+      marker.addListener('click', function () {
+        infowindow.open(this.map, marker);
+      });
+      var contentString = `<div id="content">
+            ${shift.vehicle.licensePlate} - ${shift.driver.fullname}
+            </div>`;
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+    }
+
 
     return {
       marker,
