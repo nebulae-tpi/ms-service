@@ -394,6 +394,9 @@ export class MapComponent implements OnInit, OnDestroy {
     let location = service.pickUp.marker;
     let fillColor = '#FFB6C1';
 
+
+
+
     switch (service.state) {
       case 'REQUESTED': fillColor = '#f5ff8e'; break;
       case 'ASSIGNED': fillColor = '#00ff00'; break;
@@ -429,8 +432,16 @@ export class MapComponent implements OnInit, OnDestroy {
         marker.setRadius((service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000);
       } else {
         marker.setPosition(position);
-        marker.getIcon().fillColor = fillColor;
-        marker.getIcon().fillOpacity = fillOpacity;
+        marker.setIcon({
+          //path: google.maps.SymbolPath.CIRCLE,
+          path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
+          fillOpacity,
+          fillColor,
+          strokeOpacity: 1.0,
+          strokeColor: '#000000',
+          strokeWeight: 1,
+          scale: 4 //pixels,        
+        });
       }
     } else {
       marker = service.state === 'REQUESTED'
@@ -483,6 +494,9 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param shift
    */
   convertShiftToMapFormat(shift, oldPin = undefined) {
+
+    //console.log(shift.state);
+
     let location = shift.location;
     if (!location) {
       location = { marker: { lat: 0, lng: 0 } };
@@ -514,9 +528,21 @@ export class MapComponent implements OnInit, OnDestroy {
       marker = oldPin.marker;
       marker.setPosition(position);
       //console.log(marker.getIcon());
-      marker.getIcon().fillColor = fillColor;
-      marker.getIcon().strokeColor = strokeColor;
-      marker.getIcon().strokeWeight = strokeWeight;
+      // marker.getIcon().fillColor = fillColor;
+      // marker.getIcon().strokeColor = strokeColor;
+      // marker.getIcon().strokeWeight = strokeWeight;
+      marker.setIcon(
+        {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillOpacity: 1,
+          fillColor,
+          strokeOpacity: 1.0,
+          strokeColor,
+          strokeWeight,
+          scale: 4 //pixels,        
+        }
+      );
+      //console.log(fillColor);
     } else {
       marker = new google.maps.Marker({
         position,
