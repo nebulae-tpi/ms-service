@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').load();
 }
 
+
 const Rx = require('rxjs');
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
