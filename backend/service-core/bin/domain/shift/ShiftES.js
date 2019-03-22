@@ -152,7 +152,7 @@ class ShiftES {
             // mergeMap(shift => iif(() => data.serviceId,
             //     eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(data.serviceId, data.location, user)).pipe(mapTo(shift)),
             //     of(shift))),
-            // filter(shift => shift && !shift.online),
+            // filter(shift => shift && !shift.online), 
             mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
     }
