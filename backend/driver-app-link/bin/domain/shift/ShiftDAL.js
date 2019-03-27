@@ -126,7 +126,8 @@ class ShiftDAL {
             data: {
                 location,
                 serviceId
-            }
+            },
+            ephemeral: true,
         });
     }
 
