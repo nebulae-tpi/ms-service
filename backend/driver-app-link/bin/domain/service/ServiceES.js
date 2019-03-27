@@ -146,7 +146,7 @@ class ServiceES {
                                     documentId: shift.driver.documentId,
                                     licensePlate: shift.vehicle.licensePlate,
                                 },
-                                'SYSTEM'
+                                'SYSTEM', 1, true
                             )
                         ).toPromise();
 
@@ -180,7 +180,7 @@ class ServiceES {
                             {
                                 offer: { ...service.offer, shifts: undefined }
                             },
-                            'SYSTEM'
+                            'SYSTEM', 1, true
                         )
                     ).toPromise();
                 }
@@ -419,14 +419,15 @@ class ServiceES {
      * @param {*} authToken 
      * @param {*} eventTypeVersion defaults to 1
     */
-    static buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, user, eventTypeVersion = 1) {
+    static buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, user, eventTypeVersion = 1, ephemeral = false) {
         return new Event({
             aggregateType,
             aggregateId,
             eventType,
             eventTypeVersion,
             user,
-            data
+            data,
+            ephemeral
         });
     }
 
