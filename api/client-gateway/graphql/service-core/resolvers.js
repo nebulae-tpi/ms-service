@@ -93,7 +93,7 @@ module.exports = {
                 return pubsub.asyncIterator("ClientServiceUpdatedSubscription");
             },
             (payload, variables, context, info) => {
-              if(payload.ClientServiceUpdatedSubscription.closed || !context.authToken.clientId){
+              if(payload.ClientServiceUpdatedSubscription.closed){
                 return false
               }              
 
@@ -104,7 +104,7 @@ module.exports = {
               console.log('context => ', context.authToken.clientId, " -- ", context.authToken.preferred_username, "- Service user: ", serviceUsername);
               if (context.authToken.realm_access.roles.includes("CLIENT")) {
                 // context.authToken.businessId === businessId && 
-                return context.authToken.clientId === serviceClientId;
+                return context.authToken.clientId && context.authToken.clientId === serviceClientId;
               }
 
               return false;
