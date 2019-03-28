@@ -101,10 +101,10 @@ module.exports = {
               const serviceClientId = payload.ClientServiceUpdatedSubscription.client.id;
               const serviceUsername = payload.ClientServiceUpdatedSubscription.client.username;
 
-              console.log('context => ', context.authToken.clientId, " -- ", context.authToken.preferred_username, "- Service user: ", serviceUsername);
               if (context.authToken.realm_access.roles.includes("CLIENT")) {
                 // context.authToken.businessId === businessId && 
-                return context.authToken.clientId && context.authToken.clientId === serviceClientId;
+                return (context.authToken.clientId && context.authToken.clientId === serviceClientId) 
+                || (context.authToken.preferred_username && context.authToken.clientId === serviceUsername);
               }
 
               return false;
