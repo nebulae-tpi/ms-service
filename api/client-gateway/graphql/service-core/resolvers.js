@@ -95,11 +95,13 @@ module.exports = {
             (payload, variables, context, info) => {
               if(payload.ClientServiceUpdatedSubscription.closed || !context.authToken.clientId){
                 return false
-              }
+              }              
 
               const businessId = payload.ClientServiceUpdatedSubscription.businessId;
               const serviceClientId = payload.ClientServiceUpdatedSubscription.client.id;
+              const serviceUsername = payload.ClientServiceUpdatedSubscription.client.username;
 
+              console.log('context => ', context.authToken.clientId, " -- ", context.authToken.preferred_username, "- Service user: ", serviceUsername);
               if (context.authToken.realm_access.roles.includes("CLIENT")) {
                 // context.authToken.businessId === businessId && 
                 return context.authToken.clientId === serviceClientId;
