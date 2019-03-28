@@ -132,6 +132,8 @@ type Service {
    location: Point   
    "Service last modification timestamp."
    lastModificationTimestamp: BigInt
+   "Service pickup ETA"
+   pickupETA: : BigInt
 }
 
 # "Client info."
