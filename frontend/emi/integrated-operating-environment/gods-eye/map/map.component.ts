@@ -403,7 +403,7 @@ export class MapComponent implements OnInit, OnDestroy {
     let fillColor = '#FFB6C1';
 
 
-    console.log(service.request.sourceChannel,"{{{{}}}}");
+    //console.log(service.request.sourceChannel,"{{{{}}}}");
     switch (service.state) {
       case 'REQUESTED': fillColor = service.request.sourceChannel === 'OPERATOR'  ? '#ff0000' : '#ff00ff'; break;
       case 'ASSIGNED': fillColor = '#00ff00'; break;
