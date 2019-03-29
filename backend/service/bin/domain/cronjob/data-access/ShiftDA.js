@@ -56,6 +56,8 @@ class ShiftDA {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp };
     }
 
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     return of(query.timestamp)
       .pipe(
         mergeMap(includeClosed => includeClosed
@@ -73,7 +75,7 @@ class ShiftDA {
                 });
               })
             )
-          : of(Date.today().getDate() <= 2)
+          : of(explorePastMonth)
             .pipe(
               mergeMap(searchInBeforeMonth => searchInBeforeMonth
                 ? of({ start: -1, count: 2 })
@@ -110,6 +112,8 @@ class ShiftDA {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp };
     }
 
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     return of(query.timestamp)
       .pipe(
         mergeMap(includeClosed => includeClosed
@@ -128,7 +132,7 @@ class ShiftDA {
 
               })
             )
-          : of(Date.today().getDate() <= 2)
+          : of(explorePastMonth)
             .pipe(
               mergeMap(searchInBeforeMonth => searchInBeforeMonth
                 ? of({ start: -1, count: 2 })
@@ -220,7 +224,9 @@ class ShiftDA {
       ]
     };
 
-    return of(Date.today().getDate() <= 2)
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
+    return of(explorePastMonth)
       .pipe(
         mergeMap(searchInBeforeMonth => searchInBeforeMonth
           ? of({ start: -1, count: 2 })
@@ -251,7 +257,9 @@ class ShiftDA {
       ]
     };
 
-    return of(Date.today().getDate() <= 2)
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
+    return of(explorePastMonth)
       .pipe(
         mergeMap(searchInBeforeMonth => searchInBeforeMonth
           ? of({ start: -1, count: 2 })

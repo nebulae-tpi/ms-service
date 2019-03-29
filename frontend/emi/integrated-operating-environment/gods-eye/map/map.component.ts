@@ -358,7 +358,7 @@ export class MapComponent implements OnInit, OnDestroy {
     let page = 0;
     while (moreDataAvailable) {
       console.log(`map.queryServices: nextPage=${page}`);
-      const gqlResult = await this.godsEyeService.queryServices$([], this.channelFilter, this.seeAllOperation, this.selectedBusinessId, page++, 20, undefined).toPromise();
+      const gqlResult = await this.godsEyeService.queryServices$([], this.channelFilter, this.seeAllOperation, this.selectedBusinessId, page++, 20, 0,undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices.map(v => ({ ...v, type: 'SERVICE' })));
       } else {
@@ -372,7 +372,7 @@ export class MapComponent implements OnInit, OnDestroy {
     page = 0;
     while (moreDataAvailable) {
       console.log(`map.queryShifts: nextPage=${page}`);
-      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 20, undefined).toPromise();
+      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 20, 0,undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEShifts && gqlResult.data.IOEShifts.length > 0) {
         data.push(...gqlResult.data.IOEShifts.map(v => ({ ...v, type: 'SHIFT' })));
       } else {

@@ -306,6 +306,7 @@ type Query{
         businessId: String
         page: Int
         pageCount: Int
+        monthsToAdd: Int
         projections: [String]
     ): [IOEService]
     "Gets a Shift by its ID"
@@ -316,6 +317,7 @@ type Query{
         businessId: String
         page: Int
         pageCount: Int
+        monthsToAdd: Int
         projections: [String]
     ): [IOEShift]
 }

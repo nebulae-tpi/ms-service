@@ -164,12 +164,12 @@ export class OperatorWorkstationService {
    * Query all services filtered
    * @param IOERequest
    */
-  queryServices$(serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, projections) {
+  queryServices$(serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, monthsToAdd, projections) {
     return this.gateway.apollo
       .query<any>({
         query: IOEServices,
         variables: {
-          serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, projections
+          serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, monthsToAdd, projections
         },
         fetchPolicy: 'network-only',
         errorPolicy: 'all'
@@ -179,7 +179,7 @@ export class OperatorWorkstationService {
   /**
    * Event triggered when a business is created, updated or deleted.
    */
-  listenIOEService$(businessId, operatorId, statesFilter, channelsFilter ): Observable<any> {
+  listenIOEService$(businessId, operatorId, statesFilter, channelsFilter): Observable<any> {
     return this.gateway.apollo
       .subscribe({
         query: IOEServiceSubscription,

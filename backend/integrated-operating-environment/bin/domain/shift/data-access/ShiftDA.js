@@ -35,15 +35,13 @@ class ShiftDA {
   /**
    * Finds shift by filters
    */
-  static findByFilters$(businessId, states, page, count, projection = undefined) {
+  static findByFilters$(businessId, states, page, count, monthsToAdd = 0, projection = undefined) {
     const query = { "businessId": businessId };
     if (states && states.length > 0) {
       query.state = { "$in": states };
     }
 
-    const explorePastMonth = false; // TODO: solucionar// Date.today().getDate() <= 1;
-    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
-      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+    return of(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)).pipe(
       map(db => db.collection(CollectionName)),
       mergeMap(collection =>
         defer(() =>
@@ -51,9 +49,9 @@ class ShiftDA {
             collection.find(query).sort({ timestamp: -1 }).skip(page * count).limit(count)
           )
         )
-      ),
-      take(count)
+      )
     );
+
   }
 
 }

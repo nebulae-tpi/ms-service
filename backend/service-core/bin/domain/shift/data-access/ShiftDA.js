@@ -22,21 +22,21 @@ class ShiftDA {
   }
 
   static findNearbyVehicles$(location, vehicleRequestedFilters, maxDistance) {
-    const explorePastMonth = false; // Date.today().getDate() <= 1; TODO:  FIX!!!!
-    
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = {
       state: "AVAILABLE",
-      online: true,      
+      online: true,
     };
 
-    if(vehicleRequestedFilters && vehicleRequestedFilters.length > 0){
+    if (vehicleRequestedFilters && vehicleRequestedFilters.length > 0) {
       query['vehicle.features'] = { $all: vehicleRequestedFilters };
     }
 
     const aggregateQuery = [
       {
         $geoNear: {
-          near: { type: "Point", coordinates: [ location.lng , location.lat ] },
+          near: { type: "Point", coordinates: [location.lng, location.lat] },
           distanceField: "dist.calculated",
           maxDistance: maxDistance,
           minDistance: 0,
@@ -45,9 +45,9 @@ class ShiftDA {
           num: 20,
           spherical: true
         }
-    }, {
-      $project: {location: 1, vehicle: 1}
-    }];
+      }, {
+        $project: { location: 1, vehicle: 1 }
+      }];
 
     // console.log('Query => ', JSON.stringify(aggregateQuery));
 
@@ -56,7 +56,7 @@ class ShiftDA {
       map(db => db.collection('Shift')),
       mergeMap(collection =>
         defer(() =>
-    
+
           collection.aggregate(
             aggregateQuery
           ).toArray()
@@ -72,12 +72,14 @@ class ShiftDA {
    * Finds an open shift by driver
    */
   static findOpenShiftByDriverAndIdentifier$(driverId, deviceIdentifier, projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$ne": "CLOSED" }, "driver.id": driverId, "driver.deviceIdentifier": deviceIdentifier };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
+      filter(s => s),
       first(shift => shift, undefined)
     );
   }
@@ -87,12 +89,14 @@ class ShiftDA {
    * Finds an open shift by driver
    */
   static findOpenShiftByDriver$(driverId, projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$ne": "CLOSED" }, "driver.id": driverId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
+      filter(s => s),
       first(shift => shift, undefined)
     );
   }
@@ -101,12 +105,14 @@ class ShiftDA {
    * Finds an open shift by vehiclePlate
    */
   static findOpenShiftByVehiclePlate$(vehiclePlate) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$ne": "CLOSED" }, "vehicle.licensePlate": vehiclePlate };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query))),
+      filter(s => s),
       first(shift => shift, undefined)
     );
   }
@@ -115,12 +121,14 @@ class ShiftDA {
    * Finds an open shift by vehicle Id
    */
   static findOpenShiftByVehicleId$(vehicleId, projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$ne": "CLOSED" }, "vehicle.id": vehicleId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
+      filter(s => s),
       first(shift => shift, undefined)
     );
   }

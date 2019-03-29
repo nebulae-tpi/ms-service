@@ -62,11 +62,12 @@ class ShiftCQRS {
     //ShiftCQRS.log(`ShiftCQRS.queryShifts RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ShiftCQRS", "queryShifts", PERMISSION_DENIED, READ_ROLES).pipe(
       mapTo(args),
-      mergeMap(({ shiftStatesFilter = ["AVAILABLE","NOT_AVAILABLE","BUSY"], businessId, page, pageCount, projections }) => ShiftDA.findByFilters$(
+      mergeMap(({ shiftStatesFilter = ["AVAILABLE", "NOT_AVAILABLE", "BUSY"], businessId, page, pageCount, monthsToAdd, projections }) => ShiftDA.findByFilters$(
         businessId ? businessId : authToken.businessId,
         shiftStatesFilter,
         page,
         pageCount,
+        monthsToAdd,
         projections
       )),
       map(shift => this.formatShiftToGraphqlIOEShift(shift)),

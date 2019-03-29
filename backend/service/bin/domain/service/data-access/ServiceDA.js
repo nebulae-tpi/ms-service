@@ -64,7 +64,8 @@ class ServiceDA {
       query["client.id"] = clientId;
     }
 
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1)
     .pipe(

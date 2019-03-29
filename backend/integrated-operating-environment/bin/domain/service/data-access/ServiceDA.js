@@ -37,25 +37,21 @@ class ServiceDA {
   /**
    * Finds services by filters
    */
-  static findByFilters$(businessId, states, channels, operatorId, page, count, projection = undefined) {
+  static findByFilters$(businessId, states, channels, operatorId, page, count, monthsToAdd = 0, projection = undefined) {
     const query = { "businessId": businessId, "closed": false };
     if (states && states.length > 0) {
       query.state = { "$in": states };
     }
     if (channels && channels.length > 0) {
       query["request.sourceChannel"] = { "$in": channels };
-    }else{
+    } else {
       query["request.sourceChannel"] = { "$in": ['UNDEFINED'] };
     }
     if (operatorId) {
       query["request.ownerOperatorId"] = operatorId;
     }
-    //console.log({ businessId, states, channels, operatorId, page, count, projection });
-    // console.log('MONGO FILTERS ==>', JSON.stringify(query, null, 1));
 
-    const explorePastMonth = false; // TODO: solucionar// Date.today().getDate() <= 1;
-    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
-      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+    return of(mongoDB.getHistoricalDb(undefined, monthsToAdd)).pipe(
       map(db => db.collection(CollectionName)),
       mergeMap(collection =>
         defer(() =>
@@ -63,8 +59,7 @@ class ServiceDA {
             collection.find(query).sort({ timestamp: -1 }).skip(page * count).limit(count)
           )
         )
-      ),
-      take(count)
+      )
     );
   }
 

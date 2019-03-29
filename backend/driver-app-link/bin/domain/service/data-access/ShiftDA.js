@@ -24,15 +24,16 @@ class ShiftDA {
 
 
   static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined) {
-    const explorePastMonth = false; //Date.today().getDate() <= 1; TODO:  FIX!!!!
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
 
     const query = {
       businessId,
       state: "AVAILABLE",
       online: true,
-      
+
     };
-    if(requestedFeatures && requestedFeatures.length > 0){
+    if (requestedFeatures && requestedFeatures.length > 0) {
       query['vehicle.features'] = { $all: requestedFeatures };
     }
     for (let i = 0, len = ignoredShiftsIds.length; i < len; i++) {
@@ -61,30 +62,15 @@ class ShiftDA {
       map(db => db.collection('Shift')),
       mergeMap(collection =>
         defer(() =>
-    
           collection.aggregate(
             aggregateQuery
           ).toArray()
-          //)
         )
       ),
+      toArray(),
+      map(([r1, r2]) => explorePastMonth ? r1.concat(r2) : r1)
     );
   }
-
-
-  // /**
-  //  * Finds all open shift// DELETE, JUST FOR TESTING
-  //  */
-  // static findNearOpenShifts$(location,projection = undefined) {
-  //   const explorePastMonth = Date.today().getDate() <= 2;
-  //   const query = { "state": "AVAILABLE" };
-  //   return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
-  //     map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
-  //     map(db => db.collection('Shift')),
-  //     mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
-  //   );
-  // }
-
 
 }
 /**

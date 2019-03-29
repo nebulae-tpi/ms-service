@@ -18,8 +18,8 @@ export const IOECancelService = gql`
 `;
 
 export const IOEServices = gql`
-query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [String], $viewAllOperators: Boolean, $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
-  IOEServices(serviceStatesFilter: $serviceStatesFilter, serviceChannelsFilter : $serviceChannelsFilter, viewAllOperators: $viewAllOperators, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
+query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [String], $viewAllOperators: Boolean, $businessId: String, $page: Int, $pageCount: Int, $monthsToAdd: Int ,$projections: [String]){
+  IOEServices(serviceStatesFilter: $serviceStatesFilter, serviceChannelsFilter : $serviceChannelsFilter, viewAllOperators: $viewAllOperators, businessId: $businessId, page: $page, pageCount: $pageCount, monthsToAdd: $monthsToAdd, projections: $projections){
     id,
     closed,
       businessId,
@@ -85,8 +85,8 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
 `;
 
 export const IOEShifts = gql`
-query IOEShifts($shiftStatesFilter: [String], $businessId: String, $page: Int, $pageCount: Int, $projections: [String]){
-  IOEShifts(shiftStatesFilter: $shiftStatesFilter, businessId: $businessId, page: $page, pageCount: $pageCount, projections: $projections){
+query IOEShifts($shiftStatesFilter: [String], $businessId: String, $page: Int, $pageCount: Int, $monthsToAdd: Int $projections: [String]){
+  IOEShifts(shiftStatesFilter: $shiftStatesFilter, businessId: $businessId, page: $page, pageCount: $pageCount, monthsToAdd: $monthsToAdd, projections: $projections){
     id,
     businessId,
     timestamp,            

@@ -75,13 +75,14 @@ class ServiceCQRS {
     // ServiceCQRS.log(`ServiceCQRS.queryServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ServiceCQRS", "queryServices", PERMISSION_DENIED, READ_ROLES).pipe(
       mapTo(args),
-      mergeMap(({ serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, projections }) => ServiceDA.findByFilters$(
+      mergeMap(({ serviceStatesFilter, serviceChannelsFilter, viewAllOperators, businessId, page, pageCount, monthsToAdd,projections }) => ServiceDA.findByFilters$(
         businessId ? businessId : authToken.businessId,
         serviceStatesFilter,
         serviceChannelsFilter,
         viewAllOperators ? undefined : authToken.userId,
         page,
         pageCount,
+        monthsToAdd,
         projections
       )),
       map(service => this.formatServiceToGraphQLSchema(service)),

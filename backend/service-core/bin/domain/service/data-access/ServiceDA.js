@@ -77,12 +77,12 @@ class ServiceDA {
   //   );
   // }
 
-    /**
-   * appends location
-   * @returns {Observable}
-   */
+  /**
+ * appends location
+ * @returns {Observable}
+ */
   static appendLocation$(_id, location) {
-    const query = { "_id": _id, "state": { "$in": ["ASSIGNED", "ARRIVED", "ON_BOARD"] }};
+    const query = { "_id": _id, "state": { "$in": ["ASSIGNED", "ARRIVED", "ON_BOARD"] } };
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         query,
@@ -288,12 +288,14 @@ class ServiceDA {
    * Finds an open service by driver
    */
   static findOpenAssignedServiceByDriver$(driverId, projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$in": ["ASSIGNED", "ARRIVED", "ON_BOARD"] }, "driver.id": driverId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
+      filter(s => s),
       first(service => service, undefined)
     );
   }
@@ -302,7 +304,8 @@ class ServiceDA {
    * Finds the open services requested by the client
    */
   static findCurrentServicesRequestedByClient$(clientId, projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$in": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "client.id": clientId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
@@ -326,9 +329,9 @@ class ServiceDA {
     );
   }
 
-    /**
-   * Finds an historical service by client
-   */
+  /**
+ * Finds an historical service by client
+ */
   static findHistoricalServiceByClient$(clientId, year, month, page, count, projection = undefined) {
     const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
     const query = { "state": { "$nin": ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"] }, "client.id": clientId };

@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Service";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, first } = require("rxjs/operators");
+const { map, mergeMap, first, filter } = require("rxjs/operators");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
 
 class ServiceDA {
@@ -28,12 +28,14 @@ class ServiceDA {
    * Finds an open Service by shift id
    */
   static findOpeneServiceByShift$(shiftId) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$ne": "CLOSED" }, "shiftId": shiftId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query))),
+      filter(s => s),
       first(service => service, undefined)
     );
   }

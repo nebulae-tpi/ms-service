@@ -27,12 +27,14 @@ class ShiftDA {
    * Finds an open shift by driver
    */
   static findOpenShiftByDriver$(driverId, projection = undefined) {
-    const explorePastMonth = Date.today().getDate() <= 2;
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
     const query = { "state": { "$ne": "CLOSED" }, "driver.id": driverId };
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection(CollectionName)),
       mergeMap(collection => defer(() => collection.findOne(query, {projection}))),
+      filter(s => s),
       first(shift => shift, undefined)
     );
   }
