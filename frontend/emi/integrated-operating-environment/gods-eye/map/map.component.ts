@@ -135,7 +135,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.initMap();
     this.listenLayoutChanges();
     this.listenToolbarCommands();
-    //await this.resetData();
+    await this.resetData();
     this.subscribeIOEServicesListener();
     this.subscribeIOEShiftsListener();
     this.registerTimer();

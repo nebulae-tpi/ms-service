@@ -141,6 +141,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     await this.queryUserSpecs();
     this.listenLayoutChanges();
     this.listenToolbarCommands();
+    await this.resetData();
     this.subscribeIOEServicesListener();
     this.registerTimer();
   }
