@@ -135,7 +135,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.initMap();
     this.listenLayoutChanges();
     this.listenToolbarCommands();
-    await this.resetData();
+    //await this.resetData();
     this.subscribeIOEServicesListener();
     this.subscribeIOEShiftsListener();
     this.registerTimer();
@@ -191,12 +191,13 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   listenToolbarCommands() {
     this.godsEyeService.toolbarCommands$.pipe(
-      debounceTime(10),
+      debounceTime(100),
       takeUntil(this.ngUnsubscribe)
     ).subscribe(
       async ({ code, args }) => {
         switch (code) {
           case GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:
+            console.log('GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:');
             this.resetData();
             break;
           case GodsEyeService.TOOLBAR_COMMAND_MAP_APPLY_CHANNEL_FILTER:
@@ -209,7 +210,7 @@ export class MapComponent implements OnInit, OnDestroy {
             }
             break;
           case GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
-            // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
+            console.log('GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED');
             this.selectedBusinessId = args[0];
             this.resetDataAndSubscriptions();
             break;
@@ -300,8 +301,14 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   async resetData() {
     Object.keys(this.pins).forEach(k => this.removePin(this.pins[k]));
-
-    const totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
+    const today = new Date();
+    const explorePastMonth = today.getDate() <= 1;
+    console.log(`Current Date: date=${today.getDate()}, hours=${today.getHours()}, explorePastMonth=${explorePastMonth}`);
+    let totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer(0) : [];
+    if (explorePastMonth) {
+      const pastMotnTotalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer(-1) : [];
+      totalRawData = totalRawData.concat(pastMotnTotalRawData);
+    }
     totalRawData.forEach(raw => {
       this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
       this.pins[raw.id].marker.setMap(this.map)
@@ -351,35 +358,36 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /**
    * Queries bit by bit all the services from the server
+   * @param monthsToAdd number of months to add to the query db. eg: 0=current month, 1=next month, -1=past month
    */
-  async queryAllDataFromServer() {
+  async queryAllDataFromServer(monthsToAdd = 0) {
     const data = [];
     let moreDataAvailable = true;
     let page = 0;
     while (moreDataAvailable) {
-      console.log(`map.queryServices: nextPage=${page}`);
-      const gqlResult = await this.godsEyeService.queryServices$([], this.channelFilter, this.seeAllOperation, this.selectedBusinessId, page++, 20, 0,undefined).toPromise();
+      console.log(`map.queryServices: monthsToAdd=${monthsToAdd}; nextPage=${page}`);
+      const gqlResult = await this.godsEyeService.queryServices$([], this.channelFilter, this.seeAllOperation, this.selectedBusinessId, page++, 20, monthsToAdd, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices.map(v => ({ ...v, type: 'SERVICE' })));
       } else {
         moreDataAvailable = false;
       }
     }
-    console.log(`map.queryServices: totalCount=${data.length}`);
+    console.log(`map.queryServices:  monthsToAdd=${monthsToAdd}; totalCount=${data.length}`);
 
 
     moreDataAvailable = true;
     page = 0;
     while (moreDataAvailable) {
-      console.log(`map.queryShifts: nextPage=${page}`);
-      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 20, 0,undefined).toPromise();
+      console.log(`map.queryShifts: monthsToAdd=${monthsToAdd}; nextPage=${page}`);
+      const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 20, monthsToAdd, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEShifts && gqlResult.data.IOEShifts.length > 0) {
         data.push(...gqlResult.data.IOEShifts.map(v => ({ ...v, type: 'SHIFT' })));
       } else {
         moreDataAvailable = false;
       }
     }
-    console.log(`map.queryAllDataFromServer: totalCount=${data.length}`);
+    console.log(`map.queryAllDataFromServer:  monthsToAdd=${monthsToAdd}; totalCount=${data.length}`);
 
 
     return data;
@@ -395,10 +403,9 @@ export class MapComponent implements OnInit, OnDestroy {
     let fillColor = '#FFB6C1';
 
 
-
-
+    console.log(service.request.sourceChannel,"{{{{}}}}");
     switch (service.state) {
-      case 'REQUESTED': fillColor = '#f5ff8e'; break;
+      case 'REQUESTED': fillColor = service.request.sourceChannel === 'OPERATOR'  ? '#ff0000' : '#ff00ff'; break;
       case 'ASSIGNED': fillColor = '#00ff00'; break;
       case 'ARRIVED': fillColor = '#0000FF'; location = service.location; break;
       case 'ON_BOARD': fillColor = '#000088'; location = service.location; break;
@@ -446,10 +453,10 @@ export class MapComponent implements OnInit, OnDestroy {
     } else {
       marker = service.state === 'REQUESTED'
         ? new google.maps.Circle({
-          strokeColor: '#FF0000',
+          strokeColor: fillColor,
           strokeOpacity: 0.8,
           strokeWeight: 2,
-          fillColor: '#FF0000',
+          fillColor,
           fillOpacity,
           center: position,
           radius: (service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000,

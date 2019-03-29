@@ -142,7 +142,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
     this.listenLayoutChanges();
     this.listenToolbarCommands();
     this.subscribeIOEServicesListener();
-    await this.resetData();
     this.registerTimer();
   }
 
@@ -235,7 +234,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
           case OperatorWorkstationService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
             // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
             this.selectedBusinessId = args[0];
-            this.resetData();
             this.resetDataAndSubscriptions();
             break;
         }
@@ -252,6 +250,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Listen to real-time service changes
    */
   subscribeIOEServicesListener() {
+    console.log(`subscribeIOEServicesListener: ${this.selectedBusinessId}, ${this.seeAllOperation} ? null : ${this.userId}, ${this.statesFilter}, ${this.channelsFilter} `);
     of(this.selectedBusinessId)
       .pipe(
         filter(selectedBusinessId => selectedBusinessId),
@@ -295,9 +294,18 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Loads the entire data from DB
    */
   async resetData() {
-    this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer() : [];
-    this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
 
+    const today = new Date();
+    const explorePastMonth =  today.getDate() <= 1;
+    console.log(`Current Date: date=${today.getDate()}, hours=${today.getHours()}, explorePastMonth=${explorePastMonth}`);
+
+    this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer(0) : [];
+    if (explorePastMonth) {
+      const pastMonthTotalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer(-1) : [];
+      this.totalRawData = this.totalRawData.concat(pastMonthTotalRawData);
+    }
+
+    this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
     await this.recalculatePartialData();
   }
 
@@ -337,13 +345,13 @@ export class DatatableComponent implements OnInit, OnDestroy {
   /**
    * Queries bit by bit all the services from the server
    */
-  async queryAllDataFromServer() {
+  async queryAllDataFromServer(monthsToAdd = 0) {
     const data = [];
     let moreDataAvailable = true;
     let page = 0;
     while (moreDataAvailable) {
       console.log(`datatable.queryAllDataFromServer: nextPage=${page}`);
-      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId, page++, 10, 0, undefined).toPromise();
+      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId, page++, 10, monthsToAdd, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices);
       }
@@ -603,9 +611,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
     this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
   }
 
-  resetDataAndSubscriptions() {
+  async resetDataAndSubscriptions() {
+    console.log('=====resetDataAndSubscriptions====');
     this.ngUnsubscribeIOEServiceListener.next();
-    this.resetData();
+    await this.resetData();
+    console.log(this.selectedBusinessId);
     if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
   }
   //#endregion
