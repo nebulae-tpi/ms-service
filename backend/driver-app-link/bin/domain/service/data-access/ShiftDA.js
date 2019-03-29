@@ -5,7 +5,7 @@ let mongoDB = undefined;
 const CollectionName = "Shift";
 const { CustomError } = require("../../../tools/customError");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
-const { map, mergeMap, tap, filter } = require("rxjs/operators");
+const { map, mergeMap, tap, filter, toArray } = require("rxjs/operators");
 
 class ShiftDA {
 
