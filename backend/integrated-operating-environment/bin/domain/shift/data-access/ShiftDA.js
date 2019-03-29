@@ -41,7 +41,7 @@ class ShiftDA {
       query.state = { "$in": states };
     }
 
-    return of(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)).pipe(
+    return of(mongoDB.getHistoricalDb(undefined, monthsToAdd)).pipe(
       map(db => db.collection(CollectionName)),
       mergeMap(collection =>
         defer(() =>
