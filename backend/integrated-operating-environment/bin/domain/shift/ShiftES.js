@@ -71,6 +71,8 @@ class ShiftES {
         return of(shiftEvent).pipe(
             delay(1000),
             mergeMap(evt => ShiftDA.findById$(evt.aid)),
+            tap(s => { if(!s){console.log(`shiftEvent of undefined shift: ${JSON.stringify(shiftEvent)}`)} }),
+            filter(s => s),
             map(shift => this.formatShiftToGraphqlIOEShift(shift)),
             mergeMap(ioeShift => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEShift`, ioeShift))
         );

@@ -165,6 +165,7 @@ class ServiceES {
         return of(serviceEvent).pipe(
             delay(1000),
             mergeMap(evt => ServiceDA.findById$(evt.aid)),
+            filter(s => s),
             map(service => this.formatServiceToGraphqlIOEService(service)),
             mergeMap(ioeService => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEService`, ioeService))
         );
