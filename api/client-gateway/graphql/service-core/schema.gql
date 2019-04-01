@@ -133,7 +133,7 @@ type Service {
    "Service last modification timestamp."
    lastModificationTimestamp: BigInt
    "Service pickup ETA"
-   pickupETA: BigInt
+   pickUpETA: BigInt
 }
 
 # "Client info."
