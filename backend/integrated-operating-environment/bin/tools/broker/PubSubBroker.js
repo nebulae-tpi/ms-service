@@ -216,7 +216,7 @@ class PubSubBroker {
     */
     publish$(topic, type, data, { correlationId } = {}) {    
         if(!data || !topic){
-            console.log(`PubSubBroker.publish: databuffer is null: t:${topic}, d=${data}`);
+            console.log(`PubSubBroker.publish: databuffer is null: t:${topic}, d=${JSON.stringify(data)}`);
             return of(`PubSubBroker.publish: databuffer is null: t:${topic}, d=${data}`);
         }    
         const dataBuffer = Buffer.from(JSON.stringify(data));
