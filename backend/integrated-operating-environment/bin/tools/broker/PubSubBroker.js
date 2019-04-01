@@ -214,12 +214,12 @@ class PubSubBroker {
     * @param {Object} data 
     * @param {Object} ops {correlationId} 
     */
-    publish$(topic, type, data, { correlationId } = {}) {        
+    publish$(topic, type, data, { correlationId } = {}) {    
+        if(!data || !topic){
+            console.log(`PubSubBroker.publish: databuffer is null: t:${topic}, d=${data}`);
+            return of(`PubSubBroker.publish: databuffer is null: t:${topic}, d=${data}`);
+        }    
         const dataBuffer = Buffer.from(JSON.stringify(data));
-        if(!dataBuffer){
-            console.log('PubSubBroker.publish: databuffer is null');
-            return of('PubSubBroker.publish: databuffer is null');
-        }
         return from(
             topic.publisher().publish(
                 dataBuffer,
