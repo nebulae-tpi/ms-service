@@ -138,7 +138,7 @@ class ShiftDA {
    * @param {*} shift 
    */
   static insertShift$(shift) {
-    return defer(() => mongoDB.getHistoricalDb().collection(CollectionName).insertOne(shift));
+    return defer(() => mongoDB.getHistoricalDbByYYMM(shift._id.split('-').pop()).collection(CollectionName).insertOne(shift));
   }
 
   /**
