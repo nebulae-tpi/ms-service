@@ -192,6 +192,41 @@ class ServiceClientCQRS {
     );
   }
 
+  /**
+   * Send messages to the driver
+   * @param {*} param0 
+   * @param {*} authToken 
+   */
+  sendMessageToDriver$({ root, args, jwt }, authToken) {
+    ServiceClientCQRS.log(`ServiceCQRS.sendMessageToDriver RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceClientCQRS", "SendMessageToDriver", PERMISSION_DENIED, ["CLIENT"]).pipe(
+      mapTo(args),
+      mergeMap(message => 
+        ServiceDA.findById$(message.serviceId, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, message })))
+      ),
+      tap(({ service, message }) => { if (!service) throw ERROR_23223; }),// service does not exists
+      tap(({ service, message }) => { if (service.closed) throw ERROR_23224; }),// service is already closed
+      mergeMap(({ service, message }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+        'Service',
+        message.serviceId,
+        'ServiceMessageSent',
+        {
+          from: authToken.preferred_username,
+          to: message.driverUsername,
+          message: {
+            predefinedMessageId: message.predefinedMessageId,
+            textMessage: message.textMessage
+          },
+          type: 'DRIVER'
+        },
+        authToken))), //Build and send event (event-sourcing)
+      mapTo(this.buildCommandAck()), // async command acknowledge
+      //tap(x => ServiceCQRS.log(`ServiceCQRS.reportServiceAsArrived RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err, true))
+    );
+  }
+
   //#endregion
 
   //#region REQUEST VALIDATIONS

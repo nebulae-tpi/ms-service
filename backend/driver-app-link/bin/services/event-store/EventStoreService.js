@@ -145,6 +145,7 @@ class EventStoreService {
       ServiceCancelledByDriver: { fn: ServiceES.handleServiceCancelledByDriver$, obj: ServiceES },
       ServiceCancelledByClient: { fn: ServiceES.handleServiceCancelledByClient$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperator$, obj: ServiceES },
+      ServiceMessageSent: { fn: ServiceES.handleServiceMessageSent$, obj: ServiceES },
     };
   }
 
@@ -176,6 +177,7 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
       { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
+      { aggregateType: "Service", eventType: "ServiceMessageSent" }, 
     ]
   }
 }

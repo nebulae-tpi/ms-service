@@ -106,6 +106,19 @@ class DriverAppLinkBroker {
         return this.publish$(topic, eventType, event);
     }
 
+    /**
+     * Sends a message to a driver on the service topic
+     * @param {*} businessId 
+     * @param {*} driverUserName 
+     * @param {*} eventType 
+     * @param {*} event 
+     * @returns {Observable}
+     */
+    sendServiceMessageToDrivers$(businessId, driverUserName, eventType, event) {
+        const topic = `${businessId}/driver-app/msg/${driverUserName}`;
+        return this.publish$(topic, eventType, event);
+    }
+
 
     /**
      * Sends an event to a driver on the errors topic

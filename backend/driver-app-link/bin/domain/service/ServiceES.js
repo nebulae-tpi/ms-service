@@ -346,6 +346,24 @@ class ServiceES {
         );
     }
 
+    /**
+     * Handles message driver sent
+     * @param {Event} evt 
+     * @returns {Observable}
+     */
+    handleServiceMessageSent$({ aid, data }) {
+        console.log(`ServiceES: handleServiceMessageSent: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        return of({}).pipe(
+            filter(() => data.type === 'DRIVER'),
+            mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 })),
+            filter(service => service.driver && service.driver.username),
+            mergeMap(service => 
+                driverAppLinkBroker.sendServiceMessageToDrivers$(
+                    service.businessId, service.driver.username, 'ServiceMessageSent', data
+                )
+            ),
+        );
+    }
 
     //#region Object builders
 

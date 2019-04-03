@@ -98,7 +98,7 @@ type Location {
 }
 
 "Service info"
-type Service{
+type Service {
    "Service Identifier"
    _id: String
    "Service created timestamp."
@@ -131,7 +131,12 @@ type Service{
    state: String
 }
 
-type Query{
+input ChatMessageInput {
+   predefinedMessageId: Int
+   textMessage: String
+}
+
+type Query {
    "Get driver's assigned vehicles"
    DriverAssignedVehicles: [Vehicle] @requireAuth
 
@@ -153,7 +158,7 @@ type Query{
     ): [Service] @requireAuth
 }
 
-type Mutation{
+type Mutation {
    "Starts a new shift"
    startShift(
       "Vehicle's plate to use"
@@ -179,5 +184,13 @@ type Mutation{
       serviceId: String
       "Current shift location"
       location: PointInput
+   ): CommandAck @requireAuth
+
+   "Send a message to the client"
+   sendMessageToClient(
+      "Service ID"
+      serviceId: String!
+      "Message"
+      message: ChatMessageInput!
    ): CommandAck @requireAuth
 }

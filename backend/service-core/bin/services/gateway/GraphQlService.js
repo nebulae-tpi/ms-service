@@ -194,6 +194,10 @@ class GraphQlService {
         aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.ChangeServiceState"
       },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.SendMessageToDriver"
+      },      
       //DRIVER
       {
         aggregateType: "Driver",
@@ -244,7 +248,12 @@ class GraphQlService {
       {
         aggregateType: "Service",
         messageType: "drivergateway.graphql.query.HistoricalDriverServices"
-      },   
+      },
+      {
+        aggregateType: "Service",
+        messageType: "drivergateway.graphql.mutation.sendMessageToClient"
+      },  
+      
     ];
   }
 
@@ -305,6 +314,10 @@ class GraphQlService {
       "clientgateway.graphql.mutation.ChangeServiceState": {
         fn: ServiceClientCQRS.changeServiceState$,
         obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.mutation.SendMessageToDriver": {
+        fn: ServiceClientCQRS.sendMessageToDriver$,
+        obj: ServiceClientCQRS
       },      
 
       // SERVICES
@@ -343,7 +356,7 @@ class GraphQlService {
       "drivergateway.graphql.mutation.acceptServiceOffer": {
         fn: ServiceCQRS.acceptServiceOffer$,
         obj: ServiceCQRS
-      },            
+      },                  
       "drivergateway.graphql.query.AssignedService": {
         fn: ServiceCQRS.queryAssignedService$,
         obj: ServiceCQRS
@@ -351,7 +364,11 @@ class GraphQlService {
       "drivergateway.graphql.query.HistoricalDriverServices": {
         fn: ServiceCQRS.queryHistoricalDriverServices$,
         obj: ServiceCQRS
-      },            
+      },
+      "drivergateway.graphql.mutation.sendMessageToClient": {
+        fn: ServiceCQRS.sendMessageToClient$,
+        obj: ServiceCQRS
+      },          
     };
   }
 }

@@ -4,6 +4,11 @@ type CommandAck {
    accepted: Boolean
 }
 
+type ChatMessage {
+   predefinedMessageId: Int
+   textMessage: String
+}
+
 "Vehicle info"
 type Vehicle {
    "License plate"
@@ -60,6 +65,11 @@ input PointInput {
    lat: Float
    "Longitude"
    lng: Float
+}
+
+input ChatMessageInput {
+   predefinedMessageId: Int
+   textMessage: String
 }
 
 # "Vehicles Filter Input"
@@ -134,6 +144,15 @@ type Service {
    lastModificationTimestamp: BigInt
    "Service pickup ETA"
    pickUpETA: BigInt
+}
+
+type ServiceMessage {
+   "Username of the person that sent the message"
+   from: String!
+   "Username of the person that will receive the message"
+   to: String!
+   "Message data"
+   message: ChatMessage!
 }
 
 # "Client info."
@@ -214,11 +233,17 @@ type Mutation {
       "New service state"
       newState: String!
    ): CommandAck @requireAuth
+
+   "Send a message to the driver"
+   SendMessageToDriver(
+      serviceId: String!
+      message: ChatMessageInput!
+   ): CommandAck @requireAuth
 }
 
 type Subscription {
   "This events is triggered when a Service is updated"
   ClientServiceUpdatedSubscription: Service
+  "This events is triggered when a Service message is sent"
+  ServiceMessageSubscription: ServiceMessage
 }
-
-

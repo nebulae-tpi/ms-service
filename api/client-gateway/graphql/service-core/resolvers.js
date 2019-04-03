@@ -83,6 +83,14 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
+    SendMessageToDriver: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'SendMessageToDriver', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.SendMessageToDriver", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
   },
 
   //// SUBSCRIPTIONS ///////
@@ -110,9 +118,21 @@ module.exports = {
               return false;
             }
         )
-    }
+    },
+    ServiceMessageSubscription: {
+      subscribe: withFilter(
+          (payload, variables, context, info) => {
+              return pubsub.asyncIterator("ServiceMessageSubscription");
+          },
+          (payload, variables, context, info) => {
+            const username = context.authToken.preferred_username;
+            return payload.ClientServiceUpdatedSubscription.to === username;
+          }
+      )
+  }
   }
 };
+
 
 //// SUBSCRIPTIONS SOURCES ////
 

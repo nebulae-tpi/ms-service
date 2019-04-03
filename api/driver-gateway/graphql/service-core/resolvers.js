@@ -104,5 +104,14 @@ module.exports = {
       ).toPromise();
     },
 
+    sendMessageToClient: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'sendMessageToClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "drivergateway.graphql.mutation.sendMessageToClient", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
+
   },
 }
