@@ -1,8 +1,8 @@
 'use strict'
 
 
-const { of, iif, forkJoin, Observable, Subject } = require("rxjs");
-const { mapTo, mergeMap, tap, mergeMapTo, map, toArray,  groupBy, debounceTime, filter, catchError } = require('rxjs/operators');
+const { of, iif, forkJoin, Observable, Subject, timer } = require("rxjs");
+const { mapTo, mergeMap, tap, mergeMapTo, map, toArray, groupBy, debounceTime, filter, catchError } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -24,44 +24,44 @@ class ServiceES {
         this.startServiceClientEventEmitter();
     }
 
-    startServiceClientEventEmitter(){
+    startServiceClientEventEmitter() {
         this.serviceClientUpdatedEventEmitter$
-        .pipe(
-            filter(serviceId => {
-              return serviceId != null;
-            }),
-            groupBy(serviceId => serviceId),
-            mergeMap(group$ => group$.pipe(debounceTime(600))),
-            mergeMap(serviceId => this.sendServiceUpdatedEvent$(serviceId)),
-        ).subscribe(
-          (result) => {},
-          (err) => { console.log(err) },
-          () => { }
-        );
+            .pipe(
+                filter(serviceId => {
+                    return serviceId != null;
+                }),
+                groupBy(serviceId => serviceId),
+                mergeMap(group$ => group$.pipe(debounceTime(600))),
+                mergeMap(serviceId => this.sendServiceUpdatedEvent$(serviceId)),
+            ).subscribe(
+                (result) => { },
+                (err) => { console.log(err) },
+                () => { }
+            );
     }
 
     /**
      * Sends an event with the service data is updated.
      * @param {*} serviceId 
      */
-    sendServiceUpdatedEvent$(serviceId){
+    sendServiceUpdatedEvent$(serviceId) {
         return of(serviceId)
-        .pipe(
-            mergeMap(serviceId => 
-                // Error isolation: If an error ocurrs, it is not going to affect the stream
-                ServiceDA.findById$(serviceId)
-                .pipe(
-                filter(service => service),
-                map(service => this.formatServiceToGraphQLSchema(service)),          
-                mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ClientServiceUpdatedSubscription', service)),
-                catchError(error => {
-                    console.log('An error ocurred while a service updated event was being processed: ', error);
-                    return of('Error: ', error)
-                }),
+            .pipe(
+                mergeMap(serviceId =>
+                    // Error isolation: If an error ocurrs, it is not going to affect the stream
+                    ServiceDA.findById$(serviceId)
+                        .pipe(
+                            filter(service => service),
+                            map(service => this.formatServiceToGraphQLSchema(service)),
+                            mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ClientServiceUpdatedSubscription', service)),
+                            catchError(error => {
+                                console.log('An error ocurred while a service updated event was being processed: ', error);
+                                return of('Error: ', error)
+                            }),
+                        )
                 )
-            )
-        );
-    }  
+            );
+    }
 
     /**
      * Queue the service events and group them by its id to reduce the 
@@ -77,7 +77,7 @@ class ServiceES {
     formatServiceToGraphQLSchema(service) {
         const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
 
-        const location = (!service || !service.location) ? undefined: { lng: service.location.coordinates[0], lat: service.location.coordinates[1] };
+        const location = (!service || !service.location) ? undefined : { lng: service.location.coordinates[0], lat: service.location.coordinates[1] };
 
         return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, location: location };
     }
@@ -92,9 +92,9 @@ class ServiceES {
     handleServiceRequested$({ data }) {
         //console.log(`*** ServiceES: handleServiceRequested: `, data); //DEBUG: DELETE LINE
         return ServiceDA.insertService$(data)
-        .pipe(
-            tap(() => this.queueAndGroupServiceEvent(data))
-        );
+            .pipe(
+                tap(() => this.queueAndGroupServiceEvent(data))
+            );
     }
 
     /**
@@ -105,21 +105,39 @@ class ServiceES {
     handleServiceAssigned$({ aid, data, user }) {
         //console.log(`*** ServiceES: handleServiceAssigned: `, data); //DEBUG: DELETE LINE
         const { shiftId, driver, vehicle, skipPersist } = data;
-        return iif(() => skipPersist, of({}), ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)).pipe(
-            tap(() => this.queueAndGroupServiceEvent({_id: aid})),
-            mergeMap(persistResult =>
-                eventSourcing.eventStore.emitEvent$(
+        return iif(() => skipPersist,
+            //IF CQRS DID PERSIST THE DATA, THEN THERE IS A POSSIBILITY THAT THE DRIVER HAD ACCEPTED THE SERVICE AT THE SAME TIME THE SERVICE IS CANCELLED.
+            //  SO WE MUST CHECK IF THE SERVICE IS CANCELLED AND IF SO WE MUST FREE THE DRIVER (BUSY -> AVAILABLE)
+            timer(1000).pipe(
+                mergeMap(t => ServiceDA.findById$(aid, { state: 1 })),
+                filter(service => !["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"].includes(service.state)),
+                mergeMap(service => eventSourcing.eventStore.emitEvent$(
                     ServiceES.buildEventSourcingEvent(
                         'Shift',
                         shiftId,
                         'ShiftStateChanged',
-                        { _id: shiftId, state: 'BUSY' },
+                        { _id: shiftId, state: 'AVAILABLE' },
                         user
                     )
-                )
+                ))
             ),
-            mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: state: BUSY`)
-        );
+
+            //IF CQRS DID NOT PERSIST THE DATA, THEN WE ASSIGN THE DRIVER WITHIN THE SERVICE AND THEN SEND THE BUSY STATE TO THE SHIFT
+            ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)).pipe(
+                tap(() => this.queueAndGroupServiceEvent({ _id: aid })),
+                mergeMap(persistResult =>
+                    eventSourcing.eventStore.emitEvent$(
+                        ServiceES.buildEventSourcingEvent(
+                            'Shift',
+                            shiftId,
+                            'ShiftStateChanged',
+                            { _id: shiftId, state: 'BUSY' },
+                            user
+                        )
+                    )
+                ),
+                mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: state: BUSY`)
+            );
     }
 
     /**
@@ -131,9 +149,9 @@ class ServiceES {
         //console.log(`*** ServiceES: handleServicePickUpETAReported: `, data); //DEBUG: DELETE LINE
         const { eta } = data;
         return ServiceDA.setPickUpETA$(aid, eta)
-        .pipe(
-            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
-        );
+            .pipe(
+                tap(() => this.queueAndGroupServiceEvent({ _id: aid }))
+            );
     }
 
     /**
@@ -145,14 +163,14 @@ class ServiceES {
         // console.log(`*** ServiceES: handleServiceLocationReported: `, aid, data); //DEBUG: DELETE LINE
         const { location } = data;
         return ServiceDA.appendLocation$(aid, location)
-        .pipe(
-            tap(result => {
-                // console.log('result.nModified => ', result.nModified);
-                //if(result.nModified > 0) {
-                    this.queueAndGroupServiceEvent({_id: aid});
-                //}                
-            })
-        );
+            .pipe(
+                tap(result => {
+                    // console.log('result.nModified => ', result.nModified);
+                    //if(result.nModified > 0) {
+                    this.queueAndGroupServiceEvent({ _id: aid });
+                    //}                
+                })
+            );
     }
 
     /**
@@ -164,9 +182,9 @@ class ServiceES {
         //console.log(`*** ServiceES: handleServiceArrived: `, aid, data); //DEBUG: DELETE LINE
         const { location, timestamp } = data;
         return ServiceDA.appendstate$(aid, 'ARRIVED', location, timestamp)
-        .pipe(
-            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
-        );
+            .pipe(
+                tap(() => this.queueAndGroupServiceEvent({ _id: aid }))
+            );
     }
 
     /**
@@ -178,9 +196,9 @@ class ServiceES {
         //console.log(`*** ServiceES: handleServicePassengerBoarded: `, data); //DEBUG: DELETE LINE
         const { location, timestamp } = data;
         return ServiceDA.appendstate$(aid, 'ON_BOARD', location, timestamp)
-        .pipe(
-            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
-        );
+            .pipe(
+                tap(() => this.queueAndGroupServiceEvent({ _id: aid }))
+            );
     }
 
     /**
@@ -192,7 +210,7 @@ class ServiceES {
         //console.log(`*** ServiceES: handleServiceCompleted: `, data); //DEBUG: DELETE LINE
         const { location, timestamp } = data;
         return ServiceDA.appendstateAndReturnService$(aid, 'DONE', location, timestamp, { shiftId: 1 }).pipe(
-            tap(({ shiftId }) => this.queueAndGroupServiceEvent({_id: aid})),
+            tap(({ shiftId }) => this.queueAndGroupServiceEvent({ _id: aid })),
             mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
             mergeMap(shift =>
                 eventSourcing.eventStore.emitEvent$(
@@ -217,9 +235,9 @@ class ServiceES {
     handleServiceClosed$({ aid }) {
         //console.log(`*** ServiceES: handleServiceClosed: `, aid); //DEBUG: DELETE LINE
         return ServiceDA.closeService$(aid)
-        .pipe(
-            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
-        );
+            .pipe(
+                tap(() => this.queueAndGroupServiceEvent({ _id: aid }))
+            );
     }
 
     /**
@@ -231,9 +249,9 @@ class ServiceES {
         //console.log(`*** ServiceES: handleServiceDropOffETAReported: `, data); //DEBUG: DELETE LINE
         const { eta } = data;
         return ServiceDA.setPickUpETA$(aid, eta)
-        .pipe(
-            tap(() => this.queueAndGroupServiceEvent({_id: aid}))
-        );
+            .pipe(
+                tap(() => this.queueAndGroupServiceEvent({ _id: aid }))
+            );
     }
 
 
@@ -284,7 +302,7 @@ class ServiceES {
     handleCancellation$(serviceId, cancelStateType, reason, notes, location, timestamp, user) {
         //console.log(`*** ServiceES: handleCancellation: `, serviceId, cancelStateType, timestamp); //DEBUG: DELETE LINE
         return ServiceDA.setCancelStateAndReturnService$(serviceId, cancelStateType, location, reason, notes, timestamp, { shiftId: 1 }).pipe(
-            tap(service => this.queueAndGroupServiceEvent({_id: serviceId})),
+            tap(service => this.queueAndGroupServiceEvent({ _id: serviceId })),
             filter(({ shiftId }) => shiftId),
             mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
             mergeMap(shift =>
@@ -315,7 +333,7 @@ class ServiceES {
             filter(() => data.type === 'CLIENT'),
             mergeMap(() => ServiceDA.findById$(aid, { "client.username": 1, "businessId": 1 })),
             filter(service => service.driver && service.client.username),
-            mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ServiceMessageSubscription', {...data}))
+            mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ServiceMessageSubscription', { ...data }))
         );
     }
 
