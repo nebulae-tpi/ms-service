@@ -125,7 +125,7 @@ class ServiceES {
             ),
             //IF CQRS DID PERSIST THE DATA, THEN THERE IS A POSSIBILITY THAT THE DRIVER HAD ACCEPTED THE SERVICE AT THE SAME TIME THE SERVICE IS CANCELLED.
             //  SO WE MUST CHECK IF THE SERVICE IS CANCELLED AND IF SO WE MUST FREE THE DRIVER (BUSY -> AVAILABLE)
-            delay(1000),
+            delay(5000),
             mergeMap(x => ServiceDA.findById$(aid, { state: 1 })),
             mergeMap(service => ["ASSIGNED", "ARRIVED", "ON_BOARD"].includes(service.state)
                 ? of(` - Sent ShiftStateChanged for service._id=${shiftId} to BUSY`)
