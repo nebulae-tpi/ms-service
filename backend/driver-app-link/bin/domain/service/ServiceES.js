@@ -132,7 +132,7 @@ class ServiceES {
                         await driverAppLinkBroker.sendServiceEventToDrivers$(
                             shift.businessId,
                             shift.driver.username,
-                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), pickUp: { ...service.pickUp, location: undefined }, dropOffSpecialType: service.dropOffSpecialType, expirationTime: offerTotalThreshold }
+                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), tip: service.tip, pickUp: { ...service.pickUp, location: undefined }, dropOffSpecialType: service.dropOffSpecialType, expirationTime: offerTotalThreshold }
                         ).toPromise();
 
                         await eventSourcing.eventStore.emitEvent$(
@@ -357,7 +357,7 @@ class ServiceES {
             filter(() => data.type === 'DRIVER'),
             mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 })),
             filter(service => service.driver && service.driver.username),
-            mergeMap(service => 
+            mergeMap(service =>
                 driverAppLinkBroker.sendServiceMessageToDrivers$(
                     service.businessId, service.driver.username, 'ServiceMessageSent', data
                 )
