@@ -2,7 +2,7 @@
 
 
 const { of, iif, forkJoin, Observable, Subject, timer } = require("rxjs");
-const { mapTo, mergeMap, tap, mergeMapTo, map, toArray, groupBy, debounceTime, filter, catchError } = require('rxjs/operators');
+const { mapTo, mergeMap, tap, mergeMapTo, map, toArray, groupBy, debounceTime, filter, catchError, delay } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -105,13 +105,31 @@ class ServiceES {
     handleServiceAssigned$({ aid, data, user }) {
         //console.log(`*** ServiceES: handleServiceAssigned: `, data); //DEBUG: DELETE LINE
         const { shiftId, driver, vehicle, skipPersist } = data;
-        return iif(() => skipPersist,
+        return iif(
+            () => skipPersist,
+            of({}),
+            //IF CQRS DID NOT PERSIST THE DATA, THEN WE ASSIGN THE DRIVER WITHIN THE SERVICE AND THEN SEND THE BUSY STATE TO THE SHIFT
+            ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)
+        ).pipe(
+            tap(() => this.queueAndGroupServiceEvent({ _id: aid })),
+            mergeMap(persistResult =>
+                eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Shift',
+                        shiftId,
+                        'ShiftStateChanged',
+                        { _id: shiftId, state: 'BUSY' },
+                        user
+                    )
+                )
+            ),
             //IF CQRS DID PERSIST THE DATA, THEN THERE IS A POSSIBILITY THAT THE DRIVER HAD ACCEPTED THE SERVICE AT THE SAME TIME THE SERVICE IS CANCELLED.
             //  SO WE MUST CHECK IF THE SERVICE IS CANCELLED AND IF SO WE MUST FREE THE DRIVER (BUSY -> AVAILABLE)
-            timer(1000).pipe(
-                mergeMap(t => ServiceDA.findById$(aid, { state: 1 })),
-                filter(service => !["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD"].includes(service.state)),
-                mergeMap(service => eventSourcing.eventStore.emitEvent$(
+            delay(1000),
+            mergeMap(x => ServiceDA.findById$(aid, { state: 1 })),
+            mergeMap(service => ["ASSIGNED", "ARRIVED", "ON_BOARD"].includes(service.state)
+                ? of(` - Sent ShiftStateChanged for service._id=${shiftId} to BUSY`)
+                : eventSourcing.eventStore.emitEvent$(
                     ServiceES.buildEventSourcingEvent(
                         'Shift',
                         shiftId,
@@ -119,25 +137,9 @@ class ServiceES {
                         { _id: shiftId, state: 'AVAILABLE' },
                         user
                     )
-                ))
-            ),
-
-            //IF CQRS DID NOT PERSIST THE DATA, THEN WE ASSIGN THE DRIVER WITHIN THE SERVICE AND THEN SEND THE BUSY STATE TO THE SHIFT
-            ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)).pipe(
-                tap(() => this.queueAndGroupServiceEvent({ _id: aid })),
-                mergeMap(persistResult =>
-                    eventSourcing.eventStore.emitEvent$(
-                        ServiceES.buildEventSourcingEvent(
-                            'Shift',
-                            shiftId,
-                            'ShiftStateChanged',
-                            { _id: shiftId, state: 'BUSY' },
-                            user
-                        )
-                    )
-                ),
-                mapTo(` - Sent ShiftStateChanged for service._id=${shiftId}: state: BUSY`)
-            );
+                ).pipe(mapTo(` - Sent ShiftStateChanged for service._id=${shiftId} to AVAILABLE`))
+            )
+        );
     }
 
     /**
