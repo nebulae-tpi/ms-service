@@ -18,6 +18,7 @@ const Rx = require('rxjs');
 
 const shift = require('./domain/shift');
 const Cronjob = require('./domain/cronjob');
+const Wallet = require('./domain/cronjob');
 
 
 const start = () => {
@@ -29,6 +30,7 @@ const start = () => {
         VehicleDA.start$(),
         ServiceDA.start$(),
         ClientDA.start$(),
+        Wallet.start$,
         shift.start$,
         Cronjob.start$,
         graphQlService.start$()
