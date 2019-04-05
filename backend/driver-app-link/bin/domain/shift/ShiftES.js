@@ -49,6 +49,22 @@ class ShiftES {
 
     /**
      * process event and forwards the right data to the drivers
+     * @param {*} shiftWalletUpdatedEvt 
+     */
+    handleShiftWalletUpdated$({ aid, data }) {
+        console.log(`ShiftES: handleShiftWalletUpdated: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
+        if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
+        return of({})
+        .pipe(
+            delay(300),
+            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, driver: 1, vehicle: 1, state: 1 })),
+            filter(shift => shift.driver && shift.vehicle),
+            mergeMap((shift) => driverAppLinkBroker.sendShiftEventToDrivers$(shift.businessId, shift.driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema({ ...shift, ...data })))
+        );
+    }
+
+    /**
+     * process event and forwards the right data to the drivers
      * @param {Event} shiftConnectedEvt
      */
     handleShiftConnected$({ aid }) {
@@ -171,7 +187,8 @@ class ShiftES {
                 fullname: shift.driver.fullname,
                 username: shift.driver.username,
                 blocks: shift.driver.blocks,
-                active: true
+                active: true,
+                wallet: shift.driver.wallet
             },
             vehicle: {
                 plate: shift.vehicle.licensePlate,

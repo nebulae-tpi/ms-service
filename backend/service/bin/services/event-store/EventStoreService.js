@@ -231,11 +231,11 @@ class EventStoreService {
         fn: CronJobES.handlePeriodicMonthly$,
         obj: CronJobES
       },
-      // WALLET
-      WalletUpdated: {
-        fn: WalletES.handleWalletUpdated$,
-        obj: WalletES
-      }
+      // // WALLET
+      // WalletUpdated: {
+      //   fn: WalletES.handleWalletUpdated$,
+      //   obj: WalletES
+      // }
 
     };
   }
@@ -337,8 +337,8 @@ class EventStoreService {
       { aggregateType: "Cronjob", eventType: "PeriodicFiveMinutes" },
       { aggregateType: "Cronjob", eventType: "PeriodicFifteenMinutes" },
       { aggregateType: "Cronjob", eventType: "PeriodicMonthly" },
-      // Wallet
-      { aggregateType: "Wallet", eventType: "WalletUpdated" },
+      // // Wallet
+      // { aggregateType: "Wallet", eventType: "WalletUpdated" },
     ]
   }
 }

@@ -5,6 +5,7 @@ const { ShiftES } = require("../../domain/shift");
 const { DriverES } = require("../../domain/driver");
 const { VehicleES } = require("../../domain/vehicle");
 const { ServiceES } = require("../../domain/service");
+const { WalletES } = require("../../domain/wallet");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -157,6 +158,8 @@ class EventStoreService {
       ServiceCancelledBySystem: { fn: ServiceES.handleServiceCancelledBySystem$, obj: ServiceES },
       ServiceClosed: { fn: ServiceES.handleServiceClosed$, obj: ServiceES },
       ServiceMessageSent: { fn: ServiceES.handleServiceMessageSent$, obj: ServiceES },
+      // WALLET
+      WalletUpdated: { fn: WalletES.handleWalletUpdated$, obj: WalletES }
     };
   }
 

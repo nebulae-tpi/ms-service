@@ -125,6 +125,7 @@ class EventStoreService {
       //SHIFT 
       ShiftStarted: { fn: ShiftES.handleShiftStarted$, obj: ShiftES },
       ShiftStateChanged: { fn: ShiftES.handleShiftStateChanged$, obj: ShiftES },
+      ShiftWalletUpdated: { fn: ShiftES.handleShiftWalletUpdated$, obj: ShiftES },
       ShiftConnected: { fn: ShiftES.handleShiftConnected$, obj: ShiftES },
       ShiftDisconnected: { fn: ShiftES.handleShiftDisconnected$, obj: ShiftES },
       ShiftStopped: { fn: ShiftES.handleShiftStopped$, obj: ShiftES },
@@ -165,6 +166,7 @@ class EventStoreService {
       { aggregateType: "Shift", eventType: "ShiftDriverBlockRemoved" },
       { aggregateType: "Shift", eventType: "ShiftDriverBlockAdded" },
       { aggregateType: "Shift", eventType: "ShiftLocationReported" },
+      { aggregateType: "Shift", eventType: "ShiftWalletUpdated" },
       //SERVICE
       { aggregateType: "Service", eventType: "ServiceRequested" },
       { aggregateType: "Service", eventType: "ServiceAssigned" },

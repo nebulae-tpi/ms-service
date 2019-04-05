@@ -162,7 +162,12 @@ class ShiftCQRS {
         "languages": driver.languages,
         "phone": driver.phone,
         "username": authToken.preferred_username,
-        deviceIdentifier
+        deviceIdentifier,
+        "wallet": !driver.wallet ? null: {
+          _id: driver.wallet,
+          pockets: driver.wallet.pockets,
+          businessId: driver.wallet.businessId
+        }
       },
       "vehicle": {
         "id": vehicle._id,
