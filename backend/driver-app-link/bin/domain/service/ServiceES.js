@@ -108,6 +108,9 @@ class ServiceES {
                 ).toPromise();
 
                 shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
+                shifts = service.client.tipType === 'VIRTUAL_WALLET'
+                    ? shifts.filter(s => true ) // todo
+                    : shifts;
                 obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
                 if (service.client && service.client.referrerDriverDocumentId) {

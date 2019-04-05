@@ -6,6 +6,7 @@ const { ClientES } = require("../../domain/client");
 const { VehicleES } = require("../../domain/vehicle");
 const { ServiceES } = require("../../domain/service");
 const { CronJobES } = require("../../domain/cronjob");
+const { WalletES } = require("../../domain/wallet");
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -229,7 +230,13 @@ class EventStoreService {
       PeriodicMonthly: {
         fn: CronJobES.handlePeriodicMonthly$,
         obj: CronJobES
+      },
+      // WALLET
+      WalletUpdated: {
+        fn: WalletES.handleWalletUpdated$,
+        obj: WalletES
       }
+
     };
   }
 
@@ -330,6 +337,8 @@ class EventStoreService {
       { aggregateType: "Cronjob", eventType: "PeriodicFiveMinutes" },
       { aggregateType: "Cronjob", eventType: "PeriodicFifteenMinutes" },
       { aggregateType: "Cronjob", eventType: "PeriodicMonthly" },
+      // Wallet
+      { aggregateType: "Wallet", eventType: "WalletUpdated" },
     ]
   }
 }

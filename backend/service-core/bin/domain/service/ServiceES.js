@@ -9,7 +9,7 @@ const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 
-const { ServiceDA, ShiftDA } = require('./data-access');
+const { ServiceDA, ShiftDA, ClientDA } = require('./data-access');
 const CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC = "client-gateway-materialized-view-updates";
 
 /**
@@ -104,10 +104,10 @@ class ServiceES {
      */
     handleServiceAssigned$({ aid, data, user }) {
         //console.log(`*** ServiceES: handleServiceAssigned: `, data); //DEBUG: DELETE LINE
-        const { shiftId, driver, vehicle, skipPersist } = data;
-        return iif(
-            () => skipPersist,
-            of({}),
+
+        const { shiftId, driver, vehicle, skipPersist, client } = data;
+        const walletTransactionId = Crosscutting.generateDateBasedUuid();
+        return iif(() => skipPersist, of({}),
             //IF CQRS DID NOT PERSIST THE DATA, THEN WE ASSIGN THE DRIVER WITHIN THE SERVICE AND THEN SEND THE BUSY STATE TO THE SHIFT
             ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)
         ).pipe(
@@ -120,6 +120,25 @@ class ServiceES {
                         'ShiftStateChanged',
                         { _id: shiftId, state: 'BUSY' },
                         user
+                ))
+            ),
+            mergeMap(() => ServiceDA.findById$(aid, { "client.id": 1 } ) ),
+            mergeMap(service => ClientDA.findById$(service.client.id) ),
+            mergeMap( ({client}) => (client) 
+                ? of({})
+                : eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Wallet',
+                        walletTransactionId,
+                        'WalletTransactionCommited',
+                        {
+                            _id: walletTransactionId,
+                            type: 'MOVEMENT',
+                            concept: 'CLIENT_AGREEMENT_PAYMENT',
+                            amount: 0, // todo doorman tip
+                            fromId: driver._id,
+                            toId: client.id
+                        }
                     )
                 )
             ),

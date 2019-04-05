@@ -199,6 +199,11 @@ class DriverDA {
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.updateOne({_id: driverId}, {$pull: { blocks: { key: blockKey } } }) )
   }  
+  
+  static updateDriverWallet$(driverId, wallet){
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.updateOne({_id: driverId}, {$set: { wallet: wallet } }) )
+  }
 
 }
 /**
