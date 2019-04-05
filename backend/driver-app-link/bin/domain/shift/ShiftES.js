@@ -64,7 +64,7 @@ class ShiftES {
     }
 
     /**
-     * process event and forwards the right data to the drivers
+     * process event and forwards the right data to the drivers.
      * @param {Event} shiftConnectedEvt
      */
     handleShiftConnected$({ aid }) {

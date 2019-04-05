@@ -17,7 +17,12 @@ class WalletES {
     constructor() {
     }
 
+    /**
+     * Handle wallet updated event
+     * @param {*} param0 
+     */
     handleWalletUpdated$({ aid, wallet, user }) {
+      console.log('* handleWalletUpdated => ', wallet);
         return of(wallet)
             .pipe(
                 // DRIVER

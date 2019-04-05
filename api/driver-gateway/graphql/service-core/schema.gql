@@ -34,9 +34,22 @@ type Driver {
    "username"
    username: String
    "Current blocks"
-   blocks: [Block]   
+   blocks: [Block]
+   "Wallet driver"
+   wallet: DriverWallet
    "Active flag"
    active: Boolean
+}
+
+type DriverWallet {
+   _id: String
+   pockets: DriverWalletPocket
+   businessId: String
+}
+
+type DriverWalletPocket {
+   main: Float
+   bonus: Float
 }
 
 "Driver's shift info"
