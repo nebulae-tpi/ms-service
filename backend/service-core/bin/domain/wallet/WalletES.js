@@ -4,6 +4,8 @@ const {of} = require("rxjs");
 const { tap, mergeMap, mergeMapTo, catchError, map, mapTo, delay, filter } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
+const { Event } = require("@nebulae/event-store");
+const eventSourcing = require("../../tools/EventSourcing")();
 
 const { ShiftDA, DriverDA } = require('./data-access');
 
@@ -37,7 +39,8 @@ class WalletES {
                   pockets: data.pockets,
                   businessId: data.businessId
                 })),
-                mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftWalletUpdatedEsEvent(shift, state))), //Build and send ShiftWalletUpdated event (event-sourcing)
+                mapTo(result.ops[0]),
+                mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftWalletUpdatedEsEvent(shift))), //Build and send ShiftWalletUpdated event (event-sourcing)
             );
     }
 
@@ -47,8 +50,8 @@ class WalletES {
    * @param {*} shift 
    * @returns {Event}
    */
-  buildShiftWalletUpdatedEsEvent(shift, state) {
-    console.log('buildShiftWalletUpdatedEsEvent => ', shift, state);
+  buildShiftWalletUpdatedEsEvent(shift) {
+    console.log('buildShiftWalletUpdatedEsEvent => ', shift);
     
     return new Event({
       aggregateType: 'Shift',
@@ -56,7 +59,7 @@ class WalletES {
       eventType: 'ShiftWalletUpdated',
       eventTypeVersion: 1,
       user: 'SYSTEM',
-      data: { state, businessId: shift.businessId, driverUsername: shift.driver.username }
+      data: { businessId: shift.businessId, driverUsername: shift.driver.username }
     });
   }
 
