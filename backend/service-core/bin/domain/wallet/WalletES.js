@@ -21,21 +21,21 @@ class WalletES {
      * Handle wallet updated event
      * @param {*} param0 
      */
-    handleWalletUpdated$({ aid, wallet, user }) {
-      console.log('* handleWalletUpdated => ', wallet);
-        return of(wallet)
+    handleWalletUpdated$({ aid, data, user }) {
+      console.log('* handleWalletUpdated => ', data);
+        return of(data)
             .pipe(
                 // DRIVER
-                filter(wallet => wallet.type == 'DRIVER'),
+                filter(data => data.type == 'DRIVER'),
                 // Update driver wallet
-                DriverDA.updateDriverWallet$(wallet._id, wallet),
+                DriverDA.updateDriverWallet$(data._id, data),
                 // Look for the open shift of the driver
                 mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)),
                 filter(openShift => openShift != null),
                 mergeMap(openShift => ShiftDA.updateShiftWallet$(openShift._id, {
-                  _id: wallet._id,
-                  pockets: wallet.pockets,
-                  businessId: wallet.businessId
+                  _id: data._id,
+                  pockets: data.pockets,
+                  businessId: data.businessId
                 })),
                 mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftWalletUpdatedEsEvent(shift, state))), //Build and send ShiftWalletUpdated event (event-sourcing)
             );
