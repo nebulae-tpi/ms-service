@@ -1,7 +1,7 @@
 'use strict'
 
 const {of} = require("rxjs");
-const { tap, mergeMap, mergeMapTo, catchError, map, mapTo, delay } = require('rxjs/operators');
+const { tap, mergeMap, mergeMapTo, catchError, map, mapTo, delay, filter } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 
@@ -28,9 +28,9 @@ class WalletES {
                 // DRIVER
                 filter(data => data.type == 'DRIVER'),
                 // Update driver wallet
-                DriverDA.updateDriverWallet$(data._id, data),
+                mergeMapTo(DriverDA.updateDriverWallet$(data._id, data)),
                 // Look for the open shift of the driver
-                mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId)),
+                mergeMapTo(ShiftDA.findOpenShiftByDriver$(data._id)),
                 filter(openShift => openShift != null),
                 mergeMap(openShift => ShiftDA.updateShiftWallet$(openShift._id, {
                   _id: data._id,
@@ -48,6 +48,8 @@ class WalletES {
    * @returns {Event}
    */
   buildShiftWalletUpdatedEsEvent(shift, state) {
+    console.log('buildShiftWalletUpdatedEsEvent => ', shift, state);
+    
     return new Event({
       aggregateType: 'Shift',
       aggregateId: shift._id,

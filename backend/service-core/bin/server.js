@@ -14,6 +14,7 @@ const shift = require('./domain/shift');
 const driver = require('./domain/driver');
 const vehicle = require('./domain/vehicle');
 const service = require('./domain/service');
+const wallet = require('./domain/wallet');
 
 
 const start = () => {
@@ -25,6 +26,7 @@ const start = () => {
         driver.start$,
         vehicle.start$,
         service.start$,
+        wallet.start$,
         graphQlService.start$()
     ).subscribe(
         (evt) => {
