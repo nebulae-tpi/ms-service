@@ -27,7 +27,7 @@ type Vehicle {
    active: Boolean
 }
 
-"Driver info"
+"Driver info."
 type Driver {
    "Driver fullname"
    fullname: String

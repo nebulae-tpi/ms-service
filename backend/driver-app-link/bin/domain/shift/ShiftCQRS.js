@@ -22,7 +22,7 @@ const {
 
 
 /**
- * Singleton instance
+ * Singleton instance.
  */
 let instance;
 

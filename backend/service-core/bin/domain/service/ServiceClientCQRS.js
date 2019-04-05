@@ -46,7 +46,6 @@ class ServiceClientCQRS {
     
   //#region CLIENT-GATEWAY
 
-
   queryClientCurrentServices$({ root, args, jwt }, authToken) {
     const clientId = authToken.clientId || '-1';
     console.log(`ServiceCQRS.queryClientCurrentServices RQST: ${JSON.stringify(authToken)}`); //DEBUG: DELETE LINE
