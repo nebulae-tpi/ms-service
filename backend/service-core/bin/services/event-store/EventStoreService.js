@@ -199,7 +199,10 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" },      
       { aggregateType: "Service", eventType: "ServiceCancelledBySystem" },      
       { aggregateType: "Service", eventType: "ServiceClosed" },
+      { aggregateType: "Service", eventType: "ServiceMessageSent" },
       { aggregateType: "Service", eventType: "ServiceMessageSent" },   
+      //WALLET
+      { aggregateType: "Wallet", eventType: "WalletUpdated" },
     ]
   }
 }
