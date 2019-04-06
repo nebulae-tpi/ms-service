@@ -242,6 +242,11 @@ class ShiftCQRS {
         fullname: shift.driver.fullname,
         username: shift.driver.username,
         blocks: shift.driver.blocks,
+        wallet: !shift.driver.wallet ? null: {
+          _id: shift.driver.wallet._id,
+          pockets: shift.driver.wallet.pockets,
+          businessId: shift.driver.wallet.businessId
+        },
         active: true
       },
       vehicle: {
