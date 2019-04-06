@@ -164,7 +164,7 @@ class ShiftCQRS {
         "username": authToken.preferred_username,
         deviceIdentifier,
         "wallet": !driver.wallet ? null: {
-          _id: driver.wallet,
+          _id: driver.wallet._id,
           pockets: driver.wallet.pockets,
           businessId: driver.wallet.businessId
         }
