@@ -47,7 +47,7 @@ class ShiftDA {
    */
   static updateShiftWallet$(_id, wallet) {
     return defer(
-      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
         { $set: { 'driver.wallet': wallet } },
         { upsert: false }

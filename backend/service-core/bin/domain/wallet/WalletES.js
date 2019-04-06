@@ -40,8 +40,8 @@ class WalletES {
                   businessId: data.businessId
                 })),
                 map(result => {
-                  console.log('RESULT => ', resul);
-                  return result.ops[0];
+                  console.log('RESULT => ', result);
+                  return result.value;
                 }),
                 mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftWalletUpdatedEsEvent(shift))), //Build and send ShiftWalletUpdated event (event-sourcing)
             );
