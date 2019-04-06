@@ -13,7 +13,7 @@ spec:
         app: service-core
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.servicecore:2.8.21 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
+      - image: DOCKERHUB/service.backend.servicecore:2.8.22 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
         name: service-core
         volumeMounts:
         - name: google-application-credentials
