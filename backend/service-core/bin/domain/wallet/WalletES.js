@@ -39,7 +39,7 @@ class WalletES {
                   pockets: data.pockets,
                   businessId: data.businessId
                 })),
-                mapTo(result.ops[0]),
+                map(result => result.ops[0]),
                 mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftWalletUpdatedEsEvent(shift))), //Build and send ShiftWalletUpdated event (event-sourcing)
             );
     }
