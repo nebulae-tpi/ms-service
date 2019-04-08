@@ -16,6 +16,7 @@ import { DialogComponent } from './dialog/dialog.component';
 import { ShiftDriverInfoComponent } from './shift-detail/driver-info/shift-driver-info.component';
 import { ShiftVehicleInfoComponent } from './shift-detail/vehicle-info/shift-vehicle-info.component';
 
+
 const routes: Routes = [
   {
     path: '',
