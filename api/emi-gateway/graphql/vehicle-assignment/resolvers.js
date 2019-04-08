@@ -39,7 +39,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles, 'ms-Service', 'ServiceDrivers',
                 PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -60,7 +60,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceDriversSize', PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -83,7 +83,7 @@ module.exports = {
                 'ms-Service', 'ServiceDriver',
                 PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -104,7 +104,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles, 'ms-Service', 'ServiceDriverVehicleList',
                 PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -133,7 +133,7 @@ module.exports = {
                 'ms-Service', 'assignVehicleToDriver',
                 PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -156,7 +156,7 @@ module.exports = {
                 'ms-Service', 'unassignVehicleFromDriver',
                 PERMISSION_DENIED_ERROR_CODE,
                 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>

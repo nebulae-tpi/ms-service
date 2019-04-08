@@ -43,7 +43,8 @@
           "PLATFORM-ADMIN",
           "BUSINESS-OWNER",
           "BUSINESS-ADMIN",
-          "COORDINATOR"
+          "COORDINATOR",
+          "OPERATION-SUPERVISOR"
         ],
         "default": false
       }

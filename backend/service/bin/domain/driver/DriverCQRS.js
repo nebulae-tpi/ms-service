@@ -42,7 +42,7 @@ class DriverCQRS {
       "Driver",
       "getDriver",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -66,7 +66,7 @@ class DriverCQRS {
       "Driver",
       "getDriverList",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -93,7 +93,7 @@ class DriverCQRS {
       "Driver",
       "getDriverListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -115,7 +115,7 @@ class DriverCQRS {
       "Service",
       "getDriverVehicles",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
     )
       .pipe(
         mergeMap(() => DriverHelper.validateVehicleAsignment$(args.driverId, args.vehiclePlate)),
@@ -141,7 +141,7 @@ class DriverCQRS {
       "Service",
       "getDriverVehicles",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
     )
       .pipe(
         mergeMap(() => DriverHelper.validateVehicleUnassignment$(args.driverId, args.vehiclePlate)),
@@ -173,7 +173,7 @@ class DriverCQRS {
       "Service",
       "getDriverVehicles",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "COORDINATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(() => DriverDA.getDriver$(args.driverId)),
       map(driver => driver.assignedVehicles),
