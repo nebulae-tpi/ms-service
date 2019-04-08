@@ -122,26 +122,26 @@ class ServiceES {
                         user
                 ))
             ),
-            mergeMap(() => ServiceDA.findById$(aid, { "client.id": 1 } ) ),
-            mergeMap(service => ClientDA.findById$(service.client.id) ),
-            mergeMap( ({client}) => (client) 
-                ? of({})
-                : eventSourcing.eventStore.emitEvent$(
-                    ServiceES.buildEventSourcingEvent(
-                        'Wallet',
-                        walletTransactionId,
-                        'WalletTransactionCommited',
-                        {
-                            _id: walletTransactionId,
-                            type: 'MOVEMENT',
-                            concept: 'CLIENT_AGREEMENT_PAYMENT',
-                            amount: 0, // todo doorman tip
-                            fromId: driver._id,
-                            toId: client.id
-                        }
-                    )
-                )
-            ),
+            // mergeMap(() => ServiceDA.findById$(aid, { "client.id": 1 } ) ),
+            // mergeMap(service => ClientDA.findById$(service.client.id) ),
+            // mergeMap( ({client}) => (client) 
+            //     ? of({})
+            //     : eventSourcing.eventStore.emitEvent$(
+            //         ServiceES.buildEventSourcingEvent(
+            //             'Wallet',
+            //             walletTransactionId,
+            //             'WalletTransactionCommited',
+            //             {
+            //                 _id: walletTransactionId,
+            //                 type: 'MOVEMENT',
+            //                 concept: 'CLIENT_AGREEMENT_PAYMENT',
+            //                 amount: 0, // todo doorman tip
+            //                 fromId: driver._id,
+            //                 toId: client.id
+            //             }
+            //         )
+            //     )
+            // ),
             //IF CQRS DID PERSIST THE DATA, THEN THERE IS A POSSIBILITY THAT THE DRIVER HAD ACCEPTED THE SERVICE AT THE SAME TIME THE SERVICE IS CANCELLED.
             //  SO WE MUST CHECK IF THE SERVICE IS CANCELLED AND IF SO WE MUST FREE THE DRIVER (BUSY -> AVAILABLE)
             delay(5000),
