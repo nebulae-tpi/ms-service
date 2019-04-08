@@ -81,7 +81,8 @@
         "priority": 1000,
         "roles": [
           "SATELLITE",
-          "OPERATOR"
+          "OPERATOR",
+          "OPERATION-SUPERVISOR"
         ],
         "default": false
       }
@@ -164,7 +165,7 @@
           "BUSINESS-OWNER",
           "BUSINESS-ADMIN",
           "BUSINESS-VIEWER",
-          "OPERATOR"
+          "OPERATOR", "OPERATION-SUPERVISOR"
         ],
         "default": false
       }

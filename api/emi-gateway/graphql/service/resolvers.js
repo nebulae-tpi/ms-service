@@ -31,7 +31,7 @@ module.exports = {
     ////// QUERY ///////    
     Query: {
         ServiceServicesSize(root, args, context) {
-            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceServicesSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"])
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceServicesSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"])
                 .pipe(
                     mergeMap(() =>
                         broker
@@ -47,7 +47,7 @@ module.exports = {
                 ).toPromise();
         },
         ServiceServicesSatellite(root, args, context) {
-            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceServicesSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE", "OPERATOR"])
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceServicesSatellite', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"])
                 .pipe(
                     mergeMap(() =>
                         broker
@@ -99,7 +99,7 @@ module.exports = {
                 ).toPromise();
         },
         ServiceServices(root, args, context) {
-            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceServices', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"])
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceServices', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"])
                 .pipe(
                     mergeMap(() =>
                         broker
@@ -115,7 +115,7 @@ module.exports = {
                 ).toPromise();
         },
         ServiceService(root, args, context) {
-            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceService', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"])
+            return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceService', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"])
                 .pipe(
                     mergeMap(() =>
                         broker
@@ -137,7 +137,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceShifts', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -157,7 +157,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceShiftsSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -177,7 +177,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceShift', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -197,7 +197,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceShiftStateChangesList', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -217,7 +217,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceShiftStateChangesListSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -237,7 +237,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceShiftOnlineChangesList', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -257,7 +257,7 @@ module.exports = {
             return RoleValidator.checkPermissions$(
                 context.authToken.realm_access.roles,
                 'ms-Service', 'ServiceShiftOnlineChangesListSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied',
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
             )
                 .pipe(
                     mergeMap(() =>
@@ -315,7 +315,7 @@ module.exports = {
                         return true;
                     }
 
-                    if ((context.authToken.realm_access.roles.includes("OPERATOR"))) {
+                    if ((context.authToken.realm_access.roles.includes("OPERATOR")) || (context.authToken.realm_access.roles.includes("OPERATION-SUPERVISOR"))) {
                         return context.authToken.businessId === businessId;
                     }
 

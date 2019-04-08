@@ -42,7 +42,7 @@ class ClientCQRS {
       "Shift",
       "getShift",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(() => ShiftDA.getShiftById$(args.id) ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -61,7 +61,7 @@ class ClientCQRS {
       "Shift",
       "getShiftList",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -89,7 +89,7 @@ class ClientCQRS {
       "Shift",
       "getShiftListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -111,7 +111,7 @@ class ClientCQRS {
       "Shift",
       "getShiftStateChangesList",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(() => ShiftDA.getShiftStateChangeList$(args.id, args.paginationInput)),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -126,7 +126,7 @@ class ClientCQRS {
       "Shift",
       "getShiftStateChangesListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => ShiftDA.getShiftStateChangeListSize$(args.id)),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -140,7 +140,7 @@ class ClientCQRS {
       "Shift",
       "getShiftOnlineChangesList",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => ShiftDA.getShiftOnlineChangeList$(args.id, args.paginationInput) ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -154,7 +154,7 @@ class ClientCQRS {
       "Shift",
       "getShiftOnlineChangesListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles =>  ShiftDA.getShiftOnlineChangeListSize$(args.id) ),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -168,7 +168,7 @@ class ClientCQRS {
       "Shift",
       "closeShift",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-MANAGER", "BUSINESS-VIEWER", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(() => ShiftDA.getShiftById$(args.id)),
       tap(shift => { if (!shift) throw ERROR_23020; }), // Driver does not have an open shift verification
