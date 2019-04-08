@@ -234,7 +234,7 @@ class ServiceCQRS {
   requestServices$({ root, args, jwt }, authToken) {
     const { id } = args;
     //ServiceCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
@@ -251,7 +251,7 @@ class ServiceCQRS {
    */
   cancelService$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.cancelService RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceCancellationRequestInput(request)),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
@@ -275,7 +275,7 @@ class ServiceCQRS {
    */
   assignService$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.assignService RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "assignService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "assignService", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAssignRequestInput(request)),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
@@ -308,7 +308,7 @@ class ServiceCQRS {
    */
   reportServiceAsArrived$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.reportServiceAsArrived RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsArrived", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsArrived", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
       mapTo(args),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
@@ -331,7 +331,7 @@ class ServiceCQRS {
    */
   reportServicePickupETA$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.reportServicePickupETA RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServicePickupETA", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServicePickupETA", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
 
       //tap(x => ServiceCQRS.log(`ServiceCQRS.reportServicePickupETA RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -344,7 +344,7 @@ class ServiceCQRS {
    */
   reportServiceAsPickedUp$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.reportServiceAsPickedUp RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsPickedUp", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsPickedUp", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
       mapTo(args),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
@@ -368,7 +368,7 @@ class ServiceCQRS {
    */
   reportServiceAsCompleted$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.reportServiceAsCompleted RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsCompleted", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "reportServiceAsCompleted", PERMISSION_DENIED, ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
       mapTo(args),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists

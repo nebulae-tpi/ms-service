@@ -30,7 +30,7 @@ module.exports = {
 
   Query: {
     ServiceCoreService: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'ServiceCoreService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'ServiceCoreService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR", ]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.query.ServiceCoreService", { root, args, jwt: context.encodedToken }, 2000)
         ),        
@@ -41,7 +41,7 @@ module.exports = {
 
   Mutation: {
     ServiceCoreRequestService: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.mutation.ServiceCoreRequestService", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -51,7 +51,7 @@ module.exports = {
     },
 
     ServiceCoreCancelService: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.mutation.ServiceCoreCancelService", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -61,7 +61,7 @@ module.exports = {
     },
 
     ServiceCoreAssignService: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.mutation.ServiceCoreAssignService", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -72,7 +72,7 @@ module.exports = {
 
     
     ServiceCoreReportServicePickupETA: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.mutation.ServiceCoreReportServicePickupETA", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -82,7 +82,7 @@ module.exports = {
     },
 
     ServiceCoreReportServiceAsArrived: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.mutation.ServiceCoreReportServiceAsArrived", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -92,7 +92,7 @@ module.exports = {
     },
 
     ServiceCoreReportServiceAsPickedUp: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.mutation.ServiceCoreReportServiceAsPickedUp", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -102,7 +102,7 @@ module.exports = {
     },
 
     ServiceCoreReportServiceAsCompleted: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'v', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN" , "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "emigateway.graphql.mutation.ServiceCoreReportServiceAsCompleted", { root, args, jwt: context.encodedToken }, 2000)
         ),

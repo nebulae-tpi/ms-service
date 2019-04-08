@@ -61,7 +61,7 @@ class ClientCQRS {
       ["OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
-        const isOperator = roles["OPERATOR"];
+        const isOperator = roles["OPERATOR", "OPERATION-SUPERVISOR"];
         const isSatellite = roles["SATELLITE"];
 
         const businessId = authToken.businessId || '-1';

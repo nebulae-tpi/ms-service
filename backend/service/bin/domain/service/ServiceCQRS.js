@@ -40,7 +40,7 @@ class ServiceCQRS {
       "Service",
       "getService",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -68,10 +68,10 @@ class ServiceCQRS {
       "Service",
       "getServiceSatelliteList",
       PERMISSION_DENIED,
-      ["OPERATOR","SATELLITE"]
+      ["OPERATOR", "OPERATION-SUPERVISOR","SATELLITE"]
     ).pipe(
       mergeMap(roles => {
-        const isOperator = roles["OPERATOR"];
+        const isOperator = roles["OPERATOR", "OPERATION-SUPERVISOR"];
         const isSatellite = roles["SATELLITE"];
 
         const businessId = authToken.businessId || '-1';
@@ -102,7 +102,7 @@ class ServiceCQRS {
       "Service",
       "getServiceList",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
@@ -132,7 +132,7 @@ class ServiceCQRS {
       "Service",
       "getServiceListSize",
       PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"]
     ).pipe(
       mergeMap(roles => {
         const isPlatformAdmin = roles["PLATFORM-ADMIN"];
