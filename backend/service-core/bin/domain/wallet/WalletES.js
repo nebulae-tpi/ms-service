@@ -24,7 +24,7 @@ class WalletES {
      * @param {*} param0 
      */
     handleWalletUpdated$({ aid, data, user }) {
-      console.log('* handleWalletUpdated => ', data);
+      // console.log('* handleWalletUpdated => ', data);
         return of(data)
             .pipe(
                 // DRIVER
@@ -39,10 +39,7 @@ class WalletES {
                   pockets: data.pockets,
                   businessId: data.businessId
                 })),
-                map(result => {
-                  console.log('RESULT => ', result);
-                  return result.value;
-                }),
+                map(result => result.value),
                 mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftWalletUpdatedEsEvent(shift))), //Build and send ShiftWalletUpdated event (event-sourcing)
             );
     }
@@ -54,7 +51,7 @@ class WalletES {
    * @returns {Event}
    */
   buildShiftWalletUpdatedEsEvent(shift) {
-    console.log('buildShiftWalletUpdatedEsEvent => ', shift);
+    // console.log('buildShiftWalletUpdatedEsEvent => ', shift);
     
     return new Event({
       aggregateType: 'Shift',
