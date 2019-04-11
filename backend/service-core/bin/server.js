@@ -17,6 +17,7 @@ const service = require('./domain/service');
 const wallet = require('./domain/wallet');
 
 
+
 const start = () => {
     Rx.concat(
         eventSourcing.eventStore.start$(),
