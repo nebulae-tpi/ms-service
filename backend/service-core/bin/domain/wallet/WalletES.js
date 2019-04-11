@@ -24,18 +24,18 @@ class WalletES {
      * @param {*} param0 
      */
     handleWalletUpdated$({ aid, data, user }) {
-      // console.log('* handleWalletUpdated => ', data);
+      console.log('* handleWalletUpdated$ => ', {aid, data});
         return of(data)
             .pipe(
                 // DRIVER
                 filter(data => data.type == 'DRIVER'),
                 // Update driver wallet
-                mergeMapTo(DriverDA.updateDriverWallet$(data._id, data)),
+                mergeMapTo(DriverDA.updateDriverWallet$(aid, data)),
                 // Look for the open shift of the driver
-                mergeMapTo(ShiftDA.findOpenShiftByDriver$(data._id)),
+                mergeMapTo(ShiftDA.findOpenShiftByDriver$(aid)),
                 filter(openShift => openShift != null),
                 mergeMap(openShift => ShiftDA.updateShiftWallet$(openShift._id, {
-                  _id: data._id,
+                  _id: aid,
                   pockets: data.pockets,
                   businessId: data.businessId
                 })),
