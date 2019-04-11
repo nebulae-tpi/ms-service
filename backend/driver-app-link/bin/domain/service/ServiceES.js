@@ -4,6 +4,7 @@
 const { of, timer, forkJoin, Observable, iif, from, empty } = require("rxjs");
 const { toArray, mergeMap, map, tap, filter, delay, mapTo, switchMap } = require('rxjs/operators');
 const dateFormat = require('dateformat');
+const uuidv4 = require("uuid/v4");
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -279,8 +280,8 @@ class ServiceES {
                 concept: "CLIENT_AGREEMENT_PAYMENT",
                 timestamp: Date.now(),
                 amount: client.tip,
-                fromId: driver._id,
-                toId: client.tipClientId
+                fromId: driver.id,
+                toId: client.tipClientId 
             })
           ),
           mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
@@ -288,7 +289,7 @@ class ServiceES {
                 eventType: "WalletTransactionCommited",
                 eventTypeVersion: 1,
                 aggregateType: "Wallet",
-                aggregateId: tx._id,
+                aggregateId: uuidv4(),
                 data: tx,
                 user: "SYSTEM"
               })
