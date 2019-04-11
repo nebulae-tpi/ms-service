@@ -24,7 +24,7 @@ class WalletES {
      * @param {*} param0 
      */
     handleWalletUpdated$({ aid, data, user }) {
-      console.log('* handleWalletUpdated$ => ', {aid, data});
+      // console.log('* handleWalletUpdated$ => ', {aid, data});
         return of(data)
             .pipe(
                 // DRIVER

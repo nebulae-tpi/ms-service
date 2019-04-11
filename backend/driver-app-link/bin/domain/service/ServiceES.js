@@ -283,7 +283,7 @@ class ServiceES {
                 toId: client.tipClientId 
             })
           ),
-          tap(tx => console.log("TRANSACTION ==> ", {tx})),
+        //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
           mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
               new Event({
                 eventType: "WalletTransactionCommited",
