@@ -28,7 +28,7 @@ class WalletES {
         return of(data)
             .pipe(
                 // DRIVER
-                filter(data => data.type == 'DRIVER'),
+                filter(data =>(data &&  data.type == 'DRIVER')),
                 // Update driver wallet
                 mergeMapTo(DriverDA.updateDriverWallet$(aid, data)),
                 // Look for the open shift of the driver
