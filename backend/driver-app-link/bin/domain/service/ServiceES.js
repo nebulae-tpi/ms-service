@@ -267,8 +267,7 @@ class ServiceES {
      * @param {*} service  
      */
     payClientAgreement$({ businessId, client, driver}){
-        console.log("payClientAgreement$ ==> ", {businessId, client, driver});
-        
+        // console.log("payClientAgreement$ ==> ", {businessId, client, driver});        
         return of({}).pipe(
           map(() => (client.tipType != "VIRTUAL_WALLET")
             ? null
@@ -284,6 +283,7 @@ class ServiceES {
                 toId: client.tipClientId 
             })
           ),
+          tap(tx => consolelog("TRANSACTION ==> ", {tx})),
           mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
               new Event({
                 eventType: "WalletTransactionCommited",
