@@ -109,17 +109,15 @@ class ServiceES {
 
                 shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
                 // (todo) filter to avoid drivers how does not have money to pay to the dorrman client
-                // shifts = service.client.tipType === "VIRTUAL_WALLET"
-                //     ? shifts.filter(s => 
-                //         (
-                //           s.driver.wallet &&
-                //           s.driver.wallet.pockets.main &&
-                //           service.client &&
-                //           service.client.tip &&
-                //           s.driver.wallet.pockets.main >= service.client.tip
-                //         )
-                //       )
-                //     : shifts;
+                shifts = service.client.tipType === "VIRTUAL_WALLET"
+                    ? shifts.filter(s => 
+                        (
+                          s.driver.wallet &&
+                          s.driver.wallet.pockets &&
+                          (s.driver.wallet.pockets.main || 0) >= service.client.tip
+                        )
+                      )
+                    : shifts;
                 obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
                 if (service.client && service.client.referrerDriverDocumentId) {
@@ -225,18 +223,16 @@ class ServiceES {
         return of({})
             .pipe(
                 delay(300),
-                mergeMap(() => {
-                    return ServiceDA.findById$(aid,
-                        {
-                            "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1,
-                            "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
-                            "driver": 1, "businessId": 1
-                        });
-                }),
+                mergeMap(() => ServiceDA.findById$(aid,
+                    {
+                        "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1,
+                        "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
+                        "driver": 1, "businessId": 1
+                    })
+                ),
                 mergeMap(dbService => forkJoin(
                     of(dbService),
-                    // this.payClientAgreement$(dbService) // (todo)
-                    of(null)
+                    this.payClientAgreement$(dbService) // (todo)
                 )), 
                 map(([dbService, a]) =>
                     (
@@ -267,22 +263,27 @@ class ServiceES {
 
     /**
      * (todo) makespaymento to doorman
-     * @param {*} param0 
+     * @param {*} service  
      */
-    payClientAgreement$({client, driver}){
+    payClientAgreement$({ businessId, client, driver}){
+        console.log("payClientAgreement$ ==> ", {businessId, client, driver});
+        
         return of({}).pipe(
-          map(() => ({
-            _id: Crosscutting.generateDateBasedUuid(),
-            type: "MOVEMENT",
-            // notes: mba.notes,
-            concept: "CLIENT_AGREEMENT_PAYMENT",
-            timestamp: Date.now(),
-            amount: client.tip,
-            fromId: driver._id,
-            toId: client.tipClientId
-          })),
-          mergeMap(tx =>
-            eventSourcing.eventStore.emitEvent$(
+          map(() => (client.tipType != "VIRTUAL_WALLET")
+            ? null
+            : ({
+                _id: Crosscutting.generateDateBasedUuid(),
+                businessId: businessId,
+                type: "MOVEMENT",
+                // notes: mba.notes,
+                concept: "CLIENT_AGREEMENT_PAYMENT",
+                timestamp: Date.now(),
+                amount: client.tip,
+                fromId: driver._id,
+                toId: client.tipClientId
+            })
+          ),
+          mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
               new Event({
                 eventType: "WalletTransactionCommited",
                 eventTypeVersion: 1,

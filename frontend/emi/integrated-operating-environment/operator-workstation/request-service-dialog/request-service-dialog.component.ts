@@ -178,7 +178,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
   onClientSelected(client) {
     this.doorMenOptions = (client.satelliteInfo && client.satelliteInfo.clientAgreements && client.satelliteInfo.clientAgreements.length > 0 ) ? client.satelliteInfo.clientAgreements: undefined;
-    console.log(' this.doorMenOptions',  this.doorMenOptions);
     this.form.patchValue({ client });
     if (client) {  
       this.clientDefaultTip = !this.doorMenOptions ? client.satelliteInfo.tip : 0;
@@ -206,8 +205,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   /**
    * Send the request service command to the server
    */
-  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount }) {
-
+  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount }) {    
     return range(1, quantity || 1)
       .pipe(
         filter(() => client != null),
@@ -216,11 +214,13 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
             id: client._id,
             fullname: client.generalInfo.name,
             username: client.auth ? client.auth.username : null,
-            tip: (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
-              ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
-              : client.satelliteInfo
-                ? client.satelliteInfo.tip
-                : 0,
+            tip : this.doorMenOptions 
+              ? this.doorMenOptions[this.selectedIndexDoorman].tip
+              : (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
+                ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
+                : client.satelliteInfo
+                  ? client.satelliteInfo.tip
+                  : 0,
             tipType: this.doorMenOptions 
               ? this.doorMenOptions[this.selectedIndexDoorman].tipType
               : client.satelliteInfo ? client.satelliteInfo.tipType : '',

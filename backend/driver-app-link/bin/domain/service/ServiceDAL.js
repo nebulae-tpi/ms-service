@@ -202,15 +202,7 @@ class ServiceDAL {
         return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
-            tap((service) => { if (!['ASSIGNED', 'ARRIVED', 'ON_BOARD'].includes(service.state)) throw ERROR_23230; }),// Service state not allowed
-            // (todo) make the refund to the  driver
-            // mergeMap(() => ServiceDA.findById$(aid)
-            //     .pipe(
-            //         map(({ client, driver }) => {
-                        
-            //         })
-            //     )
-            // ),
+            tap((service) => { if (!['ASSIGNED', 'ARRIVED', 'ON_BOARD'].includes(service.state)) throw ERROR_23230; }),// Service state not allowed            
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
                 _id,
