@@ -30,13 +30,13 @@ class CronJobES {
     return forkJoin(
       //this.checkDisconnectedShifts$(),
       //this.checkClosedShifts$(),
-      this.checkServicesToClose$()
+      this.checkServicesToClose$(),
+      this.checkServicesOnBoardToComplete$()
     )
   }
 
   handlePeriodicFifteenMinutes$() {
-    return forkJoin(
-      this.checkServicesOnBoardToComplete$(),
+    return forkJoin(      
       this.checkClosedShifts$(),
       //this.checkServicesToClose$()
     )
