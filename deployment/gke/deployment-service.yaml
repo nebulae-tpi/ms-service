@@ -67,7 +67,7 @@ spec:
         - name: SERVICE_CLOSED_THRESHOLD
           value: "120000"
         - name: SERVICE_COMPLETED_THRESHOLD
-          value: "1800000"
+          value: "120000"
         
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
