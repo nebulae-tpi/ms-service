@@ -122,7 +122,7 @@ class ServiceDA {
    */
   static appendstate$(_id, state, location, timestamp) {
     const update = {
-      $set: { state, lastModificationTimestamp: Date.now() },
+      $set: { state, lastModificationTimestamp: Date.now(), lastStateChangeTimestamp: Date.now() },
       $push: {
         "stateChanges": { state, timestamp, location, },
       }
@@ -145,7 +145,7 @@ class ServiceDA {
    */
   static appendstateAndReturnService$(_id, state, location, timestamp, projection = undefined) {
     const update = {
-      $set: { state, lastModificationTimestamp: Date.now() },
+      $set: { state, lastModificationTimestamp: Date.now(), lastStateChangeTimestamp: Date.now() },
       $push: {
         "stateChanges": { state, timestamp, location },
       }
@@ -171,7 +171,7 @@ class ServiceDA {
    */
   static setCancelStateAndReturnService$(_id, state, location, reason, notes, timestamp, projection = undefined) {
     const update = {
-      $set: { state, lastModificationTimestamp: timestamp },
+      $set: { state, lastModificationTimestamp: timestamp, lastStateChangeTimestamp: Date.now() },
       $push: {
         "stateChanges": { state, timestamp, location, reason, notes },
       }
@@ -216,7 +216,8 @@ class ServiceDA {
         vehicle,
         state: 'ASSIGNED',
         lastModificationTimestamp: Date.now(),
-        location: { ...location, timestamp: Date.now() }
+        location: { ...location, timestamp: Date.now() },
+        lastStateChangeTimestamp: Date.now()
       },
       $push: {
         "stateChanges": {
@@ -264,6 +265,7 @@ class ServiceDA {
         vehicle,
         state: 'ASSIGNED',
         lastModificationTimestamp: Date.now(),
+        lastStateChangeTimestamp: Date.now()
       },
       $push: {
         "stateChanges": {

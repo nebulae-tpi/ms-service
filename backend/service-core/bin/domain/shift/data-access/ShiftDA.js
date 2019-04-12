@@ -150,7 +150,9 @@ class ShiftDA {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        { $set: { state, lastReceivedComm: Date.now() }, $push: { stateChanges: { state, timestamp: Date.now() } } },
+        { 
+          $set: { state, lastReceivedComm: Date.now(), lastStateChangeTimestamp: Date.now() },
+          $push: { stateChanges: { state, timestamp: Date.now() } } },
         {
           projection: { online: 1 },
           upsert: false,
@@ -221,7 +223,7 @@ class ShiftDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
         {
-          $set: { state },
+          $set: { state, lastStateChangeTimestamp: Date.now() },
           $push: { stateChanges: { state, timestamp: Date.now() } },
           $unset: { location: "" }
         },
