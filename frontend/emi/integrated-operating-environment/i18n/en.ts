@@ -77,6 +77,7 @@ export const locale = {
       1: 'Internal server error',
       2: 'Permission denied',
       3: 'Business Unit Required, Please Select One',
+      4: 'Service Already Cancelled',
       23200: 'Insufficient data. Client, collection point and payment are required',
       23201: 'Invalid customer name',
       23202: 'Tip type for invalid customer (Cash, Virtual wallet)',

@@ -77,6 +77,7 @@ export const locale = {
       1: 'Error interno del servidor',
       2: 'Permiso denegado',
       3: 'Unida de Negocio Requerida, por favor Selecciona una',
+      4: 'El Servicio Ya Está Cancelado',
       23200: 'Datos insuficientes. Cliente, punto de recogida y pago son obligatorios',
       23201: 'Nombre del cliente inválido',
       23202: 'Tipo de propina para cliente inválida (Efectivo, Billetera virtual)',

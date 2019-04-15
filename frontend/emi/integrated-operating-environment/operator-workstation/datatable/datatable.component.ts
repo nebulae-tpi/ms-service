@@ -535,7 +535,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
    */
   cancelSelectedTrip() {
     const selectedRow = this.getSelectedRow();
-    // console.log(selectedRow);
+    if(selectedRow && selectedRow.state.includes('CANCELLED')){
+      this.showMessageSnackbar('ERRORS.4')
+      return;
+    }
     if (selectedRow) {
       this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
         (results) => {
@@ -620,6 +623,32 @@ export class DatatableComponent implements OnInit, OnDestroy {
     if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
   }
   //#endregion
+
+  /**
+   * Shows a message snackbar on the bottom of the page
+   * @param messageKey Key of the message to i18n
+   * @param detailMessageKey Key of the detail message to i18n
+   */
+  showMessageSnackbar(messageKey, detailMessageKey?) {
+    const translationData = [];
+    if (messageKey) {
+      translationData.push(messageKey);
+    }
+
+    if (detailMessageKey) {
+      translationData.push(detailMessageKey);
+    }
+
+    this.translate.get(translationData).subscribe(data => {
+      this.snackBar.open(
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
+        {
+          duration: 5000
+        }
+      );
+    });
+  }
 
 
 }
