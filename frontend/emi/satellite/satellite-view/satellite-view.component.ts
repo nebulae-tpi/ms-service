@@ -808,7 +808,11 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   graphQlAlarmsErrorHandler$(response) {
     return of(JSON.parse(JSON.stringify(response))).pipe(
       tap((resp: any) => {
-        this.showSnackBarError(resp);
+        if (response && Array.isArray(response.errors)) {
+          response.errors.forEach(error => {
+            this.showMessageSnackbar('ERRORS.' + ((error.extensions||{}).code || 1) )
+          });
+        }
         return resp;
       })
     );

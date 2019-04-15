@@ -6,23 +6,21 @@ const { map, tap, mergeMap, switchMapTo, catchError } = require('rxjs/operators'
 const broker = require("../../broker/BrokerFactory")();
 const RoleValidator = require('../../tools/RoleValidator');
 const {handleError$} = require('../../tools/GraphqlResponseTools');
+const { ApolloError } = require("apollo-server");
 
 const INTERNAL_SERVER_ERROR_CODE = 23001;
 const USERS_PERMISSION_DENIED_ERROR_CODE = 23002;
 
 function getResponseFromBackEnd$(response) {
-  return of(response).pipe(
-    map(resp => {
-      if (resp.result.code != 200) {
-        const err = new Error();
-        err.name = 'Error';
-        err.message = resp.result.error;
-        // this[Symbol()] = resp.result.error;
-        Error.captureStackTrace(err, 'Error');
-        throw err;
-      }
-      return resp.data;
-    }));
+  return of(response)
+  .pipe(
+      map(({result, data}) => {            
+          if (result.code != 200) {
+              throw new ApolloError(result.error.msg, result.code, result.error );
+          }
+          return data;
+      })
+  );
 }
 
 

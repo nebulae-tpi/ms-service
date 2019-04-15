@@ -125,35 +125,16 @@ export class ServiceDetailGeneralInfoComponent implements OnInit, OnDestroy {
     return of(JSON.parse(JSON.stringify(response)))
       .pipe(
         tap((resp: any) => {
-          this.showSnackBarError(resp);
-
+          if (response && Array.isArray(response.errors)) {
+            response.errors.forEach(error => {
+              this.showMessageSnackbar('ERRORS.' + ((error.extensions||{}).code || 1) )
+            });
+          }
           return resp;
         })
       );
   }
-
-  /**
-   * Shows an error snackbar
-   * @param response
-   */
-  showSnackBarError(response) {
-    if (response.errors) {
-
-      if (Array.isArray(response.errors)) {
-        response.errors.forEach(error => {
-          if (Array.isArray(error)) {
-            error.forEach(errorDetail => {
-              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
-            });
-          } else {
-            response.errors.forEach(error => {
-              this.showMessageSnackbar('ERRORS.' + error.message.code);
-            });
-          }
-        });
-      }
-    }
-  }
+  
 
   /**
    * Shows a message snackbar on the bottom of the page
