@@ -108,7 +108,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       'clientName',
       'driverName',
       'licensePlate',
-      'paymentType',
+      // 'paymentType',
       'state'
     ];
 
