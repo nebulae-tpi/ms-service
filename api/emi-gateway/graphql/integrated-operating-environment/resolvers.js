@@ -19,7 +19,7 @@ function getResponseFromBackEnd$(response) {
   return of(response)
   .pipe(
       map(({result, data}) => {            
-          if (result.code != 200) {
+          if (result.code != 200 && result.error) {
               throw new ApolloError(result.error.msg, result.code, result.error );
           }
           return data;

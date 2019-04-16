@@ -170,8 +170,7 @@ export class SatelliteViewComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getAllSatelliteClientsFiltered(filterText: String, limit: number): Observable<any[]> {
-    return this.satelliteViewService
-      .getSatelliteClientsByFilter(filterText, limit)
+    return this.satelliteViewService.getSatelliteClientsByFilter(filterText, limit)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter(resp => !resp.errors),
