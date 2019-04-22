@@ -13,7 +13,7 @@ spec:
         app: service
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.service:1.0.21
+      - image: DOCKERHUB/service.backend.service:1.0.22
         name: service
         volumeMounts:
         - name: google-application-credentials
@@ -71,7 +71,7 @@ spec:
         
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
-          value: "19-02-05_1340"
+          value: "22-04-19"
         
       volumes:
       - name: google-application-credentials
