@@ -279,7 +279,7 @@ module.exports = {
                 "Shift", "ServiceShiftClose",
                 PERMISSION_DENIED_ERROR_CODE,
                 "Permission denied",
-                ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
+                ["PLATFORM-ADMIN", "BUSINESS-OWNER", "OPERATION-SUPERVISOR" ]
             )
                 .pipe(
                     mergeMap(() =>
