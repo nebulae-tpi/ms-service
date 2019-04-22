@@ -93,7 +93,6 @@ class MongoDB {
       await historicalDB.collection("Service").createIndex({ location: "2dsphere" })
         .catch((err) => console.log(`Failed to create index: ${err}`));
 
-      // los de sebas 
       // INDEXES FOR COLLECTION 'Shift' IN HISTORICAL RELATED DB
 
       observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ timestamp: -1, state: 1, businessId: 1, "driver.documentId": 1, "vehicle.licensePlate": 1, online: 1 })`);
@@ -116,7 +115,15 @@ class MongoDB {
       await historicalDB.collection('Shift').createIndex({ location: "2dsphere" })
         .catch((err) => console.log(`Failed to create index: ${err}`));
 
-      // TODO indexes for historical DBs
+      // INDEXES FOR COLLECTION 'drivers' IN master DB
+
+      observer.next(`Creating index for master.Driver => ({ businessId: 1 })`);
+      await this.client.db('master') .collection('Driver').createIndex({ businessId: 1, documentId: 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+        observer.next(`Creating index for master.Driver => ({ assignedVehicles: 1 })`);
+      await this.client.db('master') .collection('Driver').createIndex({ assignedVehicles: 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
 
       observer.next("All indexes created");
       observer.complete();

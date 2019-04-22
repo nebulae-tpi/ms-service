@@ -232,7 +232,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/service/
             export DOCKERHUB_IMAGE=service.backend.service
-            export DOCKERHUB_TAG=1.0.19
+            export DOCKERHUB_TAG=1.0.20
             gitChanged backend/service || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/service/
             gitChanged backend/service || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/service || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
