@@ -3,7 +3,7 @@
         <mat-icon span>refresh</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.REFRESH' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId" mat-button fxHide.xs (click)="showRequestServiceDialog()">
+    <button *ngIf="selectedBusinessId" mat-button fxHide.xs (click)="showRequestServiceDialog(0)">
         <mat-icon span>add_box</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.REQUEST' | translate }}</span>
     </button>
 
@@ -49,7 +49,7 @@
         <mat-icon>refresh</mat-icon>
         <span>{{ 'TOOLBAR.ACTIONS.REFRESH' | translate }}</span>
     </button>
-    <button mat-menu-item (click)="showRequestServiceDialog()"fxHide fxShow.xs>
+    <button mat-menu-item (click)="showRequestServiceDialog(0)"fxHide fxShow.xs>
         <mat-icon>add_box</mat-icon>
         <span>{{ 'TOOLBAR.ACTIONS.REQUEST' | translate }}</span>
     </button>

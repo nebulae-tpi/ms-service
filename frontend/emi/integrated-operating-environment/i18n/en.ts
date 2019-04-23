@@ -70,7 +70,12 @@ export const locale = {
         TITLE: 'Request a Service',
         SATELLITE_CLIENT_PLACEHOLDER: 'Client',
         REQUEST_BTN_LBL: 'Request',
-        CLIENT_LIST_TITLE: 'Doormen'
+        CLIENT_LIST_TITLE: 'Doormen',
+        IOE_CLIENT_GOOGLE_ADRESS: 'Location',
+        IOE_CLIENT_ADDRESS: 'Adress',
+        IOE_CLIENT_LOCATION_REF: 'Location Reference',
+        IOE_CLIENT_NAME: 'Client Name',
+        IOE_CLIENT_TIP: 'Client Tip'
       }
     },
     ERRORS: {

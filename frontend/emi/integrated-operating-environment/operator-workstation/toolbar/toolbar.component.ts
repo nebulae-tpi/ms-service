@@ -104,9 +104,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   // selected filters to filter services
   channelsFilter: String[] = ['OPERATOR'];
 
-  isBusinessOwner= false;
-  isPlatformAdmin= false;
-  isSysAdmin= false;
+  isBusinessOwner = false;
+  isPlatformAdmin = false;
+  isSysAdmin = false;
 
 
   /**
@@ -198,14 +198,22 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   configureHotkeys() {
     this._hotkeysService.add(new Hotkey(['+', 's'], (event: KeyboardEvent): boolean => {
       if (this.selectedBusinessId){
-        this.showRequestServiceDialog();
+        this.showRequestServiceDialog(0);
+      } else {
+        this.showMessageSnackbar('ERRORS.3');
+      }
+      return false;
+    }));
+    this._hotkeysService.add(new Hotkey(['alt+s'], (event: KeyboardEvent): boolean => {
+      if (this.selectedBusinessId){
+        this.showRequestServiceDialog(1);
       } else {
         this.showMessageSnackbar('ERRORS.3');
       }
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['r'], (event: KeyboardEvent): boolean => {
-      if (this.selectedBusinessId){        
+      if (this.selectedBusinessId){
         this.sendDatatableRefreshCommand();
       }
       return false;
@@ -246,9 +254,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   /**
    * displays request service dialog
-   * @param $event
+   * @param type
    */
-  showRequestServiceDialog($event?) {
+  showRequestServiceDialog(type?) {
     if (this.isThereAnOpenDialog()) { return; }
     if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')) {
       this.showMessageSnackbar('ERRORS.2');
@@ -260,13 +268,17 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     const width = this.layout.total.width > REQUEST_SERVICE_DIALOG_MAX_DIMENSION[0]
       ? REQUEST_SERVICE_DIALOG_MAX_DIMENSION[0]
       : this.layout.total.width - 10;
-    const height = this.layout.total.height > REQUEST_SERVICE_DIALOG_MAX_DIMENSION[1]
+    let height = this.layout.total.height > REQUEST_SERVICE_DIALOG_MAX_DIMENSION[1]
       ? REQUEST_SERVICE_DIALOG_MAX_DIMENSION[1]
       : this.layout.total.height - 10;
+    if (type === 1){
+      height =  height + 100;
+    }
 
     dialogConfig.width = `${width}px`;
-    dialogConfig.height = `${height+50}px`;
+    dialogConfig.height = `${height + 50}px`;
     dialogConfig.autoFocus = true;
+    dialogConfig.data = { type };
     console.log('DIALOG CONFIG ==> ', dialogConfig);
 
     this.requestServiceDialogRef = this.dialog.open(RequestServiceDialogComponent, dialogConfig);
@@ -442,23 +454,23 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   async queryUserRols() {
     this.userRoles = await this.keycloakService.getUserRoles(true);
-    this.isBusinessOwner= this.userRoles.includes('BUSINESS-OWNER');
-    this.isPlatformAdmin= this.userRoles.includes('PLATFORM-ADMIN');
-    this.isSysAdmin= this.userRoles.includes('SYSADMIN');
+    this.isBusinessOwner = this.userRoles.includes('BUSINESS-OWNER');
+    this.isPlatformAdmin = this.userRoles.includes('PLATFORM-ADMIN');
+    this.isSysAdmin = this.userRoles.includes('SYSADMIN');
   }
 
   updateChannelFilters(event, channel, activateViewAllOperation){
 
     this.channelsFilter = event.checked
       ? [...this.channelsFilter, channel]
-      : this.channelsFilter.filter(ch => ch  != channel)
+      : this.channelsFilter.filter(ch => ch  !== channel);
 
     this.operatorWorkstationService.publishToolbarCommand({
       code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED,
       args: [this.channelsFilter]
     });
 
-    
+
   }
 
   //#endregion

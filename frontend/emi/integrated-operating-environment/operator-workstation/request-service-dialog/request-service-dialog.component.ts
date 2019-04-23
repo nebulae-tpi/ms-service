@@ -3,9 +3,12 @@ import {
   Component,
   OnInit,
   OnDestroy,
+  AfterViewInit,
   ViewChild,
   ElementRef,
-  HostListener
+  HostListener,
+  Inject,
+  NgZone
 } from '@angular/core';
 
 import {
@@ -34,7 +37,7 @@ import {
   take
 } from 'rxjs/operators';
 
-import { Subject, iif, from, of, forkJoin, Observable, range, combineLatest } from 'rxjs';
+import { Subject, iif, from, of, forkJoin, Observable, range, combineLatest, fromEvent } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -43,7 +46,8 @@ import {
   MatTableDataSource,
   MatSnackBar,
   MatDialog,
-  MatDialogRef
+  MatDialogRef,
+  MAT_DIALOG_DATA
 } from '@angular/material';
 import { fuseAnimations } from '../../../../../core/animations';
 
@@ -65,6 +69,8 @@ import { KeycloakService } from 'keycloak-angular';
 import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
+//////////  Angular Google Maps API //////////
+import { MapsAPILoader } from '@agm/core';
 
 const SPECIAL_DESTINATION_PRICE_MODS = { '5000': 5000, '10000': 10000 };
 
@@ -77,7 +83,7 @@ const SPECIAL_DESTINATION_PRICE_MODS = { '5000': 5000, '10000': 10000 };
   animations: fuseAnimations,
   providers: []
 })
-export class RequestServiceDialogComponent implements OnInit, OnDestroy {
+export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   // current user roles
   userRoles = undefined;
   // Subject to unsubscribe
@@ -95,8 +101,14 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   selectedIndexDoorman = -1;
   doorMenOptions: any[];
 
+  // google autocomplete
+  placesAutocomplete: any;
+  // searchElementRef: ElementRef;
+  @ViewChild('addressAutocomplete') addressAutocomplete: ElementRef;
+  selectedGooglePlace = null;
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
     private formBuilder: FormBuilder,
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
@@ -108,7 +120,9 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private dialog: MatDialog,
     private dialogRef: MatDialogRef<RequestServiceDialogComponent>,
-    private _hotkeysService: HotkeysService
+    private _hotkeysService: HotkeysService,
+    private mapsAPILoader: MapsAPILoader,
+    private ngZone: NgZone,
   ) {
     this.translationLoader.loadTranslations(english, spanish);
   }
@@ -120,13 +134,61 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     this.buildRequesServiceForm();
     this.buildClientNameFilterCtrl();
     this.configureHotkeys();
+
   }
 
+  ngAfterViewInit(){
+    this.buildPlacesAutoComplete();
+  }
 
   ngOnDestroy() {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
     this._hotkeysService.remove(this.hotkeys);
+  }
+
+  buildPlacesAutoComplete() {
+    if (this.addressAutocomplete) {
+
+      this.mapsAPILoader.load().then(() => {
+        this.placesAutocomplete = new google.maps.places.Autocomplete(
+          this.addressAutocomplete.nativeElement,
+          {
+            componentRestrictions: { country: 'co' }
+          }
+        );
+
+        this.placesAutocomplete.addListener('place_changed', () => {
+          this.ngZone.run(() => {
+            // get the place result
+            const place: google.maps.places.PlaceResult = this.placesAutocomplete.getPlace();
+            // verify result
+            if (place.geometry === undefined || place.geometry === null) {
+              return;
+            }
+            this.selectedGooglePlace = {
+              address: place.formatted_address.split(',')[0],
+              coords: {
+                latitude: place.geometry.location.lat(),
+                longitude: place.geometry.location.lng()
+              }
+            };
+          });
+        });
+      });
+
+      fromEvent(this.addressAutocomplete.nativeElement, 'keydown')
+        .pipe(
+          filter((e: any) => this.selectedGooglePlace && e.key === 'Backspace'),
+          tap(e => this.clearGoogleLocation()),
+          takeUntil(this.ngUnsubscribe)
+        ).subscribe();
+    }
+  }
+
+  clearGoogleLocation(){
+    this.form.patchValue({clientGoogleAdress: null});
+    this.selectedGooglePlace = null;
   }
 
 
@@ -138,10 +200,17 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     // Reactive Filter Form
     this.form = new FormGroup({
       client: new FormControl(undefined, [Validators.nullValidator]),
+      clientGoogleAdress: new FormControl(null),
+      clientAddress: new FormControl(null),
+      clientLocationRef: new FormControl(null),
+      clientName: new FormControl(null),
       quantity: new FormControl(1, [Validators.min(1), Validators.max(5)]),
       featureOptionsGroup: new FormControl([]),
       destinationOptionsGroup: new FormControl('DEFAULT'),
-    });
+      clientTip: new FormControl(0)
+    },
+      // [this.validateFormAcordingType.bind(this)]
+    );
   }
 
   /**
@@ -155,8 +224,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       tap((selected) => {
         if (typeof selected === 'string' || selected instanceof String) {
           this.doorMenOptions = undefined;
-          this.selectedIndexDoorman=-1;
-          this.clientDefaultTip=0;
+          this.selectedIndexDoorman = -1;
+          this.clientDefaultTip = 0;
           this.form.patchValue({ client: null });
         }
       }),
@@ -177,14 +246,15 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   }
 
   onClientSelected(client) {
-    this.doorMenOptions = (client.satelliteInfo && client.satelliteInfo.clientAgreements && client.satelliteInfo.clientAgreements.length > 0 ) ? client.satelliteInfo.clientAgreements: undefined;
+    this.doorMenOptions = (client.satelliteInfo && client.satelliteInfo.clientAgreements && client.satelliteInfo.clientAgreements.length > 0 )
+      ? client.satelliteInfo.clientAgreements : undefined;
     this.form.patchValue({ client });
-    if (client) {  
+    if (client) {
       this.clientDefaultTip = !this.doorMenOptions ? client.satelliteInfo.tip : 0;
-      if(this.doorMenOptions && this.doorMenOptions.length == 1 ){
+      if (this.doorMenOptions && this.doorMenOptions.length === 1 ){
         this.selectedIndexDoorman = 0;
         this.clientDefaultTip = this.doorMenOptions[0].tip;
-      }      
+      }
     }
   }
 
@@ -197,31 +267,57 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   }
 
   submit(event?) {
-    this.requestService(this.form.getRawValue());
+    this.form.patchValue({  });
+    let rawRequest = {
+      ...this.form.getRawValue()
+    };
+    if (this.data.type === 1){
+      rawRequest = {...rawRequest,
+        client: {
+          _id: null,
+          generalInfo: {
+            name: rawRequest.clientName,
+            addressLine1: rawRequest.clientAddress,
+            addressLine2: rawRequest.clientLocationRef,
+          },
+          satelliteInfo: {
+            tip: rawRequest.clientTip,
+            tipType: 'CASH'
+          },
+          location: {
+            lat: this.selectedGooglePlace.coords.latitude,
+            lng: this.selectedGooglePlace.coords.longitude
+          }
+        },
+        fareDiscount: this.data.type === 1 ? 0.1 : undefined
+      };
+    }
+    this.requestService(rawRequest);
     this.form.patchValue({ client: null });
+    this.selectedGooglePlace = null;
     this.dialogRef.close();
   }
 
   /**
    * Send the request service command to the server
    */
-  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount }) {    
+  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount }) {
     return range(1, quantity || 1)
       .pipe(
-        filter(() => client != null),
+        filter(() => (this.data.type === 0 && client != null) || ( this.data.type === 1 && this.selectedGooglePlace)),
         map(requestNumber => ({
           client: {
             id: client._id,
             fullname: client.generalInfo.name,
             username: client.auth ? client.auth.username : null,
-            tip : this.doorMenOptions 
+            tip : this.doorMenOptions
               ? this.doorMenOptions[this.selectedIndexDoorman].tip
               : (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
                 ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
                 : client.satelliteInfo
                   ? client.satelliteInfo.tip
                   : 0,
-            tipType: this.doorMenOptions 
+            tipType: this.doorMenOptions
               ? this.doorMenOptions[this.selectedIndexDoorman].tipType
               : client.satelliteInfo ? client.satelliteInfo.tipType : '',
             tipClientId: this.doorMenOptions ? this.doorMenOptions[this.selectedIndexDoorman].clientId : client._id,
@@ -245,7 +341,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
           paymentType,
           requestedFeatures: featureOptionsGroup,
           dropOff: null,
-          //dropOffSpecialType: destinationOptionsGroup,
+          // dropOffSpecialType: destinationOptionsGroup,
           fareDiscount,
           fare,
           tip,
@@ -254,7 +350,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
             destChannel: 'DRIVER_APP',
           }
         })),
-        tap(rqst => console.log('Enviando REQUEST ==> ', rqst)),
+        tap(rqst => console.log('Enviando REQUEST ==> ', JSON.stringify(rqst))),
+        filter(r => false),
         mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
         takeUntil(this.ngUnsubscribe)
       )
@@ -275,11 +372,24 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
   onDoormanChipselected(chipIndex: number){
     console.log('onDoormanChipselected', chipIndex);
-    this.selectedIndexDoorman = chipIndex-1;
+    this.selectedIndexDoorman = chipIndex - 1;
     this.clientDefaultTip = (this.doorMenOptions && this.selectedIndexDoorman >= this.doorMenOptions.length)
       ? 0
       : this.doorMenOptions[this.selectedIndexDoorman].tip;
   }
+
+  // validateFormAcordingType(form: FormGroup){
+  //   const rawValue = form.getRawValue();
+  //   if (this.data.type === 1){
+  //     // if (!rawValue.clientGoogleAdress){
+  //     //   return { missingGoogleLocation: true };
+  //     // }
+  //     // if (!rawValue.clientGoogleAdress){
+  //     //   return { missingGoogleLocation: true };
+  //     // }
+  //   }
+  //   return null;
+  // }
 
 
 
@@ -290,7 +400,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       tap((resp: any) => {
         if (response && Array.isArray(response.errors)) {
           response.errors.forEach(error => {
-            this.showMessageSnackbar('ERRORS.' + ((error.extensions||{}).code || 1) )
+            this.showMessageSnackbar('ERRORS.' + ((error.extensions || {}).code || 1) );
           });
         }
         return resp;
@@ -338,23 +448,23 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
 
     this.hotkeys = [
       new Hotkey(['ctrl+shift+a'], (event: KeyboardEvent): boolean => {
-        this.toggleFeatureOption("AC");
+        this.toggleFeatureOption('AC');
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+s'], (event: KeyboardEvent): boolean => {
-        this.toggleFeatureOption("TRUNK");
+        this.toggleFeatureOption('TRUNK');
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+d'], (event: KeyboardEvent): boolean => {
-        this.toggleFeatureOption("ROOF_RACK");
+        this.toggleFeatureOption('ROOF_RACK');
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+f'], (event: KeyboardEvent): boolean => {
-        this.toggleFeatureOption("PETS");
+        this.toggleFeatureOption('PETS');
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+g'], (event: KeyboardEvent): boolean => {
-        this.toggleFeatureOption("BIKE_RACK");
+        this.toggleFeatureOption('BIKE_RACK');
         return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT']),
       new Hotkey(['ctrl+shift+z'], (event: KeyboardEvent): boolean => {
@@ -377,7 +487,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       new Hotkey(['ctrl+shift+right'], (event: KeyboardEvent): boolean => {
         this.addQuantity(1);
         return false;
-      }, ['INPUT', 'TEXTAREA', 'SELECT']),      
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
       // doormen selection
       new Hotkey(['ctrl+shift+1'], (event: KeyboardEvent): boolean => {
         this.onDoormanChipselected(1);
@@ -414,6 +524,10 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
       new Hotkey(['ctrl+shift+9'], (event: KeyboardEvent): boolean => {
         this.onDoormanChipselected(9);
         return false;
+      }, ['INPUT', 'TEXTAREA', 'SELECT']),
+      new Hotkey(['ctrl+l'], (event: KeyboardEvent): boolean => {
+        this.clearGoogleLocation();
+        return false;
       }, ['INPUT', 'TEXTAREA', 'SELECT'])
     ];
     this._hotkeysService.add(this.hotkeys);
@@ -422,7 +536,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
   toggleFeatureOption(feauture) {
     const currentSelection: String[] = this.form.getRawValue().featureOptionsGroup || [];
     const featIndex = currentSelection.indexOf(feauture);
-    if (featIndex === -1) currentSelection.push(feauture); else currentSelection.splice(featIndex, 1);
+    if (featIndex === -1) { currentSelection.push(feauture); } else { currentSelection.splice(featIndex, 1); }
     this.form.patchValue({ featureOptionsGroup: currentSelection });
   }
 
@@ -430,9 +544,9 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy {
     let newQuantity = this.form.get('quantity').value + quantityaddition;
     newQuantity = (newQuantity === 6 && quantityaddition === 1)
       ? 1
-      : (newQuantity === 0 && quantityaddition === -1) ? 5 : newQuantity
+      : (newQuantity === 0 && quantityaddition === -1) ? 5 : newQuantity;
 
-    
+
     this.form.patchValue({ quantity: newQuantity });
   }
 

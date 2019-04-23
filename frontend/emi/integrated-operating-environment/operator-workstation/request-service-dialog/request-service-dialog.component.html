@@ -1,15 +1,13 @@
 <form [formGroup]="form" (ngSubmit)="submit(form)">
     <div class="nav" fxLayout="column">
-
-        <mat-dialog-content fxLayout="column" fxLayoutAlign="start" fxFlex="100">
+        <mat-dialog-content *ngIf="data.type == 0" fxLayout="column" fxLayoutAlign="start" fxFlex="100">
             <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
-
                 <div fxLayout="row wrap" fxLayoutAlign="space-between center" fxFlex="100">
 
                     <h2 mat-dialog-title fxFlex="100">{{ 'SERVICES.REQUEST_DIALOG.TITLE' | translate }}</h2>
 
                     <mat-form-field fxFlex="95">
-                        <input matInput [formControl]="clientNameFilterCtrl" name="clientNameFilterCtrl"
+                        <input required matInput [formControl]="clientNameFilterCtrl" name="clientNameFilterCtrl"
                             placeholder="{{ 'SERVICES.REQUEST_DIALOG.SATELLITE_CLIENT_PLACEHOLDER' | translate }}"
                             [matAutocomplete]="auto" cdkFocusInitial>
 
@@ -19,9 +17,9 @@
                                 <mat-icon>person_pin_circle</mat-icon>
                                 <span class="text-boxed text-uppercase">{{ client.generalInfo ? client.generalInfo.name: '' }} </span>
                             </mat-option>
-                        </mat-autocomplete>                        
+                        </mat-autocomplete>
                     </mat-form-field>
-                  
+
                     <div *ngIf="doorMenOptions"
                         class="pr-12 pl-12" fxFlex="100">
                         <!-- <div class="pb-8 pt-8"> {{ 'SERVICES.REQUEST_DIALOG.CLIENT_LIST_TITLE' | translate }} </div> -->
@@ -33,18 +31,17 @@
                         </mat-chip-list>
                     </div>
 
-
                     <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider>
-                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="center center">
-                        <mat-dialog-actions>
-                            <button [disabled]="!form.controls['client'].value || !clientNameFilterCtrl.value 
-                                || (doorMenOptions && selectedIndexDoorman == -1 ) 
+                    <!-- <div fxFlex="100" fxLayout="row" fxLayoutAlign="center center"> -->
+                        <mat-dialog-actions fxFlex="100" fxLayoutAlign="center center">
+                            <button [disabled]="!form.controls['client'].value || !clientNameFilterCtrl.value
+                                || (doorMenOptions && selectedIndexDoorman == -1 )
                                 || doorMenOptions && selectedIndexDoorman >= doorMenOptions.length"
                                 fxFlex="80" mat-raised-button color="primary" type="submit">
                                 {{ 'SERVICES.REQUEST_DIALOG.REQUEST_BTN_LBL' | translate }}
                             </button>
                         </mat-dialog-actions>
-                    </div>
+                    <!-- </div> -->
 
                     <mat-divider style="visibility:  hidden; height: 20px;" fxFlex="100"></mat-divider>
                     <div fxFlex="95" fxLayout="row" fxLayoutAlign="space-between center">
@@ -69,7 +66,7 @@
                             </mat-button-toggle>
                             <mat-button-toggle value="ROOF_RACK">
                                 <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('ROOF_RACK') }">grid_on</mat-icon>
-                            </mat-button-toggle>                            
+                            </mat-button-toggle>
                             <mat-button-toggle value="PETS">
                                 <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('PETS') }">pets</mat-icon>
                             </mat-button-toggle>
@@ -100,9 +97,121 @@
                         </mat-button-toggle-group>
                     </div>
 
-
                 </div>
             </div>
         </mat-dialog-content>
+
+        <div *ngIf="data.type == 1" fxLayout="column" fxLayoutAlign="start" fxFlex="100">
+          <div fxLayout="column" fxLayoutAlign="space-between center" fxFlex="100">
+              <div fxLayout="row wrap" fxLayoutAlign="space-between center" fxFlex="100">
+                  <h2 mat-dialog-title fxFlex="100">{{ 'SERVICES.REQUEST_DIALOG.TITLE' | translate }}</h2>
+                  <!-- CLIENT GOOGLE MAPS ADRESS -->
+                  <mat-form-field fxFlex="100">
+                    <input #addressAutocomplete matInput formControlName="clientGoogleAdress" name="clientGoogleAdress" autocorrect="off"
+                      autocapitalize="off" spellcheck="off" type="text" required [readOnly]="selectedGooglePlace"
+                      placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_GOOGLE_ADRESS' | translate }}" cdkFocusInitial>
+                      <button *ngIf="selectedGooglePlace" type="button" (click)="clearGoogleLocation()" mat-icon-button matSuffix fxLayoutAlign="center center" >
+                        <mat-icon>close</mat-icon>
+                      </button>
+                  </mat-form-field>
+                  <!-- CLIENT GOOGLE MAPS ADRESS -->
+
+                  <!-- CLIENT ADRESS -->
+                  <!-- <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider> -->
+                  <mat-form-field fxFlex="100">
+                    <!-- <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
+                      <mat-icon class="icon s-40 mr-16">directions</mat-icon>
+                    </div> -->
+                    <input matInput formControlName="clientAddress" name="clientAddress" autocomplete="off" required
+                      placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_ADDRESS' | translate }}" cdkFocusInitial>
+                  </mat-form-field>
+                  <!-- CLIENT ADRESS -->
+
+                  <!-- CLIENT NAME -->
+                  <!-- <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider> -->
+                  <mat-form-field fxFlex="100">
+                      <input matInput formControlName="clientName" name="clientName" autocomplete="off" required
+                        placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_NAME' | translate }}" cdkFocusInitial>
+                    </mat-form-field>
+                    <!-- CLIENT NAME -->
+
+                  <!-- REQUEST BUTTON -->
+                  <!-- <div fxFlex="100" fxLayoutAlign="center center"> -->
+                    <mat-dialog-actions fxFlex="100" fxLayoutAlign="center center">
+                      <button [disabled]="form.invalid"
+                        fxFlex="80" mat-raised-button color="primary" type="submit">
+                        {{ 'SERVICES.REQUEST_DIALOG.REQUEST_BTN_LBL' | translate }}
+                      </button>
+                    </mat-dialog-actions>
+                  <!-- </div> -->
+                  <!-- REQUEST BUTTON -->
+
+                  <!-- CLIENT LOCATION REF -->
+                  <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider>
+                  <mat-form-field fxFlex="100">
+                    <!-- <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
+                      <mat-icon class="icon s-40 mr-16">directions</mat-icon>
+                    </div> -->
+                    <input matInput formControlName="clientLocationRef" name="clientLocationRef" autocomplete="off"
+                      placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_LOCATION_REF' | translate }}" cdkFocusInitial>
+                  </mat-form-field>
+                  <!-- CLIENT LOCATION REF -->
+
+                  <!-- <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider> -->
+
+                  <!-- VEHICLE QUANTITY -->
+                  <!-- <mat-divider style="visibility:  hidden; height: 20px;" fxFlex="100"></mat-divider> -->
+                  <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
+                      <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
+                          <mat-icon class="icon s-40 mr-16">local_taxi</mat-icon>
+                          <span>{{form.controls['quantity'].value}}</span>
+                      </div>
+                      <mat-slider max="5" min="1" step="1" thumbLabel="true" tickInterval="1"
+                          formControlName="quantity" fxFlex="70">
+                      </mat-slider>
+                  </div>
+                  <!-- VEHICLE QUANTITY -->
+
+                  <!-- FEATURES -->
+                  <mat-divider style="visibility:  hidden; height: 10px;" fxFlex="100"></mat-divider>
+                  <div fxFlex="100" fxLayout="row" fxLayoutAlign="end center">
+                      <mat-button-toggle-group name="featureOptionsGroup" formControlName="featureOptionsGroup"
+                          multiple="true">
+                          <mat-button-toggle  value="AC">
+                              <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('AC') }">ac_unit</mat-icon>
+                          </mat-button-toggle>
+                          <mat-button-toggle value="TRUNK">
+                              <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('TRUNK') }">work</mat-icon>
+                          </mat-button-toggle>
+                          <mat-button-toggle value="ROOF_RACK">
+                              <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('ROOF_RACK') }">grid_on</mat-icon>
+                          </mat-button-toggle>
+                          <mat-button-toggle value="PETS">
+                              <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('PETS') }">pets</mat-icon>
+                          </mat-button-toggle>
+                          <mat-button-toggle value="BIKE_RACK">
+                              <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('BIKE_RACK') }">motorcycle</mat-icon>
+                          </mat-button-toggle>
+                      </mat-button-toggle-group>
+                  </div>
+                  <!-- FEATURES -->
+
+                  <!-- TIP -->
+                  <mat-divider style="visibility:  hidden; height: 20px;" fxFlex="100"></mat-divider>
+                  <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
+                    <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
+                      <mat-icon class="icon s-40 mr-16">attach_money</mat-icon>
+                    </div>
+                    <!-- <span fxFlex></span> -->
+                    <!-- <mat-form-field> -->
+                      <input style="border: 2px solid grey; border-radius: 5px; height: 35px;" matInput step="100" min="0" formControlName="clientTip" name="clientTip" type="number"
+                        placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_TIP' | translate }}" cdkFocusInitial>
+                    <!-- </mat-form-field> -->
+                  </div>
+                  <!-- TIP -->
+
+              </div>
+          </div>
+        </div>
     </div>
 </form>

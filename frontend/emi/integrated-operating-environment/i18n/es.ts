@@ -70,7 +70,12 @@ export const locale = {
         TITLE: 'Solicitud de Servicio',
         SATELLITE_CLIENT_PLACEHOLDER: 'Cliente',
         REQUEST_BTN_LBL: 'Solicitar',
-        CLIENT_LIST_TITLE: 'Porteros'
+        CLIENT_LIST_TITLE: 'Porteros',
+        IOE_CLIENT_GOOGLE_ADRESS: 'Ubicación',
+        IOE_CLIENT_ADDRESS: 'Dirección',
+        IOE_CLIENT_LOCATION_REF: 'Lugar Referencia',
+        IOE_CLIENT_NAME: 'Nombre de Cliente',
+        IOE_CLIENT_TIP: 'Propina'
       }
     },
     ERRORS: {

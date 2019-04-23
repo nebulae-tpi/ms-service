@@ -231,7 +231,7 @@
       }
     ],
     "preBuildCommands": [
-      "npm install angular2-hotkeys --save"
+      "npm install angular2-hotkeys --save", "npm install @agm/core@1.0.0-beta.5"
     ],
     "environmentVars": {}
   }

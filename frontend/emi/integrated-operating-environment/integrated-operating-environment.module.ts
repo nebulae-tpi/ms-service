@@ -22,6 +22,9 @@ import { ToolbarComponent as GodsEyeToolbarComponent } from './gods-eye/toolbar/
 import { StatsComponent as GodsEyeStatsComponent } from './gods-eye/stats/stats.component';
 import { MapComponent as GodsEyeMapComponent } from './gods-eye/map/map.component';
 
+import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
+import { environment } from '../../../../environments/environment';
+
 
 
 const routes: Routes = [
@@ -45,7 +48,11 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     FuseWidgetModule,
     HotkeyModule.forRoot(),
-    MatDialogModule
+    MatDialogModule,
+    AgmCoreModule.forRoot({
+      apiKey: environment.google.maps.key,
+      libraries: ['places']
+    }),
   ],
   declarations: [
     OperatorWorkstationComponent,
