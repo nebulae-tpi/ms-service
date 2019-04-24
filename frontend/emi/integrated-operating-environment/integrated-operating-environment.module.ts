@@ -24,6 +24,7 @@ import { MapComponent as GodsEyeMapComponent } from './gods-eye/map/map.componen
 
 import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
 import { environment } from '../../../../environments/environment';
+import { CurrencyMaskModule } from 'ng2-currency-mask';
 
 
 
@@ -49,6 +50,7 @@ const routes: Routes = [
     FuseWidgetModule,
     HotkeyModule.forRoot(),
     MatDialogModule,
+    CurrencyMaskModule,
     AgmCoreModule.forRoot({
       apiKey: environment.google.maps.key,
       libraries: ['places']

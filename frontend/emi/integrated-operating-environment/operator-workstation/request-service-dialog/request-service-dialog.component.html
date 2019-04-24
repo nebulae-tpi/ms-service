@@ -204,8 +204,15 @@
                     </div>
                     <!-- <span fxFlex></span> -->
                     <!-- <mat-form-field> -->
-                      <input style="border: 2px solid grey; border-radius: 5px; height: 35px;" matInput step="100" min="0" formControlName="clientTip" name="clientTip" type="number"
-                        placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_TIP' | translate }}" cdkFocusInitial>
+
+
+                      <!-- <input  type="number" cdkFocusInitial> -->
+
+                        <input class="tip-with-border" min="0" step="100"
+                            placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_TIP' | translate }}"
+                            formControlName="clientTip" name="clientTip" matInput maxlength="8" [(ngModel)]="tipValue" currencyMask
+                            [options]="{ prefix: '$', thousands: '.', precision: '0', align: 'left'}" />
+                            
                     <!-- </mat-form-field> -->
                   </div>
                   <!-- TIP -->
