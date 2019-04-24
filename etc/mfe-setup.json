@@ -73,17 +73,15 @@
         "id": "poi",
         "icon": "map",
         "translate": {
-          "en": "POI",
-          "es": "POI"
+          "en": "_POI",
+          "es": "_POI"
         },
         "navURL": "/poi",
         "path": "poi",
         "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
         "priority": 1000,
         "roles": [
-          "SATELLITE",
-          "OPERATOR",
-          "OPERATION-SUPERVISOR"
+          "_SYSADMIN"
         ],
         "default": false
       }
@@ -194,8 +192,8 @@
         "id": "operator-workstation",
         "icon": "ballot",
         "translate": {
-          "en": "Operator Workstation",
-          "es": "Estación de Trabajo de Operador"
+          "en": "POI",
+          "es": "POI"
         },
         "path": "integrated-operating-environment",
         "navURL": "/integrated-operating-environment/operator-workstation",

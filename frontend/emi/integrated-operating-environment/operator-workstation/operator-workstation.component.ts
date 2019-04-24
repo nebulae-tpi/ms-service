@@ -101,6 +101,7 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
   layoutType: number;
   showInbox = false;
 
+  selectedBusiness: any;
   selectedBusinessId: any;
   userIsSupervisor = false;
 
@@ -181,6 +182,7 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
     this.toolbarService.onSelectedBusiness$
       .pipe(
         tap(bu => {
+          this.selectedBusiness = bu;
           this.selectedBusinessId = bu ? bu.id : null;
           this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED, args: [this.selectedBusinessId] });
         }),

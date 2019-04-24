@@ -1,36 +1,36 @@
 <div fxFlex="100" fxLayoutAlign="start center" class="mat-primary-bg">
-    <button *ngIf="selectedBusinessId" mat-button fxHide.xs (click)="sendDatatableRefreshCommand()">
+    <button *ngIf="selectedBusinessRef && selectedBusinessRef.id" mat-button fxHide.xs (click)="sendDatatableRefreshCommand()">
         <mat-icon span>refresh</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.REFRESH' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId" mat-button fxHide.xs (click)="showRequestServiceDialog(0)">
+    <button *ngIf="selectedBusinessRef && selectedBusinessRef.id" mat-button fxHide.xs (click)="showRequestServiceDialog(0)">
         <mat-icon span>add_box</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.REQUEST' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId" mat-button [matMenuTriggerFor]="actions_menu">
+    <button *ngIf="selectedBusinessRef && selectedBusinessRef.id" mat-button [matMenuTriggerFor]="actions_menu">
         <mat-icon>format_list_bulleted</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.ACTIONS_LBL' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId && (userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin)"
+    <button *ngIf="(selectedBusinessRef && selectedBusinessRef.id) && (userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin)"
         mat-button [matMenuTriggerFor]="view_menu">
         <mat-icon>visibility</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.VIEW' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId && false" mat-button [matMenuTriggerFor]="filter_menu" fxHide.lt-md>
+    <button *ngIf="(selectedBusinessRef && selectedBusinessRef.id) && false" mat-button [matMenuTriggerFor]="filter_menu" fxHide.lt-md>
         <mat-icon>filter_list</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId && (userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin)" mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
+    <button *ngIf="(selectedBusinessRef && selectedBusinessRef.id) && (userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin)" mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
         <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
     </button>
 
-    <button *ngIf="!selectedBusinessId" fxFlex="100" mat-button>
+    <button *ngIf="!(selectedBusinessRef && selectedBusinessRef.id)" fxFlex="100" mat-button>
         <mat-icon>warning</mat-icon> <span class="business-required pl-8">{{ 'WORKSTATION.BUSINESS_UNIT_REQUIRED' | translate }}</span>
     </button>
 
     <span fxFlex></span>
 
-    <div *ngIf="selectedBusinessId" fxLayoutGap="2px grid">
+    <div *ngIf="selectedBusinessRef && selectedBusinessRef.id" fxLayoutGap="2px grid">
         <button mat-button fxFlex="30px" (click)="sendDatatableApplyPrevPage()">
             <mat-icon>keyboard_arrow_left</mat-icon>
         </button>

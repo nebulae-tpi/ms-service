@@ -82,7 +82,8 @@ const REQUEST_SERVICE_DIALOG_MAX_DIMENSION = [400, 400];
 export class ToolbarComponent implements OnInit, OnDestroy {
 
   // selected business in toolbar
-  @Input('selectedBusinessId') selectedBusinessId: any;
+  // @Input('selectedBusiness') selectedBusiness: any;
+  public selectedBusinessRef: any;
   // user is supervisor
   @Input('userIsSupervisor') userIsSupervisor: any;
   // Last refresh command sent timestamp
@@ -136,6 +137,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.listenLayoutChanges();
     this.listenToolbarCommands();
     this.configureHotkeys();
+    console.log('-------------------------------------------', this.selectedBusinessRef);
   }
 
 
@@ -145,9 +147,17 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this._hotkeysService.remove();
   }
 
+  get selectedBusiness(): any {
+    // transform value for display
+    return this.selectedBusinessRef;
+  }
 
-
-
+  @Input()
+  set selectedBusiness(selectedBusiness: any) {
+    // console.log('prev value: ', this._selectedBusiness);
+    // console.log('got name: ', selectedBusiness);
+    this.selectedBusinessRef = selectedBusiness;
+  }
 
   //#region Events/Commands listeners
   listenLayoutChanges() {
@@ -197,7 +207,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   configureHotkeys() {
     this._hotkeysService.add(new Hotkey(['+', 's'], (event: KeyboardEvent): boolean => {
-      if (this.selectedBusinessId){
+      if (this.selectedBusinessRef && this.selectedBusinessRef.id){
         this.showRequestServiceDialog(0);
       } else {
         this.showMessageSnackbar('ERRORS.3');
@@ -205,7 +215,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['alt+s'], (event: KeyboardEvent): boolean => {
-      if (this.selectedBusinessId){
+      if (this.selectedBusinessRef && this.selectedBusinessRef.id){
         this.showRequestServiceDialog(1);
       } else {
         this.showMessageSnackbar('ERRORS.3');
@@ -213,7 +223,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       return false;
     }));
     this._hotkeysService.add(new Hotkey(['r'], (event: KeyboardEvent): boolean => {
-      if (this.selectedBusinessId){
+      if (this.selectedBusinessRef && this.selectedBusinessRef.id ){
         this.sendDatatableRefreshCommand();
       }
       return false;
@@ -278,7 +288,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     dialogConfig.width = `${width}px`;
     dialogConfig.height = `${height + 50}px`;
     dialogConfig.autoFocus = true;
-    dialogConfig.data = { type };
+    dialogConfig.data = { type, business: this.selectedBusinessRef };
     console.log('DIALOG CONFIG ==> ', dialogConfig);
 
     this.requestServiceDialogRef = this.dialog.open(RequestServiceDialogComponent, dialogConfig);

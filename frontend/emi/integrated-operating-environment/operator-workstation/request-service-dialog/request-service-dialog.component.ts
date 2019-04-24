@@ -134,7 +134,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     this.buildRequesServiceForm();
     this.buildClientNameFilterCtrl();
     this.configureHotkeys();
-
   }
 
   ngAfterViewInit(){
@@ -147,7 +146,10 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     this._hotkeysService.remove(this.hotkeys);
   }
 
+
+
   buildPlacesAutoComplete() {
+    console.log('buildPlacesAutoComplete');
     if (this.addressAutocomplete) {
 
       this.mapsAPILoader.load().then(() => {
@@ -157,6 +159,27 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
             componentRestrictions: { country: 'co' }
           }
         );
+
+        if (this.data.business && this.data.business.attributes && this.data.business.attributes.length > 0 ){
+          const buAttributes = this.data.business.attributes;
+          const attrs = buAttributes.filter(e => e.key === 'latitude' || e.key === 'longitude');
+
+          if (attrs.length === 2){
+            const lat =  attrs.find(e => e.key === 'latitude').value;
+            const lng =  attrs.find(e => e.key === 'longitude').value;
+            console.log('################', {lat, lng});
+
+            const circle = new google.maps.Circle({
+              center: new google.maps.LatLng(parseFloat(lat), parseFloat(lng)),
+              radius: 20000 // meters
+            });
+
+            this.placesAutocomplete.setOptions({ bounds: circle.getBounds(), strictBounds: true });
+
+
+          }
+
+        }
 
         this.placesAutocomplete.addListener('place_changed', () => {
           this.ngZone.run(() => {
@@ -173,6 +196,11 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
                 longitude: place.geometry.location.lng()
               }
             };
+            console.log({
+              latitude: place.geometry.location.lat(),
+              longitude: place.geometry.location.lng()}
+            );
+
           });
         });
       });
@@ -183,6 +211,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           tap(e => this.clearGoogleLocation()),
           takeUntil(this.ngUnsubscribe)
         ).subscribe();
+
     }
   }
 
