@@ -342,7 +342,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
                 ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
                 : client.satelliteInfo
                   ? client.satelliteInfo.tip
-                  : undefined,
+                  : null,
             tipType: this.doorMenOptions
               ? this.doorMenOptions[this.selectedIndexDoorman].tipType
               : client.satelliteInfo ? client.satelliteInfo.tipType : '',
