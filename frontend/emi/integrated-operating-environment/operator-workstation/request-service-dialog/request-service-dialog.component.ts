@@ -380,7 +380,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           }
         })),
         tap(rqst => console.log('Enviando REQUEST ==> ', JSON.stringify(rqst))),
-        filter(r => false),
         mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
         takeUntil(this.ngUnsubscribe)
       )

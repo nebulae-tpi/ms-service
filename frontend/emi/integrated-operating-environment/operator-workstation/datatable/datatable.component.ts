@@ -119,6 +119,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
   channelsFilter: String[] = ['OPERATOR'];
   // selected state filters
   statesFilter: String[] = [];
+  //last cancelled Service command
+  lastCancelledService: {id: string, time: number} = null;
 
 
   constructor(
@@ -535,11 +537,15 @@ export class DatatableComponent implements OnInit, OnDestroy {
    */
   cancelSelectedTrip() {
     const selectedRow = this.getSelectedRow();
+    if(this.lastCancelledService && this.lastCancelledService.id === selectedRow.id && (this.lastCancelledService.time + 5000 ) > Date.now()){
+      return;           
+    }
     if(selectedRow && selectedRow.state.includes('CANCELLED')){
       this.showMessageSnackbar('ERRORS.4')
       return;
     }
     if (selectedRow) {
+      this.lastCancelledService = { id: selectedRow.id, time: Date.now()};
       this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
         (results) => {
           console.log(`DatatableComponent.cancelService = ${results}`);

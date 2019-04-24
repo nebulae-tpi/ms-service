@@ -122,7 +122,7 @@
                     <!-- <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
                       <mat-icon class="icon s-40 mr-16">directions</mat-icon>
                     </div> -->
-                    <input matInput formControlName="clientAddress" name="clientAddress" autocomplete="off" required
+                    <input matInput formControlName="clientAddress" name="clientAddress" autocomplete="off" required maxlength="40"
                       placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_ADDRESS' | translate }}" cdkFocusInitial>
                   </mat-form-field>
                   <!-- CLIENT ADRESS -->
@@ -130,7 +130,7 @@
                   <!-- CLIENT NAME -->
                   <!-- <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider> -->
                   <mat-form-field fxFlex="100">
-                      <input matInput formControlName="clientName" name="clientName" autocomplete="off" required
+                      <input matInput formControlName="clientName" name="clientName" autocomplete="off" required maxlength="40"
                         placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_NAME' | translate }}" cdkFocusInitial>
                     </mat-form-field>
                     <!-- CLIENT NAME -->
@@ -152,7 +152,7 @@
                     <!-- <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
                       <mat-icon class="icon s-40 mr-16">directions</mat-icon>
                     </div> -->
-                    <input matInput formControlName="clientLocationRef" name="clientLocationRef" autocomplete="off"
+                    <input matInput formControlName="clientLocationRef" name="clientLocationRef" autocomplete="off" maxlength="40"
                       placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_LOCATION_REF' | translate }}" cdkFocusInitial>
                   </mat-form-field>
                   <!-- CLIENT LOCATION REF -->
