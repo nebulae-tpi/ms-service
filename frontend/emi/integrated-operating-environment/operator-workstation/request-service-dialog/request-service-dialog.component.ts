@@ -106,6 +106,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
   // searchElementRef: ElementRef;
   @ViewChild('addressAutocomplete') addressAutocomplete: ElementRef;
   selectedGooglePlace = null;
+  selectedGooglePlaceAddress = '';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -173,10 +174,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
               center: new google.maps.LatLng(parseFloat(lat), parseFloat(lng)),
               radius: 20000 // meters
             });
-
             this.placesAutocomplete.setOptions({ bounds: circle.getBounds(), strictBounds: true });
-
-
           }
 
         }
@@ -196,7 +194,11 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
                 longitude: place.geometry.location.lng()
               }
             };
+
+            this.selectedGooglePlaceAddress = this.selectedGooglePlace.address;
+
             console.log({
+              selectedGooglePlace: this.selectedGooglePlace,
               latitude: place.geometry.location.lat(),
               longitude: place.geometry.location.lng()}
             );
@@ -217,6 +219,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
 
   clearGoogleLocation(){
     this.form.patchValue({clientGoogleAdress: null});
+    this.selectedGooglePlaceAddress = '';
     this.selectedGooglePlace = null;
   }
 
@@ -230,7 +233,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     this.form = new FormGroup({
       client: new FormControl(undefined, [Validators.nullValidator]),
       clientGoogleAdress: new FormControl(null),
-      clientAddress: new FormControl(null),
+      // clientAddress: new FormControl(null),
       clientLocationRef: new FormControl(null),
       clientName: new FormControl(null),
       quantity: new FormControl(1, [Validators.min(1), Validators.max(5)]),
@@ -306,7 +309,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           _id: null,
           generalInfo: {
             name: rawRequest.clientName,
-            addressLine1: rawRequest.clientAddress,
+            addressLine1: this.selectedGooglePlaceAddress,
             addressLine2: rawRequest.clientLocationRef,
           },
           location: {

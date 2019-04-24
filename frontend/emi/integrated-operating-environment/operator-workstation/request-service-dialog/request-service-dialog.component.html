@@ -107,9 +107,10 @@
                   <h2 mat-dialog-title fxFlex="100">{{ 'SERVICES.REQUEST_DIALOG.TITLE' | translate }}</h2>
                   <!-- CLIENT GOOGLE MAPS ADRESS -->
                   <mat-form-field fxFlex="100">
-                    <input #addressAutocomplete matInput formControlName="clientGoogleAdress" name="clientGoogleAdress" autocorrect="off"
-                      autocapitalize="off" spellcheck="off" type="text" required [readOnly]="selectedGooglePlace"
-                      placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_GOOGLE_ADRESS' | translate }}" cdkFocusInitial>
+                    <input #addressAutocomplete matInput formControlName="clientGoogleAdress" name="clientGoogleAdress"
+                        autocorrect="off" autocapitalize="off" spellcheck="off" type="text" required
+                        [readOnly]="selectedGooglePlace" cdkFocusInitial
+                        placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_GOOGLE_ADRESS' | translate }}">
                       <!-- <button *ngIf="selectedGooglePlace" type="button" (click)="clearGoogleLocation()" mat-icon-button matSuffix fxLayoutAlign="center center" >
                         <mat-icon>close</mat-icon>
                       </button> -->
@@ -118,19 +119,16 @@
 
                   <!-- CLIENT ADRESS -->
                   <!-- <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider> -->
-                  <mat-form-field fxFlex="100">
-                    <!-- <div class="h2 secondary-text" fxLayoutAlign="left center" fxFlex="20">
-                      <mat-icon class="icon s-40 mr-16">directions</mat-icon>
-                    </div> -->
+                  <!-- <mat-form-field fxFlex="100">
                     <input matInput formControlName="clientAddress" name="clientAddress" autocomplete="off" required maxlength="40"
                       placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_ADDRESS' | translate }}" cdkFocusInitial>
-                  </mat-form-field>
+                  </mat-form-field> -->
                   <!-- CLIENT ADRESS -->
 
                   <!-- CLIENT NAME -->
                   <!-- <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider> -->
                   <mat-form-field fxFlex="100">
-                      <input matInput formControlName="clientName" name="clientName" autocomplete="off" required maxlength="40"
+                      <input matInput formControlName="clientName" name="clientName" autocomplete="off" required minlength="3" maxlength="40"
                         placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_NAME' | translate }}" cdkFocusInitial>
                     </mat-form-field>
                     <!-- CLIENT NAME -->
@@ -210,9 +208,9 @@
 
                         <input class="tip-with-border" min="0" step="100"
                             placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_TIP' | translate }}"
-                            formControlName="clientTip" name="clientTip" matInput maxlength="8" [(ngModel)]="tipValue" currencyMask
+                            formControlName="clientTip" name="clientTip" matInput maxlength="8" currencyMask
                             [options]="{ prefix: '$', thousands: '.', precision: '0', align: 'left'}" />
-                            
+
                     <!-- </mat-form-field> -->
                   </div>
                   <!-- TIP -->
