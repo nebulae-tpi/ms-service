@@ -106,7 +106,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
   // searchElementRef: ElementRef;
   @ViewChild('addressAutocomplete') addressAutocomplete: ElementRef;
   selectedGooglePlace = null;
-  selectedGooglePlaceAddress = '';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -150,9 +149,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
 
 
   buildPlacesAutoComplete() {
-    console.log('buildPlacesAutoComplete');
     if (this.addressAutocomplete) {
-
       this.mapsAPILoader.load().then(() => {
         this.placesAutocomplete = new google.maps.places.Autocomplete(
           this.addressAutocomplete.nativeElement,
@@ -195,8 +192,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
               }
             };
 
-            this.selectedGooglePlaceAddress = this.selectedGooglePlace.address;
-
             console.log({
               selectedGooglePlace: this.selectedGooglePlace,
               latitude: place.geometry.location.lat(),
@@ -219,7 +214,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
 
   clearGoogleLocation(){
     this.form.patchValue({clientGoogleAdress: null});
-    this.selectedGooglePlaceAddress = '';
     this.selectedGooglePlace = null;
   }
 
@@ -309,7 +303,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           _id: null,
           generalInfo: {
             name: rawRequest.clientName,
-            addressLine1: this.selectedGooglePlaceAddress,
+            addressLine1: this.selectedGooglePlace.address;,
             addressLine2: rawRequest.clientLocationRef,
           },
           location: {
