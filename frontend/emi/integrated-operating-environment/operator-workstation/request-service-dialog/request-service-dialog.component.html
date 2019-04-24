@@ -110,9 +110,9 @@
                     <input #addressAutocomplete matInput formControlName="clientGoogleAdress" name="clientGoogleAdress" autocorrect="off"
                       autocapitalize="off" spellcheck="off" type="text" required [readOnly]="selectedGooglePlace"
                       placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_GOOGLE_ADRESS' | translate }}" cdkFocusInitial>
-                      <button *ngIf="selectedGooglePlace" type="button" (click)="clearGoogleLocation()" mat-icon-button matSuffix fxLayoutAlign="center center" >
+                      <!-- <button *ngIf="selectedGooglePlace" type="button" (click)="clearGoogleLocation()" mat-icon-button matSuffix fxLayoutAlign="center center" >
                         <mat-icon>close</mat-icon>
-                      </button>
+                      </button> -->
                   </mat-form-field>
                   <!-- CLIENT GOOGLE MAPS ADRESS -->
 
