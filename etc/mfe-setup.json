@@ -67,25 +67,7 @@
         "priority": 1000
       }
     ],
-    "contents": [
-      {
-        "groupId": "integrated-operating-environment",
-        "id": "poi",
-        "icon": "map",
-        "translate": {
-          "en": "_POI",
-          "es": "_POI"
-        },
-        "navURL": "/poi",
-        "path": "poi",
-        "loadChildren": "./main/content/satellite/satellite.module#SatelliteModule",
-        "priority": 1000,
-        "roles": [
-          "_SYSADMIN"
-        ],
-        "default": false
-      }
-    ],
+    "contents": [],
     "preBuildCommands": [],
     "environmentVars": {}
   },
@@ -195,8 +177,8 @@
           "en": "POI",
           "es": "POI"
         },
-        "path": "integrated-operating-environment",
-        "navURL": "/integrated-operating-environment/operator-workstation",
+        "path": "poi",
+        "navURL": "/poi",
         "loadChildren": "./main/content/integrated-operating-environment/integrated-operating-environment.module#IntegratedOperatingEnvironmentModule",
         "priority": 1000,
         "roles": [

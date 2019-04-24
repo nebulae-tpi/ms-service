@@ -309,16 +309,13 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
             addressLine1: rawRequest.clientAddress,
             addressLine2: rawRequest.clientLocationRef,
           },
-          satelliteInfo: {
-            tip: rawRequest.clientTip,
-            tipType: 'CASH'
-          },
           location: {
             lat: this.selectedGooglePlace.coords.latitude,
             lng: this.selectedGooglePlace.coords.longitude
           }
         },
-        fareDiscount: this.data.type === 1 ? 0.1 : undefined
+        fareDiscount: this.data.type === 1 ? 0.1 : undefined,
+        tip: rawRequest.clientTip
       };
     }
     this.requestService(rawRequest);
