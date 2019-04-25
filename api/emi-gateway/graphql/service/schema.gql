@@ -38,7 +38,7 @@ type ServiceServiceLocation {
 "Client info."
 type ServiceServiceClient {
   "Client id"
-  id: String!
+  id: String
   "Business id where the client belongs"
   businessId: String!
   "Username of the client"
