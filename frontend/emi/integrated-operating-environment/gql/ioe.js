@@ -112,7 +112,7 @@ export const IOEServiceSubscription = gql`
         timestamp,
         requestedFeatures,
         client{
-        id,
+          # id,
           businessId,
           fullname,
           username,
