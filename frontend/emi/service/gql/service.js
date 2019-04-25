@@ -74,7 +74,7 @@ export const ServiceServiceFieldsFragment = gql`
         fullname
       }
       client {
-        id
+        # id
         businessId
         username
         fullname
@@ -166,7 +166,7 @@ export const ServiceService = gql`
         fullname
       }
       client {
-        id
+        # id
         businessId
         username
         fullname
@@ -358,7 +358,7 @@ export const ServiceServiceUpdatedSubscription = gql`
         fullname
       }
       client {
-        id
+        # id
         businessId
         username
         fullname
