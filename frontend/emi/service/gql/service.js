@@ -258,7 +258,8 @@ export const ServiceServices = gql`
         fullname
       }
       client {
-        id
+        # this field cant be featched due at bug in apollo client https://github.com/apollographql/apollo-client/issues/3903
+        # id, 
         businessId
         username
         fullname

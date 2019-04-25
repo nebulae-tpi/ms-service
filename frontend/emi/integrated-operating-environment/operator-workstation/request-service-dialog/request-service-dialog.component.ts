@@ -302,7 +302,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         client: {
           _id: null,
           generalInfo: {
-            name: rawRequest.clientName,
+            name: rawRequest.clientName.toUpperCase(),
             addressLine1: this.selectedGooglePlace.address,
             addressLine2: rawRequest.clientLocationRef,
           },

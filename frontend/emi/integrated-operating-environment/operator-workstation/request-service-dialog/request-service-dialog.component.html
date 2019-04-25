@@ -109,7 +109,6 @@
                   <mat-form-field fxFlex="100">
                     <input #addressAutocomplete matInput formControlName="clientGoogleAdress" name="clientGoogleAdress"
                         autocorrect="off" autocapitalize="off" spellcheck="off" type="text" required
-                        value="{{ selectedGooglePlace ? selectedGooglePlace.address : '' }}"
                         [readOnly]="selectedGooglePlace" cdkFocusInitial
                         placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_GOOGLE_ADRESS' | translate }}">
                       <!-- <button *ngIf="selectedGooglePlace" type="button" (click)="clearGoogleLocation()" mat-icon-button matSuffix fxLayoutAlign="center center" >
