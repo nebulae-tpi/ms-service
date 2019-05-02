@@ -5,7 +5,6 @@ import { GatewayService } from '../../../api/gateway.service';
 export class IntegratedOperatingEnvironmentService {
 
   constructor(private gateway: GatewayService) {
-  }  
-    
-
+  }
+  
 }
