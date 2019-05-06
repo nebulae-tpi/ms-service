@@ -15,7 +15,6 @@ const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const { concat, forkJoin } = require('rxjs');
 
 
-
 const shift = require('./domain/shift');
 const Cronjob = require('./domain/cronjob');
 const Wallet = require('./domain/cronjob');
