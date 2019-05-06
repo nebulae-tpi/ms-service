@@ -17,10 +17,10 @@ const start = () => {
         mongoDB.start$(),
         eventSourcing.eventStore.start$(),
 
-        forkJoin(
-            shift.start$,
-            service.start$
-        ),
+        // forkJoin(
+        //     shift.start$,
+        //     service.start$
+        // ),
         
         // // executing maintenance tasks
         eventStoreService.syncState$(),

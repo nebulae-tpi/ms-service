@@ -14,6 +14,7 @@ const driver = require('./domain/driver');
 const vehicle = require('./domain/vehicle');
 const service = require('./domain/service');
 
+
 const start = () => {
     concat(
         eventSourcing.eventStore.start$(),
