@@ -13,7 +13,7 @@ spec:
         app: integrated-operating-environment
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.integratedoperatingenvironment:1.2.23 # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment 
+      - image: DOCKERHUB/service.backend.integratedoperatingenvironment:1.2.25 # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment 
         name: integrated-operating-environment
         volumeMounts:
         - name: google-application-credentials
@@ -62,7 +62,7 @@ spec:
           value: "GMT-5"
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
-          value: "06-05-19_004"
+          value: "06-05-19_005"
         
       volumes:
       - name: google-application-credentials

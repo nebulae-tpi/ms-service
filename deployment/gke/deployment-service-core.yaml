@@ -13,7 +13,7 @@ spec:
         app: service-core
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.servicecore:2.8.43 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
+      - image: DOCKERHUB/service.backend.servicecore:2.8.45 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
         name: service-core
         volumeMounts:
         - name: google-application-credentials
@@ -64,7 +64,7 @@ spec:
           value: "1500"
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
-          value: "06-05-19_004"
+          value: "06-05-19_005"
         
       volumes:
       - name: google-application-credentials

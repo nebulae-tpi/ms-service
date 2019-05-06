@@ -23,7 +23,7 @@ const start = () => {
         // ),
         
         // // executing maintenance tasks
-        eventStoreService.syncState$(),
+        // eventStoreService.syncState$(),
 
         // stoping resources
         eventSourcing.eventStore.stop$(),
