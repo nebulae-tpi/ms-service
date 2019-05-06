@@ -42,4 +42,5 @@ const routes: Routes = [
   providers: [ ShiftListService, ShiftDetailService, DatePipe]
 })
 
+
 export class ShiftsModule {}

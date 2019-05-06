@@ -92,8 +92,7 @@ class EventStoreService {
   */
   syncState$() {
     return from(this.aggregateEventsArray).pipe(
-      filter(evt => (evt.aggregateType != "Service" || evt.aggregateType != "Shift" )),
-      tap(r => console.log('Listening to: ==> ', r)),
+      filter(evt => (evt.aggregateType != "Service" && evt.aggregateType != "Shift" )),
       concatMap(params => this.subscribeEventRetrieval$(params))
     )
   }
