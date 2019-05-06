@@ -92,6 +92,7 @@ class EventStoreService {
   */
   syncState$() {
     return from(this.aggregateEventsArray).pipe(
+      filter(() => false),
       concatMap(params => this.subscribeEventRetrieval$(params))
     )
   }

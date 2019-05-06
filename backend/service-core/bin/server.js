@@ -18,6 +18,7 @@ const wallet = require('./domain/wallet');
 
 
 
+
 const start = () => {
     concat(
         eventSourcing.eventStore.start$(),

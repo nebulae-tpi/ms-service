@@ -4,7 +4,6 @@ import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 
-import { ShiftService } from './shift.service';
 
 import { ShiftListService } from './shift-list/shift-list.service';
 import { ShiftListComponent } from './shift-list/shift-list.component';
@@ -43,7 +42,7 @@ const routes: Routes = [
     ShiftStateChangesComponent
   ],
   entryComponents: [DialogComponent],
-  providers: [ ShiftService, ShiftListService, ShiftDetailService, DatePipe]
+  providers: [ ShiftListService, ShiftDetailService, DatePipe]
 })
 
 export class ShiftsModule {}
