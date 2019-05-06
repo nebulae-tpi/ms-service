@@ -7,13 +7,32 @@ if (process.env.NODE_ENV !== 'production') {
 const mongoDB = require('./data/MongoDB').singleton();
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
-const Rx = require('rxjs');
+
+const DriverDA = require('./data/DriverDA');
+const VehicleDA = require('./data/VehicleDA');
+const ServiceDA = require('./domain/service/data-access/ServiceDA');
+const ClientDA = require('./domain/client/data-access/ClientDA');
+const shift = require('./domain/shift');
+const Cronjob = require('./domain/cronjob');
+const Wallet = require('./domain/cronjob');
+
+const { concat, forkJoin } = require('rxjs');
 
 const start = () => {
-    Rx.concat(
+    concat(
         // initializing needed resources
         mongoDB.start$(),
         eventSourcing.eventStore.start$(),
+
+        forkJoin(
+            DriverDA.start$(),
+            VehicleDA.start$(),
+            ServiceDA.start$(),
+            ClientDA.start$(),
+            Wallet.start$,
+            shift.start$,
+            Cronjob.start$
+        ),
         
         // // executing maintenance tasks
         eventStoreService.syncState$(),
