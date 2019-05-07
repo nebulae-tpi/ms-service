@@ -15,19 +15,16 @@ const start = () => {
     concat(
         // initializing needed resources
         mongoDB.start$(),
-        eventSourcing.eventStore.start$(),
-
+        // eventSourcing.eventStore.start$(),
         // forkJoin(
         //     shift.start$,
         //     service.start$
-        // ),
-        
-        // // executing maintenance tasks
-        eventStoreService.syncState$(),
-
+        // ),        
+        // executing maintenance tasks
+        // eventStoreService.syncState$(),
         // stoping resources
-        eventSourcing.eventStore.stop$(),
-        eventStoreService.stop$(),
+        // eventStoreService.stop$(),
+        // eventSourcing.eventStore.stop$(),        
         mongoDB.stop$(),
     ).subscribe(
         (evt) => console.log(`service (syncing): ${(evt instanceof Object) ? JSON.stringify(evt) : evt}`),

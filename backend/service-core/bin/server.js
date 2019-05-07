@@ -15,8 +15,6 @@ const vehicle = require('./domain/vehicle');
 const service = require('./domain/service');
 const wallet = require('./domain/wallet');
 
-
-
 const start = () => {
     concat(
         eventSourcing.eventStore.start$(),
