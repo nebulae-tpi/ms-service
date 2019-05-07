@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.driverapplink:2.9.38 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: DOCKERHUB/service.backend.driverapplink:2.9.39 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -62,7 +62,7 @@ spec:
           value: "GMT-5"
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
-          value: "07-05-19_01"
+          value: "07-05-19_02"
         # DRIVER-APP-LINK CONFIG
         - name: DRIVER_APP_MQTT_SERVER_URL
           valueFrom:
