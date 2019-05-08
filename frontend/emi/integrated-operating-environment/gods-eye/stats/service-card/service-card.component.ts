@@ -185,7 +185,7 @@ export class ServiceCardComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     ).subscribe(
       ({ data, count }) => {
-        console.log(`ServiceCardComponent.listenStatsCommands`, { data, count });
+        //console.log(`ServiceCardComponent.listenStatsCommands`, { data, count });
       },
       (error) => console.error(`ServiceCardComponent.listenStatsCommands: Error => ${error}`),
       () => {

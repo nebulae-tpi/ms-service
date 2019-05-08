@@ -169,7 +169,7 @@ export class ShiftCardComponent implements OnInit, OnDestroy {
       takeUntil(this.ngUnsubscribe)
     ).subscribe(
       ({data, count}) => {
-        console.log(`ShiftCardComponent.listenStatsCommands`, { data, count });        
+        //console.log(`ShiftCardComponent.listenStatsCommands`, { data, count });        
       },
       (error) => console.error(`ShiftCardComponent.listenStatsCommands: Error => ${error}`),
       () => {
