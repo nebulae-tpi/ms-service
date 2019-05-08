@@ -1,0 +1,16 @@
+<div class="card">
+    <div class="card-preview">
+
+        <div class="fuse-card">
+            <div class="p-16">
+                <div class="h1 font-weight-300">{{ 'GODSEYE.STATS.SHIFTS' | translate }}: {{dataCount}}</div>
+            </div>
+            <div class="h-100">
+                <ngx-charts-bar-horizontal  [animations]="false" [scheme]="scheme" [results]="data" [yAxis]="true"
+                    [showDataLabel]="true">
+                </ngx-charts-bar-horizontal>
+            </div>
+            <div class="card-divider mb-0"></div>
+        </div>
+    </div>
+</div>
