@@ -6,6 +6,7 @@ import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 import { ToolbarService } from '../../toolbar/toolbar.service';
 import { HotkeyModule, HotkeysService } from 'angular2-hotkeys';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { IntegratedOperatingEnvironmentService } from './integrated-operating-environment.service';
 
@@ -20,6 +21,8 @@ import { GodsEyeService } from './gods-eye/gods-eye.service';
 import { GodsEyeComponent } from './gods-eye/gods-eye.component';
 import { ToolbarComponent as GodsEyeToolbarComponent } from './gods-eye/toolbar/toolbar.component';
 import { StatsComponent as GodsEyeStatsComponent } from './gods-eye/stats/stats.component';
+import { ShiftCardComponent } from './gods-eye/stats/shift-card/shift-card.component';
+import { ServiceCardComponent } from './gods-eye/stats/service-card/service-card.component';
 import { MapComponent as GodsEyeMapComponent } from './gods-eye/map/map.component';
 
 import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
@@ -55,6 +58,7 @@ const routes: Routes = [
       apiKey: environment.google.maps.key,
       libraries: ['places']
     }),
+    NgxChartsModule,
   ],
   declarations: [
     OperatorWorkstationComponent,
@@ -66,6 +70,8 @@ const routes: Routes = [
     GodsEyeComponent,
     GodsEyeToolbarComponent,
     GodsEyeStatsComponent,
+    ShiftCardComponent,
+    ServiceCardComponent,
     GodsEyeMapComponent
   ],
   entryComponents: [WorkstationRequestServiceDialogComponent],

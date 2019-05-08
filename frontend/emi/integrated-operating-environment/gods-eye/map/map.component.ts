@@ -16,6 +16,8 @@ import {
   Validators
 } from '@angular/forms';
 
+import { environment } from '../../../../../../environments/environment';
+
 import { Router, ActivatedRoute } from '@angular/router';
 
 ////////// RXJS ///////////
@@ -61,8 +63,9 @@ import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
 
 //////////// MAPS ////////////
-// import { MapRef } from './entities/agmMapRef';
-// import { MarkerRef, ClientPoint, MarkerRefOriginalInfoWindowContent } from './entities/markerRef';
+//import {} from 'googlemaps';
+
+
 
 
 @Component({
@@ -95,6 +98,10 @@ export class MapComponent implements OnInit, OnDestroy {
 
   // markers
   pins = {};
+  // summary stats
+  shiftsSummary = { AVAILABLE: 0, NOT_AVAILABLE: 0, BUSY: 0, BLOCKED: 0, OFFLINE: 0 };
+  // service stats
+  servicesSummary = { REQUESTED: 0, ASSIGNED: 0, ARRIVED: 0, ON_BOARD: 0, DONE: 0, CANCELLED_CLIENT: 0, CANCELLED_OPERATOR: 0, CANCELLED_DRIVER: 0, CANCELLED_SYSTEM: 0}
   // current selected service id
   private selectedServiceId = undefined;
   //current zoom
@@ -108,6 +115,8 @@ export class MapComponent implements OnInit, OnDestroy {
   // businessId = undefined;
   userId = undefined;
   seeAllOperation = false;
+  // map of service vs bouncing shifts array
+  bouncingShifts = {};
   channelFilter = ["OPERATOR", "CLIENT"];
   stateFilter = ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER", "CANCELLED_SYSTEM", "DONE"];
 
@@ -135,7 +144,8 @@ export class MapComponent implements OnInit, OnDestroy {
     this.initMap();
     this.listenLayoutChanges();
     this.listenToolbarCommands();
-    await this.resetData();
+    this.listenBusinessChanges();
+    //await this.resetData();
     this.subscribeIOEServicesListener();
     this.subscribeIOEShiftsListener();
     this.registerTimer();
@@ -164,6 +174,32 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   //#region LISTENERS
+
+  listenBusinessChanges() {
+    this.toolbarService.onSelectedBusiness$
+      .pipe(
+        filter(bu => bu !== undefined && bu !== null),
+        map(bu => {
+          return {
+            selectedBusinessId: bu.id,
+            businessLocation: {
+              latitude: '4.633400', // def value
+              longitude: '-74.094829', // def value
+              ...((bu.attributes || []).reduce((acc, obj) => { acc[obj.key] = obj.value; return acc; }, {}))
+            }
+          };
+        }),
+        tap(({ selectedBusinessId, businessLocation }) => {
+          this.selectedBusinessId = selectedBusinessId;
+          this.map.setCenter(new google.maps.LatLng(parseFloat(businessLocation.latitude), parseFloat(businessLocation.longitude)));
+          this.map.setZoom(13);
+          this.resetDataAndSubscriptions();
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe();
+  }
+
   /**
    * Listen layout (size and distribution) changes
    */
@@ -176,8 +212,6 @@ export class MapComponent implements OnInit, OnDestroy {
     ).subscribe(
       (layout) => {
         this.mapHeight = layout.map.height;
-        // console.log(`Layout = ${JSON.stringify(layout)}`);
-        this.recalculatePartialData();
       },
       (error) => console.error(`MapComponent.listenLayoutChanges: Error => ${error}`),
       () => {
@@ -197,7 +231,7 @@ export class MapComponent implements OnInit, OnDestroy {
       async ({ code, args }) => {
         switch (code) {
           case GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:
-            console.log('GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:');
+            //console.log('GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:');
             this.resetData();
             break;
           case GodsEyeService.TOOLBAR_COMMAND_MAP_APPLY_CHANNEL_FILTER:
@@ -205,14 +239,6 @@ export class MapComponent implements OnInit, OnDestroy {
           case GodsEyeService.TOOLBAR_COMMAND_MAP_APPLY_SERVICE_FILTER:
             break;
           case GodsEyeService.TOOLBAR_COMMAND_MAP_CHANGE_ZOOM:
-            if (this.zoom !== args.zoom) {
-              await this.recalculatePartialData();
-            }
-            break;
-          case GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
-            console.log('GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED');
-            this.selectedBusinessId = args[0];
-            this.resetDataAndSubscriptions();
             break;
         }
         // console.log({ code, args });
@@ -241,6 +267,7 @@ export class MapComponent implements OnInit, OnDestroy {
         (service: any) => {
           service.type = 'SERVICE';
           this.applyHotUpdate(service);
+          this.toggleServiceOfferBounce(service);
         },
         (error) => console.error(`MapComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
         () => {
@@ -299,7 +326,11 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Loads the entire data from DB
    */
-  async resetData() {
+  async resetData() {    
+    this.shiftsSummary = { AVAILABLE: 0, NOT_AVAILABLE: 0, BUSY: 0, BLOCKED: 0, OFFLINE: 0 };
+    this.servicesSummary = { REQUESTED: 0, ASSIGNED: 0, ARRIVED: 0, ON_BOARD: 0, DONE: 0, CANCELLED_CLIENT: 0, CANCELLED_OPERATOR: 0, CANCELLED_DRIVER: 0, CANCELLED_SYSTEM: 0};
+    this.processStats(undefined, undefined);
+    
     Object.keys(this.pins).forEach(k => this.removePin(this.pins[k]));
     const today = new Date();
     const explorePastMonth = today.getDate() <= 1;
@@ -312,8 +343,11 @@ export class MapComponent implements OnInit, OnDestroy {
     totalRawData.forEach(raw => {
       this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
       this.pins[raw.id].marker.setMap(this.map)
+      this.processStats(this.pins[raw.id], undefined, false);
+      if (raw.type == 'SERVICE') { this.toggleServiceOfferBounce(raw); }
     });
-    await this.recalculatePartialData();
+
+    this.processStats(undefined, undefined);
   }
 
   async resetDataAndSubscriptions() {
@@ -333,14 +367,46 @@ export class MapComponent implements OnInit, OnDestroy {
     if (raw.closed || raw.state === 'CLOSED') {
       if (oldPin) {
         this.removePin(oldPin);
+        this.processStats(undefined, oldPin);
       }
     } else if (oldPin) {
       this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw, oldPin) : this.convertShiftToMapFormat(raw, oldPin);
+      this.processStats(this.pins[raw.id], oldPin);
     } else {
       this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
-      this.pins[raw.id].marker.setMap(this.map)
+      this.pins[raw.id].marker.setMap(this.map);
+      this.processStats(this.pins[raw.id], oldPin);
     }
-    await this.recalculatePartialData();
+  }
+
+  toggleServiceOfferBounce(service) {
+    if (service.state == 'REQUESTED' && service.offer) {
+      const serviceShifts: [string] = this.bouncingShifts[service.id] || [];
+      service.offer.shifts
+        .filter(sId => !serviceShifts.includes(sId))
+        .map(sId => this.pins[sId])
+        .filter(pin => pin)
+        .forEach(pin => {
+          pin.marker.setAnimation(google.maps.Animation.BOUNCE)
+          serviceShifts.push(pin.id);
+          this.bouncingShifts[service.id] = serviceShifts;
+        });
+    } else if (this.bouncingShifts[service.id] !== undefined) {
+      //console.log(`toggleServiceOfferBounce: ${service.state}: ${this.bouncingShifts[service.id]}`);
+      this.bouncingShifts[service.id]
+        .map(sId => this.pins[sId])
+        .filter(pin => pin)
+        .filter(pin => // do not stpo bouncing pins if they are bouncing in another service
+          Object.keys(this.bouncingShifts)
+            .filter(sId => sId !== service.id)
+            .map(s => this.bouncingShifts[s])
+            .filter(shifts => shifts.includes(pin.id))
+            .length <= 0)
+        .forEach(pin => {
+          pin.marker.setAnimation(null)
+        });
+      delete this.bouncingShifts[service.id];
+    }
   }
 
   removePin(pin) {
@@ -351,7 +417,67 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Recarlculate the data partial data (the visible part at the table)
    */
-  async recalculatePartialData() {
+  processStats(newPin, oldPin, publish = true) {
+    if ((!newPin && !oldPin) && publish) {
+      // we only need to publish everything
+      this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SHIFTS, args: this.shiftsSummary });
+      this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SERVICES, args: this.servicesSummary });
+    }
+
+    if(oldPin && !oldPin.ref){
+      console.log('NO REFFFF');
+    }
+
+    const shiftsUpdate = ((newPin && newPin.ref && newPin.ref.type === 'SHIFT') || (oldPin && oldPin.ref && oldPin.ref.type === 'SHIFT'));
+    const serviceUpdate = ((newPin && newPin.ref && newPin.ref.type === 'SERVICE') || (oldPin && oldPin.ref && oldPin.ref.type === 'SERVICE'));
+
+    if (shiftsUpdate) {
+      const newPinState = (newPin && newPin.ref)
+        ? newPin.ref.online
+          ? newPin.ref.state
+          : 'OFFLINE'
+        : undefined;
+      const oldPinState = (oldPin && oldPin.ref)
+        ? oldPin.ref.online
+          ? oldPin.ref.state
+          : 'OFFLINE'
+        : undefined;
+
+      if (newPinState === oldPinState) {
+        // do nothing
+      } else {
+        if (newPinState) {
+          this.shiftsSummary[newPinState] += 1;
+        }
+        if (oldPinState) {
+          this.shiftsSummary[oldPinState] -= 1;
+        }
+        if (publish) {
+          //console.log('publishing: ', JSON.stringify(this.shiftsSummary));
+          this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SHIFTS, args: this.shiftsSummary });
+        }
+      }
+    }
+
+    if (serviceUpdate) {
+      const newPinState = (newPin && newPin.ref) ? newPin.ref.state : undefined;
+      const oldPinState = (oldPin && oldPin.ref) ? oldPin.ref.state : undefined;        
+
+      if (newPinState === oldPinState) {
+        // do nothing
+      } else {
+        if (newPinState) {
+          this.servicesSummary[newPinState] += 1;
+        }
+        if (oldPinState) {
+          this.servicesSummary[oldPinState] -= 1;
+        }
+        if (publish) {
+          //console.log('publishing: ', JSON.stringify(this.shiftsSummary));
+          this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SERVICES, args: this.servicesSummary });
+        }
+      }
+    }
 
   }
 
@@ -405,7 +531,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     //console.log(service.request.sourceChannel,"{{{{}}}}");
     switch (service.state) {
-      case 'REQUESTED': fillColor = service.request.sourceChannel === 'OPERATOR'  ? '#ff0000' : '#ff00ff'; break;
+      case 'REQUESTED': fillColor = service.request.sourceChannel === 'OPERATOR' ? '#ff0000' : '#ff00ff'; break;
       case 'ASSIGNED': fillColor = '#00ff00'; break;
       case 'ARRIVED': fillColor = '#0000FF'; location = service.location; break;
       case 'ON_BOARD': fillColor = '#000088'; location = service.location; break;
@@ -417,26 +543,30 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
     const fillOpacity = service.state === 'REQUESTED'
-      ? 0.05 + (0.004 * ((Date.now() - service.timestamp) / 1000))
+      ? 0.07 // + (0.004 * ((Date.now() - service.timestamp) / 1000))
       : service.state === 'DONE' ? 0 : 1;
     const position = new google.maps.LatLng(location.lat, location.lng);
 
     const needsReplace = (oldPin && oldPin.ref.state === 'REQUESTED' && service.state !== 'REQUESTED');
+    const radius = (service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000;
+    const internalradius = (service.offer && service.offer.params && service.offer.params.minDistance > 50) ? service.offer.params.minDistance : 50;
+
+
     let oldMap;
     if (needsReplace) {
       oldMap = oldPin.marker.getMap();
       oldPin.marker.setMap(null);
-      delete oldPin.marker;
-      delete oldPin.ref;
+      // delete oldPin.marker;
+      //delete oldPin.ref;
     }
-
     let marker;
     if (oldPin && !needsReplace) {
       marker = oldPin.marker;
       if (service.state === 'REQUESTED') {
-        marker.setCenter(position);
-        marker.fillOpacity = fillOpacity;
-        marker.setRadius((service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000);
+        marker.setPaths([
+          this.getCirclePoints(position, radius, 180, true),
+          this.getCirclePoints(position, internalradius, 6, false)
+        ]);
       } else {
         marker.setPosition(position);
         marker.setIcon({
@@ -452,14 +582,19 @@ export class MapComponent implements OnInit, OnDestroy {
       }
     } else {
       marker = service.state === 'REQUESTED'
-        ? new google.maps.Circle({
+
+        ? new google.maps.Polygon({
+          paths: [
+            this.getCirclePoints(position, radius, 180, true),
+            this.getCirclePoints(position, internalradius, 6, false)
+          ],
           strokeColor: fillColor,
           strokeOpacity: 0.8,
           strokeWeight: 2,
           fillColor,
           fillOpacity,
-          center: position,
-          radius: (service.offer && service.offer.params) ? service.offer.params.maxDistance : 1000,
+          //center: position,
+          //radius,
         })
         : new google.maps.Marker({
           position,
@@ -561,7 +696,7 @@ export class MapComponent implements OnInit, OnDestroy {
           strokeColor,
           strokeWeight,
           scale: 4 //pixels,        
-        }
+        },
       });
 
       marker.addListener('click', function () {
@@ -574,7 +709,6 @@ export class MapComponent implements OnInit, OnDestroy {
         content: contentString
       });
     }
-
 
     return {
       marker,
@@ -593,6 +727,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
   //#endregion
+
+
+  //#region MAPS
 
   initMap() {
     const styledMapType = new google.maps.StyledMapType(
@@ -715,8 +852,8 @@ export class MapComponent implements OnInit, OnDestroy {
       ],
       { name: 'Styled Map' });
     this.map = new google.maps.Map(this.gmapElement.nativeElement, {
-      center: new google.maps.LatLng(3.415718, -76.526693),
-      zoom: 15,
+      center: new google.maps.LatLng(4.633400, -74.094829),
+      zoom: 13,
       streetViewControl: false,
       fullscreenControl: true,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -741,9 +878,23 @@ export class MapComponent implements OnInit, OnDestroy {
     }
   }
 
-  //#region MAPS
+  getCirclePoints(center, radius, numPoints, clockwise) {
+    var points = [];
+    for (var i = 0; i < numPoints; ++i) {
+      var angle = i * 360 / numPoints;
+      if (!clockwise) {
+        angle = 360 - angle;
+      }
 
+      // the maps API provides geometrical computations
+      // just make sure you load the required library (libraries=geometry)
+      var p = google.maps.geometry.spherical.computeOffset(center, radius, angle);
+      points.push(p);
+    }
 
-
+    // 'close' the polygon
+    points.push(points[0]);
+    return points;
+  }
   //#endregion
 }

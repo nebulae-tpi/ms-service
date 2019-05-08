@@ -107,9 +107,9 @@ export class StatsComponent implements OnInit, OnDestroy {
     this.cards = [
       {icon: "directions_car", shortcutCode: "#03", text: "JULIO RIVES, ITAGUI"},
       {icon: "call", shortcutCode: "#12", text: "Leon Garcia +57301533132"},
-      {icon: "call", shortcutCode: "#13", text: "Sebastian Molano +57301533132"},
-      {icon: "directions_car", shortcutCode: "#14", text: "VIVA ENVIGADO, ENVIGADO"},
-      {icon: "directions_car", shortcutCode: "#15", text: "AVIVA, BELEN"}
+      // {icon: "call", shortcutCode: "#13", text: "Sebastian Molano +57301533132"},
+      // {icon: "directions_car", shortcutCode: "#14", text: "VIVA ENVIGADO, ENVIGADO"},
+      // {icon: "directions_car", shortcutCode: "#15", text: "AVIVA, BELEN"}
     ];
   }
 

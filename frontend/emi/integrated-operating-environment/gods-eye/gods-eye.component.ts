@@ -70,8 +70,8 @@ export interface Tile {
   text: string;
 }
 
-const HORIZONTAL_STATS_COLS = 15;
-const VERTICAL_STATS_ROWS = 10;
+const HORIZONTAL_STATS_COLS = 34;
+const VERTICAL_STATS_ROWS = 15;
 const TOOLBAR_ROWS = 4;
 const SCREEN_HEIGHT_WASTE = 110;
 
@@ -181,8 +181,8 @@ export class GodsEyeComponent implements OnInit, OnDestroy {
     this.toolbarService.onSelectedBusiness$
       .pipe(
         tap(bu => {
-          this.selectedBusinessId = bu ? bu.id : null;
-          this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED, args: [this.selectedBusinessId] });
+          this.selectedBusinessId = bu ? bu.id : null;          
+          this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED, args: [this.selectedBusinessId,bu] });
         }),
         takeUntil(this.ngUnsubscribe)
       )

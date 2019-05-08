@@ -15,6 +15,7 @@ export const locale = {
         CANCEL: 'Cancelar',
       },
       VIEW: 'Ver',
+      STATS: 'Estadísticas',
       VIEWS: {
         ALL_OPERATION: 'Toda la Operación'
       },
@@ -105,6 +106,30 @@ export const locale = {
       23227: 'Nombre de conductor inválido',
       23228: 'Turno no encontrado',
       23229: 'Turno se encuentra cerrado',
+    },
+    GODSEYE: {
+      STATS: {
+        SERVICE: {
+          REQUESTED: 'Solicitaod',
+          ASSIGNED: 'Asignado',
+          ARRIVED: 'Ha llegado',
+          ON_BOARD: 'A bordo',
+          DONE: 'Terminado',
+          CANCELLED_CLIENT: 'C. Cliente',
+          CANCELLED_OPERATOR: 'C. Operador',
+          CANCELLED_DRIVER: 'C. Conductor',
+          CANCELLED_SYSTEM: 'C. Sistema'
+        },
+        SHIFT: {
+          AVAILABLE: 'Disponible',
+          NOT_AVAILABLE: 'No Disponible',
+          BUSY: 'Ocupado',
+          BLOCKED: 'Bloqueado',
+          OFFLINE: 'Fuera de linea'
+        },
+        SERVICES: 'Servicios',
+        SHIFTS: 'Turnos',
+      }
     }
   }
 };

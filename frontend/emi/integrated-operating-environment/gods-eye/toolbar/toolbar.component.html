@@ -1,42 +1,35 @@
 <div fxFlex="100" fxLayoutAlign="start center" class="mat-primary-bg">
-    <button *ngIf="selectedBusinessId" mat-button fxHide.xs (click)="sendMapRefreshCommand()">
+    <button *ngIf="selectedBusinessId" mat-button (click)="sendMapRefreshCommand()">
         <mat-icon span>refresh</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.REFRESH' | translate }}</span>
     </button>
-    
+
 
     <!-- <button *ngIf="selectedBusinessId" mat-button [matMenuTriggerFor]="actions_menu">
         <mat-icon>format_list_bulleted</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.ACTIONS_LBL' | translate }}</span>
     </button> -->
 
-    <button *ngIf="selectedBusinessId && userIsSupervisor" mat-button [matMenuTriggerFor]="view_menu">
+    <button *ngIf="selectedBusinessId" mat-button [matMenuTriggerFor]="view_menu">
         <mat-icon>visibility</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.VIEW' | translate }}</span>
     </button>
 
-    <button *ngIf="selectedBusinessId && false" mat-button [matMenuTriggerFor]="filter_menu" fxHide.lt-md>
-        <mat-icon>filter_list</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
-    </button>
-
-    <button *ngIf="selectedBusinessId && false" mat-button [matMenuTriggerFor]="channels_menu" fxHide.lt-md>
-        <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
-    </button>
-
     <button *ngIf="!selectedBusinessId" fxFlex="100" mat-button>
-        <mat-icon>warning</mat-icon> <span class="business-required pl-8">{{ 'WORKSTATION.BUSINESS_UNIT_REQUIRED' | translate }}</span>
+        <mat-icon>warning</mat-icon> <span
+            class="business-required pl-8">{{ 'WORKSTATION.BUSINESS_UNIT_REQUIRED' | translate }}</span>
     </button>
 
     <span fxFlex></span>
 
     <div *ngIf="selectedBusinessId" fxLayoutGap="2px grid">
-        
+
     </div>
 
 </div>
 
 <mat-menu #actions_menu="matMenu">
-    <button mat-menu-item  fxHide fxShow.xs (click)="sendMapRefreshCommand()">
+    <button mat-menu-item fxHide fxShow.xs (click)="sendMapRefreshCommand()">
         <mat-icon>refresh</mat-icon>
         <span>{{ 'TOOLBAR.ACTIONS.REFRESH' | translate }}</span>
-    </button>    
+    </button>
     <button mat-menu-item (click)="sendMapServiceAssignCommand()" *ngIf="false">
         <mat-icon>directions_car</mat-icon>
         <span>{{ 'TOOLBAR.ACTIONS.ASSIGN' | translate }}</span>
@@ -96,19 +89,11 @@
 </mat-menu>
 
 <mat-menu #view_menu="matMenu" overlapTrigger=false>
-    <button *ngIf="false" mat-menu-item [matMenuTriggerFor]="filter_menu" fxHide fxShow.lt-md (click)="$event.stopPropagation()">
-        <mat-icon>filter_list</mat-icon> <span>{{ 'TOOLBAR.FILTERS_LBL' | translate }}</span>
-    </button>
-    <button *ngIf="false" mat-menu-item [matMenuTriggerFor]="channels_menu" fxHide fxShow.lt-md (click)="$event.stopPropagation()">
-        <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
-    </button>
-    <button *ngIf="false" mat-menu-item (click)="$event.stopPropagation()">
-        <mat-icon>move_to_stats</mat-icon>
-        <mat-checkbox (change)="onCheckStatsChange($event)" [(ngModel)]="isStatsVisible">Stats</mat-checkbox>
-    </button>
-    <button *ngIf="userIsSupervisor" mat-menu-item (click)="$event.stopPropagation()">
-        <!-- <mat-icon>ballot</mat-icon> -->
-        <mat-checkbox (change)="onCheckViewAllOperationChange($event)" [(ngModel)]="supervisorWatchinAllOperation">
-          {{ 'TOOLBAR.VIEWS.ALL_OPERATION' | translate }}</mat-checkbox>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-icon>person</mat-icon>
+        <mat-checkbox (change)="onCheckStatsChange($event)"
+            [checked]="isStatsVisible">
+            {{ 'TOOLBAR.STATS' | translate }}
+        </mat-checkbox>
     </button>
 </mat-menu>

@@ -190,48 +190,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     if (this.isThereAnOpenDialog()) { return; }
     this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH, args: [] });
   }
-  /**
-   * sendMapApplyChannelFilterCommand
-   * @param $event
-   */
-  sendMapApplyChannelFilterCommand($event?) {
-    if (this.isThereAnOpenDialog()) { return; }
-    this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_MAP_APPLY_CHANNEL_FILTER, args: [] });
-  }
-  /**
-   * sendMapApplyServiceFilterCommand
-   * @param $event
-   */
-  sendMapApplyServiceFilterCommand($event?) {
-    if (this.isThereAnOpenDialog()) { return; }
-    this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_MAP_APPLY_SERVICE_FILTER, args: [] });
-  }
-  /**
-   * sendMapApplyChangeZoomCommand
-   * @param $event
-   */
-  sendMapApplyChangeZoomCommand($event?) {
-    if (this.isThereAnOpenDialog()) { return; }
-    this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_MAP_CHANGE_ZOOM, args: { zoom: this.zoom } });
-  }  
-  /**
-   * sendMapApplyLessZoom
-   * @param $event
-   */
-  sendMapApplyLessZoom($event?) {
-    if (this.isThereAnOpenDialog() || this.zoom <= 40) { return; }
-    this.zoom -= 25;
-    this.sendMapApplyChangeZoomCommand();
-  }
-  /**
-   * sendMapApplyMoreZoom
-   * @param $event
-   */
-  sendMapApplyMoreZoom($event?) {
-    if (this.isThereAnOpenDialog() || this.zoom >= this.maxZoom) { return; }
-    this.zoom += 25;
-    this.sendMapApplyChangeZoomCommand();
-  }
+  
   /**
    * sendMapFocusCommand
    * @param $event
@@ -247,6 +206,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   onCheckStatsChange($event) {
+    this.isStatsVisible = !this.isStatsVisible;
     this.godsEyeService.publishLayoutCommand(
       {
         code: this.isStatsVisible

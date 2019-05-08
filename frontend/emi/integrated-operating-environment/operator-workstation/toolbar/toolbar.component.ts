@@ -137,7 +137,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.listenLayoutChanges();
     this.listenToolbarCommands();
     this.configureHotkeys();
-    console.log('-------------------------------------------', this.selectedBusinessRef);
   }
 
 

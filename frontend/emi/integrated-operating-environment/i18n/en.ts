@@ -15,10 +15,11 @@ export const locale = {
         CANCEL: 'Cancel',
       },
       VIEW: 'View',
+      STATS: 'Stats',
       VIEWS: {
         ALL_OPERATION: 'All Operation'
       },
-      FILTERS_LBL : 'Filters',
+      FILTERS_LBL: 'Filters',
       FILTERS: {
         REQUESTED: 'Requested',
         ASSIGNED: 'Assigned',
@@ -105,6 +106,30 @@ export const locale = {
       23227: 'Invalid driver name',
       23228: 'Turn not found',
       23229: 'Shift is closed',
+    },
+    GODSEYE: {
+      STATS: {
+        SERVICE: {
+          REQUESTED: 'Requested',
+          ASSIGNED: 'Assigned',
+          ARRIVED: 'Arrived',
+          ON_BOARD: 'On Board',
+          DONE: 'Done',
+          CANCELLED_CLIENT: 'C. Client',
+          CANCELLED_OPERATOR: 'C. Operator',
+          CANCELLED_DRIVER: 'C. Driver',
+          CANCELLED_SYSTEM: 'C. System'
+        },
+        SHIFT: {
+          AVAILABLE: 'Available',
+          NOT_AVAILABLE: 'Not Available',
+          BUSY: 'Busy',
+          BLOCKED: 'Blocked',
+          OFFLINE: 'Offline'
+        },
+        SERVICES: 'Services',
+        SHIFTS: 'Shifts',
+      }
     }
   }
 };

@@ -32,6 +32,9 @@ export class GodsEyeService {
 
   public static TOOLBAR_COMMAND_TOOLBAR_SET_ZOOM = 3000;
 
+  public static STATS_COMMAND_UPDATE_SHIFTS = 4001;
+  public static STATS_COMMAND_UPDATE_SERVICES = 4002;
+
   /**
    * layout dimension observable
    */
@@ -40,6 +43,10 @@ export class GodsEyeService {
    * toolbar commands bus
    */
   toolbarCommands$ = new Subject();
+  /**
+   * stats commands bus
+   */
+  statsCommands$ = new Subject<any>();
 
   constructor(private gateway: GatewayService) {
   }
@@ -91,6 +98,14 @@ export class GodsEyeService {
   publishToolbarCommand(command) {
     this.toolbarCommands$.next(command);
   }
+
+  /**
+   * Publish toolbar command
+   */
+  publishStatsCommand(command) {
+    this.statsCommands$.next(command);
+  }
+
 
 
   /**
