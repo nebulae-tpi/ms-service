@@ -3,7 +3,7 @@ const { of, from, concat } = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const { ShiftES } = require("../../domain/shift");
 const { ServiceES } = require("../../domain/service");
-const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
+const { map, switchMap, filter, mergeMap, concatMap, tap } = require('rxjs/operators');
 /**
  * Singleton instance
  */
@@ -92,6 +92,7 @@ class EventStoreService {
   */
   syncState$() {
     return from(this.aggregateEventsArray).pipe(
+      filter(evt => (evt.aggregateType != "Service" && evt.aggregateType != "Shift" )),
       concatMap(params => this.subscribeEventRetrieval$(params))
     )
   }

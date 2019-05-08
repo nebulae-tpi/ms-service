@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').load();
 }
 
-const Rx = require('rxjs');
+const { concat, forkJoin } = require('rxjs');
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
@@ -16,19 +16,19 @@ const service = require('./domain/service');
 
 
 const start = () => {
-    Rx.concat(
+    concat(
         eventSourcing.eventStore.start$(),
         eventStoreService.start$(),
         mongoDB.start$(),
-        shift.start$,
-        driver.start$,
-        vehicle.start$,
-        service.start$,
+        forkJoin(
+            shift.start$,
+            driver.start$,
+            vehicle.start$,
+            service.start$
+        ),        
         graphQlService.start$()
     ).subscribe(
-        (evt) => {
-            console.log(evt)
-        },
+        (evt) => console.log(evt),
         (error) => {
             console.error('Failed to start', error);
             process.exit(1);

@@ -3,8 +3,6 @@
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').load();
 }
-
-
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
@@ -13,24 +11,26 @@ const VehicleDA = require('./data/VehicleDA');
 const ServiceDA = require('./domain/service/data-access/ServiceDA');
 const ClientDA = require('./domain/client/data-access/ClientDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
-const Rx = require('rxjs');
-
+const { concat, forkJoin } = require('rxjs');
 const shift = require('./domain/shift');
 const Cronjob = require('./domain/cronjob');
 const Wallet = require('./domain/cronjob');
 
+
 const start = () => {
-    Rx.concat(
+    concat(
         eventSourcing.eventStore.start$(),
         eventStoreService.start$(),
         mongoDB.start$(),
-        DriverDA.start$(),
-        VehicleDA.start$(),
-        ServiceDA.start$(),
-        ClientDA.start$(),
-        Wallet.start$,
-        shift.start$,
-        Cronjob.start$,
+        forkJoin(
+            DriverDA.start$(),
+            VehicleDA.start$(),
+            ServiceDA.start$(),
+            ClientDA.start$(),
+            Wallet.start$,
+            shift.start$,
+            Cronjob.start$
+        ),        
         graphQlService.start$()
     ).subscribe(
         (evt) => {

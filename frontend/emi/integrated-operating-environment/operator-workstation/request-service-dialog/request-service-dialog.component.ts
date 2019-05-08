@@ -165,7 +165,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           if (attrs.length === 2){
             const lat =  attrs.find(e => e.key === 'latitude').value;
             const lng =  attrs.find(e => e.key === 'longitude').value;
-            console.log('################', {lat, lng});
 
             const circle = new google.maps.Circle({
               center: new google.maps.LatLng(parseFloat(lat), parseFloat(lng)),
@@ -179,13 +178,15 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         this.placesAutocomplete.addListener('place_changed', () => {
           this.ngZone.run(() => {
             // get the place result
-            const place: google.maps.places.PlaceResult = this.placesAutocomplete.getPlace();
+            const place: google.maps.places.PlaceResult = this.placesAutocomplete.getPlace();            
             // verify result
             if (place.geometry === undefined || place.geometry === null) {
               return;
             }
+            // this.addressAutocomplete.nativeElement.value.split(',').splice(0, 3).join(',')
+            // console.log('place.formatted_address' , place.formatted_address)
             this.selectedGooglePlace = {
-              address: place.formatted_address.split(',')[0],
+              address: this.addressAutocomplete.nativeElement.value.split(',').splice(0, 3).join(','),
               coords: {
                 latitude: place.geometry.location.lat(),
                 longitude: place.geometry.location.lng()

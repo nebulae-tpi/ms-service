@@ -3,9 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
-
-import { ShiftService } from './shift.service';
-
 import { ShiftListService } from './shift-list/shift-list.service';
 import { ShiftListComponent } from './shift-list/shift-list.component';
 import { ShiftDetailService } from './shift-detail/shift-detail.service';
@@ -15,7 +12,6 @@ import { ToolbarService } from '../../toolbar/toolbar.service';
 import { DialogComponent } from './dialog/dialog.component';
 import { ShiftDriverInfoComponent } from './shift-detail/driver-info/shift-driver-info.component';
 import { ShiftVehicleInfoComponent } from './shift-detail/vehicle-info/shift-vehicle-info.component';
-
 
 const routes: Routes = [
   {
@@ -43,7 +39,8 @@ const routes: Routes = [
     ShiftStateChangesComponent
   ],
   entryComponents: [DialogComponent],
-  providers: [ ShiftService, ShiftListService, ShiftDetailService, DatePipe]
+  providers: [ ShiftListService, ShiftDetailService, DatePipe]
 })
+
 
 export class ShiftsModule {}
