@@ -108,6 +108,16 @@ export const locale = {
       23229: 'Shift is closed',
     },
     GODSEYE: {
+      MAP:{
+        SERVICE:{
+          WALLET: 'Wallet',
+          CASH: 'Cash'
+        },
+        SHIFT : {
+          WALLET: 'Wallet',
+          BALANCE: 'Balance',
+        }
+      },
       STATS: {
         SERVICE: {
           REQUESTED: 'Requested',

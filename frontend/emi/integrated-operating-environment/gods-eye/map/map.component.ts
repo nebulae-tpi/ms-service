@@ -101,7 +101,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // summary stats
   shiftsSummary = { AVAILABLE: 0, NOT_AVAILABLE: 0, BUSY: 0, BLOCKED: 0, OFFLINE: 0 };
   // service stats
-  servicesSummary = { REQUESTED: 0, ASSIGNED: 0, ARRIVED: 0, ON_BOARD: 0, DONE: 0, CANCELLED_CLIENT: 0, CANCELLED_OPERATOR: 0, CANCELLED_DRIVER: 0, CANCELLED_SYSTEM: 0}
+  servicesSummary = { REQUESTED: 0, ASSIGNED: 0, ARRIVED: 0, ON_BOARD: 0, DONE: 0, CANCELLED_CLIENT: 0, CANCELLED_OPERATOR: 0, CANCELLED_DRIVER: 0, CANCELLED_SYSTEM: 0 }
   // current selected service id
   private selectedServiceId = undefined;
   //current zoom
@@ -232,7 +232,7 @@ export class MapComponent implements OnInit, OnDestroy {
         switch (code) {
           case GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:
             //console.log('GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:');
-            this.resetData();
+            this.resetDataAndSubscriptions();
             break;
           case GodsEyeService.TOOLBAR_COMMAND_MAP_APPLY_CHANNEL_FILTER:
             break;
@@ -259,6 +259,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
     this.godsEyeService.listenIOEService$(this.selectedBusinessId, null, this.stateFilter, this.channelFilter)
       .pipe(
+        filter(() => this.resetSemaphore === 0),
         map(subscription => subscription.data.IOEService),
         takeUntil(this.ngUnsubscribe),
         takeUntil(this.ngUnsubscribeIOEServiceListener)
@@ -285,6 +286,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
     this.godsEyeService.listenIOEShift$(this.selectedBusinessId)
       .pipe(
+        filter(() => this.resetSemaphore === 0),
         filter(v => v),
         map(subscription => subscription.data.IOEShift),
         takeUntil(this.ngUnsubscribe),
@@ -326,11 +328,11 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Loads the entire data from DB
    */
-  async resetData() {    
+  async resetData() {
     this.shiftsSummary = { AVAILABLE: 0, NOT_AVAILABLE: 0, BUSY: 0, BLOCKED: 0, OFFLINE: 0 };
-    this.servicesSummary = { REQUESTED: 0, ASSIGNED: 0, ARRIVED: 0, ON_BOARD: 0, DONE: 0, CANCELLED_CLIENT: 0, CANCELLED_OPERATOR: 0, CANCELLED_DRIVER: 0, CANCELLED_SYSTEM: 0};
+    this.servicesSummary = { REQUESTED: 0, ASSIGNED: 0, ARRIVED: 0, ON_BOARD: 0, DONE: 0, CANCELLED_CLIENT: 0, CANCELLED_OPERATOR: 0, CANCELLED_DRIVER: 0, CANCELLED_SYSTEM: 0 };
     this.processStats(undefined, undefined);
-    
+
     Object.keys(this.pins).forEach(k => this.removePin(this.pins[k]));
     const today = new Date();
     const explorePastMonth = today.getDate() <= 1;
@@ -350,12 +352,17 @@ export class MapComponent implements OnInit, OnDestroy {
     this.processStats(undefined, undefined);
   }
 
+  resetSemaphore: number = 0;
   async resetDataAndSubscriptions() {
+    if (this.resetSemaphore++ > 0) {
+      return;
+    }
     this.ngUnsubscribeIOEServiceListener.next();
     this.ngUnsubscribeIOEShiftListener.next();
     await this.resetData();
     this.subscribeIOEServicesListener();
     this.subscribeIOEShiftsListener();
+    this.resetSemaphore = 0;
   }
 
   /**
@@ -424,7 +431,7 @@ export class MapComponent implements OnInit, OnDestroy {
       this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SERVICES, args: this.servicesSummary });
     }
 
-    if(oldPin && !oldPin.ref){
+    if (oldPin && !oldPin.ref) {
       console.log('NO REFFFF');
     }
 
@@ -453,7 +460,7 @@ export class MapComponent implements OnInit, OnDestroy {
           this.shiftsSummary[oldPinState] -= 1;
         }
         if (publish) {
-          //console.log('publishing: ', JSON.stringify(this.shiftsSummary));
+          console.log('publishing: ', 'STATS_COMMAND_UPDATE_SHIFTS');
           this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SHIFTS, args: this.shiftsSummary });
         }
       }
@@ -461,7 +468,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     if (serviceUpdate) {
       const newPinState = (newPin && newPin.ref) ? newPin.ref.state : undefined;
-      const oldPinState = (oldPin && oldPin.ref) ? oldPin.ref.state : undefined;        
+      const oldPinState = (oldPin && oldPin.ref) ? oldPin.ref.state : undefined;
 
       if (newPinState === oldPinState) {
         // do nothing
@@ -473,7 +480,7 @@ export class MapComponent implements OnInit, OnDestroy {
           this.servicesSummary[oldPinState] -= 1;
         }
         if (publish) {
-          //console.log('publishing: ', JSON.stringify(this.shiftsSummary));
+          console.log('publishing: ', 'STATS_COMMAND_UPDATE_SERVICES');
           this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SERVICES, args: this.servicesSummary });
         }
       }
@@ -531,7 +538,13 @@ export class MapComponent implements OnInit, OnDestroy {
 
     //console.log(service.request.sourceChannel,"{{{{}}}}");
     switch (service.state) {
-      case 'REQUESTED': fillColor = service.request.sourceChannel === 'OPERATOR' ? '#ff0000' : '#ff00ff'; break;
+      case 'REQUESTED': fillColor =
+        service.request.sourceChannel === 'CLIENT'
+          ? '#ff00ff' // mobile client app
+          : ((service.client.tipType || 'CASH') === 'CASH')
+            ? '#ff0000' // operator + cash
+            : '#0033ff' // operator + wallet
+        break;
       case 'ASSIGNED': fillColor = '#00ff00'; break;
       case 'ARRIVED': fillColor = '#0000FF'; location = service.location; break;
       case 'ON_BOARD': fillColor = '#000088'; location = service.location; break;
@@ -556,7 +569,7 @@ export class MapComponent implements OnInit, OnDestroy {
     if (needsReplace) {
       oldMap = oldPin.marker.getMap();
       oldPin.marker.setMap(null);
-      // delete oldPin.marker;
+      delete oldPin.marker;
       //delete oldPin.ref;
     }
     let marker;
@@ -581,22 +594,37 @@ export class MapComponent implements OnInit, OnDestroy {
         });
       }
     } else {
-      marker = service.state === 'REQUESTED'
+      const tipStr = !service.client.tipType
+        ? ''
+        : `${this.translationLoader.getTranslate().instant(`GODSEYE.MAP.SERVICE.${service.client.tipType}`)}: $${service.client.tip}`;
+      const infoWinowContent =
+        `<div id="content">
+      ${service.client.fullname} </br>
+      ${tipStr}
+      </div>`;
 
-        ? new google.maps.Polygon({
-          paths: [
-            this.getCirclePoints(position, radius, 180, true),
-            this.getCirclePoints(position, internalradius, 6, false)
-          ],
+
+      if (service.state === 'REQUESTED') {
+
+        const externalRad = this.getCirclePoints(position, radius, 180, true);
+        const internalRad = this.getCirclePoints(position, internalradius, 6, false);
+        const infowindow = new google.maps.InfoWindow({
+          content: infoWinowContent,
+          position: externalRad[0]
+        });
+
+        marker = new google.maps.Polygon({
+          paths: [externalRad, internalRad],
           strokeColor: fillColor,
           strokeOpacity: 0.8,
           strokeWeight: 2,
           fillColor,
           fillOpacity,
-          //center: position,
-          //radius,
-        })
-        : new google.maps.Marker({
+        });
+        google.maps.event.addListener(marker,
+          'click', () => infowindow.open(this.map));
+      } else {
+        marker = new google.maps.Marker({
           position,
           icon: {
             //path: google.maps.SymbolPath.CIRCLE,
@@ -609,16 +637,11 @@ export class MapComponent implements OnInit, OnDestroy {
             scale: 4 //pixels,        
           }
         });
-
-      marker.addListener('click', function () {
-        infowindow.open(this.map, marker);
-      });
-      var contentString = `<div id="content">
-              ${service.client.fullname}
-              </div>`;
-      var infowindow = new google.maps.InfoWindow({
-        content: contentString
-      });
+        const infowindow = new google.maps.InfoWindow({ content: infoWinowContent });
+        marker.addListener('click', function () {
+          infowindow.open(this.map, marker);
+        });
+      }
     }
 
     if (oldMap) {
@@ -703,7 +726,8 @@ export class MapComponent implements OnInit, OnDestroy {
         infowindow.open(this.map, marker);
       });
       var contentString = `<div id="content">
-            ${shift.vehicle.licensePlate} - ${shift.driver.fullname}
+            ${shift.vehicle.licensePlate} - ${shift.driver.fullname} </br>
+            ${this.translationLoader.getTranslate().instant(`GODSEYE.MAP.SHIFT.BALANCE`)} : $${(shift.driver.wallet || {pockets:{main:0}}).pockets.main}
             </div>`;
       var infowindow = new google.maps.InfoWindow({
         content: contentString

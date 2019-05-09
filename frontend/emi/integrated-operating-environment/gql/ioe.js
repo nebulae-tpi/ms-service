@@ -94,7 +94,17 @@ query IOEShifts($shiftStatesFilter: [String], $businessId: String, $page: Int, $
     state,        
     online,
     lastReceivedComm,
-    driver{ fullname, documentId, id ,username},
+    driver{ 
+      fullname, 
+      documentId, 
+      id,
+      username,
+      wallet {
+        pockets{
+          main, bonus
+        }
+      }
+    },
     vehicle{ id, licensePlate,features, brand,line, model },
     location{ lat, lng, timestamp },
   }
@@ -177,7 +187,17 @@ export const IOEShiftSubscription = gql`
       state,        
       online,
       lastReceivedComm,
-      driver{ fullname, documentId, id ,username},
+      driver{ 
+      fullname, 
+      documentId, 
+      id,
+      username,
+      wallet {
+        pockets{
+          main, bonus
+        }
+      }
+      },
       vehicle{ id, licensePlate,features, brand,line, model },
       location{ lat, lng, timestamp },
     }

@@ -108,6 +108,16 @@ export const locale = {
       23229: 'Turno se encuentra cerrado',
     },
     GODSEYE: {
+      MAP:{
+        SERVICE:{
+          WALLET: 'Billetera',
+          CASH: 'Efectivo'
+        },
+        SHIFT : {
+          WALLET: 'Billetera',
+          BALANCE: 'Saldo',
+        }
+      },
       STATS: {
         SERVICE: {
           REQUESTED: 'Solicitaod',
