@@ -65,101 +65,31 @@ class ServiceES {
     imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId) {
         return Observable.create(async obs => {
 
+            // precalculated offer params
             const offerTotalSpan = parseInt(process.env.SERVICE_OFFER_TOTAL_SPAN);
             const offerSearchSpan = parseInt(process.env.SERVICE_OFFER_SEARCH_SPAN);
             const offerShiftSpan = parseInt(process.env.SERVICE_OFFER_SHIFT_SPAN);
             const offerTotalThreshold = offerTotalSpan + Date.now();
-
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId })}`);
 
-            let service = undefined;
-            let retries = 0;
-            while (!service && retries < 5) {
-                retries++;
-                await timer(200).toPromise();// time for the service to be persisted 
-                service = await ServiceDA.updateOfferParamsAndfindById$(
-                    serviceId,
-                    {
-                        offer: {
-                            searchCount: 0,
-                            shifts: {},
-                            params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan }
-                        }
-                    }).toPromise();
-            }
-            if (!service) {
-                throw new Error(`Service not found when trying to offer at imperativeServiceOfferAlgorithm; serviceId=${serviceId}; retries=${retries}`);
-            }
-
-            obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+            let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs);
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
             while (needToOffer) {
 
                 //find available shifts
-                let shifts = await ShiftDA.findServiceOfferCandidates$(
-                    service.businessId,
-                    service.pickUp.marker || service.pickUp.polygon,
-                    service.requestedFeatures,
-                    Object.keys(service.offer.shifts),
-                    service.offer.params.maxDistance,
-                    0,//min distance form mongo is always zero
-                    { "driver": 1, "vehicle": 1 }
-                ).toPromise();
+                let shifts = await this.findShiftCandidates(service, obs);
 
-                shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
-                // (todo) filter to avoid drivers how does not have money to pay to the dorrman client
-                shifts = service.client.tipType === "VIRTUAL_WALLET"
-                    ? shifts.filter(s => 
-                        (
-                          s.driver.wallet &&
-                          s.driver.wallet.pockets &&
-                          (s.driver.wallet.pockets.main || 0) >= service.client.tip
-                        )
-                      )
-                    : shifts;
-                obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
-
-                if (service.client && service.client.referrerDriverDocumentId) {
-                    const priorityShift = shifts.filter(sh => sh.driver.documentId === service.client.referrerDriverDocumentId)[0];
-                    if (priorityShift) {
-                        shifts = shifts.filter(s => s.driver.documentId !== priorityShift.driver.documentId);
-                        shifts.unshift({ ...priorityShift, referred: true });
-                        obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
-                    }
-                }
-
-                shifts = shifts.filter(s => s.referred || (s.dist.calculated > service.offer.params.minDistance));
-                obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
-
+                // threshold defining the total time span of this offer
                 const offerSearchThreshold = offerSearchSpan + Date.now();
 
                 if (shifts.length > 0) {
+                    // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
+                        //selected shift
                         const shift = shifts[i];
-                        obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
-                        await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
-                        await driverAppLinkBroker.sendServiceEventToDrivers$(
-                            shift.businessId,
-                            shift.driver.username,
-                            'ServiceOffered', { _id: serviceId, timestamp: Date.now(), tip: service.tip, pickUp: { ...service.pickUp, location: undefined }, dropOffSpecialType: service.dropOffSpecialType, expirationTime: offerTotalThreshold }
-                        ).toPromise();
-
-                        await eventSourcing.eventStore.emitEvent$(
-                            ServiceES.buildEventSourcingEvent(
-                                'Service',
-                                serviceId,
-                                'ServiceOfferedToShift',
-                                {
-                                    distance: shift.dist.calculated,
-                                    username: shift.driver.username,
-                                    documentId: shift.driver.documentId,
-                                    licensePlate: shift.vehicle.licensePlate,
-                                },
-                                'SYSTEM', 1, true
-                            )
-                        ).toPromise();
+                        await this.offerServiceToShift(service, shift, obs);
 
                         //re-eval service state\/
                         await timer(offerShiftSpan).toPromise();
@@ -213,6 +143,138 @@ class ServiceES {
 
     }
 
+    /**
+     * query a service in the DB waiting up to 1 second to appear.  then configure the offer params
+     * @param {string} serviceId 
+     * @param {*} minDistance 
+     * @param {*} maxDistance 
+     * @param {*} offerTotalSpan 
+     * @param {*} offerSearchSpan 
+     * @param {*} offerShiftSpan 
+     * @returns Service after the update
+     */
+    async findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs) {
+        undefined;
+        let service = undefined;
+        let retries = 0;
+        while (!service && retries < 5) {
+            retries++;
+            await timer(200).toPromise();// time for the service to be persisted 
+            service = await ServiceDA.updateOfferParamsAndfindById$(
+                serviceId,
+                {
+                    offer: {
+                        searchCount: 0,
+                        shifts: {},
+                        params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan }
+                    }
+                }).toPromise();
+        }
+        if (!service) {
+            throw new Error(`Service not found when trying to offer at imperativeServiceOfferAlgorithm; serviceId=${serviceId}; retries=${retries}`);
+        }
+        obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+        return service;
+    }
+
+    /**
+     * query all avialble shifts within the offer radius
+     * - avoiding current candidates 
+     * - filtering by wallet balance if neccesary 
+     * - filtering by distance 
+     * - prioritazing referred driver
+     * @param {*} service 
+     * @returns shifts array
+     */
+    async findShiftCandidates(service, obs) {
+        //find available shifts
+        let shifts = await ShiftDA.findServiceOfferCandidates$(
+            service.businessId,
+            service.pickUp.marker || service.pickUp.polygon,
+            service.requestedFeatures,
+            Object.keys(service.offer.shifts),
+            service.offer.params.maxDistance,
+            0,//min distance form mongo is always zero
+            { "driver": 1, "vehicle": 1 }
+        ).toPromise();
+
+        //ignores shifts that were already taken into account
+        shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
+        //if the services requires VIRTUAL_WALLET balance, then filter everyone that does not have sufficent money
+        shifts = service.client.tipType === "VIRTUAL_WALLET"
+            ? shifts.filter(s =>
+                (
+                    s.driver.wallet &&
+                    s.driver.wallet.pockets &&
+                    (s.driver.wallet.pockets.main || 0) >= service.client.tip
+                )
+            )
+            : shifts;
+
+        obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
+
+        // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
+        if (service.client && service.client.referrerDriverDocumentId) {
+            const priorityShift = shifts.filter(sh => sh.driver.documentId === service.client.referrerDriverDocumentId)[0];
+            if (priorityShift) {
+                shifts = shifts.filter(s => s.driver.documentId !== priorityShift.driver.documentId);
+                shifts.unshift({ ...priorityShift, referred: true });
+                obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
+            }
+        }
+        // filter all the trips that are closer than the minDistance threshold
+        shifts = shifts.filter(s => s.referred || (s.dist.calculated > service.offer.params.minDistance));
+        obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
+
+        return shifts;
+    }
+
+    /**
+     * executes the whole offer workflow
+     * . persist the shift into the offer
+     * . send the offer to the driver
+     * . sends the event-sourcing offer event
+     * @param {*} service 
+     * @param {*} shift 
+     * @param {*} obs 
+     */
+    async offerServiceToShift(service, shift, obs) {
+        obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
+        //appends the shift into the service 
+        await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
+        
+
+        const serviceOffer = { _id: serviceId, timestamp: Date.now(), tip: service.tip, pickUp: { ...service.pickUp, location: undefined }, dropOffSpecialType: service.dropOffSpecialType, expirationTime: offerTotalThreshold };
+
+        const RESEND_TO_ALL = true; // THIS FLAG DEFINES IF THE OFFER WILL ONLY BE SENT TO THE SELECTED SHIFT .... OR ... WILL BE SENT TO ALL PREVIOSLY SELECTED SHIFTS
+        // send the offer to every  shift
+        const businessId = shift.businessId;        
+        const driverUsernamesToNotify = RESEND_TO_ALL
+            ? Object.values(service.offer.shifts).map(s => s.driverUsername)
+            : [shift.driver.username];
+        for (let i=0; i<driverUsernamesToNotify.length; i++) {
+            const driverUsername = driverUsernamesToNotify[i];
+            const init = Date.now();
+            await driverAppLinkBroker.sendServiceEventToDrivers$(businessId, driverUsername, 'ServiceOffered', serviceOffer).toPromise();
+            console.log(`driverAppLinkBroker.sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${init}`);
+        }
+
+        // sends the Event-sourcing offer Event 
+        await eventSourcing.eventStore.emitEvent$(
+            ServiceES.buildEventSourcingEvent(
+                'Service',
+                serviceId,
+                'ServiceOfferedToShift',
+                {
+                    distance: shift.dist.calculated,
+                    username: shift.driver.username,
+                    documentId: shift.driver.documentId,
+                    licensePlate: shift.vehicle.licensePlate,
+                },
+                'SYSTEM', 1, true
+            )
+        ).toPromise();
+    }
 
     /**
      * Handles EventSourcing Event ServiceAssigned
@@ -234,7 +296,7 @@ class ServiceES {
                 mergeMap(dbService => forkJoin(
                     of(dbService),
                     this.payClientAgreement$(dbService) // (todo)
-                )), 
+                )),
                 map(([dbService, a]) =>
                     (
                         {
@@ -266,35 +328,35 @@ class ServiceES {
      * (todo) makespaymento to doorman
      * @param {*} service  
      */
-    payClientAgreement$({ businessId, client, driver}){
+    payClientAgreement$({ businessId, client, driver }) {
         // console.log("payClientAgreement$ ==> ", {businessId, client, driver});        
         return of({}).pipe(
-          map(() => (client.tipType != "VIRTUAL_WALLET")
-            ? null
-            : ({
-                _id: Crosscutting.generateDateBasedUuid(),
-                businessId: businessId,
-                type: "MOVEMENT",
-                // notes: mba.notes,
-                concept: "CLIENT_AGREEMENT_PAYMENT",
-                timestamp: Date.now(),
-                amount: client.tip,
-                fromId: driver.id,
-                toId: client.tipClientId 
-            })
-          ),
-        //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
-          mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
-              new Event({
-                eventType: "WalletTransactionCommited",
-                eventTypeVersion: 1,
-                aggregateType: "Wallet",
-                aggregateId: uuidv4(),
-                data: tx,
-                user: "SYSTEM"
-              })
+            map(() => (client.tipType != "VIRTUAL_WALLET")
+                ? null
+                : ({
+                    _id: Crosscutting.generateDateBasedUuid(),
+                    businessId: businessId,
+                    type: "MOVEMENT",
+                    // notes: mba.notes,
+                    concept: "CLIENT_AGREEMENT_PAYMENT",
+                    timestamp: Date.now(),
+                    amount: client.tip,
+                    fromId: driver.id,
+                    toId: client.tipClientId
+                })
+            ),
+            //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
+            mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
+                new Event({
+                    eventType: "WalletTransactionCommited",
+                    eventTypeVersion: 1,
+                    aggregateType: "Wallet",
+                    aggregateId: uuidv4(),
+                    data: tx,
+                    user: "SYSTEM"
+                })
             )
-          )
+            )
         );
     }
 
