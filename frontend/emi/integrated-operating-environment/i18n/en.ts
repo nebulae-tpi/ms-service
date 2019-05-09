@@ -110,7 +110,7 @@ export const locale = {
     GODSEYE: {
       MAP:{
         SERVICE:{
-          WALLET: 'Wallet',
+          VIRTUAL_WALLET: 'Wallet',
           CASH: 'Cash'
         },
         SHIFT : {
