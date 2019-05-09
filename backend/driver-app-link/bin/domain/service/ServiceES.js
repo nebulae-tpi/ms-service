@@ -243,7 +243,7 @@ class ServiceES {
         //appends the shift into the service 
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
         
-        const serviceOffer = { _id: serviceId, timestamp: Date.now(), tip: service.tip, pickUp: { ...service.pickUp, location: undefined }, dropOffSpecialType: service.dropOffSpecialType, expirationTime: offerTotalThreshold };
+        const serviceOffer = { _id: service._id, timestamp: Date.now(), tip: service.tip, pickUp: { ...service.pickUp, location: undefined }, dropOffSpecialType: service.dropOffSpecialType, expirationTime: offerTotalThreshold };
 
         const RESEND_TO_ALL = true; // THIS FLAG DEFINES IF THE OFFER WILL ONLY BE SENT TO THE SELECTED SHIFT .... OR ... WILL BE SENT TO ALL PREVIOSLY SELECTED SHIFTS
         // send the offer to every  shift
@@ -262,7 +262,7 @@ class ServiceES {
         await eventSourcing.eventStore.emitEvent$(
             ServiceES.buildEventSourcingEvent(
                 'Service',
-                serviceId,
+                service._id,
                 'ServiceOfferedToShift',
                 {
                     distance: shift.dist.calculated,
