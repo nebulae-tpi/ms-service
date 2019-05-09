@@ -35,13 +35,14 @@ class ServiceES {
         const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
         const localHour = localDate.getHours();
         const extendedDistanceHours = (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4").split('_').map(h => parseInt(h));
-        let maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
+        let maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);        
         if (extendedDistanceHours.includes(localHour)) {
             let extendedDistance = parseInt(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500");
             if (extendedDistance && extendedDistance > maxDistance) {
                 maxDistance = extendedDistance;
             }
         }
+        maxDistance = (maxDistance < process.env.SERVICE_OFFER_MAX_DISTANCE_MIN) ? process.env.SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
 
         const minDistance = data.client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
@@ -456,6 +457,8 @@ class ServiceES {
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
+            mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
+                dbService.businessId, 'all', 'ServiceOfferWithdraw', { _id: formattedService._id }))
         );
     }
 

@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.driverapplink:2.10.4 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: DOCKERHUB/service.backend.driverapplink:2.10.5 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -90,6 +90,8 @@ spec:
              name: driver-app-link
              key: DRIVER_APP_MQTT_SERVER_PASSWORD
         # SERVICE OFFER SPANS CONFIG
+        - name: SERVICE_OFFER_MAX_DISTANCE_MIN
+          value: "1200"
         - name: SERVICE_OFFER_MAX_DISTANCE
           value: "1500"
         - name: SERVICE_OFFER_MIN_DISTANCE
@@ -101,9 +103,9 @@ spec:
         - name: SERVICE_OFFER_SHIFT_SPAN
           value: "9000"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
-          value: "0_1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20_21_22_23"
+          value: "0_1_2_3_4_21_22_23"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE
-          value: "1200"
+          value: "2000"
         - name: INCOMING_SHIFT_MSG_TOPIC
           # value: "4ab03a09-9e34-40fe-9102-25cc6b5b2176/driver-app/shift/server"
           value: "$share/server-dal/+/driver-app/shift/server"
