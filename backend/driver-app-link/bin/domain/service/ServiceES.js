@@ -42,7 +42,8 @@ class ServiceES {
                 maxDistance = extendedDistance;
             }
         }
-        maxDistance = (maxDistance < process.env.SERVICE_OFFER_MAX_DISTANCE_MIN) ? process.env.SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
+        const SERVICE_OFFER_MAX_DISTANCE_MIN = parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE_MIN);
+        maxDistance = (maxDistance < SERVICE_OFFER_MAX_DISTANCE_MIN ) ? SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
 
         const minDistance = data.client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
