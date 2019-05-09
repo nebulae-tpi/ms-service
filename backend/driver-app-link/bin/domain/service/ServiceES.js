@@ -76,6 +76,7 @@ class ServiceES {
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
+            const previouslySelectedShifts = [];
             while (needToOffer) {
 
                 //find available shifts
@@ -89,7 +90,8 @@ class ServiceES {
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
                         //selected shift
                         const shift = shifts[i];
-                        await this.offerServiceToShift(service, shift, offerTotalThreshold, obs);
+                        await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs);
+                        previouslySelectedShifts.push(shift);
 
                         //re-eval service state\/
                         await timer(offerShiftSpan).toPromise();
@@ -238,7 +240,7 @@ class ServiceES {
      * @param {*} shift 
      * @param {*} obs 
      */
-    async offerServiceToShift(service, shift, offerTotalThreshold, obs) {
+    async offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts = [], obs) {
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
@@ -249,13 +251,13 @@ class ServiceES {
         // send the offer to every  shift
         const businessId = shift.businessId;
         const driverUsernamesToNotify = RESEND_TO_ALL
-            ? Object.values(service.offer.shifts).map(s => s.driverUsername)
+            ? [shift.driver.username, ...previouslySelectedShifts.map(s => s.driver.username)]
             : [shift.driver.username];
         for (let i = 0; i < driverUsernamesToNotify.length; i++) {
             const driverUsername = driverUsernamesToNotify[i];
             const init = Date.now();
             await driverAppLinkBroker.sendServiceEventToDrivers$(businessId, driverUsername, 'ServiceOffered', serviceOffer).toPromise();
-            console.log(`driverAppLinkBroker.sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${init}`);
+            obs.next(`sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${Date.now() - init}`);
         }
 
         // sends the Event-sourcing offer Event 
