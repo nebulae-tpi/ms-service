@@ -458,7 +458,7 @@ class ServiceES {
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
-                service.businessId, 'all', 'ServiceOfferWithdraw', { _id: formattedService._id }))
+                service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }))
         );
     }
 
