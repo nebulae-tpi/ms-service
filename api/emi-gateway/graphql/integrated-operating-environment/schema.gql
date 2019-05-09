@@ -208,7 +208,21 @@ type IOEDriver {
     phone: Int
     "user name"
     username: String
+    "wallet"
+    wallet: IOEDriverWallet
 }
+
+"Driver Wallet"
+type IOEDriverWallet{
+    pockets: IOEDriverWalletPockets
+}
+
+"driver wallets pockets"
+type IOEDriverWalletPockets{
+    main: Int
+    bonus: Int
+}
+
 "Driver info"
 input IOEDriverInput {
     "Driver fullname"
