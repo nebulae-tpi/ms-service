@@ -452,13 +452,13 @@ class ServiceES {
     handleServiceCancelledByOperator$({ aid, data }) {
         //console.log(`ServiceES: handleServiceCancelledByOperator: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
-            delay(300),
+            delay(300),            
             mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 })),
+            mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
+                service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id })),
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
-                service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
-            mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
-                service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }))
+                service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),            
         );
     }
 
