@@ -132,4 +132,4 @@ type Mutation {
 type Subscription {
   "This events is triggered when a Driver is created or updated"
   ServiceDriverVehicleAssignedSubscription(driverId: String): ServiceDriverVehicle  
-}
+} 
