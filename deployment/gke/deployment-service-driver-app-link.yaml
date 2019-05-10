@@ -101,7 +101,7 @@ spec:
         - name: SERVICE_OFFER_SEARCH_SPAN
           value: "30000"
         - name: SERVICE_OFFER_SHIFT_SPAN
-          value: "9000"
+          value: "6000"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
           value: "0_1_2_3_4_21_22_23"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE
