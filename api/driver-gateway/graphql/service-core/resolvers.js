@@ -31,6 +31,7 @@ module.exports = {
 
   Query: {
     DriverAssignedVehicles: (root, args, context, info) => {
+      console.log("DriverAssignedVehicles ==> ", {...args});
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'DriverAssignedVehicles', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Driver", "drivergateway.graphql.query.DriverAssignedVehicles", { root, args, jwt: context.encodedToken }, 2000)
@@ -38,7 +39,6 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
-
     OpenShift: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'OpenShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
@@ -47,8 +47,8 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
-
     AssignedService: (root, args, context, info) => {
+      console.log("AssignedService ==> ", {...args});
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'AssignedService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "drivergateway.graphql.query.AssignedService", { root, args, jwt: context.encodedToken }, 2000)
