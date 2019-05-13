@@ -35,7 +35,7 @@ class ServiceES {
         const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
         const localHour = localDate.getHours();
         const extendedDistanceHours = (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4").split('_').map(h => parseInt(h));
-        let maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);        
+        let maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
         if (extendedDistanceHours.includes(localHour)) {
             let extendedDistance = parseInt(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500");
             if (extendedDistance && extendedDistance > maxDistance) {
@@ -43,7 +43,7 @@ class ServiceES {
             }
         }
         const SERVICE_OFFER_MAX_DISTANCE_MIN = parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE_MIN);
-        maxDistance = (maxDistance < SERVICE_OFFER_MAX_DISTANCE_MIN ) ? SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
+        maxDistance = (maxDistance < SERVICE_OFFER_MAX_DISTANCE_MIN) ? SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
 
         const minDistance = data.client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
@@ -453,13 +453,17 @@ class ServiceES {
     handleServiceCancelledByOperator$({ aid, data }) {
         //console.log(`ServiceES: handleServiceCancelledByOperator: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
-            delay(300),            
+            delay(300),
             mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 })),
-            mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
-                service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id })),
+            mergeMap(service =>
+                driverAppLinkBroker.sendServiceEventToDrivers$(
+                    service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }).pipe(
+                        mapTo(service)
+                    )
+            ),
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
-                service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),            
+                service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
         );
     }
 
