@@ -20,7 +20,7 @@ class ShiftDA {
       }
       observer.complete();
     });
-  }
+  } 
 
 
   static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined) {
