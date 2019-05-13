@@ -97,7 +97,7 @@ module.exports = {
     },
 
     acceptServiceOffer: (root, args, context, info) => {
-      console.log("acceptServiceOffer ==> ", {...args});
+      console.log("acceptServiceOffer ==>  ", {...args});
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'acceptServiceOffer', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "drivergateway.graphql.mutation.acceptServiceOffer", { root, args, jwt: context.encodedToken }, 2000)
