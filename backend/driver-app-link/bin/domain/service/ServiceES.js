@@ -460,7 +460,7 @@ class ServiceES {
                     service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }).pipe(
                         mapTo(service)
                     )
-            ),
+            ),   
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
