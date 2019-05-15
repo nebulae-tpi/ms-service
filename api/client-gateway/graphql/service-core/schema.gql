@@ -155,15 +155,27 @@ type ServiceMessage {
    message: ChatMessage!
 }
 
-# "Client info."
-# input ClientInput {
-#     "Client ID"
-#     id: String
-#     "Full name"
-#     fullname: String
-#     "user name"
-#     username: String
-# }
+"Client info."
+input ClientInput {
+    "Client ID"
+    id: String
+    "Full name"
+    fullname: String
+    "user name"
+    username: String
+    "Tip given to the client. Eg. satellites"
+    tip: Int
+    "Tiping type"
+    tipType: String
+    "Tip Client ID"
+    tipClientId: String
+    "drivers document, this is the one who referred this client"
+    referrerDriverDocumentId: String
+    "custom offer min distance in radious"
+    offerMinDistance: Int
+    "custom offer max distance in radious"
+    offerMaxDistance: Int
+}
 
 "Location info"
 input LocationInput {
@@ -203,7 +215,7 @@ type Mutation {
    "Request a new service"
    RequestService(
       # "client info"
-      # client: ClientInput!
+      client: ClientInput
       "Passenger pick up location"
       pickUp: LocationInput!
       "Payment type key"

@@ -98,7 +98,7 @@ class ServiceClientCQRS {
    */
   requestServices$({ root, args, jwt }, authToken) {
     const { id } = args;
-    // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
     .pipe(
       //TODO: Remove client of the request service ??  
@@ -110,6 +110,7 @@ class ServiceClientCQRS {
         )
       ),    
       mapTo({ ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId } }),
+      tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
       tap(request => this.validateServiceRequestInput(request)),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
@@ -321,8 +322,8 @@ class ServiceClientCQRS {
         pickUp,
         dropOff,
         client: {
-          // id: authToken.clientId,
-          // businessId: authToken.businessId,
+          id: authToken.clientId,
+          businessId: authToken.businessId,
           username: authToken.preferred_username,
           fullname: authToken.name,
           ...request.client,
