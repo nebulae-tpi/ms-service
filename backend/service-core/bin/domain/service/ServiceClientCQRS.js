@@ -100,14 +100,14 @@ class ServiceClientCQRS {
     const { id } = args;
     ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
-    .pipe(
-      //TODO: Remove client of the request service ??  
-      mergeMap(() => 
-        ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, {_id: 1})
-        .pipe(
-          toArray(),
-          mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
-        )
+    .pipe( 
+      mergeMap(() => !args.client
+        ? ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, {_id: 1})
+          .pipe(
+            toArray(),
+            mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
+          )
+          : of({})
       ),    
       mapTo({ ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId } }),
       tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
