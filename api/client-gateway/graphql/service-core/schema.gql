@@ -144,6 +144,8 @@ type Service {
    lastModificationTimestamp: BigInt
    "Service pickup ETA"
    pickUpETA: BigInt
+   "Closed state"
+   closed: Boolean
 }
 
 type ServiceMessage {

@@ -110,8 +110,8 @@ class ServiceClientCQRS {
           )
           : of({})
       ),    
-      mapTo({ ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId } }),
-      tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
+      mapTo({ ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId, ...args.client } }),
+      // tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
       tap(request => this.validateServiceRequestInput(request)),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
