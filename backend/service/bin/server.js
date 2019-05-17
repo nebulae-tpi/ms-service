@@ -18,6 +18,7 @@ const Cronjob = require('./domain/cronjob');
 const Wallet = require('./domain/cronjob');
 
 
+
 const start = () => {
     concat(
         eventSourcing.eventStore.start$(),
