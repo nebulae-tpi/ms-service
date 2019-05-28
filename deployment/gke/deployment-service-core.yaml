@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: service-core
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: service-core
@@ -13,7 +13,7 @@ spec:
         app: service-core
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.servicecore:2.8.57 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
+      - image: DOCKERHUB/service.backend.servicecore:2.8.58 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
         name: service-core
         volumeMounts:
         - name: google-application-credentials
