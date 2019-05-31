@@ -565,7 +565,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
         (results) => {
           console.log(`DatatableComponent.cancelService = ${results}`);
-        },
+        }, 
         (error) => {
           console.error(`DatatableComponent.cancelService: Error => ${error}`);
           this.loadingData = false;
