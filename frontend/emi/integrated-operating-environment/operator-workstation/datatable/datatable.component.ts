@@ -30,6 +30,7 @@ import {
   startWith,
   debounceTime,
   distinctUntilChanged,
+  bufferTime
 } from 'rxjs/operators';
 
 import { Subject, from, of, forkJoin, Observable, concat, timer } from 'rxjs';
@@ -120,7 +121,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   // selected state filters
   statesFilter: String[] = [];
   //last cancelled Service command
-  lastCancelledService: {id: string, time: number} = null;
+  lastCancelledService: { id: string, time: number } = null;
 
 
   constructor(
@@ -259,12 +260,13 @@ export class DatatableComponent implements OnInit, OnDestroy {
         filter(selectedBusinessId => selectedBusinessId),
         mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId, this.statesFilter, this.channelsFilter)),
         map(subscription => subscription.data.IOEService),
+        bufferTime(1000, 1000),
         takeUntil(this.ngUnsubscribe),
         takeUntil(this.ngUnsubscribeIOEServiceListener)
       )
       .subscribe(
-        (service: any) => {
-          this.appendData(service);
+        (services: any) => {
+          this.appendData(services);
         },
         (error) => console.error(`DatatableComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
         () => { },
@@ -299,7 +301,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   async resetData() {
 
     const today = new Date();
-    const explorePastMonth =  today.getDate() <= 1;
+    const explorePastMonth = today.getDate() <= 1;
     console.log(`Current Date: date=${today.getDate()}, hours=${today.getHours()}, explorePastMonth=${explorePastMonth}`);
 
     this.totalRawData = this.selectedBusinessId ? await this.queryAllDataFromServer(0) : [];
@@ -316,17 +318,31 @@ export class DatatableComponent implements OnInit, OnDestroy {
    * Adds (or removes in case of closing services) services
    * @param service
    */
-  async appendData(service) {
-    const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
-    if (service.closed) {
-      if (oldDataIndex >= 0) {
-        this.totalRawData.splice(oldDataIndex, 1);
+  async appendData(services) {
+    if (services.length <= 0) return;
+
+    let additions = 0;
+    let deletions = 0;
+    let updates = 0;
+    let uhm = 0;
+    for (let service of services) {
+      const oldDataIndex = this.totalRawData.findIndex(raw => raw.id === service.id);
+      if (service.closed) {
+        if (oldDataIndex >= 0) {
+          this.totalRawData.splice(oldDataIndex, 1);
+          deletions++;
+        } else {
+          uhm++;
+        }
+      } else if (oldDataIndex >= 0) {
+        this.totalRawData[oldDataIndex] = service;
+        updates++;
+      } else {
+        this.totalRawData.unshift(service);
+        additions++
       }
-    } else if (oldDataIndex >= 0) {
-      this.totalRawData[oldDataIndex] = service;
-    } else {
-      this.totalRawData.unshift(service);
     }
+    console.log(`evts:${services.length}, adds:${additions}, del:${deletions}, upd:${updates} uhm:${uhm}`);
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
     await this.recalculatePartialData();
   }
@@ -537,15 +553,15 @@ export class DatatableComponent implements OnInit, OnDestroy {
    */
   cancelSelectedTrip() {
     const selectedRow = this.getSelectedRow();
-    if(this.lastCancelledService && this.lastCancelledService.id === selectedRow.id && (this.lastCancelledService.time + 5000 ) > Date.now()){
-      return;           
+    if (this.lastCancelledService && this.lastCancelledService.id === selectedRow.id && (this.lastCancelledService.time + 5000) > Date.now()) {
+      return;
     }
-    if(selectedRow && selectedRow.state.includes('CANCELLED')){
+    if (selectedRow && selectedRow.state.includes('CANCELLED')) {
       this.showMessageSnackbar('ERRORS.4')
       return;
     }
     if (selectedRow) {
-      this.lastCancelledService = { id: selectedRow.id, time: Date.now()};
+      this.lastCancelledService = { id: selectedRow.id, time: Date.now() };
       this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
         (results) => {
           console.log(`DatatableComponent.cancelService = ${results}`);
