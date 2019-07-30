@@ -97,12 +97,12 @@ class ServiceClientCQRS {
    * @param {*} authToken 
    */
   requestServices$({ root, args, jwt }, authToken) {
-    const { id } = args;
-    args.fareDiscount = args.client ? 0 : 0.15;  
+    const { id, tripCost, client } = args;
+    args.fareDiscount = client ? 0 : 0.15;  
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
     .pipe( 
-      mergeMap(() => !args.client
+      mergeMap(() => !client
         ? ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, {_id: 1})
           .pipe(
             toArray(),
@@ -292,7 +292,7 @@ class ServiceClientCQRS {
    */
   buildServiceRequestedEsEvent(authToken, request) {
     // All of the request performed by a client must have a fare discount of 0.1 (10%)
-    let { requestedFeatures, fare, pickUp, tip, dropOff, fareDiscount= 0.1 } = request;
+    let { requestedFeatures, fare, pickUp, tip, dropOff, tripCost, fareDiscount= 0.1 } = request;
 
     pickUp = !pickUp ? undefined : {
       ...pickUp,

@@ -227,7 +227,10 @@ type Mutation {
       "Passenger drop off location"
       dropOff: LocationInput
       "Tip given to the driver"
-      tip: Int
+      tip: Int,
+      "Trip cost"
+      tripCost: Int
+
    ): CommandAck @requireAuth
 
    "Cancel a requested service"
