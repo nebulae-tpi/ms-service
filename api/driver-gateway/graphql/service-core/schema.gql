@@ -142,6 +142,8 @@ type Service {
    route: [Point]   
    "current service state"
    state: String
+   "trip cost"
+   tripCost: Int
 }
 
 input ChatMessageInput {

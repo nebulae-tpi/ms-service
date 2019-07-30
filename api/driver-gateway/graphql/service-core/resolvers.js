@@ -48,7 +48,6 @@ module.exports = {
       ).toPromise();
     },
     AssignedService: (root, args, context, info) => {
-      console.log("AssignedService ==> ", {...args});
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'AssignedService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "drivergateway.graphql.query.AssignedService", { root, args, jwt: context.encodedToken }, 2000)
