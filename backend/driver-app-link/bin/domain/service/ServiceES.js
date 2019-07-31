@@ -291,7 +291,7 @@ class ServiceES {
                 delay(300),
                 mergeMap(() => ServiceDA.findById$(aid,
                     {
-                        "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1,
+                        "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1, "tripCost": 1,
                         "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
                         "driver": 1, "businessId": 1
                     })

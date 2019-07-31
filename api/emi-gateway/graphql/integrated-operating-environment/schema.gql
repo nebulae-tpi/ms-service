@@ -60,6 +60,8 @@ type IOEService{
     closed: Boolean
     "service offer info"
     offer: Offer
+    "trip cost"
+    tripCost: Int
 }
 
 "Shift info"
