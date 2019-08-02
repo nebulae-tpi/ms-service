@@ -5,6 +5,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 
+
+
 const { concat, forkJoin} = require('rxjs');
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
