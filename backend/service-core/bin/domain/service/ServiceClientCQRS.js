@@ -98,7 +98,8 @@ class ServiceClientCQRS {
    */
   requestServices$({ root, args, jwt }, authToken) {
     const { id, tripCost, client } = args;
-    args.fareDiscount = client ? 0 : 0.15;  
+    args.fareDiscount = client ? 0 : 0.15;
+    args.fareDiscount = (tripCost && tripCost > 0) ? 0 : args.fareDiscount;
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
     .pipe( 
