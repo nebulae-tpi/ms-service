@@ -97,6 +97,8 @@ class ServiceClientCQRS {
    * @param {*} authToken 
    */
   requestServices$({ root, args, jwt }, authToken) {
+    console.log('ON requestServices$  ==> ', args.dropOff );
+    
     const { id, tripCost, client } = args;
     args.fareDiscount = client ? 0 : 0.15;
     args.fareDiscount = (tripCost && tripCost > 0) ? 0 : args.fareDiscount;
@@ -247,7 +249,7 @@ class ServiceClientCQRS {
     // if (!pickUp.addressLine1) throw ERROR_23205; //  pickup address not specified
     if (VALID_SERVICE_PAYMENT_TYPES.indexOf(paymentType) == -1) throw ERROR_23206; // invalid payment type
     if (requestedFeatures && requestedFeatures.filter(v => VALID_SERVICE_REQUEST_FEATURES.indexOf(v) == -1).length > 0) throw ERROR_23207; // invalid requested Features    
-    if (dropOff && !dropOff.marker && !dropOff.polygon) throw ERROR_23208; // dropOff location undefined
+    if (dropOff && !dropOff.marker) throw ERROR_23208; //(!dropOff.polygon) dropOff location undefined
     if (fareDiscount && (fareDiscount < 0.01 || fareDiscount > 1.00)) throw ERROR_23209; // invalid fare discount amount
     if (fare && (fare < 0 || fare > 500000)) throw ERROR_23210; // invalid fare amount
     if (tip && (tip < 500 || tip > 100000)) throw ERROR_23211; // invalid tip amount
@@ -308,6 +310,8 @@ class ServiceClientCQRS {
       marker: dropOff.marker ? { type: "Point", coordinates: [dropOff.marker.lng, dropOff.marker.lat] } : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
     };
+    console.log('on buildServiceRequestedEsEvent dropOf ==> ', dropOff);
+    
 
 
     const _id = Crosscutting.generateDateBasedUuid();
