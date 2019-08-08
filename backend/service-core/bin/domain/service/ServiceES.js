@@ -90,12 +90,13 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ data }) {
-        //console.log(`*** ServiceES: handleServiceRequested: `, data); //DEBUG: DELETE LINE
+        // console.log(`*** ServiceES: handleServiceRequested: `, data); //DEBUG: DELETE LINE
         return ServiceDA.insertService$(data)
             .pipe(
                 tap(() => this.queueAndGroupServiceEvent(data))
             );
     }
+    
 
     /**
      * Handles EventSourcing Event ServiceAssigned
