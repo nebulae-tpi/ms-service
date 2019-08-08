@@ -540,9 +540,14 @@ class ServiceCQRS {
   //#region GraphQL response formatters
 
   formatServiceToGraphQLSchema(service) {
-    const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
+    const pickUpMarker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
+    const dropOffMarker = (!service || !service.dropOff || !service.dropOff.marker) ? undefined : { lng: service.dropOff.marker.coordinates[0], lat: service.dropOff.marker.coordinates[1] };
 
-    return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id };
+    return !service ? undefined : { ...service,
+      vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' },
+      pickUp: { ...service.pickUp, marker: pickUpMarker },
+      dropOff: { ...service.dropOff, marker: dropOffMarker },
+      route: undefined, id: service._id };
   }
 
 
