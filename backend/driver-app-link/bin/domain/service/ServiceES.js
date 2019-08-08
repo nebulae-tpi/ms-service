@@ -252,6 +252,7 @@ class ServiceES {
             timestamp: Date.now(), 
             tip: service.tip, 
             pickUp: { ...service.pickUp, location: undefined }, 
+            dropOff: { ...service.dropOff, location: undefined },
             dropOffSpecialType: service.dropOffSpecialType, 
             expirationTime: offerTotalThreshold,
             tripCost: service.tripCost
