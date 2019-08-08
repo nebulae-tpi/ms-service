@@ -247,6 +247,7 @@ class ServiceES {
         //appends the shift into the service 
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
 
+        
         const serviceOffer = {
             _id: service._id, 
             timestamp: Date.now(), 
