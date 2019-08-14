@@ -87,7 +87,7 @@ class ServiceCQRS {
       )),
       map(service => this.formatServiceToGraphQLSchema(service)),
       toArray(),
-      tap(x => ServiceCQRS.log(`ServiceCQRS.queryServices RESP: ${x.length}`)),//DEBUG: DELETE LINE
+      // tap(x => ServiceCQRS.log(`ServiceCQRS.queryServices RESP: ${x.length}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
