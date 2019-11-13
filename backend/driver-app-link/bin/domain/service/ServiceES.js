@@ -204,8 +204,6 @@ class ServiceES {
         ).toPromise();
         //ignores shifts that were already taken into account
         shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
-        console.log('Shift 1 =============>  ', JSON.stringify(shifts));
-        console.log('=============================================================');
         //if the services requires VIRTUAL_WALLET balance, then filter everyone that does not have sufficent money
         shifts = service.client.tipType === "VIRTUAL_WALLET"
             ? shifts.filter(s =>
@@ -216,8 +214,6 @@ class ServiceES {
                 )
             )
             : shifts;
-        console.log('Shift 2 =============>  ', JSON.stringify(shifts));
-        console.log('=============================================================');
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
@@ -229,17 +225,10 @@ class ServiceES {
                 obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
             }
         }
-        console.log('Shift 3 =============>  ', JSON.stringify(shifts));
-        console.log('=============================================================');
         // filter all the trips that are closer than the minDistance threshold
         shifts = shifts.filter(s => {
-            console.log('Shift Referred: ', s.referred);
-            console.log('Shift dis calculated: ', s.dist.calculated);
-            console.log('Shift min distance: ', service.offer.params.minDistance);
             return s.referred || (s.dist.calculated > service.offer.params.minDistance)
             });
-        console.log('Shift 4 =============>  ', JSON.stringify(shifts));
-        console.log('=============================================================');
         obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
         return shifts;
     }
