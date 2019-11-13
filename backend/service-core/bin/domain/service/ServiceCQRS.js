@@ -95,8 +95,8 @@ class ServiceCQRS {
           from: authToken.preferred_username,
           to: service.client.username,
           message: {
-            predefinedMessageId: message.predefinedMessageId,
-            textMessage: message.textMessage
+            predefinedMessageId: message.message.predefinedMessageId,
+            textMessage: message.message.textMessage
           },
           type: 'CLIENT'
         },

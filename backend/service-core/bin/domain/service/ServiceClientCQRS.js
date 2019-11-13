@@ -218,8 +218,8 @@ class ServiceClientCQRS {
           from: authToken.preferred_username,
           to: message.driverUsername,
           message: {
-            predefinedMessageId: message.predefinedMessageId,
-            textMessage: message.textMessage
+            predefinedMessageId: message.message.predefinedMessageId,
+            textMessage: message.message.textMessage
           },
           type: 'DRIVER'
         },
