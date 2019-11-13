@@ -92,6 +92,7 @@ class ServiceES {
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
                         //selected shift
                         const shift = shifts[i];
+                        console.log('INICIA OFERTA =======> ', JSON.stringify(shift));
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs);
                         previouslySelectedShifts.push(shift);
 
@@ -201,7 +202,7 @@ class ServiceES {
             0,//min distance form mongo is always zero
             { "driver": 1, "vehicle": 1 }
         ).toPromise();
-
+        console.log('Shifts before =============>  ', JSON.stringify(shifts));
         //ignores shifts that were already taken into account
         shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
         //if the services requires VIRTUAL_WALLET balance, then filter everyone that does not have sufficent money
@@ -229,7 +230,7 @@ class ServiceES {
         // filter all the trips that are closer than the minDistance threshold
         shifts = shifts.filter(s => s.referred || (s.dist.calculated > service.offer.params.minDistance));
         obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
-
+        console.log('Shifts after =============>  ', JSON.stringify(shifts));
         return shifts;
     }
 
