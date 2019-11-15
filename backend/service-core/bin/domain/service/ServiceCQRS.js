@@ -85,7 +85,7 @@ class ServiceCQRS {
       // tap(request => this.validateServiceAssignRequestInput(request)),
       mergeMap(message => ServiceDA.findById$(message.serviceId, { _id: 1, 'client.username': 1 }).pipe(first(v => v, undefined), map(service => ({ service, message })))),
       tap(({ service, message }) => { if (!service) throw ERROR_23223; }),// shift does not exists
-      tap(({ service, message }) => { if (!service.open) throw ERROR_23224; }),// shift is already closed
+      tap(({ service, message }) => { if (service.closed) throw ERROR_23224; }),// shift is already closed
 
       mergeMap(({ service, message }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
