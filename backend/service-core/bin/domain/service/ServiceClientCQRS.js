@@ -221,7 +221,7 @@ class ServiceClientCQRS {
             predefinedMessageId: message.message.predefinedMessageId,
             textMessage: message.message.textMessage
           },
-          type: 'DRIVER'
+          type: 'DRIVER' 
         },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
