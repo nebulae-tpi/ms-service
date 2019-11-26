@@ -354,7 +354,9 @@ class ServiceES {
         return of({}).pipe(
             filter(() => data.type === 'CLIENT'),
             mergeMap(() => ServiceDA.findById$(aid, { "client.username": 1, "businessId": 1 })),
+            tap(()=> console.log('PASA primer filtro')),
             filter(service => service.driver && service.client.username),
+            tap(()=> console.log('PASA segundo filtro')),
             mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ServiceMessageSubscription', { ...data }))
         );
     }
