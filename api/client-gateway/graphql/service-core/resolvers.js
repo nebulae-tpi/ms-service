@@ -150,7 +150,7 @@ const eventDescriptors = [
     dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
     onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
     onEvent: (evt, descriptor) => {
-        //console.log(`Event of type  ${descriptor.backendEventName} arraived`);
+        console.log(`Event of type  ${descriptor.backendEventName} arraived`);
     },// OPTIONAL, only use if needed
 },
 ];
