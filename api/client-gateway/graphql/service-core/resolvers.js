@@ -143,6 +143,15 @@ const eventDescriptors = [
           //console.log(`Event of type  ${descriptor.backendEventName} arraived`);
       },// OPTIONAL, only use if needed
   },
+  {
+    backendEventName: 'ServiceMessageSubscription',
+    gqlSubscriptionName: 'ServiceMessageSubscription',
+    dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
+    onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
+    onEvent: (evt, descriptor) => {
+        //console.log(`Event of type  ${descriptor.backendEventName} arraived`);
+    },// OPTIONAL, only use if needed
+},
 ];
 
 
