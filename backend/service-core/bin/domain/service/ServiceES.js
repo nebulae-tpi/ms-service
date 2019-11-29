@@ -352,10 +352,9 @@ class ServiceES {
     handleServiceMessageSent$({ aid, data }) {
         console.log(`ServiceES: handleServiceMessageSent: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
-            
             filter(() => data.type === 'CLIENT'),
             mergeMap(() => ServiceDA.findById$(aid, { "client.username": 1, "businessId": 1 })),
-            tap(()=> console.log('PASA!!! primer filtro: '+ (service.driver && service.client.username))),
+            tap(service=> console.log('PASA!!! primer filtro: '+ (service.driver && service.client.username))),
             filter(service => service.driver && service.client.username),
             tap(()=> console.log('PASA segundo filtro')),
             mergeMap(service => broker.send$(CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC, 'ServiceMessageSubscription', { ...data }))
