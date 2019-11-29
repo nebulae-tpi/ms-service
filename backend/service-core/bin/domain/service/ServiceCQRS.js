@@ -87,7 +87,9 @@ class ServiceCQRS {
       tap(({ service, message }) => { if (!service) throw ERROR_23223; }),// shift does not exists
       tap(({ service, message }) => { if (service.closed) throw ERROR_23224; }),// shift is already closed
 
-      mergeMap(({ service, message }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+      mergeMap(({ service, message }) => {
+        console.log('Envia mensaje a ES');
+        return eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
         message.serviceId,
         'ServiceMessageSent',
@@ -100,7 +102,7 @@ class ServiceCQRS {
           },
           type: 'CLIENT'
         },
-        authToken))), //Build and send event (event-sourcing)
+        authToken))}), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       //tap(x => ServiceCQRS.log(`ServiceCQRS.assignService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
