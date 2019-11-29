@@ -123,8 +123,7 @@ module.exports = {
           },
           (payload, variables, context, info) => {
             const username = context.authToken.preferred_username;
-            console.log('PAYLOAD: ', payload);
-            return payload.ClientServiceUpdatedSubscription.to === username;
+            return payload.ServiceMessageSubscription.to === username;
           }
       )
   }
