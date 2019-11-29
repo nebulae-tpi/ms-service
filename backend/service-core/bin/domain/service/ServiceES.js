@@ -353,7 +353,7 @@ class ServiceES {
         console.log(`ServiceES: handleServiceMessageSent: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
             filter(() => data.type === 'CLIENT'),
-            mergeMap(() => ServiceDA.findById$(aid, { "client.username": 1, "businessId": 1, "service.driver": 1 })),
+            mergeMap(() => ServiceDA.findById$(aid, { "client.username": 1, "businessId": 1, "driver": 1 })),
             tap(service => {
                 console.log('PASA!!! primer filtro: ' + (service.driver && service.client.username))
                 console.log('service.driver: ' + service.driver);
