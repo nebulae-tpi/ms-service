@@ -92,15 +92,22 @@ class ServiceClientCQRS {
 
 
   /**
-   * Command to request a new Service.
+   * Handler for request made from client gateway
    * @param {*} param0 
    * @param {*} authToken 
    */
   requestServices$({ root, args, jwt }, authToken) {
     console.log('ON requestServices$  ==> ', args.dropOff );
+
+    // const discountByBusinessUnit =  {
+    //   "75cafa6d-0f27-44be-aa27-c2c82807742d": 0.10, // CALI
+    //   "b19c067e-57b4-468f-b970-d0101a31cacb": 0.15  // MANIZALES
+    // };
+
+    // const businessId = authToken.businessId;
     
     const { id, tripCost, client } = args;
-    args.fareDiscount = client ? 0 : 0.15;
+    args.fareDiscount = client ? 0 : 0.10;
     args.fareDiscount = (tripCost && tripCost > 0) ? 0 : args.fareDiscount;
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
