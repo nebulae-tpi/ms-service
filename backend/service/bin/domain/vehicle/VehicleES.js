@@ -120,6 +120,13 @@ class VehicleES {
     }
 
 
+    handleVehicleSubscriptionTypeUpdated$({ etv, aid, av, data, user, timestamp }){
+        const { type  } = data;
+        const sets = {'subscription.type': type};
+
+        return VehicleDA.updateVehicleInfo$(aid, sets);
+    }
+
 }
 
 

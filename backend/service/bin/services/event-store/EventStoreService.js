@@ -190,6 +190,10 @@ class EventStoreService {
         fn: VehicleES.handleVehicleBlockAdded$,
         obj: VehicleES
       },
+      VehicleSubscriptionTypeUpdated: {
+        fn: VehicleES.handleVehicleSubscriptionTypeUpdated$,
+        obj: VehicleES
+      },
 
       //CLIENT
       ClientSatelliteEnabled: {
@@ -313,6 +317,10 @@ class EventStoreService {
       {
         aggregateType: "Vehicle",
         eventType: "VehicleBlockAdded"
+      },
+      {
+        aggregateType: "Vehicle",
+        eventType: "VehicleSubscriptionTypeUpdated"
       },
       // CLIENT
       {
