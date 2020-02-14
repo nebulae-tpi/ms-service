@@ -58,6 +58,12 @@ type Shift {
    _id: String
    "shift's state"
    state: String,
+   "true if business unit allow PayPerService mode"
+   allowPayPerService: String,
+   "cost for pay per service if it is enabled"
+   payPerServicePrice: Int
+   "subscription Type REGULAR or PAY_PER_SERVICE"
+   subscriptionType: String
    "shift's vehicle"
    vehicle: Vehicle
    "shift's Driver"

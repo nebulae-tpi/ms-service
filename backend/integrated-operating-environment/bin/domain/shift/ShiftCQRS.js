@@ -46,7 +46,7 @@ class ShiftCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ShiftCQRS", "queryShift", PERMISSION_DENIED, READ_ROLES).pipe(
       mapTo(args),
       mergeMap(() => ShiftDA.findById$(id)),
-      map(shift => this.formatShiftToGraphQLSchema(shift)),
+      map(shift => this.formatShiftToGraphqlIOEShift(shift)),
       tap(x => ShiftCQRS.log(`ShiftCQRS.queryShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))

@@ -21,19 +21,6 @@ type Driver {
    fullname: String
 }
 
-"Driver's shift info"
-type Shift {
-   "Shift ID"
-   _id: String
-   "shift's state"
-   state: String,
-   "shift's vehicle"
-   vehicle: Vehicle
-   "shift's Driver"
-   driver: Driver
-}
-
-
 "Client info"
 type Client {
    "Full name"

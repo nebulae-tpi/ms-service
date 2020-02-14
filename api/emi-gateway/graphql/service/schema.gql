@@ -344,7 +344,13 @@ type ServiceShift {
   timestamp: BigInt
   "Shift State"
   state: String
-  "Shift State changes" 
+  "true if business unit allow PayPerService mode"
+  allowPayPerService: String,
+  "cost for pay per service if it is enabled"
+  payPerServicePrice: Int
+  "subscription Type REGULAR or PAY_PER_SERVICE"
+  subscriptionType: String
+  "Shift State changes"
   stateChanges: [ServiceShiftStateChange]
   "Shift online status"
   online: Boolean

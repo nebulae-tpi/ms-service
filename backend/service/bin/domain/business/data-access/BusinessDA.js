@@ -27,7 +27,7 @@ class BusinessDA {
 
     return defer(() => collection.findOneAndUpdate(
       { _id: id },
-      { $set: { ...data } },
+      { $set: { generalInfo: { ...data } } },
       { upsert: true }
     ))
   }

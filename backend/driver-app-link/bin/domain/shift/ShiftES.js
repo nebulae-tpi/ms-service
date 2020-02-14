@@ -183,6 +183,9 @@ class ShiftES {
         return (!shift) ? undefined : {
             _id: shift._id,
             state: shift.state,
+            allowPayPerService: shift.allowPayPerService,
+            payPerServicePrice: shift.payPerServicePrice,
+            subscriptionType: shift.subscriptionType,
             driver: {
                 fullname: shift.driver.fullname,
                 username: shift.driver.username,

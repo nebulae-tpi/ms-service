@@ -21,10 +21,9 @@ class BusinessDA {
     });
   }
 
-  static finOneBusiness$(id){
+  static finOneBusiness$(id, projection = undefined ){
     const collection = mongoDB.db.collection(COLLECTION_NAME);
-    return (() => collection.findOne({ _id: id }) )
-
+    return (() => collection.findOne({ _id: id }, { projection }));
   }
 
 }

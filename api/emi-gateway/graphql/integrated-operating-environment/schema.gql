@@ -78,6 +78,12 @@ type IOEShift{
     online: Boolean
     "Last received communication"
     lastReceivedComm: BigInt
+    "true if business unit allow PayPerService mode"
+    allowPayPerService: String,
+    "cost for pay per service if it is enabled"
+    payPerServicePrice: Int
+    "subscription Type REGULAR or PAY_PER_SERVICE"
+    subscriptionType: String
     "Driver info"
     driver: IOEDriver
     "Vehicle info"

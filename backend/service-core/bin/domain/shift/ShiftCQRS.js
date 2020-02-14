@@ -67,7 +67,7 @@ class ShiftCQRS {
         forkJoin(
           VehicleDA.findByLicensePlate$(vehiclePlate),
           DriverDA.findById$(driverId)), // quering vehicle + driver
-          BusinessDA.finOneBusiness$(businessId)
+          BusinessDA.finOneBusiness$(businessId, { "generalInfo": 1 })
       ),
       tap(([vehicle, driver]) => { if (!vehicle) throw ERROR_23015; if (!driver) throw ERROR_23016 }), // Driver or Vehicle not found verfication
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
@@ -141,7 +141,7 @@ class ShiftCQRS {
     const vehicleBlocked = (vehicle.blocks && vehicle.blocks.length > 0);
     const driverBlocked = (driver.blocks && driver.blocks.length > 0);
     const state = (vehicleBlocked || driverBlocked) ? 'BLOCKED' : 'AVAILABLE';
-    const { allowPayPerService, payPerServicePrice } = businessInfo;
+    const { allowPayPerService, payPerServicePrice } = (businessInfo || {}).generalInfo || {};
     const payPerServiceEnabled = vehicle.subscription.type == "PAY_PER_SERVICE";
 
     return {
@@ -246,6 +246,9 @@ class ShiftCQRS {
     return (!shift) ? undefined : {
       _id: shift._id,
       state: shift.state,
+      allowPayPerService: shift.allowPayPerService,
+      payPerServicePrice: shift.payPerServicePrice,
+      subscriptionType: shift.subscriptionType,
       driver: {
         fullname: shift.driver.fullname,
         username: shift.driver.username,
