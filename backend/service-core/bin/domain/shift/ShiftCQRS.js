@@ -150,6 +150,7 @@ class ShiftCQRS {
       timestamp: Date.now(),
       allowPayPerService: allowPayPerService,
       payPerServicePrice: payPerServiceEnabled ?  payPerServicePrice || null: undefined,
+      subscriptionType: vehicle.subscription.type || "REGULAR",
       state,
       stateChanges: [{ state, timestamp: Date.now() }],
       "online": true,

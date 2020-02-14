@@ -120,11 +120,8 @@ class VehicleDA {
     return defer(() =>
         collection.findOneAndUpdate(
           { _id: id },
-          {
-            $set: { ...update }
-          },{
-            returnOriginal: true
-          }
+          { $set: { ...update } },
+          { returnOriginal: true, upsert: true }
         )
     ).pipe(
       map(result => result && result.value ? result.value : undefined)
