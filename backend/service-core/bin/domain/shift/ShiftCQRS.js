@@ -20,7 +20,7 @@ const {
   ERROR_23010, ERROR_23011, ERROR_23012, ERROR_23013, ERROR_23014, ERROR_23015, ERROR_23016, ERROR_23020, ERROR_23021, ERROR_23025, ERROR_23026, ERROR_23027, ERROR_23028,
 } = require("../../tools/customError");
 
-const { ShiftDA, VehicleDA, DriverDA, ServiceDA } = require('./data-access')
+const { ShiftDA, VehicleDA, DriverDA, ServiceDA, BusinessDA } = require('./data-access')
 
 
 /**
@@ -64,12 +64,15 @@ class ShiftCQRS {
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
       mergeMapTo(ShiftDA.findOpenShiftByVehiclePlate$(vehiclePlate).pipe(tap(shift => { if (shift) throw ERROR_23011; }))),  // Vehicle has an open shift verification
       mergeMapTo(
-        forkJoin(VehicleDA.findByLicensePlate$(vehiclePlate), DriverDA.findById$(driverId)) // quering vehicle + driver
+        forkJoin(
+          VehicleDA.findByLicensePlate$(vehiclePlate),
+          DriverDA.findById$(driverId)), // quering vehicle + driver
+          BusinessDA.finOneBusiness$(businessId)
       ),
       tap(([vehicle, driver]) => { if (!vehicle) throw ERROR_23015; if (!driver) throw ERROR_23016 }), // Driver or Vehicle not found verfication
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
       tap(([vehicle, driver]) => { if (driver.assignedVehicles.map(p => p.toUpperCase()).indexOf(vehicle.licensePlate.toUpperCase()) <= -1) throw ERROR_23014; }),// vehicle not assigned to driver verification
-      map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, deviceIdentifier,authToken)),// build shift with all needed proerties
+      map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken)),// build shift with all needed proerties
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       //tap(x => ShiftCQRS.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
@@ -134,15 +137,19 @@ class ShiftCQRS {
    * @param {*} vehicle 
    * @param {*} driver 
    */
-  buildShift(businessId, vehicle, driver,deviceIdentifier, authToken) {
+  buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken) {
     const vehicleBlocked = (vehicle.blocks && vehicle.blocks.length > 0);
     const driverBlocked = (driver.blocks && driver.blocks.length > 0);
     const state = (vehicleBlocked || driverBlocked) ? 'BLOCKED' : 'AVAILABLE';
+    const { allowPayPerService, payPerServicePrice } = businessInfo;
+    const payPerServiceEnabled = vehicle.subscription.type == "PAY_PER_SERVICE";
 
     return {
       "_id": Crosscutting.generateDateBasedUuid(),
       businessId,
       timestamp: Date.now(),
+      allowPayPerService: allowPayPerService,
+      payPerServicePrice: payPerServiceEnabled ?  payPerServicePrice || null: undefined,
       state,
       stateChanges: [{ state, timestamp: Date.now() }],
       "online": true,

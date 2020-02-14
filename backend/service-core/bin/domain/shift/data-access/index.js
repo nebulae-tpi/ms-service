@@ -6,6 +6,7 @@ const ShiftDA = require("./ShiftDA");
 const VehicleDA = require("./VehicleDA");
 const DriverDA = require("./DriverDA");
 const ServiceDA = require("./ServiceDA");
+const BusinessDA = require("./BusinessDA");
 
 module.exports = {
   /**
@@ -27,5 +28,9 @@ module.exports = {
   /**
    * @returns {ServiceDA}
    */
-  ServiceDA
+  ServiceDA,
+  /**
+   * @returns {BusinessDA} 
+   */
+  BusinessDA
 };
