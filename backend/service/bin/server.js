@@ -16,6 +16,7 @@ const { concat, forkJoin } = require('rxjs');
 const shift = require('./domain/shift');
 const Cronjob = require('./domain/cronjob');
 const Wallet = require('./domain/cronjob');
+const Business = require("./domain/business");
 
 
 const start = () => {
@@ -30,7 +31,8 @@ const start = () => {
             ClientDA.start$(),
             Wallet.start$,
             shift.start$,
-            Cronjob.start$
+            Cronjob.start$,
+            Business.start$
         ),        
         graphQlService.start$()
     ).subscribe(
