@@ -72,6 +72,23 @@ class ShiftDA {
     );
   }
 
+  static findById$(_id, projection){    
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
+
+    const query = { _id };
+
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection('Shift')),
+      mergeMap(collection => defer(() => collection.findOne(query, { projection }) ) ),
+      toArray(),
+      map(resultArray => resultArray.filter(item => item != null)),
+      map(( items ) => items[0])
+    );
+
+  }
+
 }
 /**
  * @returns {ShiftDA}

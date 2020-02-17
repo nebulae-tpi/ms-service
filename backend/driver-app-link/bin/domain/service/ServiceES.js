@@ -304,7 +304,7 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceAssigned$({ aid, data }) {
+    handleServiceAssigned$({ aid, data, timestamp }) {
         //console.log(`ServiceES: handleServiceAssigned: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({})
             .pipe(
@@ -313,12 +313,13 @@ class ServiceES {
                     {
                         "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1, "tripCost": 1,
                         "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
-                        "driver": 1, "businessId": 1
+                        "driver": 1, "businessId": 1, "shiftId": 1
                     })
                 ),
                 mergeMap(dbService => forkJoin(
                     of(dbService),
-                    this.payClientAgreement$(dbService) // (todo)
+                    this.payClientAgreement$(dbService, timestamp),
+                    this.generatePayPerServiceTransaction$(dbService, timestamp)
                 )),
                 map(([dbService, a]) =>
                     (
@@ -351,7 +352,7 @@ class ServiceES {
      * (todo) makespaymento to doorman
      * @param {*} service  
      */
-    payClientAgreement$({ businessId, client, driver }) {
+    payClientAgreement$({ businessId, client, driver }, timestamp) {
         // console.log("payClientAgreement$ ==> ", {businessId, client, driver});        
         return of({}).pipe(
             map(() => (client.tipType != "VIRTUAL_WALLET")
@@ -362,7 +363,7 @@ class ServiceES {
                     type: "MOVEMENT",
                     // notes: mba.notes,
                     concept: "CLIENT_AGREEMENT_PAYMENT",
-                    timestamp: Date.now(),
+                    timestamp: timestamp || Date.now(),
                     amount: client.tip,
                     fromId: driver.id,
                     toId: client.tipClientId
@@ -380,6 +381,43 @@ class ServiceES {
                 })
             )
             )
+        );
+    }
+
+    generatePayPerServiceTransaction$(dbService, timestamp){
+        console.log(JSON.stringify({ dbService }));
+        const { shiftId, driver, businessId } = dbService;
+        const projection = { "payPerServicePrice":1, "subscriptionType":1 };
+        return ShiftDA.findById$(shiftId, projection).pipe(
+            map(shift => {
+              if(!shift) return null;
+              const { payPerServicePrice, subscriptionType  } = shift;
+              if(subscriptionType == "PAY_PER_SERVICE"){
+                  return ({
+                    _id: Crosscutting.generateDateBasedUuid(),
+                    businessId: businessId,
+                    type: "MOVEMENT",
+                    notes: `Turno: ${shiftId}; Servicio: ${dbService._id}`,
+                    concept: "PAY_PER_SERVICE",
+                    timestamp: timestamp  || Date.now(),
+                    amount: payPerServicePrice,
+                    fromId: driver.id,
+                    toId: businessId
+                });
+              }
+              return null;
+            }),
+            tap(tx => console.log("TRANSACTION ==> ", {tx})),
+            mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
+                new Event({
+                    eventType: "WalletTransactionCommited",
+                    eventTypeVersion: 1,
+                    aggregateType: "Wallet",
+                    aggregateId: uuidv4(),
+                    data: tx,
+                    user: "SYSTEM"
+                })
+            ))
         );
     }
 
