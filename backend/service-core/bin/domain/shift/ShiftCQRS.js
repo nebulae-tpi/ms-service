@@ -55,6 +55,8 @@ class ShiftCQRS {
    * Starts a new shift for a driver
    */
   startShift$({ root, args, jwt }, authToken) {
+    console.log("startShift$ ==> ", args );
+    
     const vehiclePlate = args.vehiclePlate.toUpperCase();
     const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
     const { businessId, driverId } = authToken;
@@ -139,6 +141,8 @@ class ShiftCQRS {
    * @param {*} driver 
    */
   buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken) {
+    console.log(JSON.stringify(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken));
+    
     const vehicleBlocked = (vehicle.blocks && vehicle.blocks.length > 0);
     const driverBlocked = (driver.blocks && driver.blocks.length > 0);
     const state = (vehicleBlocked || driverBlocked) ? 'BLOCKED' : 'AVAILABLE';
