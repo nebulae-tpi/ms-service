@@ -67,6 +67,7 @@ module.exports = {
     },
   },
 
+  
   Mutation: {
     startShift: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'startShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
