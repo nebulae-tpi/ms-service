@@ -72,7 +72,8 @@ class ShiftCQRS {
       tap(([vehicle, driver]) => { if (!vehicle) throw ERROR_23015; if (!driver) throw ERROR_23016 }), // Driver or Vehicle not found verfication
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
       tap(([vehicle, driver]) => { if (driver.assignedVehicles.map(p => p.toUpperCase()).indexOf(vehicle.licensePlate.toUpperCase()) <= -1) throw ERROR_23014; }),// vehicle not assigned to driver verification
-      map(([vehicle, driver]) => this.buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken)),// build shift with all needed proerties
+      map(([vehicle, driver, businessInfo]) => this.buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken)),// build shift with all needed proerties
+      tap(s => console.log(JSON.stringify(s))),
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       //tap(x => ShiftCQRS.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
