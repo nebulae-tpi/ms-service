@@ -2,7 +2,7 @@
 
 require('datejs');
 let mongoDB = undefined;
-const COLLECTION_NAME = "Service";
+const COLLECTION_NAME = "Business";
 const { CustomError } = require("../../../tools/customError");
 const { map, mergeMap } = require("rxjs/operators");
 const { Observable, defer } = require("rxjs");
