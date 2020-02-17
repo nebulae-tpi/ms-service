@@ -37,6 +37,23 @@ class ShiftDA {
     );
   }
 
+  static findOpenShiftByVehicleIdAndUpdate$(vehicleId, update){
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
+    const query = { "state": { "$ne": "CLOSED" }, "vehicle.id": vehicleId };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => defer(() => collection.findOneAndUpdate(
+        query, 
+        { $set: { ...update } },
+        { returnOriginal: false }
+      ) )),
+      filter(s => s),      
+      first(shift => shift, undefined),
+      map(result => result && result.value ? result.value : undefined),
+    );
+  }
 
 }
 /**

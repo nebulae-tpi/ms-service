@@ -41,7 +41,7 @@ class ShiftES {
         return of({})
         .pipe(
             delay(300),
-            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, driver: 1, vehicle: 1, state: 1 })),
+            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, allowPayPerService: 1, payPerServicePrice: 1, subscriptionType:1, driver: 1, vehicle: 1, state: 1 })),
             filter(shift => shift.driver && shift.vehicle),
             mergeMap((shift) => driverAppLinkBroker.sendShiftEventToDrivers$(shift.businessId, shift.driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema({ ...shift, ...data })))
         );
@@ -57,7 +57,7 @@ class ShiftES {
         return of({})
         .pipe(
             delay(300),
-            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, driver: 1, vehicle: 1, state: 1 })),
+            mergeMap(() => ShiftDA.findById$(aid, { businessId: 1, allowPayPerService: 1, payPerServicePrice: 1, subscriptionType:1, driver: 1, vehicle: 1, state: 1 })),
             filter(shift => shift.driver && shift.vehicle),
             mergeMap((shift) => driverAppLinkBroker.sendShiftEventToDrivers$(shift.businessId, shift.driver.username, 'ShiftStateChanged', this.formatShitToGraphQLSchema({ ...shift, ...data })))
         );

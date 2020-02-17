@@ -2,7 +2,7 @@
 
 
 const { of, interval, forkJoin } = require("rxjs");
-const { take, mergeMap, catchError, map, toArray, filter } = require('rxjs/operators');
+const { take, mergeMap, tap, catchError, map, toArray, filter } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -44,6 +44,37 @@ class VehicleES {
                 this.buildShiftVehicleBlockAddedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))), //Build and send ShiftVehicleBlockAdded event (event-sourcing)
         );
     }
+
+    handleVehicleSubscriptionTypeUpdated$({ aid, data, user }) {
+        const update = { "subscriptionType": data.type }
+        return ShiftDA.findOpenShiftByVehicleIdAndUpdate$(aid, update).pipe(
+            filter(shift => shift),
+            tap(ns => console.log("NEW SHIFT ==> ", ns)),
+            mergeMap(( _id, state ) => eventSourcing.eventStore.emitEvent$(
+                this.buildEventSourcingEvent('Shift', shiftId, 'ShiftStateChanged', { _id, state }, user)            
+            ))
+            
+        );
+    }
+
+    /**
+     * Generates an EventSourcing Event
+     * @param {*} aggregateType 
+     * @param {*} aggregateId defaults to generated DateBased Uuid
+     * @param {*} eventType 
+     * @param {*} data defaults to {}
+     * @param {*} eventTypeVersion defaults to 1
+    */
+   buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, user = "SYSTEM", eventTypeVersion = 1) {
+    return new Event({
+        aggregateType,
+        aggregateId,
+        eventType,
+        eventTypeVersion,
+        user,
+        data
+    });
+}
 
     //#region Object builders
 
