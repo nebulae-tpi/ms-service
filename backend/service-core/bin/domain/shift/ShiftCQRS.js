@@ -4,7 +4,7 @@
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
 const { of, interval, forkJoin } = require("rxjs");
-const { mapTo, mergeMap, catchError, map, toArray, mergeMapTo, tap } = require('rxjs/operators');
+const { mapTo, mergeMap,delay, catchError, map, toArray, mergeMapTo, tap } = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
 const { Event } = require("@nebulae/event-store");
@@ -68,9 +68,11 @@ class ShiftCQRS {
       mergeMapTo(
         forkJoin(
           VehicleDA.findByLicensePlate$(vehiclePlate),
-          DriverDA.findById$(driverId)), // quering vehicle + driver
+          DriverDA.findById$(driverId), // quering vehicle + driver
           BusinessDA.finOneBusiness$(businessId, { "generalInfo": 1 })
+        )          
       ),
+      tap(r => console.log(r)),
       tap(([vehicle, driver]) => { if (!vehicle) throw ERROR_23015; if (!driver) throw ERROR_23016 }), // Driver or Vehicle not found verfication
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
       tap(([vehicle, driver]) => { if (driver.assignedVehicles.map(p => p.toUpperCase()).indexOf(vehicle.licensePlate.toUpperCase()) <= -1) throw ERROR_23014; }),// vehicle not assigned to driver verification

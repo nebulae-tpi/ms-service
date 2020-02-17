@@ -4,8 +4,8 @@ require('datejs');
 let mongoDB = undefined;
 const COLLECTION_NAME = "Service";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, first, filter } = require("rxjs/operators");
-const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
+const { map, mergeMap } = require("rxjs/operators");
+const { Observable, defer } = require("rxjs");
 
 class BusinessDA {
   static start$(mongoDbInstance) {
@@ -23,7 +23,7 @@ class BusinessDA {
 
   static finOneBusiness$(id, projection = undefined ){
     const collection = mongoDB.db.collection(COLLECTION_NAME);
-    return (() => collection.findOne({ _id: id }, { projection }));
+    return defer(() => collection.findOne({ _id: id }, { projection }));
   }
 
 }
