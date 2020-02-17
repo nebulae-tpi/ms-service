@@ -179,6 +179,7 @@ type Query {
     ): [Service] @requireAuth
 }
 
+
 type Mutation {
    "Starts a new shift"
    startShift(
