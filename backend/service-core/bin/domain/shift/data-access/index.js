@@ -12,7 +12,7 @@ module.exports = {
   /**
    * Data-Access start workflow
    */
-  start$: Rx.concat(ShiftDA.start$(), VehicleDA.start$(), DriverDA.start$(), ServiceDA.start$()),
+  start$: Rx.concat(ShiftDA.start$(), VehicleDA.start$(), DriverDA.start$(), ServiceDA.start$(), BusinessDA.start$()),
   /**
    * @returns {ShiftDA}
    */
