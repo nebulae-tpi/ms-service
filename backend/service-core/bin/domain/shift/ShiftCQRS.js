@@ -149,7 +149,8 @@ class ShiftCQRS {
     const driverBlocked = (driver.blocks && driver.blocks.length > 0);
     const state = (vehicleBlocked || driverBlocked) ? 'BLOCKED' : 'AVAILABLE';
     const { allowPayPerService, payPerServicePrice } = (businessInfo || {}).generalInfo || {};
-    const payPerServiceEnabled = (vehicle.subscription || {}).type == "PAY_PER_SERVICE";
+    const vehicleSubscriptionType = (vehicle.subscription || {}).type || "REGULAR";
+    const payPerServiceEnabled = vehicleSubscriptionType == "PAY_PER_SERVICE";
 
     return {
       "_id": Crosscutting.generateDateBasedUuid(),
@@ -157,7 +158,7 @@ class ShiftCQRS {
       timestamp: Date.now(),
       allowPayPerService: allowPayPerService,
       payPerServicePrice: payPerServiceEnabled ?  payPerServicePrice || null: undefined,
-      subscriptionType: vehicle.subscription.type || "REGULAR",
+      subscriptionType: vehicleSubscriptionType,
       state,
       stateChanges: [{ state, timestamp: Date.now() }],
       "online": true,
