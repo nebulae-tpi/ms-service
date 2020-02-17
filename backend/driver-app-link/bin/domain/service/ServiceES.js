@@ -92,7 +92,7 @@ class ServiceES {
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
                         //selected shift
                         const shift = shifts[i];
-                        console.log('INICIA OFERTA =======> ', JSON.stringify(shift));
+                        // console.log('INICIA OFERTA =======> ', JSON.stringify(shift));
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs);
                         previouslySelectedShifts.push(shift);
 
@@ -203,17 +203,27 @@ class ServiceES {
             { "driver": 1, "vehicle": 1 }
         ).toPromise();
         //ignores shifts that were already taken into account
-        shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
-        //if the services requires VIRTUAL_WALLET balance, then filter everyone that does not have sufficent money
-        shifts = service.client.tipType === "VIRTUAL_WALLET"
-            ? shifts.filter(s =>
-                (
-                    s.driver.wallet &&
-                    s.driver.wallet.pockets &&
-                    (s.driver.wallet.pockets.main || 0) >= service.client.tip
-                )
-            )
-            : shifts;
+        shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));        
+        // filter shifts who its drivers have't required money to get the service offer.
+        // tip for client and PayPerService are evaluated 
+        shifts = shifts.filter(shift => {
+
+                const tipType = service.client.tipType; // === "VIRTUAL_WALLET"
+                const driverMainPocketAmount = ((shift.driver.wallet || {}).pockets ||{}).main || 0;
+                
+                const clientTip = ( tipType === "VIRTUAL_WALLET" )
+                    ? service.client.tip || 0: 0;
+                
+                const payPerServicePrice = ( shift.subscriptionType == "PAY_PER_SERVICE" )
+                    ? shift.payPerServicePrice || 0 : 0;
+                    
+                console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
+                
+
+                return driverMainPocketAmount >= ( clientTip + payPerServicePrice );
+
+            });
+
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
