@@ -50,8 +50,8 @@ class VehicleES {
         return ShiftDA.findOpenShiftByVehicleIdAndUpdate$(aid, update).pipe(
             filter(shift => shift),
             tap(ns => console.log("NEW SHIFT ==>    ", ns)),
-            mergeMap(({ _id, state }) => eventSourcing.eventStore.emitEvent$(
-                this.buildEventSourcingEvent('Shift', _id, 'ShiftStateChanged', { _id, state }, user)            
+            mergeMap(({ _id, state, subscriptionType }) => eventSourcing.eventStore.emitEvent$(
+                this.buildEventSourcingEvent('Shift', _id, 'ShiftStateChanged', { _id, state, subscriptionType }, user)            
             ))
             
         );
