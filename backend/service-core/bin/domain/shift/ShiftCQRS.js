@@ -45,7 +45,7 @@ class ShiftCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "queryOpenShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriverAndIdentifier$(driverId, deviceIdentifier)),
       map(shift => this.formatShitToGraphQLSchema(shift)),
-      tap(x => ShiftCQRS.log(`ShiftCQRS.queryOpenShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      //tap(x => ShiftCQRS.log(`ShiftCQRS.queryOpenShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );

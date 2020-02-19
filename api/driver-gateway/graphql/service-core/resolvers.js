@@ -25,8 +25,6 @@ function getResponseFromBackEnd$(response) {
     }));
 }
 
-
-
 module.exports = {
   Query: {
     DriverAssignedVehicles: (root, args, context, info) => {
