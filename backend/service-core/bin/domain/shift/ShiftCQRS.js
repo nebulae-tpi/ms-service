@@ -155,7 +155,7 @@ class ShiftCQRS {
       "_id": Crosscutting.generateDateBasedUuid(),
       businessId,
       timestamp: Date.now(),
-      allowPayPerService: allowPayPerService || "REGULAR",
+      allowPayPerService: allowPayPerService || false,
       payPerServicePrice: payPerServicePrice || 0,
       subscriptionType,
       state,
