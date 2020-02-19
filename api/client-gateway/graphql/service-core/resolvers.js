@@ -27,6 +27,7 @@ function getResponseFromBackEnd$(response) {
     }));
 }
 
+
 module.exports = {
   Query: {
     HistoricalClientServices: (root, args, context, info) => {
