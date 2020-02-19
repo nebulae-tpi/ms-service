@@ -55,7 +55,7 @@ class ShiftCQRS {
    * Starts a new shift for a driver
    */
   startShift$({ root, args, jwt }, authToken) {
-    console.log("startShift$ ==> ", args );
+    //console.log("startShift$ ==> ", args );
     
     const vehiclePlate = args.vehiclePlate.toUpperCase();
     const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
@@ -72,12 +72,12 @@ class ShiftCQRS {
           BusinessDA.finOneBusiness$(businessId, { "generalInfo": 1 })
         )          
       ),
-      tap(r => console.log(r)),
+      // tap(r => console.log(r)),
       tap(([vehicle, driver]) => { if (!vehicle) throw ERROR_23015; if (!driver) throw ERROR_23016 }), // Driver or Vehicle not found verfication
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
       tap(([vehicle, driver]) => { if (driver.assignedVehicles.map(p => p.toUpperCase()).indexOf(vehicle.licensePlate.toUpperCase()) <= -1) throw ERROR_23014; }),// vehicle not assigned to driver verification
       map(([vehicle, driver, businessInfo]) => this.buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken)),// build shift with all needed proerties
-      tap(s => console.log(JSON.stringify(s))),
+      // tap(s => console.log(JSON.stringify(s))),
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       //tap(x => ShiftCQRS.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
@@ -143,7 +143,7 @@ class ShiftCQRS {
    * @param {*} driver 
    */
   buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken) {
-    console.log(JSON.stringify(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken));
+    //console.log(JSON.stringify(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken));
     
     const vehicleBlocked = (vehicle.blocks && vehicle.blocks.length > 0);
     const driverBlocked = (driver.blocks && driver.blocks.length > 0);

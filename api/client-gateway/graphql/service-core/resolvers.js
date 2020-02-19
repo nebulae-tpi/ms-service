@@ -27,7 +27,6 @@ function getResponseFromBackEnd$(response) {
     }));
 }
 
-
 module.exports = {
   Query: {
     HistoricalClientServices: (root, args, context, info) => {
@@ -152,7 +151,6 @@ const eventDescriptors = [
     },// OPTIONAL, only use if needed
 },
 ];
-
 
 /**
 * Connects every backend event to the right GQL subscription

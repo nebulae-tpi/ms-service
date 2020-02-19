@@ -217,7 +217,7 @@ class ServiceES {
                 const payPerServicePrice = ( shift.subscriptionType == "PAY_PER_SERVICE" )
                     ? shift.payPerServicePrice || 0 : 0;
                     
-                console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
+                // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
                 
 
                 return driverMainPocketAmount >= ( clientTip + payPerServicePrice );
@@ -385,7 +385,7 @@ class ServiceES {
     }
 
     generatePayPerServiceTransaction$(dbService, timestamp){
-        console.log(JSON.stringify({ dbService }));
+        // console.log(JSON.stringify({ dbService }));
         const { shiftId, driver, businessId } = dbService;
         const projection = { "payPerServicePrice":1, "subscriptionType":1 };
         return ShiftDA.findById$(shiftId, projection).pipe(
@@ -407,7 +407,7 @@ class ServiceES {
               }
               return null;
             }),
-            tap(tx => console.log("TRANSACTION ==> ", {tx})),
+            // tap(tx => console.log("TRANSACTION ==> ", {tx})),
             mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
                 new Event({
                     eventType: "WalletTransactionCommited",
