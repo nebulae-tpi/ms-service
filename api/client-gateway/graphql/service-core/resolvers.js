@@ -28,7 +28,6 @@ function getResponseFromBackEnd$(response) {
 }
 
 module.exports = {
-
   Query: {
     HistoricalClientServices: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalClientServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
@@ -55,7 +54,6 @@ module.exports = {
       ).toPromise();
     },
   },
-
   Mutation: {
     RequestService: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'RequestService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(

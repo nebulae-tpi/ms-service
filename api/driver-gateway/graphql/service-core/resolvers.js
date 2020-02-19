@@ -26,10 +26,7 @@ function getResponseFromBackEnd$(response) {
     }));
 }
 
-
-
 module.exports = {
-
   Query: {
     DriverAssignedVehicles: (root, args, context, info) => {
       console.log("DriverAssignedVehicles ==> ", {...args});
@@ -65,9 +62,7 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
-  },
-
-  
+  },  
   Mutation: {
     startShift: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'startShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
@@ -116,5 +111,5 @@ module.exports = {
       ).toPromise();
     },
 
-  },
+  }
 }

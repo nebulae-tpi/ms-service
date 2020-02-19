@@ -328,7 +328,6 @@ module.exports = {
 };
 
 //// SUBSCRIPTIONS SOURCES ////
-
 const eventDescriptors = [
     {
         backendEventName: 'ServiceServiceUpdatedSubscription',

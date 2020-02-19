@@ -24,8 +24,8 @@ function getResponseFromBackEnd$(response) {
     );
   }
 
-
 module.exports = {
+    
     //// QUERY ///////
     Query: {
         ServiceDrivers(root, args, context) {
@@ -115,8 +115,6 @@ module.exports = {
                 ).toPromise();
         },
     },
-
-
 
     //// MUTATIONS ///////
     Mutation: {
