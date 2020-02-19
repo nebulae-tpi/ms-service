@@ -54,9 +54,7 @@ class ShiftCQRS {
   /**  
    * Starts a new shift for a driver
    */
-  startShift$({ root, args, jwt }, authToken) {
-    //console.log("startShift$ ==> ", args );
-    
+  startShift$({ root, args, jwt }, authToken) {    
     const vehiclePlate = args.vehiclePlate.toUpperCase();
     const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
     const { businessId, driverId } = authToken;
@@ -65,6 +63,11 @@ class ShiftCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
       mergeMapTo(ShiftDA.findOpenShiftByVehiclePlate$(vehiclePlate).pipe(tap(shift => { if (shift) throw ERROR_23011; }))),  // Vehicle has an open shift verification
+      tap(() => {
+        if(vehiclePlate === "FQX351"){
+          console.log("ARGS ==> ", args);          
+        }
+      }),
       mergeMapTo(
         forkJoin(
           VehicleDA.findByLicensePlate$(vehiclePlate),
@@ -77,7 +80,11 @@ class ShiftCQRS {
       tap(([vehicle, driver]) => { if (!vehicle.active) throw ERROR_23013; if (!driver.active) throw ERROR_23012 }), // Driver or Vehicle not active verfication
       tap(([vehicle, driver]) => { if (driver.assignedVehicles.map(p => p.toUpperCase()).indexOf(vehicle.licensePlate.toUpperCase()) <= -1) throw ERROR_23014; }),// vehicle not assigned to driver verification
       map(([vehicle, driver, businessInfo]) => this.buildShift(businessId, vehicle, driver, businessInfo, deviceIdentifier, authToken)),// build shift with all needed proerties
-      // tap(s => console.log(JSON.stringify(s))),
+      tap( shift => {
+        if(vehiclePlate.licensePlate === "FQX351"){
+          console.log(JSON.stringify({ shift }));
+        }
+      }),
       mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftStartedEsEvent(authToken, shift))), //Build and send ShifStarted event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       //tap(x => ShiftCQRS.log(`ShiftCQRS.startShift RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE

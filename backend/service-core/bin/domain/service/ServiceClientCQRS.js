@@ -97,7 +97,7 @@ class ServiceClientCQRS {
    * @param {*} authToken 
    */
   requestServices$({ root, args, jwt }, authToken) {
-    console.log('ON requestServices$  ==> ', args.dropOff );
+    // console.log('ON requestServices$  ==> ', args.dropOff );
 
     // const discountByBusinessUnit =  {
     //   "75cafa6d-0f27-44be-aa27-c2c82807742d": 0.10, // CALI
@@ -318,7 +318,7 @@ class ServiceClientCQRS {
       marker: dropOff.marker ? { type: "Point", coordinates: [dropOff.marker.lng, dropOff.marker.lat] } : {},
       polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
     };
-    console.log('on buildServiceRequestedEsEvent dropOf ==> ', dropOff);
+    // console.log('on buildServiceRequestedEsEvent dropOf ==> ', dropOff);
     
 
 
