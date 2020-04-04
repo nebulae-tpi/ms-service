@@ -103,9 +103,13 @@ spec:
         - name: SERVICE_OFFER_SHIFT_SPAN
           value: "6000"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
-          value: "0_1_2_3_4_21_22_23"
+          value: "0_1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20_21_22_23"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE
-          value: "2000"
+          value: "2500"
+        # - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
+        #   value: "0_1_2_3_4_21_22_23"
+        # - name: SERVICE_OFFER_EXTENDED_DISTANCE
+        #   value: "2000"
         - name: INCOMING_SHIFT_MSG_TOPIC
           # value: "4ab03a09-9e34-40fe-9102-25cc6b5b2176/driver-app/shift/server"
           value: "$share/server-dal/+/driver-app/shift/server"
