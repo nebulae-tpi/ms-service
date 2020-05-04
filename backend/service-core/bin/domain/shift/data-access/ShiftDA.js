@@ -138,7 +138,13 @@ class ShiftDA {
    * @param {*} shift 
    */
   static insertShift$(shift) {
-    return defer(() => mongoDB.getHistoricalDbByYYMM(shift._id.split('-').pop()).collection(CollectionName).insertOne(shift));
+    return defer(() => mongoDB.getHistoricalDbByYYMM(shift._id.split('-').pop())
+      .collection(CollectionName)
+      .updateOne(
+        { _id: shift._id },
+        { $set: { ...shift } },
+        { upsert: true }
+      ));
   }
 
   /**
@@ -150,9 +156,10 @@ class ShiftDA {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        { 
+        {
           $set: { state, lastReceivedComm: Date.now(), lastStateChangeTimestamp: Date.now() },
-          $push: { stateChanges: { state, timestamp: Date.now() } } },
+          $push: { stateChanges: { state, timestamp: Date.now() } }
+        },
         {
           projection: { online: 1 },
           upsert: false,
