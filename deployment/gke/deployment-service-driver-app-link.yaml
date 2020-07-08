@@ -101,9 +101,9 @@ spec:
         - name: SERVICE_OFFER_SEARCH_SPAN
           value: "30000"
         - name: SERVICE_OFFER_SHIFT_SPAN
-          value: "6000"
+          value: "4000"
         - name: BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS
-          value: "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab,75cafa6d-0f27-44be-aa27-c2c82807742d"
+          value: ""
         - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
           value: "0_1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20_21_22_23"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE
