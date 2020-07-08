@@ -276,6 +276,7 @@ class ServiceES {
         if (BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
             serviceOffer.pickUp.addressLine1 = '';
             serviceOffer.pickUp.addressLine2 = '';
+            console.log("BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS: ",JSON.stringify(serviceOffer,null,1));
         }
 
         const RESEND_TO_ALL = true; // THIS FLAG DEFINES IF THE OFFER WILL ONLY BE SENT TO THE SELECTED SHIFT .... OR ... WILL BE SENT TO ALL PREVIOSLY SELECTED SHIFTS
