@@ -12,6 +12,8 @@ const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLinkBroker")();
 
+const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS | "").split(',')
+
 const { ServiceDA, ShiftDA } = require('./data-access')
 
 /**
@@ -97,7 +99,9 @@ class ServiceES {
                         previouslySelectedShifts.push(shift);
 
                         //re-eval service state\/
-                        await timer(offerShiftSpan).toPromise();
+                        if (!BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(shift.businessId)) {
+                            await timer(offerShiftSpan).toPromise();
+                        }
                         service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.offerCount": 1 }).toPromise();
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
@@ -203,26 +207,26 @@ class ServiceES {
             { "driver": 1, "vehicle": 1 }
         ).toPromise();
         //ignores shifts that were already taken into account
-        shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));        
+        shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
         // filter shifts who its drivers have't required money to get the service offer.
         // tip for client and PayPerService are evaluated 
         shifts = shifts.filter(shift => {
 
-                const tipType = service.client.tipType; // === "VIRTUAL_WALLET"
-                const driverMainPocketAmount = ((shift.driver.wallet || {}).pockets ||{}).main || 0;
-                
-                const clientTip = ( tipType === "VIRTUAL_WALLET" )
-                    ? service.client.tip || 0: 0;
-                
-                const payPerServicePrice = ( shift.subscriptionType == "PAY_PER_SERVICE" )
-                    ? shift.payPerServicePrice || 0 : 0;
-                    
-                // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
-                
+            const tipType = service.client.tipType; // === "VIRTUAL_WALLET"
+            const driverMainPocketAmount = ((shift.driver.wallet || {}).pockets || {}).main || 0;
 
-                return driverMainPocketAmount >= ( clientTip + payPerServicePrice );
+            const clientTip = (tipType === "VIRTUAL_WALLET")
+                ? service.client.tip || 0 : 0;
 
-            });
+            const payPerServicePrice = (shift.subscriptionType == "PAY_PER_SERVICE")
+                ? shift.payPerServicePrice || 0 : 0;
+
+            // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
+
+
+            return driverMainPocketAmount >= (clientTip + payPerServicePrice);
+
+        });
 
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
@@ -238,7 +242,7 @@ class ServiceES {
         // filter all the trips that are closer than the minDistance threshold
         shifts = shifts.filter(s => {
             return s.referred || (s.dist.calculated > service.offer.params.minDistance)
-            });
+        });
         obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
         return shifts;
     }
@@ -253,25 +257,29 @@ class ServiceES {
      * @param {*} obs 
      */
     async offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts = [], obs) {
+        const businessId = shift.businessId;
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
 
-        
+
         const serviceOffer = {
-            _id: service._id, 
-            timestamp: Date.now(), 
-            tip: service.tip, 
-            pickUp: { ...service.pickUp, location: undefined }, 
+            _id: service._id,
+            timestamp: Date.now(),
+            tip: service.tip,
+            pickUp: { ...service.pickUp, location: undefined },
             dropOff: { ...service.dropOff, location: undefined },
-            dropOffSpecialType: service.dropOffSpecialType, 
+            dropOffSpecialType: service.dropOffSpecialType,
             expirationTime: offerTotalThreshold,
             tripCost: service.tripCost
         };
+        if (BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
+            serviceOffer.pickUp.addressLine1 = '';
+            serviceOffer.pickUp.addressLine2 = '';
+        }
 
         const RESEND_TO_ALL = true; // THIS FLAG DEFINES IF THE OFFER WILL ONLY BE SENT TO THE SELECTED SHIFT .... OR ... WILL BE SENT TO ALL PREVIOSLY SELECTED SHIFTS
-        // send the offer to every  shift
-        const businessId = shift.businessId;
+        // send the offer to every  shift        
         const driverUsernamesToNotify = RESEND_TO_ALL
             ? [shift.driver.username, ...previouslySelectedShifts.map(s => s.driver.username)]
             : [shift.driver.username];
@@ -384,28 +392,28 @@ class ServiceES {
         );
     }
 
-    generatePayPerServiceTransaction$(dbService, timestamp){
+    generatePayPerServiceTransaction$(dbService, timestamp) {
         // console.log(JSON.stringify({ dbService }));
         const { shiftId, driver, businessId } = dbService;
-        const projection = { "payPerServicePrice":1, "subscriptionType":1 };
+        const projection = { "payPerServicePrice": 1, "subscriptionType": 1 };
         return ShiftDA.findById$(shiftId, projection).pipe(
             map(shift => {
-              if(!shift) return null;
-              const { payPerServicePrice, subscriptionType  } = shift;
-              if(subscriptionType == "PAY_PER_SERVICE"){
-                  return ({
-                    _id: Crosscutting.generateDateBasedUuid(),
-                    businessId: businessId,
-                    type: "MOVEMENT",
-                    notes: `Turno: ${shiftId}; Servicio: ${dbService._id}`,
-                    concept: "PAY_PER_SERVICE",
-                    timestamp: timestamp  || Date.now(),
-                    amount: payPerServicePrice,
-                    fromId: driver.id,
-                    toId: businessId
-                });
-              }
-              return null;
+                if (!shift) return null;
+                const { payPerServicePrice, subscriptionType } = shift;
+                if (subscriptionType == "PAY_PER_SERVICE") {
+                    return ({
+                        _id: Crosscutting.generateDateBasedUuid(),
+                        businessId: businessId,
+                        type: "MOVEMENT",
+                        notes: `Turno: ${shiftId}; Servicio: ${dbService._id}`,
+                        concept: "PAY_PER_SERVICE",
+                        timestamp: timestamp || Date.now(),
+                        amount: payPerServicePrice,
+                        fromId: driver.id,
+                        toId: businessId
+                    });
+                }
+                return null;
             }),
             // tap(tx => console.log("TRANSACTION ==> ", {tx})),
             mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
@@ -518,11 +526,11 @@ class ServiceES {
                     service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }).pipe(
                         mapTo(service)
                     )
-            ),   
+            ),
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
-        ); 
+        );
     }
 
     /**
