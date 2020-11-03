@@ -71,6 +71,7 @@ import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 //////////  Angular Google Maps API //////////
 import { MapsAPILoader } from '@agm/core';
+import { environment } from '../../../../../../environments/environment';
 
 const SPECIAL_DESTINATION_PRICE_MODS = { '5000': 5000, '10000': 10000 };
 
@@ -100,6 +101,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
 
   selectedIndexDoorman = -1;
   doorMenOptions: any[];
+  selectedBusinessId: any;
 
   // google autocomplete
   placesAutocomplete: any;
@@ -134,6 +136,18 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     this.buildRequesServiceForm();
     this.buildClientNameFilterCtrl();
     this.configureHotkeys();
+    this.listenBusinessChanges();
+  }
+
+  listenBusinessChanges() {
+    this.toolbarService.onSelectedBusiness$
+      .pipe(
+        tap(bu => {
+          this.selectedBusinessId = bu ? bu.id : null;
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe();
   }
 
   ngAfterViewInit(){
@@ -312,7 +326,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
             lng: this.selectedGooglePlace.coords.longitude
           }
         },
-        fareDiscount: this.data.type === 1 ? 0.1 : undefined,
+        fareDiscount: !environment.disableBusinessFareDiscountList.split(",").some(d => d === this.selectedBusinessId) && this.data.type === 1 ? 0.1 : undefined,
         tip: rawRequest.clientTip
       };
     }

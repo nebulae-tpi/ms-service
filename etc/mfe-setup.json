@@ -211,8 +211,18 @@
       }
     ],
     "preBuildCommands": [
-      "npm install angular2-hotkeys --save", "npm install @agm/core@1.0.0-beta.5", "npm install ng2-currency-mask@5.3.1"
+      "npm i angular2-hotkeys@2.1.4", "npm install @agm/core@1.0.0-beta.5", "npm install ng2-currency-mask@5.3.1"
     ],
-    "environmentVars": {}
+    "environmentVars": {
+      "default": {
+        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb"
+      },
+      "local": {
+        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb"
+      },
+      "prod": {
+        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb"
+      }     
+    }
   }
 ]
