@@ -190,6 +190,7 @@ export class OperatorWorkstationComponent implements OnInit, OnDestroy {
       )
       .subscribe();
   }
+  
 
   loadUserRoles(){
     const userRoles = this.keycloakService.getUserRoles(true);
