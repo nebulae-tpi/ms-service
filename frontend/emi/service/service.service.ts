@@ -7,7 +7,7 @@ import { GatewayService } from '../../../api/gateway.service';
 export class ServiceService {
 
   
-
+ 
   constructor(private gateway: GatewayService) {
 
   }
