@@ -20,7 +20,7 @@ export const locale = {
       MODIFIER_USER: 'User who modified',
       ADD_NEW: 'Add new',
       VEHICLE: {
-        LICENSE_PLATE: 'License plate',
+        LICENSE_PLATE: 'Identifier',
         MODEL: 'Model',
         FUEL_TYPE: 'Fuel type',
         BRAND: 'Brand',
@@ -36,7 +36,7 @@ export const locale = {
           null : 'Not specified'
         }
       },
-      LICENSE_PLATE: 'License plate',
+      LICENSE_PLATE: 'Identifier',
       DETAILS: {
         TABS: {
           GENERAL_INFO: 'General Info'
@@ -68,8 +68,8 @@ export const locale = {
     ERRORS: {
       1: 'Internal server error',
       2: 'Permission denied',
-      23011: 'License plate already belongs to this driver',
-      23012: 'License plate do not exist in the system',
+      23011: 'vehicle id already belongs to this driver',
+      23012: 'vehicle id do not exist in the system',
       23023: 'You can\'t assign vehicle because it\'s inactive '
     },
   }

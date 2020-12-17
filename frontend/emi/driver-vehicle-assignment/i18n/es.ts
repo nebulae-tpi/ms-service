@@ -20,7 +20,7 @@ export const locale = {
       MODIFIER_USER: 'Usuario que modificó',
       ADD_NEW: 'Agregar nuevo',
       VEHICLE: {
-        LICENSE_PLATE: 'Placa',
+        LICENSE_PLATE: 'Id Vehículo',
         MODEL: 'Modelo',
         FUEL_TYPE: 'Combustible',
         BRAND: 'Marca',
@@ -36,7 +36,7 @@ export const locale = {
           null : 'No especificado'
         }
       },
-      LICENSE_PLATE: 'Placa',
+      LICENSE_PLATE: 'Id Vehículo',
       DETAILS: {
         TABS: {
           GENERAL_INFO: 'Información general'
@@ -69,7 +69,7 @@ export const locale = {
       1: 'Error interno de servidor',
       2: 'Permiso denegado.',
       23011: 'Este vehículo ya pertenece al usuario',
-      23012: 'Esta placa no existe en el sistema',
+      23012: 'Est Id Vehículo no existe en el sistema',
       23023: 'No se puede asignar el vehíclulo porque se encuentra inactivo'
     }
   }

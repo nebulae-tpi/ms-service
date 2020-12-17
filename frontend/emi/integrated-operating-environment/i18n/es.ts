@@ -46,7 +46,7 @@ export const locale = {
         DRIVER_DOC_ID: 'Conductor',
         PICKUP_ADDR: 'Dir. Recogida',
         NEIGHBORHOOD: 'Barrio',
-        VEHICLE_PLATE: 'Placa',
+        VEHICLE_PLATE: 'Id Vehículo',
         ETA_TIME: 'ETA',
         STATE_TIME: 'T. Trans',
         DISTANCE: 'Dist'
@@ -102,7 +102,7 @@ export const locale = {
       23223: 'Servicio no encontrado',
       23224: 'Servicio se encuentra cerrado/terminado, no se puede modificar',
       23225: 'Datos insuficientes: se debe ingresar el id del servicio y un identificación de turno o un par conductor-vehículo',
-      23226: 'Placa inválida',
+      23226: 'Id Vehículo inválido',
       23227: 'Nombre de conductor inválido',
       23228: 'Turno no encontrado',
       23229: 'Turno se encuentra cerrado',

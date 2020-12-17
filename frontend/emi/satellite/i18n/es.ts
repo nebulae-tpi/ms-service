@@ -35,7 +35,7 @@ export const locale = {
         'CANCEL_SERVICE': 'Cancelar servicio',
         'SEE_DETAIL': 'Ver detalle',
         'MIN_MAX_TIP': 'La propina es un valor opcional pero debe estar entre $500 y $100.000.',
-        'LICENSE_PLATE': 'Placa',
+        'LICENSE_PLATE': 'Id Vehículo',
         'DRIVER': 'Conductor',
         'CLIENT': 'Cliente',
         'SERVICE_PARAMS': 'Parámetros',
@@ -47,7 +47,7 @@ export const locale = {
           'IT_TAKES_TOO_MUCH_TIME': 'Demasiado tiempo', 
           'DOESNT_REQUIRED': 'Ya no se requiere',
           'OTHER': 'Otro',
-          'PLATE_DOESNT_MATCH': 'Placa no coincide',
+          'PLATE_DOESNT_MATCH': 'Id Vehículo no coincide',
           'IS_NOT_THE_DRIVER': 'No es el conductor'
         },
         'PAYMENT_TYPES': {
@@ -96,7 +96,7 @@ export const locale = {
       23223: 'Servicio no encontrado',
       23224: 'Servicio se encuentra cerrado/terminado, no se puede modificar',
       23225: 'Datos insuficientes: se debe ingresar el id del servicio y un identificación de turno o un par conductor-vehículo',
-      23226: 'Placa inválida',
+      23226: 'Id Vehículo inválido',
       23227: 'Nombre de conductor inválido',
       23228: 'Turno no encontrado',
       23229: 'Turno se encuentra cerrado',
