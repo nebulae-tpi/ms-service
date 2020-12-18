@@ -1,7 +1,7 @@
 <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
 
-    <form name="serviceGeneralInfoForm" [formGroup]="serviceGeneralInfoForm" class="w-100-p"
-      fxLayout="column" class="mat-white-bg p-12 mr-24 mb-12">
+    <form name="serviceGeneralInfoForm" [formGroup]="serviceGeneralInfoForm" class="w-100-p mat-white-bg"
+      fxLayout="column">
 
       <div class="w-100-p" fxLayout="column" class="mat-white-bg mr-24">
     
@@ -52,14 +52,14 @@
             <div class="pickup pl-12 pt-8 pb-12 mat-elevation-z1" fxLayout="column">
 
                 <div fxFlex="100" fxLayout="row"  fxLayoutAlign="start">
-                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                    <div class="form-field mr-16 flex-wrap" fxLayout="row" fxLayoutAlign="start center">
                         <span class="title secondary-text">{{'SERVICE.DETAILS.CITY' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.city}}</span>
                     </div>
 
 
-                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                    <div class="form-field mr-16 flex-wrap" fxLayout="row" fxLayoutAlign="start center">
                         <span class="title secondary-text">{{'SERVICE.DETAILS.NEIGHBORHOOD' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.neighborhood}}</span>
@@ -67,7 +67,7 @@
                 </div>
 
                 <div fxFlex="100" fxLayout="row"  fxLayoutAlign="space-between start">
-                        <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                        <div class="form-field mr-16 flex-wrap" fxLayout="row" fxLayoutAlign="start center">
                             <span class="title secondary-text">{{'SERVICE.DETAILS.ZONE' | translate}}: </span>
                             <span>&nbsp;&nbsp;</span>
                             <span class="value">{{service.pickUp.zone}}</span>
@@ -78,19 +78,19 @@
 
                     
 
-                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center">
+                    <div class="form-field mr-16 flex-wrap" fxLayout="row" fxLayoutAlign="start center">
                         <span class="title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE1' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.addressLine1}}</span>
                     </div>
     
-                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.pickUp.addressLine2">
+                    <div class="form-field mr-16 flex-wrap" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.pickUp.addressLine2">
                         <span class="title secondary-text">{{'SERVICE.DETAILS.ADDRESSLINE2' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.addressLine2}}</span>
                     </div>               
     
-                    <div class="form-field mr-16" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.pickUp.notes">
+                    <div class="form-field mr-16 flex-wrap" fxLayout="row" fxLayoutAlign="start center" *ngIf="service.pickUp.notes">
                         <span class="title secondary-text">{{'SERVICE.DETAILS.NOTES' | translate}}: </span>
                         <span>&nbsp;&nbsp;</span>
                         <span class="value">{{service.pickUp.notes}}</span>
@@ -167,7 +167,7 @@
             <div class="h2 secondary-text">{{'SERVICE.DETAILS.CLIENT' | translate}}</div>
         </div>
 
-        <div class="client pb-12">
+        <div class="text-wrap overflow-auto client pb-12">
             <table class="simple mat-elevation-z1">
                 <thead>
                     <tr>
@@ -199,7 +199,7 @@
         <div class="pt-12 pb-12" fxLayout="row" fxLayout.xs="column">
 
           <div fxFlex="100" fxLayoutAlign="start center" *ngIf="service.driver">          
-            <div fxFlex="100" fxLayout="column" class="driver mr-8">
+            <div fxFlex="100" fxLayout="column" class="text-wrap driver mr-8">
                 <mat-icon class="m-0 mr-16">airline_seat_recline_normal</mat-icon>
                 <div class="h2 secondary-text">{{'SERVICE.DETAILS.DRIVER' | translate}}</div>
                 <table class="simple mat-elevation-z1">
