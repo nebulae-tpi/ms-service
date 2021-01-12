@@ -72,7 +72,7 @@ class ShiftDA {
         )
       ),
       toArray(),
-      tap( x => console.log('QUERY RESULT: ',JSON.stringify(X))),
+      tap( x => console.log('QUERY RESULT: ',JSON.stringify(x))),
       map(([r1, r2]) => explorePastMonth ? r1.concat(r2) : r1)
     );
   }

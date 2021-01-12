@@ -66,7 +66,7 @@ class ShiftDA {
           //)
         )
       ),
-      tap( x => console.log('QUERY RESULT: ',JSON.stringify(X)))
+      tap( x => console.log('QUERY RESULT: ',JSON.stringify(x)))
     );
   }
 
