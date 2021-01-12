@@ -59,7 +59,7 @@ class ShiftDA {
 
 
 
-    console.log("QUERY ==> ", JSON.stringify(aggregateQuery));
+    //console.log("QUERY ==> ", JSON.stringify(aggregateQuery));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
@@ -72,7 +72,7 @@ class ShiftDA {
         )
       ),
       toArray(),
-      tap( x => console.log('QUERY RESULT: ',JSON.stringify(x))),
+      //tap( x => console.log('QUERY RESULT: ',JSON.stringify(x))),
       map(([r1, r2]) => explorePastMonth ? r1.concat(r2) : r1)
     );
   }
