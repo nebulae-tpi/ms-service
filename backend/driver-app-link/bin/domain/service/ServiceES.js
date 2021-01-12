@@ -189,6 +189,7 @@ class ServiceES {
         }
         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
         return service;
+        
     }
 
     /**
