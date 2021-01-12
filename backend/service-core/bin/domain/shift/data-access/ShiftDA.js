@@ -46,7 +46,7 @@ class ShiftDA {
           spherical: true
         }
       },
-      { $limit: 20 },
+      //{ $limit: 20 },
       {
         $project: { location: 1, vehicle: 1 }
       }
