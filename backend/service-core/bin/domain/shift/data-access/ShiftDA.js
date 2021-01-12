@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Shift";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, first, filter } = require("rxjs/operators");
+const { map, mergeMap, first, filter, tap } = require("rxjs/operators");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
 
 class ShiftDA {
@@ -46,13 +46,13 @@ class ShiftDA {
           spherical: true
         }
       },
-      //{ $limit: 20 },
+      { $limit: 20 },
       {
         $project: { location: 1, vehicle: 1 }
       }
     ];
 
-    // console.log('Query => ', JSON.stringify(aggregateQuery));
+    console.log('Query => ', JSON.stringify(aggregateQuery));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
@@ -66,7 +66,7 @@ class ShiftDA {
           //)
         )
       ),
-
+      tap( x => console.log('QUERY RESULT: ',JSON.stringify(X)))
     );
   }
 
