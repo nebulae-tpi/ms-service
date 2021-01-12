@@ -188,8 +188,7 @@ class ServiceES {
             throw new Error(`Service not found when trying to offer at imperativeServiceOfferAlgorithm; serviceId=${serviceId}; retries=${retries}`);
         }
         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
-        return service;
-        
+        return service;        
     }
 
     /**
