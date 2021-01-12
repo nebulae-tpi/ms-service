@@ -173,7 +173,7 @@ class ServiceES {
         let retries = 0;
         while (!service && retries < 5) {
             retries++;
-            await timer(200).toPromise();// time for the service to be persisted 
+            await timer(500).toPromise();// time for the service to be persisted 
             service = await ServiceDA.updateOfferParamsAndfindById$(
                 serviceId,
                 {
