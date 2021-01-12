@@ -20,7 +20,7 @@ class ShiftDA {
       }
       observer.complete();
     });
-  } 
+  }
 
 
   static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined) {
@@ -40,18 +40,22 @@ class ShiftDA {
       query[`offer.shifts.${ignoredShiftsIds[i]}`] = { $exists: false };
     }
 
-    const aggregateQuery = [{
-      $geoNear: {
-        near: location,
-        distanceField: "dist.calculated",
-        maxDistance: maxDistance,
-        minDistance: minDistance,
-        query,
-        includeLocs: "dist.location",
-        num: 20,
-        spherical: true
-      }
-    }]
+    const aggregateQuery = [
+      {
+        $geoNear: {
+          near: location,
+          distanceField: "dist.calculated",
+          maxDistance: maxDistance,
+          minDistance: minDistance,
+          query,
+          includeLocs: "dist.location",
+          //num: 20,
+          spherical: true
+        },
+
+      },
+      { $limit: 20 }
+    ];
 
 
 
@@ -72,7 +76,7 @@ class ShiftDA {
     );
   }
 
-  static findById$(_id, projection){    
+  static findById$(_id, projection) {
     const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
     const explorePastMonth = today.getDate() <= 1;
 
@@ -81,10 +85,10 @@ class ShiftDA {
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
       map(db => db.collection('Shift')),
-      mergeMap(collection => defer(() => collection.findOne(query, { projection }) ) ),
+      mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
       toArray(),
       map(resultArray => resultArray.filter(item => item != null)),
-      map(( items ) => items[0])
+      map((items) => items[0])
     );
 
   }

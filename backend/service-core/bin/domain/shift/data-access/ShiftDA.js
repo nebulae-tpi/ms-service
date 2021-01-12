@@ -42,12 +42,15 @@ class ShiftDA {
           minDistance: 0,
           query,
           includeLocs: "dist.location",
-          num: 20,
+          //num: 20,
           spherical: true
         }
-      }, {
+      },
+      { $limit: 20 },
+      {
         $project: { location: 1, vehicle: 1 }
-      }];
+      }
+    ];
 
     // console.log('Query => ', JSON.stringify(aggregateQuery));
 
