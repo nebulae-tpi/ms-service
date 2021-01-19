@@ -76,11 +76,16 @@ class ServiceES {
             const offerTotalThreshold = offerTotalSpan + Date.now();
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId })}`);
 
+            //console.log('imperativeServiceOfferAlgorithm: inpu:',JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId }));
+            
             let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs);
+            //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
             const previouslySelectedShifts = [];
+
+           // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
             while (needToOffer) {
 
                 //find available shifts
@@ -169,7 +174,7 @@ class ServiceES {
         let retries = 0;
         while (!service && retries < 5) {
             retries++;
-            await timer(200).toPromise();// time for the service to be persisted 
+            await timer(500).toPromise();// time for the service to be persisted 
             service = await ServiceDA.updateOfferParamsAndfindById$(
                 serviceId,
                 {
@@ -184,7 +189,7 @@ class ServiceES {
             throw new Error(`Service not found when trying to offer at imperativeServiceOfferAlgorithm; serviceId=${serviceId}; retries=${retries}`);
         }
         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
-        return service;
+        return service;        
     }
 
     /**
