@@ -106,6 +106,8 @@ type Location {
    city: String
    "Zone name"
    zone: String
+   "Precise location"
+   unaccurateLocation: Boolean
    "Neighborhood name"
    neighborhood: String
    "Street address 1"

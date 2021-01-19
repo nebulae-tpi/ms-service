@@ -122,6 +122,7 @@ class ServiceES {
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
                         needToBeCancelledBySystem = service.state === 'REQUESTED';
                     }
+                    console.log("OFFER ===> ", service)
                     await eventSourcing.eventStore.emitEvent$(
                         ServiceES.buildEventSourcingEvent(
                             'Service',

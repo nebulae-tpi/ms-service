@@ -30,7 +30,8 @@ import {
   startWith,
   debounceTime,
   distinctUntilChanged,
-  bufferTime
+  bufferTime,
+  throttleTime
 } from 'rxjs/operators';
 
 import { Subject, from, of, forkJoin, Observable, concat, timer } from 'rxjs';
@@ -72,6 +73,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 export class DatatableComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
+
+  private duplicateServiceSubject = new Subject();
   // Subject to unsubscrtibe
   private ngUnsubscribeIOEServiceListener = new Subject();
   private loadingData = false;
@@ -147,6 +150,23 @@ export class DatatableComponent implements OnInit, OnDestroy {
     await this.resetData();
     this.subscribeIOEServicesListener();
     this.registerTimer();
+    this.duplicateServiceSubject
+      .pipe(
+        throttleTime(3000),
+        mergeMap(ioeRequestServiceData => {
+          return this.operatorWorkstationService.requestService$(ioeRequestServiceData)
+        }),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(
+        (result: any) => {
+          this.showMessageSnackbar('SERVICES.DUPLICATE_SERVICE_MSG');
+        },
+        error => {
+          this.showMessageSnackbar('SERVICES.ERROR_OPERATION');
+          console.log('Error ==> ', error);
+        }
+      );
   }
 
 
@@ -202,6 +222,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
         switch (code) {
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_REFRESH:
             this.resetData();
+            break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_DUPLICATE_SERVICE:
+            this.duplicateService();
             break;
           case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_APPLY_CHANNEL_FILTER:
             break;
@@ -548,6 +571,98 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
   //#region SERVICE ACTIONS
 
+  duplicateService() {
+    const selectedRow = this.getSelectedRow();
+    if (selectedRow) {
+      let rawRequest = {
+        client: {
+          id: null,
+          fullname: selectedRow.client_name.toUpperCase(),
+          username: null,
+          tip: selectedRow.serviceRef.tip,
+          referrerDriverDocumentId:  null,
+          offerMinDistance:  null,
+          offerMaxDistance: null,
+        },
+        pickUp: {
+          marker: {
+            lat: selectedRow.serviceRef.pickUp.marker.lat,
+            lng: selectedRow.serviceRef.pickUp.marker.lng,
+          },
+          polygon: null,
+          addressLine1: selectedRow.serviceRef.pickUp.addressLine1,
+          addressLine2: selectedRow.serviceRef.pickUp.addressLine2,
+        },
+        paymentType:  'CASH',
+        requestedFeatures: [],
+        dropOff: null,
+        // dropOffSpecialType: destinationOptionsGroup,
+        fareDiscount: selectedRow.serviceRef.fareDiscount,
+        request: {
+          sourceChannel: 'OPERATOR',
+          destChannel: 'DRIVER_APP',
+        }
+      };
+      this.duplicateServiceSubject.next(rawRequest);
+    }
+
+  }
+
+
+  requestService({ client, destinationOptionsGroup, featureOptionsGroup, paymentType = 'CASH', tip, fare, fareDiscount }) {
+
+    const ioeRequest = {
+      client: {
+        id: client._id,
+        fullname: client.generalInfo.name,
+        username: client.auth ? client.auth.username : null,
+        tip,
+        referrerDriverDocumentId: client.satelliteInfo ? client.satelliteInfo.referrerDriverDocumentId : null,
+        offerMinDistance: client.satelliteInfo ? client.satelliteInfo.offerMinDistance : null,
+        offerMaxDistance: client.satelliteInfo ? client.satelliteInfo.offerMaxDistance : null,
+      },
+      pickUp: {
+        marker: {
+          lat: client.location.lat,
+          lng: client.location.lng,
+        },
+        polygon: null,
+        city: client.generalInfo.city,
+        zone: client.generalInfo.zone,
+        neighborhood: client.generalInfo.neighborhood,
+        addressLine1: client.generalInfo.addressLine1,
+        addressLine2: client.generalInfo.addressLine2,
+        notes: client.generalInfo.notes
+      },
+      paymentType,
+      requestedFeatures: featureOptionsGroup,
+      dropOff: null,
+      // dropOffSpecialType: destinationOptionsGroup,
+      fareDiscount,
+      fare,
+      tip,
+      request: {
+        sourceChannel: 'OPERATOR',
+        destChannel: 'DRIVER_APP',
+      }
+    }
+    return this.operatorWorkstationService.requestService$(ioeRequest)
+      .pipe(
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(
+        (result: any) => {
+          if (result.data && result.data.IOERequestService && result.data.IOERequestService.accepted) {
+            this.showMessageSnackbar('SERVICES.REQUEST_SERVICE_SUCCESS');
+          }
+        },
+        error => {
+          this.showMessageSnackbar('SERVICES.ERROR_OPERATION');
+          console.log('Error ==> ', error);
+        }
+      );
+  }
+
   /**
    * Cancel selected service
    */
@@ -565,7 +680,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
       this.operatorWorkstationService.cancelService$({ id: selectedRow.id, reason: 'OTHER', notes: '', authorType: 'OPERATOR' }).subscribe(
         (results) => {
           console.log(`DatatableComponent.cancelService = ${results}`);
-        }, 
+        },
         (error) => {
           console.error(`DatatableComponent.cancelService: Error => ${error}`);
           this.loadingData = false;

@@ -227,6 +227,12 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       }
       return false;
     }));
+    this._hotkeysService.add(new Hotkey(['d'], (event: KeyboardEvent): boolean => {
+      if (this.selectedBusinessRef && this.selectedBusinessRef.id ){
+        this.duplicateServices();
+      }
+      return false;
+    }));
     this._hotkeysService.add(new Hotkey(['c'], (event: KeyboardEvent): boolean => {
       this.sendDatatableServiceCancelCommand();
       return false;
@@ -296,6 +302,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         this.requestServiceDialogRef = undefined;
       }
     );
+  }
+  duplicateServices($event?) {
+    this.operatorWorkstationService.publishToolbarCommand({ code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_DUPLICATE_SERVICE, args: [] });
   }
 
   /**

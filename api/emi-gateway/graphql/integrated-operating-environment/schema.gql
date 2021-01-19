@@ -269,6 +269,8 @@ input IOELocationInput {
     marker: IOEPointInput
     "Non-Accurate location, describes an area"
     polygon: [IOEPointInput]
+    "Precise location"
+    unaccurateLocation: Boolean
     "City name"
     city: String
     "Zone name"

@@ -102,12 +102,14 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
   selectedIndexDoorman = -1;
   doorMenOptions: any[];
   selectedBusinessId: any;
+  addressLocation: any;
 
   // google autocomplete
   placesAutocomplete: any;
   // searchElementRef: ElementRef;
   @ViewChild('addressAutocomplete') addressAutocomplete: ElementRef;
   selectedGooglePlace = null;
+  showPreciseLocation: Boolean;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -144,6 +146,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
       .pipe(
         tap(bu => {
           this.selectedBusinessId = bu ? bu.id : null;
+          //this.showPreciseLocation = this.selectedBusinessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab";
         }),
         takeUntil(this.ngUnsubscribe)
       )
@@ -206,12 +209,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
                 longitude: place.geometry.location.lng()
               }
             };
-
-            console.log({
-              selectedGooglePlace: this.selectedGooglePlace,
-              latitude: place.geometry.location.lat(),
-              longitude: place.geometry.location.lng()}
-            );
+            this.addressLocation = this.selectedGooglePlace.address;
 
           });
         });
@@ -242,7 +240,8 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     this.form = new FormGroup({
       client: new FormControl(undefined, [Validators.nullValidator]),
       clientGoogleAdress: new FormControl(null),
-      // clientAddress: new FormControl(null),
+      clientAddress: new FormControl(null),
+      clientNeighborhood: new FormControl(null),
       clientLocationRef: new FormControl(null),
       clientName: new FormControl(null),
       quantity: new FormControl(1, [Validators.min(1), Validators.max(5)]),
@@ -318,8 +317,10 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           _id: null,
           generalInfo: {
             name: rawRequest.clientName.toUpperCase(),
-            addressLine1: this.selectedGooglePlace.address,
+            addressLine1: this.addressLocation,
             addressLine2: rawRequest.clientLocationRef,
+            neighborhood: rawRequest.clientNeighborhood,
+            unaccurateLocation: this.addressLocation !== this.selectedGooglePlace.address
           },
           location: {
             lat: this.selectedGooglePlace.coords.latitude,
@@ -330,6 +331,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         tip: rawRequest.clientTip
       };
     }
+    console.log("RAW REQUEST ===> ", rawRequest)
     this.requestService(rawRequest);
     this.form.patchValue({ client: null });
     this.selectedGooglePlace = null;
@@ -368,6 +370,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
               lat: client.location.lat,
               lng: client.location.lng,
             },
+            unaccurateLocation: client.generalInfo.unaccurateLocation,
             polygon: null,
             city: client.generalInfo.city,
             zone: client.generalInfo.zone,

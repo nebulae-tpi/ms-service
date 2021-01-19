@@ -107,26 +107,26 @@
                   <h2 mat-dialog-title fxFlex="100">{{ 'SERVICES.REQUEST_DIALOG.TITLE' | translate }}</h2>
                   <!-- CLIENT GOOGLE MAPS ADRESS -->
                   <mat-form-field fxFlex="100">
-                    <input #addressAutocomplete matInput formControlName="clientGoogleAdress" name="clientGoogleAdress"
+                    <input #addressAutocomplete matInput formControlName="clientGoogleAdress" 
+                        name="clientGoogleAdress"
                         autocorrect="off" autocapitalize="off" spellcheck="off" type="text" required
                         [readOnly]="selectedGooglePlace" cdkFocusInitial
                         placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_GOOGLE_ADRESS' | translate }}">
-                      <!-- <button *ngIf="selectedGooglePlace" type="button" (click)="clearGoogleLocation()" mat-icon-button matSuffix fxLayoutAlign="center center" >
-                        <mat-icon>close</mat-icon>
-                      </button> -->
                   </mat-form-field>
-                  <!-- CLIENT GOOGLE MAPS ADRESS -->
 
-                  <!-- CLIENT ADRESS -->
-                  <!-- <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider> -->
-                  <!-- <mat-form-field fxFlex="100">
-                    <input matInput formControlName="clientAddress" name="clientAddress" autocomplete="off" required maxlength="40"
-                      placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_ADDRESS' | translate }}" cdkFocusInitial>
-                  </mat-form-field> -->
-                  <!-- CLIENT ADRESS -->
+                  <mat-form-field fxFlex="100">
+                    <input #clientAddress matInput formControlName="clientAddress" name="clientAddress"
+                        [(ngModel)]="addressLocation"
+                        autocorrect="off" autocapitalize="off" spellcheck="off" type="text" required
+                        placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_ADDRESS' | translate }}">
+                  </mat-form-field>
 
-                  <!-- CLIENT NAME -->
-                  <!-- <mat-divider style="visibility: hidden; height: 20px;" fxFlex="100"></mat-divider> -->
+                  <mat-form-field fxFlex="100">
+                    <input #clientNeighborhood matInput formControlName="clientNeighborhood" name="clientNeighborhood"
+                        autocorrect="off" autocapitalize="off" spellcheck="off" type="text" required
+                        placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_NEIGHBORHOOD' | translate }}">
+                  </mat-form-field>
+
                   <mat-form-field fxFlex="100">
                       <input matInput formControlName="clientName" name="clientName" autocomplete="off" required minlength="3" maxlength="40"
                         placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_NAME' | translate }}" cdkFocusInitial>

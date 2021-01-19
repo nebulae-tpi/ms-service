@@ -53,6 +53,7 @@ export const locale = {
       }
     },
     SERVICES: {
+      DUPLICATE_SERVICE_MSG: 'The service has been duplicated succesfully',
       REQUEST_SERVICE_SUCCESS: 'Successful Request',
       ERROR_OPERATION: 'Error operation',
       STATES: {
@@ -72,11 +73,14 @@ export const locale = {
         SATELLITE_CLIENT_PLACEHOLDER: 'Client',
         REQUEST_BTN_LBL: 'Request',
         CLIENT_LIST_TITLE: 'Doormen',
+        PRECISE_LOCATION: 'Precise Location',
         IOE_CLIENT_GOOGLE_ADRESS: 'Location',
         IOE_CLIENT_ADDRESS: 'Adress',
         IOE_CLIENT_LOCATION_REF: 'Location Reference',
         IOE_CLIENT_NAME: 'Client Name',
-        IOE_CLIENT_TIP: 'Client Tip'
+        IOE_CLIENT_TIP: 'Client Tip',
+        IOE_ADDRESS: 'Address',
+        IOE_NEIGHBORHOOD: 'Neighborhood'
       }
     },
     ERRORS: {
