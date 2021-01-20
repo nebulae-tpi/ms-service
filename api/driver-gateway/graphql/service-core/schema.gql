@@ -94,7 +94,7 @@ input PointInput {
    lat: Float
    "Longitude"
    lng: Float
-}
+} 
 
 "Location info."
 type Location {
