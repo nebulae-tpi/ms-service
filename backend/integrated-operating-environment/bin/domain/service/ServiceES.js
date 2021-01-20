@@ -149,7 +149,7 @@ class ServiceES {
      */
     handleServiceOfferUpdated$(evt) {
         return this.transmitEventToFrontEnd$(evt);
-    }
+    } 
 
     /**
      * Handles EventSourcing Event ServiceOfferedToShift

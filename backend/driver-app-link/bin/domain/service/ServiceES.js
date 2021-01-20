@@ -93,7 +93,18 @@ class ServiceES {
 
                 // threshold defining the total time span of this offer
                 const offerSearchThreshold = offerSearchSpan + Date.now();
-
+                //TODO: ELIMINAR COD SOLO PARA PRUEBAS ===============
+                // const serviceOffer = {
+                //     _id: service._id,
+                //     timestamp: Date.now(),
+                //     tip: service.tip,
+                //     pickUp: { ...service.pickUp, location: undefined },
+                //     dropOff: { ...service.dropOff, location: undefined },
+                //     dropOffSpecialType: service.dropOffSpecialType,
+                //     expirationTime: offerTotalThreshold,
+                //     tripCost: service.tripCost
+                // };
+                // await driverAppLinkBroker.sendServiceEventToDrivers$("test", "test", 'ServiceOffered', serviceOffer).toPromise();
                 if (shifts.length > 0) {
                     // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
@@ -127,7 +138,6 @@ class ServiceES {
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
                         needToBeCancelledBySystem = service.state === 'REQUESTED';
                     }
-                    console.log("OFFER ===> ", service)
                     await eventSourcing.eventStore.emitEvent$(
                         ServiceES.buildEventSourcingEvent(
                             'Service',

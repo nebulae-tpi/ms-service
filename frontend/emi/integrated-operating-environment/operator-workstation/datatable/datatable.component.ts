@@ -573,6 +573,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
   duplicateService() {
     const selectedRow = this.getSelectedRow();
+    console.log("Selected ROW===> ", selectedRow)
     if (selectedRow) {
       let rawRequest = {
         client: {
@@ -590,6 +591,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
             lng: selectedRow.serviceRef.pickUp.marker.lng,
           },
           polygon: null,
+          unaccurateLocation: selectedRow.serviceRef.pickUp.unaccurateLocation,
+          neighborhood: selectedRow.serviceRef.pickUp.neighborhood,
           addressLine1: selectedRow.serviceRef.pickUp.addressLine1,
           addressLine2: selectedRow.serviceRef.pickUp.addressLine2,
         },
@@ -629,6 +632,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
         polygon: null,
         city: client.generalInfo.city,
         zone: client.generalInfo.zone,
+        unaccurateLocation: client.generalInfo.unaccurateLocation,
         neighborhood: client.generalInfo.neighborhood,
         addressLine1: client.generalInfo.addressLine1,
         addressLine2: client.generalInfo.addressLine2,

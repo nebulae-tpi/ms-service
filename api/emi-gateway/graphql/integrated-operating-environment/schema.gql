@@ -249,6 +249,8 @@ type IOELocation {
     marker: IOEPoint
     "Non-Accurate location, describes an area"
     polygon: [IOEPoint]
+    "Precise location"
+    unaccurateLocation: Boolean
     "City name"
     city: String
     "Zone name"
