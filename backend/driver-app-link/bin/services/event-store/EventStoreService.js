@@ -3,6 +3,7 @@ const { of, from, concat } = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const { ShiftES } = require("../../domain/shift");
 const { ServiceES } = require("../../domain/service");
+const { BusinessES } = require("../../domain/business");
 const { map, switchMap, filter, mergeMap, concatMap, tap } = require('rxjs/operators');
 /**
  * Singleton instance
@@ -148,6 +149,14 @@ class EventStoreService {
       ServiceCancelledByClient: { fn: ServiceES.handleServiceCancelledByClient$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperator$, obj: ServiceES },
       ServiceMessageSent: { fn: ServiceES.handleServiceMessageSent$, obj: ServiceES },
+      //BUSINESS
+      BusinessCreated: { fn: BusinessES.handleBusinessCreated$, obj: BusinessES },
+      BusinessGeneralInfoUpdated: { fn: BusinessES.handleBusinessGeneralInfoUpdated$, obj: BusinessES },
+      BusinessAttributesUpdated: { fn: BusinessES.handleBusinessAttributesUpdated$, obj: BusinessES },
+      BusinessActivated: { fn: BusinessES.handleBusinessState$, obj: BusinessES },
+      BusinessDeactivated: { fn: BusinessES.handleBusinessState$, obj: BusinessES },
+      BusinessContactInfoUpdated: { fn: BusinessES.handleBusinessContactInfoUpdated$, obj: BusinessES },
+
     };
   }
 
@@ -181,6 +190,13 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
       { aggregateType: "Service", eventType: "ServiceMessageSent" }, 
+      //BUSINESS
+      { aggregateType: "Business", eventType: "BusinessCreated" },
+      { aggregateType: "Business", eventType: "BusinessGeneralInfoUpdated" },
+      { aggregateType: "Business", eventType: "BusinessAttributesUpdated" },
+      { aggregateType: "Business", eventType: "BusinessActivated" },
+      { aggregateType: "Business", eventType: "BusinessDeactivated" },
+      { aggregateType: "Business", eventType: "BusinessContactInfoUpdated" },
     ]
   }
 }

@@ -22,7 +22,7 @@ const {
   ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229,
 } = require("../../tools/customError");
 
-const { ShiftDA, ServiceDA } = require('./data-access')
+const { ShiftDA, ServiceDA, BusinessDA } = require('./data-access')
 
 const READ_WRITE_ROLES = ["OPERATOR", "OPERATION-SUPERVISOR"];
 const READ_ROLES = ["PLATFORM-ADMIN", "BUSINESS-OWNER", "OPERATOR", "OPERATION-SUPERVISOR"];
@@ -104,7 +104,10 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ServiceCQRS", "requestServices", PERMISSION_DENIED, READ_WRITE_ROLES).pipe(
       mapTo(args),
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
-      mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request))), //Build and send ServiceRequested event (event-sourcing)
+      mergeMap(request => BusinessDA.getBusiness$(authToken.businessId).pipe(
+        map(business => ([request,business]))
+      )),
+      mergeMap(([request,business]) => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, business))), //Build and send ServiceRequested event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -264,7 +267,7 @@ class ServiceCQRS {
    * @param {*} shift 
    * @returns {Event}
    */
-  buildServiceRequestedEsEvent(authToken, rqst) {
+  buildServiceRequestedEsEvent(authToken, rqst, business) {
 
     let { requestedFeatures, fareDiscount, fare, pickUp, tip, dropOff, request } = rqst;
 
@@ -281,8 +284,7 @@ class ServiceCQRS {
 
 
     const _id = Crosscutting.generateDateBasedUuid();
-
-    return new Event({
+    const requestObj = {
       aggregateType: 'Service',
       aggregateId: _id,
       eventType: 'ServiceRequested',
@@ -322,7 +324,22 @@ class ServiceCQRS {
           ownerOperatorUsername: authToken.preferred_username,
         }
       }
-    });
+    };
+
+    if (business.attributes && business.attributes.length > 0) { 
+      requestObj.data.offer = business.attributes
+        .filter(attr => {
+          return attr && attr.key.substr(0, 5).toUpperCase() === "OFFER"
+        })
+        .map(attr => {
+        const obj = {};
+        obj[attr.key]=attr.value;
+        return obj;
+      }).reduce((acc, val) => {
+        return {...acc, ...val}
+      },{});
+    }
+    return new Event(requestObj);
   }
 
   /**

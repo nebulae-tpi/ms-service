@@ -12,6 +12,7 @@ const { concat, forkJoin } = require('rxjs');
 const driverAppLinkBroker = require('./services/driver-app-link/DriverAppLinkBroker')();
 const shift = require('./domain/shift');
 const service = require('./domain/service');
+const business = require('./domain/business');
 
 
 
@@ -24,6 +25,7 @@ const start = () => {
             driverAppLinkBroker.start$(),
             shift.start$,
             service.start$,
+            business.start$
         ),        
         graphQlService.start$()
     ).subscribe(

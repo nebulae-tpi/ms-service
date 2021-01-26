@@ -36,31 +36,44 @@ class ServiceES {
 
         const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
         const localHour = localDate.getHours();
-        const extendedDistanceHours = (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4").split('_').map(h => parseInt(h));
-        let maxDistance = data.client.offerMaxDistance || parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE);
+        const extendedDistanceHours = ((data.offer || {}).offerExtendedDistanceHours || (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4")).split('_').map(h => parseInt(h));
+        let maxDistance = data.client.offerMaxDistance || parseInt((data.offer || {}).offerMaxDistance || process.env.SERVICE_OFFER_MAX_DISTANCE);
         if (extendedDistanceHours.includes(localHour)) {
-            let extendedDistance = parseInt(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500");
+            let extendedDistance = parseInt((data.offer || {}).offerExtendedDistance ||(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500"));
             if (extendedDistance && extendedDistance > maxDistance) {
                 maxDistance = extendedDistance;
             }
         }
-        const SERVICE_OFFER_MAX_DISTANCE_MIN = parseInt(process.env.SERVICE_OFFER_MAX_DISTANCE_MIN);
+        const SERVICE_OFFER_MAX_DISTANCE_MIN = parseInt((data.offer || {}).offerMaxDistanceMin || process.env.SERVICE_OFFER_MAX_DISTANCE_MIN);
         maxDistance = (maxDistance < SERVICE_OFFER_MAX_DISTANCE_MIN) ? SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
 
-        const minDistance = data.client.offerMinDistance || parseInt(process.env.SERVICE_OFFER_MIN_DISTANCE);
+        const minDistance = data.client.offerMinDistance || parseInt((data.offer || {}).offerMinDistance || process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
         const referrerDriverDocumentId = data.client.referrerDriverDocumentId;
 
         return Observable.create(obs => {
-            this.imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId).subscribe(
-                (evt) => {
-                    //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
-                },
-                (error) => console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) ERROR: ${error}`),
-                () => {
-                    //console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) COMPL: COMPLETED\n`);
-                },
-            );
+            if ((data.offer || {}).offerBeta) {
+                this.imperativeServiceOfferAlgorithmBeta$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer).subscribe(
+                    (evt) => {
+                        //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
+                    },
+                    (error) => console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) ERROR: ${error}`),
+                    () => {
+                        //console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) COMPL: COMPLETED\n`);
+                    },
+                );
+            }
+            else { 
+                this.imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer).subscribe(
+                    (evt) => {
+                        //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
+                    },
+                    (error) => console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) ERROR: ${error}`),
+                    () => {
+                        //console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) COMPL: COMPLETED\n`);
+                    },
+                );
+            }
             obs.next(`ServiceES: handleServiceRequested: created subscription for imperativeServiceOfferAlgorithm(serviceId=${serviceId})`);
             obs.complete;
         });
@@ -168,6 +181,113 @@ class ServiceES {
 
     }
 
+    imperativeServiceOfferAlgorithmBeta$(serviceId, minDistance, maxDistance, referrerDriverDocumentId,offer) {
+        return Observable.create(async obs => {
+            // precalculated offer params
+            const offerTotalSpan = parseInt((offer || {}).offerServiceOfferTotalSpan || process.env.SERVICE_OFFER_TOTAL_SPAN);
+            const offerSearchSpan = parseInt((offer || {}).offerServiceOfferSearchSpan || process.env.SERVICE_OFFER_SEARCH_SPAN);
+            const offerShiftSpan = parseInt((offer || {}).offerServiceOfferShiftSpan || process.env.SERVICE_OFFER_SHIFT_SPAN);
+            const offerTotalThreshold = offerTotalSpan + Date.now();
+            const simultaneousOffers = parseInt((offer || {}).offerSimultaneousOffers || 1);
+            obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId, simultaneousOffers })}`);
+
+            //console.log('imperativeServiceOfferAlgorithm: inpu:',JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId }));
+            
+            let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs,simultaneousOffers);
+            //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
+
+            let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+            let needToBeCancelledBySystem = true;
+            const previouslySelectedShifts = [];
+
+           // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
+            while (needToOffer) {
+
+                //find available shifts
+                let shifts = await this.findShiftCandidates(service, obs);
+
+                // threshold defining the total time span of this offer
+                const offerSearchThreshold = offerSearchSpan + Date.now();
+                //TODO: ELIMINAR COD SOLO PARA PRUEBAS ===============
+                // const serviceOffer = {
+                //     _id: service._id,
+                //     timestamp: Date.now(),
+                //     tip: service.tip,
+                //     pickUp: { ...service.pickUp, location: undefined },
+                //     dropOff: { ...service.dropOff, location: undefined },
+                //     dropOffSpecialType: service.dropOffSpecialType,
+                //     expirationTime: offerTotalThreshold,
+                //     tripCost: service.tripCost
+                // };
+                // await driverAppLinkBroker.sendServiceEventToDrivers$("test", "test", 'ServiceOffered', serviceOffer).toPromise();
+                if (shifts.length > 0) {
+                    // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
+                    let simultaneousSendCount = 0;
+                    for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
+                        //selected shift
+                        const shift = shifts[i];
+                        // console.log('INICIA OFERTA =======> ', JSON.stringify(shift));
+                        await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs);
+                        console.log("SE ENVIA OFERTA")
+                        previouslySelectedShifts.push(shift);
+                        simultaneousSendCount++;
+                        //console.log("LOCAL COUNT => ", simultaneousSendCount);
+                        if (simultaneousSendCount >= simultaneousOffers) { 
+                            console.log("SE DETIENE ===> ",simultaneousOffers)
+                            await timer(offerShiftSpan).toPromise();
+                            simultaneousSendCount = 0;
+                        }
+                        //re-eval service state\/
+                        service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.offerCount": 1 }).toPromise();
+                        obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+                        needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
+                    }
+                } else {
+                    if (service.offer.params.minDistance !== 0) {
+                        obs.next(`no shifts found on searched area, will remove minDistance on next search`);
+                        service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, { "offer.params.minDistance": 0 }, { "offer.searchCount": 1 }).toPromise();
+                        obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+                        needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
+                    } else {
+                        //re-eval service state
+                        await timer(offerShiftSpan).toPromise();
+                        service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.searchCount": 1 }).toPromise();
+                        obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+                        needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
+                    }
+                    await eventSourcing.eventStore.emitEvent$(
+                        ServiceES.buildEventSourcingEvent(
+                            'Service',
+                            serviceId,
+                            'ServiceOfferUpdated',
+                            {
+                                offer: { ...service.offer, shifts: undefined }
+                            },
+                            'SYSTEM', 1, true
+                        )
+                    ).toPromise();
+                }
+
+            }
+            if (needToBeCancelledBySystem) {
+                await eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Service',
+                        serviceId,
+                        'ServiceCancelledBySystem',
+                        { reason: 'DRIVERS_NOT_AVAILABLE', notes: "" },
+                        'SYSTEM'
+                    )
+                ).toPromise();
+            }
+            obs.complete();
+        });
+
+    }
+
     /**
      * query a service in the DB waiting up to 1 second to appear.  then configure the offer params
      * @param {string} serviceId 
@@ -178,7 +298,7 @@ class ServiceES {
      * @param {*} offerShiftSpan 
      * @returns Service after the update
      */
-    async findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs) {
+    async findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs, simultaneousOffers) {
         undefined;
         let service = undefined;
         let retries = 0;
@@ -191,7 +311,7 @@ class ServiceES {
                     offer: {
                         searchCount: 0,
                         shifts: {},
-                        params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan }
+                        params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan,simultaneousOffers }
                     }
                 }).toPromise();
         }
