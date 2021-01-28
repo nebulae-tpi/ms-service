@@ -151,10 +151,51 @@ class ShiftES {
         return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
             mergeMap(shift => iif(() => data.serviceId,
                 eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(data.serviceId, data.location, user)).pipe(mapTo(shift)),
-                of(shift))),
-            filter(shift => shift && !shift.online), 
+                of(shift).pipe(
+                    mergeMap(() => {
+                        if (shift.state === "BUSY") {
+                            return ServiceDA.findOpenedServiceByShift$(shift._id).pipe(
+                                mergeMap(service => {
+                                    if (service && service._id) {
+                                        return of(shift);
+                                    } else {
+                                        return this.checkServiceOfShift$(shift).pipe(
+                                            mapTo(shift)
+                                        )
+                                    }
+                                })
+                            );
+                            
+                        } else {
+                            return of(shift)
+                        }
+                    })
+                )
+            )),
+            filter(shift => shift && !shift.online),
             mergeMap(shift => eventSourcing.eventStore.emitEvent$(this.buildShiftConnectedEsEvent(aid, user))), //Build and send ShiftConnected event (event-sourcing)
         );
+    }
+
+    checkServiceOfShift$(shift) {
+        return eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+            'Shift',
+            shift._id,
+            'ShiftStateChanged',
+            { state: ((shift.driver.blocks && shift.driver.blocks.length > 0) || (shift.vehicle.blocks && shift.vehicle.blocks.length > 0)) ? 'BLOCKED' : 'AVAILABLE' },
+            "SYSTEM"
+        ))
+    }
+
+    buildEventSourcingEvent(aggregateType, aggregateId, eventType, data = {}, user = "SYSTEM", eventTypeVersion = 1) {
+        return new Event({
+            aggregateType,
+            aggregateId,
+            eventType,
+            eventTypeVersion,
+            user,
+            data
+        });
     }
 
     /**

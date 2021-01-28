@@ -214,7 +214,7 @@ class ShiftDA {
         { _id },
         { $set: { lastReceivedComm: Date.now(), location } },
         {
-          projection: { online: 1 },
+          projection: { online: 1, state: 1, driver:1, vehicle: 1 },
           upsert: false,
           returnOriginal: true
         }

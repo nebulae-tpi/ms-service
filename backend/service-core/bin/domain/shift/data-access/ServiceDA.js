@@ -40,6 +40,22 @@ class ServiceDA {
     );
   }
 
+    /**
+   * Finds an open Service by shift id
+   */
+  static findOpenedServiceByShift$(shiftId) {
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
+    const query = { shiftId, closed: false };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => defer(() => collection.findOne(query))),
+      filter(s => s),
+      first(service => service, undefined)
+    );
+  }
+
 
   /**
    * appends location
