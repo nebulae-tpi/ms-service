@@ -6,6 +6,10 @@ export const locale = {
     },
     TOOLBAR: {
       REFRESH: 'REFRESCAR',
+      SEARCH_TEXT: 'Buscar por placa/id',
+      SEARCH: 'Buscar',
+      SEARCH_INVALID_VALUE: 'Se debe ingresar un valor para realizar la busqueda',
+      SEARCH_NOT_FOUND: 'No se ha encontrado un turno con la información ingresada',
       REQUEST: 'SOLICITAR',
       ACTIONS_LBL: 'ACCIONES',
       ACTIONS: {

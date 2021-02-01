@@ -6,6 +6,10 @@ export const locale = {
     },
     TOOLBAR: {
       REFRESH: 'REFRESH',
+      SEARCH_TEXT: 'Search by plate/id',
+      SEARCH: 'Search',
+      SEARCH_INVALID_VALUE: 'A value must be entered to perform the search',
+      SEARCH_NOT_FOUND: 'A shift has not been found with the information entered',
       REQUEST: 'REQUEST',
       ACTIONS_LBL: 'ACTIONS',
       ACTIONS: {

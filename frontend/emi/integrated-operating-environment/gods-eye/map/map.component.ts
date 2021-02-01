@@ -230,6 +230,9 @@ export class MapComponent implements OnInit, OnDestroy {
     ).subscribe(
       async ({ code, args }) => {
         switch (code) {
+          case GodsEyeService.TOOLBAR_COMMAND_MAP_SEARCH_SHIFT:
+            this.findPinByLicensePlate(args[0]);
+            break;
           case GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:
             //console.log('GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH:');
             this.resetDataAndSubscriptions();
@@ -248,6 +251,23 @@ export class MapComponent implements OnInit, OnDestroy {
         console.log(`MapComponent.listenToolbarCommands: Completed`);
       },
     );
+  }
+
+  findPinByLicensePlate(licensePlate) {
+    const pinList = Object.values(this.pins);
+    if (pinList && pinList.length > 0) {
+      const pinIdentified = pinList.find(pin => (((((pin as any) || {}).ref || {}).vehicle || {}).licensePlate === licensePlate))
+      if (pinIdentified && this.map) {
+        this.map.setCenter({
+          lat: (pinIdentified as any).ref.location.lat,
+          lng: (pinIdentified as any).ref.location.lng
+        });
+        this.map.setZoom(17);
+      } else {
+        this.showMessageSnackbar("TOOLBAR.SEARCH_NOT_FOUND")
+      }
+
+    }
   }
 
   /**
@@ -272,7 +292,7 @@ export class MapComponent implements OnInit, OnDestroy {
         },
         (error) => console.error(`MapComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
         () => {
-          console.log(`MapComponent.subscribeIOEServicesListener: Completed`);
+         // console.log(`MapComponent.subscribeIOEServicesListener: Completed`);
         },
       );
   }
@@ -299,7 +319,7 @@ export class MapComponent implements OnInit, OnDestroy {
         },
         (error) => console.error(`MapComponent.subscribeIOEShiftsListener: Error => ${error}`),
         () => {
-          console.log(`MapComponent.subscribeIOEShiftsListener: Completed`);
+          //console.log(`MapComponent.subscribeIOEShiftsListener: Completed`);
         },
       );
   }
@@ -319,7 +339,7 @@ export class MapComponent implements OnInit, OnDestroy {
         (_: any) => { },
         (error) => console.error(`MapComponent.registerTimer: Error => ${error}`),
         () => {
-          console.log(`MapComponent.registerTimer: Completed`);
+          //console.log(`MapComponent.registerTimer: Completed`);
         },
       );
   }
@@ -346,7 +366,9 @@ export class MapComponent implements OnInit, OnDestroy {
       this.pins[raw.id] = raw.type === 'SERVICE' ? this.convertServiceToMapFormat(raw) : this.convertShiftToMapFormat(raw);
       this.pins[raw.id].marker.setMap(this.map)
       this.processStats(this.pins[raw.id], undefined, false);
-      if (raw.type == 'SERVICE') { this.toggleServiceOfferBounce(raw); }
+      if (raw.type == 'SERVICE') {
+        this.toggleServiceOfferBounce(raw);
+      }
     });
 
     this.processStats(undefined, undefined);
@@ -394,7 +416,29 @@ export class MapComponent implements OnInit, OnDestroy {
         .map(sId => this.pins[sId])
         .filter(pin => pin)
         .forEach(pin => {
-          pin.marker.setAnimation(google.maps.Animation.BOUNCE)
+          let fillColor = '#FF8B00';
+          let strokeColor = '#000000';
+          let strokeWeight = 0.5;
+          pin.isOffering = true;
+          pin.marker.setIcon(
+            {
+              path: 'm 1 6 a 1 1 90 0 0 0 0 c 8 0 8 8 0 8 l -7 0 l -11 0 c -8 0 -8 -8 0 -8 l 18 0',
+              fillOpacity: 1,
+              fillColor,
+              strokeOpacity: 1.0,
+              strokeColor,
+              strokeWeight,
+              labelOrigin: new google.maps.Point(-7, 11),
+              scale: 2 //pixels,        
+            }
+          );
+          
+          pin.marker.setLabel({
+            text: ((pin.ref || {}).vehicle || {}).licensePlate,
+            fontSize: "10px",
+            color: "#FFFFFF",
+          })
+          //pin.marker.setAnimation(google.maps.Animation.BOUNCE)
           serviceShifts.push(pin.id);
           this.bouncingShifts[service.id] = serviceShifts;
         });
@@ -410,7 +454,8 @@ export class MapComponent implements OnInit, OnDestroy {
             .filter(shifts => shifts.includes(pin.id))
             .length <= 0)
         .forEach(pin => {
-          pin.marker.setAnimation(null)
+          pin.isOffering = false;
+          this.convertShiftToMapFormat(pin.ref, pin)
         });
       delete this.bouncingShifts[service.id];
     }
@@ -432,7 +477,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     if (oldPin && !oldPin.ref) {
-      console.log('NO REFFFF');
+      //console.log('NO REFFFF');
     }
 
     const shiftsUpdate = ((newPin && newPin.ref && newPin.ref.type === 'SHIFT') || (oldPin && oldPin.ref && oldPin.ref.type === 'SHIFT'));
@@ -460,7 +505,7 @@ export class MapComponent implements OnInit, OnDestroy {
           this.shiftsSummary[oldPinState] -= 1;
         }
         if (publish) {
-          console.log('publishing: ', 'STATS_COMMAND_UPDATE_SHIFTS');
+          //console.log('publishing: ', 'STATS_COMMAND_UPDATE_SHIFTS');
           this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SHIFTS, args: this.shiftsSummary });
         }
       }
@@ -480,7 +525,7 @@ export class MapComponent implements OnInit, OnDestroy {
           this.servicesSummary[oldPinState] -= 1;
         }
         if (publish) {
-          console.log('publishing: ', 'STATS_COMMAND_UPDATE_SERVICES');
+          //console.log('publishing: ', 'STATS_COMMAND_UPDATE_SERVICES');
           this.godsEyeService.publishStatsCommand({ code: GodsEyeService.STATS_COMMAND_UPDATE_SERVICES, args: this.servicesSummary });
         }
       }
@@ -498,7 +543,7 @@ export class MapComponent implements OnInit, OnDestroy {
     let moreDataAvailable = true;
     let page = 0;
     while (moreDataAvailable) {
-      console.log(`map.queryServices: monthsToAdd=${monthsToAdd}; nextPage=${page}`);
+      //console.log(`map.queryServices: monthsToAdd=${monthsToAdd}; nextPage=${page}`);
       const gqlResult = await this.godsEyeService.queryServices$([], this.channelFilter, this.seeAllOperation, this.selectedBusinessId, page++, 20, monthsToAdd, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices.map(v => ({ ...v, type: 'SERVICE' })));
@@ -506,13 +551,13 @@ export class MapComponent implements OnInit, OnDestroy {
         moreDataAvailable = false;
       }
     }
-    console.log(`map.queryServices:  monthsToAdd=${monthsToAdd}; totalCount=${data.length}`);
+    //console.log(`map.queryServices:  monthsToAdd=${monthsToAdd}; totalCount=${data.length}`);
 
 
     moreDataAvailable = true;
     page = 0;
     while (moreDataAvailable) {
-      console.log(`map.queryShifts: monthsToAdd=${monthsToAdd}; nextPage=${page}`);
+      //console.log(`map.queryShifts: monthsToAdd=${monthsToAdd}; nextPage=${page}`);
       const gqlResult = await this.godsEyeService.queryShifts$(['AVAILABLE', 'NOT_AVAILABLE', 'BUSY'], this.selectedBusinessId, page++, 20, monthsToAdd, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEShifts && gqlResult.data.IOEShifts.length > 0) {
         data.push(...gqlResult.data.IOEShifts.map(v => ({ ...v, type: 'SHIFT' })));
@@ -520,7 +565,7 @@ export class MapComponent implements OnInit, OnDestroy {
         moreDataAvailable = false;
       }
     }
-    console.log(`map.queryAllDataFromServer:  monthsToAdd=${monthsToAdd}; totalCount=${data.length}`);
+    //console.log(`map.queryAllDataFromServer:  monthsToAdd=${monthsToAdd}; totalCount=${data.length}`);
 
 
     return data;
@@ -669,19 +714,20 @@ export class MapComponent implements OnInit, OnDestroy {
     let fillColor = '#000000';
     let strokeColor = '#000000';
     let strokeWeight = 0.5;
+    let textColor = '#000000';
     if (shift.online) {
       switch (shift.state) {
         case 'AVAILABLE': fillColor = '#00ff00'; break;
-        case 'NOT_AVAILABLE': fillColor = '#ff0000'; break;
-        case 'BUSY': fillColor = '#0000FF'; break;
+        case 'NOT_AVAILABLE': fillColor = '#ff0000'; textColor = "#FFFFFF"; break;
+        case 'BUSY': fillColor = '#0000FF'; textColor = "#FFFFFF"; break;
       }
     } else {
       fillColor = '#FFFFFF';
       strokeWeight = 2;
       switch (shift.state) {
         case 'AVAILABLE': strokeColor = '#00ff00'; break;
-        case 'NOT_AVAILABLE': strokeColor = '#ff0000'; break;
-        case 'BUSY': strokeColor = '#0000FF'; break;
+        case 'NOT_AVAILABLE': strokeColor = '#ff0000'; textColor = "#FFFFFF"; break;
+        case 'BUSY': strokeColor = '#0000FF'; textColor = "#FFFFFF"; break;
       }
     }
 
@@ -696,29 +742,47 @@ export class MapComponent implements OnInit, OnDestroy {
       // marker.getIcon().fillColor = fillColor;
       // marker.getIcon().strokeColor = strokeColor;
       // marker.getIcon().strokeWeight = strokeWeight;
+      if (oldPin.isOffering) { 
+        fillColor = "#FF8B00";
+        strokeColor = '#000000';
+        textColor = '#FFFFFF';
+      }
       marker.setIcon(
         {
-          path: google.maps.SymbolPath.CIRCLE,
+          path: 'm 1 6 a 1 1 90 0 0 0 0 c 8 0 8 8 0 8 l -7 0 l -11 0 c -8 0 -8 -8 0 -8 l 18 0',
           fillOpacity: 1,
           fillColor,
           strokeOpacity: 1.0,
           strokeColor,
           strokeWeight,
-          scale: 4 //pixels,        
+          labelOrigin: new google.maps.Point(-7, 11),
+          scale: 2 //pixels,        
         }
       );
+      marker.setLabel({
+        text: ((shift || {}).vehicle || {}).licensePlate,
+        fontSize: "10px",
+        color: fillColor.toUpperCase() === "#FFFFFF" ? "#000000" : fillColor === "#000000" ? "#FFFFFF" : textColor,
+      })
       //console.log(fillColor);
     } else {
+      //console.log("shift ===> ", shift)
       marker = new google.maps.Marker({
         position,
+        label: {
+          text: ((shift || {}).vehicle || {}).licensePlate,
+          fontSize: "10px",
+          color: fillColor.toUpperCase() === "#FFFFFF" ? "#000000" : fillColor === "#000000" ? "#FFFFFF" : textColor,
+        },
         icon: {
-          path: google.maps.SymbolPath.CIRCLE,
+          path: 'm 1 6 a 1 1 90 0 0 0 0 c 8 0 8 8 0 8 l -7 0 l -11 0 c -8 0 -8 -8 0 -8 l 18 0',
           fillOpacity: 1,
           fillColor,
           strokeOpacity: 1.0,
           strokeColor,
           strokeWeight,
-          scale: 4 //pixels,        
+          scale: 2, //pixels,        
+          labelOrigin: new google.maps.Point(-7, 11)
         },
       });
 
@@ -727,7 +791,7 @@ export class MapComponent implements OnInit, OnDestroy {
       });
       var contentString = `<div id="content">
             ${shift.vehicle.licensePlate} - ${shift.driver.fullname} </br>
-            ${this.translationLoader.getTranslate().instant(`GODSEYE.MAP.SHIFT.BALANCE`)} : $${(shift.driver.wallet || {pockets:{main:0}}).pockets.main}
+            ${this.translationLoader.getTranslate().instant(`GODSEYE.MAP.SHIFT.BALANCE`)} : $${(shift.driver.wallet || { pockets: { main: 0 } }).pockets.main}
             </div>`;
       var infowindow = new google.maps.InfoWindow({
         content: contentString
@@ -900,6 +964,32 @@ export class MapComponent implements OnInit, OnDestroy {
     } else {
       alert('Geolocation is not supported by this browser.');
     }
+  }
+
+  /**
+  * Shows a message snackbar on the bottom of the page
+  * @param messageKey Key of the message to i18n
+  * @param detailMessageKey Key of the detail message to i18n
+  */
+  showMessageSnackbar(messageKey, detailMessageKey?) {
+    const translationData = [];
+    if (messageKey) {
+      translationData.push(messageKey);
+    }
+
+    if (detailMessageKey) {
+      translationData.push(detailMessageKey);
+    }
+
+    this.translate.get(translationData).subscribe(data => {
+      this.snackBar.open(
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
+        {
+          duration: 2000
+        }
+      );
+    });
   }
 
   getCirclePoints(center, radius, numPoints, clockwise) {

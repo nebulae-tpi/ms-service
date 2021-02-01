@@ -98,7 +98,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   zoom = 100;
   maxZoom = 300;
   minZoom = 25;
-
+  searchText = "";
   
 
   constructor(
@@ -189,6 +189,20 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   sendMapRefreshCommand($event?) {
     if (this.isThereAnOpenDialog()) { return; }
     this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_MAP_REFRESH, args: [] });
+  }
+
+  /**
+   * Sends the command to refresh map
+   * @param $event
+   */
+  searchVehicleByLicensePlate($event?) {
+    if (this.isThereAnOpenDialog()) { return; }
+    if (this.searchText && this.searchText.trim() !== "") {
+      this.godsEyeService.publishToolbarCommand({ code: GodsEyeService.TOOLBAR_COMMAND_MAP_SEARCH_SHIFT, args: [this.searchText.trim().toUpperCase()] });
+    }
+    else { 
+      this.showMessageSnackbar("TOOLBAR.SEARCH_INVALID_VALUE")
+    }
   }
   
   /**
