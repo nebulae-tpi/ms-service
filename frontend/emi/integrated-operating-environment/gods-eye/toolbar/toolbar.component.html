@@ -12,7 +12,7 @@
         <mat-icon>visibility</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.VIEW' | translate }}</span>
     </button>
 
-    <input maxlength="10" [(ngModel)]="searchText" style="color: black; padding: 0 0 0 5px; background: #e9ecf0; width: 150px; border-radius: 4px;" matInput *ngIf="selectedBusinessId" placeholder="{{ 'TOOLBAR.SEARCH_TEXT' | translate }}" />
+    <input maxlength="10"  (keyup.enter)="searchVehicleByLicensePlate()" [(ngModel)]="searchText" style="color: black; padding: 0 0 0 5px; background: #e9ecf0; width: 150px; border-radius: 4px;" matInput *ngIf="selectedBusinessId" placeholder="{{ 'TOOLBAR.SEARCH_TEXT' | translate }}" />
 
     <button *ngIf="selectedBusinessId" mat-button (click)="searchVehicleByLicensePlate()">
         <mat-icon span>search</mat-icon> <span fxHide.sm>{{ 'TOOLBAR.SEARCH' | translate }}</span>
