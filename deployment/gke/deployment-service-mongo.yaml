@@ -11,7 +11,7 @@ spec:
     targetPort: 27017
   clusterIP: None
   selector:
-    role: dbserv
+    run: dbserv
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -26,7 +26,7 @@ spec:
   template:
     metadata:
       labels:
-        role: dbserv
+        run: dbserv
     spec:
       terminationGracePeriodSeconds: 10
       containers:
