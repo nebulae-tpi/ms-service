@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: dbserv
   labels:
-    name: dbserv
+    run: dbserv
 spec:
   ports:
   - port: 27017
@@ -20,7 +20,8 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: dbserv
+      run: dbserv
+  serviceName: "dbserv"
   replicas: 3
   template:
     metadata:
