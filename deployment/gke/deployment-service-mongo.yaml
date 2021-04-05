@@ -18,11 +18,10 @@ kind: StatefulSet
 metadata:
   name: dbserv
 spec:
-  serviceName: "dbserv"
-  replicas: 3
   selector:
     matchLabels:
       app: dbserv
+  replicas: 3
   template:
     metadata:
       labels:
