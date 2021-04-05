@@ -4,14 +4,14 @@ kind: Service
 metadata:
   name: dbserv
   labels:
-    run: dbserv
+    role: dbserv
 spec:
   ports:
   - port: 27017
     targetPort: 27017
   clusterIP: None
   selector:
-    run: dbserv
+    role: dbserv
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -20,13 +20,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      run: dbserv
+      role: dbserv
   serviceName: "dbserv"
   replicas: 3
   template:
     metadata:
       labels:
-        run: dbserv
+        role: dbserv
     spec:
       terminationGracePeriodSeconds: 10
       containers:
