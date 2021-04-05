@@ -36,7 +36,7 @@ module.exports = {
                                 "Service",
                                 "emigateway.graphql.query.ServiceServicesSize",
                                 { root, args, jwt: context.encodedToken },
-                                2000
+                                20000
                             )
                     ),
                     catchError(err => handleError$(err, "ServiceServicesSize")),
@@ -104,7 +104,7 @@ module.exports = {
                                 "Service",
                                 "emigateway.graphql.query.ServiceServices",
                                 { root, args, jwt: context.encodedToken },
-                                2000
+                                20000
                             )
                     ),
                     catchError(err => handleError$(err, "ServiceServices")),
