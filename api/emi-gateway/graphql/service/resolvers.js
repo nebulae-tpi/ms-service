@@ -29,7 +29,7 @@ module.exports = {
     Query: {
         ServiceServicesSize(root, args, context) {
             return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-' + 'Service', 'ServiceServicesSize', PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"])
-                .pipe(
+                .pipe( 
                     mergeMap(() =>
                         broker
                             .forwardAndGetReply$(

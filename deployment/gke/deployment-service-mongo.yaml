@@ -13,13 +13,16 @@ spec:
   selector:
     role: dbserv
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: dbserv
 spec:
   serviceName: "dbserv"
   replicas: 3
+  selector:
+    matchLabels:
+      app: dbserv
   template:
     metadata:
       labels:
