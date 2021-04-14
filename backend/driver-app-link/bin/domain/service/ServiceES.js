@@ -52,7 +52,7 @@ class ServiceES {
         const referrerDriverDocumentId = data.client.referrerDriverDocumentId;
 
         return Observable.create(obs => {
-            if ((data.offer || {}).offerBeta === 2) {
+            if ((data.offer || {}).offerBeta === "2") {
                 this.imperativeServiceOfferAlgorithmBeta1$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer).subscribe(
                     (evt) => {
                         //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
