@@ -52,7 +52,18 @@ class ServiceES {
         const referrerDriverDocumentId = data.client.referrerDriverDocumentId;
 
         return Observable.create(obs => {
-            if ((data.offer || {}).offerBeta) {
+            if ((data.offer || {}).offerBeta === 2) {
+                this.imperativeServiceOfferAlgorithmBeta1$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer).subscribe(
+                    (evt) => {
+                        //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
+                    },
+                    (error) => console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) ERROR: ${error}`),
+                    () => {
+                        //console.error(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) COMPL: COMPLETED\n`);
+                    },
+                );
+            }
+            else if ((data.offer || {}).offerBeta) {
                 this.imperativeServiceOfferAlgorithmBeta$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer).subscribe(
                     (evt) => {
                         //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
@@ -181,6 +192,114 @@ class ServiceES {
 
     }
 
+    imperativeServiceOfferAlgorithmBeta1$(serviceId, minDistance, maxDistance, referrerDriverDocumentId,offer) {
+        return Observable.create(async obs => {
+            // precalculated offer params
+            const offerTotalSpan = parseInt((offer || {}).offerServiceOfferTotalSpan || process.env.SERVICE_OFFER_TOTAL_SPAN);
+            const offerSearchSpan = parseInt((offer || {}).offerServiceOfferSearchSpan || process.env.SERVICE_OFFER_SEARCH_SPAN);
+            const offerShiftSpan = parseInt((offer || {}).offerServiceOfferShiftSpan || process.env.SERVICE_OFFER_SHIFT_SPAN);
+            const offerTotalThreshold = offerTotalSpan + Date.now();
+            const simultaneousOffers = parseInt((offer || {}).offerSimultaneousOffers || 1);
+            obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId, simultaneousOffers })}`);
+
+            //console.log('imperativeServiceOfferAlgorithm: inpu:',JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId }));
+            
+            let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs,simultaneousOffers);
+            //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
+
+            let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+            let needToBeCancelledBySystem = true;
+            const previouslySelectedShifts = [];
+
+           // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
+            while (needToOffer) {
+                if(previouslySelectedShifts.length>0){
+                    await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
+                }                
+                //find available shifts
+                let shifts = await this.findShiftCandidates(service, obs);
+
+                // threshold defining the total time span of this offer
+                const offerSearchThreshold = offerSearchSpan + Date.now();
+                //TODO: ELIMINAR COD SOLO PARA PRUEBAS ===============
+                // const serviceOffer = {
+                //     _id: service._id,
+                //     timestamp: Date.now(),
+                //     tip: service.tip,
+                //     pickUp: { ...service.pickUp, location: undefined },
+                //     dropOff: { ...service.dropOff, location: undefined },
+                //     dropOffSpecialType: service.dropOffSpecialType,
+                //     expirationTime: offerTotalThreshold,
+                //     tripCost: service.tripCost
+                // };
+                // await driverAppLinkBroker.sendServiceEventToDrivers$("test", "test", 'ServiceOffered', serviceOffer).toPromise();
+                if (shifts.length > 0) {
+                    // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
+                    let simultaneousSendCount = 0;
+                    for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
+                        //selected shift
+                        const shift = shifts[i];
+                        await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs,false);
+                        previouslySelectedShifts.push(shift);
+                        simultaneousSendCount++;
+                        //console.log("LOCAL COUNT => ", simultaneousSendCount);
+                        if (simultaneousSendCount >= simultaneousOffers) { 
+
+                            await timer(offerShiftSpan).toPromise();
+                            simultaneousSendCount = 0;
+                            await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
+                        }
+                        //re-eval service state\/
+                        service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.offerCount": 1 }).toPromise();
+                        obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+                        needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
+                    }
+                } else {
+                    if (service.offer.params.minDistance !== 0) {
+                        obs.next(`no shifts found on searched area, will remove minDistance on next search`);
+                        service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, { "offer.params.minDistance": 0 }, { "offer.searchCount": 1 }).toPromise();
+                        obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+                        needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
+                    } else {
+                        //re-eval service state
+                        await timer(offerShiftSpan).toPromise();
+                        service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.searchCount": 1 }).toPromise();
+                        obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
+                        needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
+                        needToBeCancelledBySystem = service.state === 'REQUESTED';
+                    }
+                    await eventSourcing.eventStore.emitEvent$(
+                        ServiceES.buildEventSourcingEvent(
+                            'Service',
+                            serviceId,
+                            'ServiceOfferUpdated',
+                            {
+                                offer: { ...service.offer, shifts: undefined }
+                            },
+                            'SYSTEM', 1, true
+                        )
+                    ).toPromise();
+                }
+
+            }
+            if (needToBeCancelledBySystem) {
+                await eventSourcing.eventStore.emitEvent$(
+                    ServiceES.buildEventSourcingEvent(
+                        'Service',
+                        serviceId,
+                        'ServiceCancelledBySystem',
+                        { reason: 'DRIVERS_NOT_AVAILABLE', notes: "" },
+                        'SYSTEM'
+                    )
+                ).toPromise();
+            }
+            obs.complete();
+        });
+
+    }
+
     imperativeServiceOfferAlgorithmBeta$(serviceId, minDistance, maxDistance, referrerDriverDocumentId,offer) {
         return Observable.create(async obs => {
             // precalculated offer params
@@ -228,12 +347,10 @@ class ServiceES {
                         const shift = shifts[i];
                         // console.log('INICIA OFERTA =======> ', JSON.stringify(shift));
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs);
-                        console.log("SE ENVIA OFERTA")
                         previouslySelectedShifts.push(shift);
                         simultaneousSendCount++;
                         //console.log("LOCAL COUNT => ", simultaneousSendCount);
                         if (simultaneousSendCount >= simultaneousOffers) { 
-                            console.log("SE DETIENE ===> ",simultaneousOffers)
                             await timer(offerShiftSpan).toPromise();
                             simultaneousSendCount = 0;
                         }
@@ -383,6 +500,32 @@ class ServiceES {
         return shifts;
     }
 
+    async resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts = [], obs){
+        const businessId = service.businessId;
+        const serviceOffer = {
+            _id: service._id,
+            timestamp: Date.now(),
+            tip: service.tip,
+            pickUp: { ...service.pickUp, location: undefined },
+            dropOff: { ...service.dropOff, location: undefined },
+            dropOffSpecialType: service.dropOffSpecialType,
+            expirationTime: offerTotalThreshold,
+            tripCost: service.tripCost
+        };
+        if (serviceOffer.pickUp.neighborhood && BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
+            serviceOffer.pickUp.addressLine1 = '---';
+            serviceOffer.pickUp.addressLine2 = '';
+            console.log("BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS: ", JSON.stringify(serviceOffer, null, 1));
+        }
+        const driverUsernamesToNotify = previouslySelectedShifts.map(s => s.driver.username)
+        for (let i = 0; i < driverUsernamesToNotify.length; i++) {
+            const driverUsername = driverUsernamesToNotify[i];
+            const init = Date.now();
+            await driverAppLinkBroker.sendServiceEventToDrivers$(businessId, driverUsername, 'ServiceOffered', serviceOffer).toPromise();
+            obs.next(`sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${Date.now() - init}`);
+        }
+    }
+
     /**
      * executes the whole offer workflow
      * . persist the shift into the offer
@@ -392,7 +535,7 @@ class ServiceES {
      * @param {*} shift 
      * @param {*} obs 
      */
-    async offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts = [], obs) {
+    async offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts = [], obs, resendToAll = true) {
         const businessId = shift.businessId;
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
@@ -415,9 +558,9 @@ class ServiceES {
             console.log("BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS: ", JSON.stringify(serviceOffer, null, 1));
         }
 
-        const RESEND_TO_ALL = true; // THIS FLAG DEFINES IF THE OFFER WILL ONLY BE SENT TO THE SELECTED SHIFT .... OR ... WILL BE SENT TO ALL PREVIOSLY SELECTED SHIFTS
+        // THIS FLAG DEFINES IF THE OFFER WILL ONLY BE SENT TO THE SELECTED SHIFT .... OR ... WILL BE SENT TO ALL PREVIOSLY SELECTED SHIFTS
         // send the offer to every  shift        
-        const driverUsernamesToNotify = RESEND_TO_ALL
+        const driverUsernamesToNotify = resendToAll
             ? [shift.driver.username, ...previouslySelectedShifts.map(s => s.driver.username)]
             : [shift.driver.username];
         for (let i = 0; i < driverUsernamesToNotify.length; i++) {
