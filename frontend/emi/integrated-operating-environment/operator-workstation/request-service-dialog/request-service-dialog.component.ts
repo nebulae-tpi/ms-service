@@ -230,6 +230,12 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     this.selectedGooglePlace = null;
   }
 
+  onBlurClientGoogleAdress(){
+    if(!this.selectedGooglePlace || this.selectedGooglePlace === null){
+      this.clearGoogleLocation()
+    }
+  }
+
 
 
   /**

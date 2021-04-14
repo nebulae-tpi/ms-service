@@ -12,6 +12,7 @@
                             [matAutocomplete]="auto" cdkFocusInitial>
 
                         <mat-autocomplete panelWidth="200" #auto="matAutocomplete" autoActiveFirstOption
+                            clearOnBlur='true'
                             (optionSelected)='onClientSelected($event.option.value)' [displayWith]="clientDisplayFn">
                             <mat-option *ngFor="let client of queriedClientsByAutocomplete$ | async" [value]="client">
                                 <mat-icon>person_pin_circle</mat-icon>
@@ -109,6 +110,7 @@
                   <mat-form-field fxFlex="100">
                     <input #addressAutocomplete matInput formControlName="clientGoogleAdress" 
                         name="clientGoogleAdress"
+                        (blur)="onBlurClientGoogleAdress()"
                         autocorrect="off" autocapitalize="off" spellcheck="off" type="text" required
                         [readOnly]="selectedGooglePlace" cdkFocusInitial
                         placeholder="{{ 'SERVICES.REQUEST_DIALOG.IOE_CLIENT_GOOGLE_ADRESS' | translate }}">
