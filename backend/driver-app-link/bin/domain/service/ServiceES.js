@@ -310,16 +310,13 @@ class ServiceES {
             const simultaneousOffers = parseInt((offer || {}).offerSimultaneousOffers || 1);
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId, simultaneousOffers })}`);
 
-            //console.log('imperativeServiceOfferAlgorithm: inpu:',JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId }));
             
             let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs,simultaneousOffers);
-            //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
             const previouslySelectedShifts = [];
 
-           // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
             while (needToOffer) {
 
                 //find available shifts
