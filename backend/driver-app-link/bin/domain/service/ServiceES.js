@@ -217,7 +217,7 @@ class ServiceES {
                     await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
                 }                
                 //find available shifts
-                let shifts = await this.findShiftCandidates(service, obs);
+                let shifts = await this.findShiftCandidates(service, obs,simultaneousOffers);
 
                 // threshold defining the total time span of this offer
                 const offerSearchThreshold = offerSearchSpan + Date.now();
