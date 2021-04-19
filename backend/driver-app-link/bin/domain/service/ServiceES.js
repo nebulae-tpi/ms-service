@@ -320,7 +320,7 @@ class ServiceES {
             while (needToOffer) {
 
                 //find available shifts
-                let shifts = await this.findShiftCandidates(service, obs);
+                let shifts = await this.findShiftCandidates(service, obs, simultaneousOffers);
 
                 // threshold defining the total time span of this offer
                 const offerSearchThreshold = offerSearchSpan + Date.now();
@@ -445,7 +445,7 @@ class ServiceES {
      * @param {*} service 
      * @returns shifts array
      */
-    async findShiftCandidates(service, obs) {
+    async findShiftCandidates(service, obs, limit) {
         //find available shifts
         let shifts = await ShiftDA.findServiceOfferCandidates$(
             service.businessId,
@@ -454,7 +454,8 @@ class ServiceES {
             Object.keys(service.offer.shifts),
             service.offer.params.maxDistance,
             0,//min distance form mongo is always zero
-            { "driver": 1, "vehicle": 1 }
+            { "driver": 1, "vehicle": 1 },
+            limit
         ).toPromise();
         //ignores shifts that were already taken into account
         shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));

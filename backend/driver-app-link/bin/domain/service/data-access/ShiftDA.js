@@ -23,7 +23,7 @@ class ShiftDA {
   }
 
 
-  static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined) {
+  static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined, limit= 20) {
     const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
     const explorePastMonth = today.getDate() <= 1;
 
@@ -54,7 +54,7 @@ class ShiftDA {
         },
 
       },
-      { $limit: 20 }
+      { $limit: limit }
     ];
 
 
