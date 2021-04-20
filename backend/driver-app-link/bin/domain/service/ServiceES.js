@@ -39,7 +39,7 @@ class ServiceES {
         const extendedDistanceHours = ((data.offer || {}).offerExtendedDistanceHours || (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4")).split('_').map(h => parseInt(h));
         let maxDistance = data.client.offerMaxDistance || parseInt((data.offer || {}).offerMaxDistance || process.env.SERVICE_OFFER_MAX_DISTANCE);
         if (extendedDistanceHours.includes(localHour)) {
-            let extendedDistance = parseInt((data.offer || {}).offerExtendedDistance ||(process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500"));
+            let extendedDistance = parseInt((data.offer || {}).offerExtendedDistance || (process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500"));
             if (extendedDistance && extendedDistance > maxDistance) {
                 maxDistance = extendedDistance;
             }
@@ -74,7 +74,7 @@ class ServiceES {
                     },
                 );
             }
-            else { 
+            else {
                 this.imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer).subscribe(
                     (evt) => {
                         //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
@@ -101,7 +101,7 @@ class ServiceES {
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId })}`);
 
             //console.log('imperativeServiceOfferAlgorithm: inpu:',JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId }));
-            
+
             let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs);
             //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
 
@@ -109,7 +109,7 @@ class ServiceES {
             let needToBeCancelledBySystem = true;
             const previouslySelectedShifts = [];
 
-           // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
+            // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
             while (needToOffer) {
 
                 //find available shifts
@@ -192,7 +192,7 @@ class ServiceES {
 
     }
 
-    imperativeServiceOfferAlgorithmBeta1$(serviceId, minDistance, maxDistance, referrerDriverDocumentId,offer) {
+    imperativeServiceOfferAlgorithmBeta1$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, offer) {
         return Observable.create(async obs => {
             // precalculated offer params
             const offerTotalSpan = parseInt((offer || {}).offerServiceOfferTotalSpan || process.env.SERVICE_OFFER_TOTAL_SPAN);
@@ -203,21 +203,21 @@ class ServiceES {
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId, simultaneousOffers })}`);
 
             //console.log('imperativeServiceOfferAlgorithm: inpu:',JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId }));
-            
-            let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs,simultaneousOffers);
+
+            let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs, simultaneousOffers);
             //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
             const previouslySelectedShifts = [];
 
-           // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
+            // console.log('imperativeServiceOfferAlgorithm: needToOffer: ',needToOffer);
             while (needToOffer) {
-                if(previouslySelectedShifts.length>0){
+                if (previouslySelectedShifts.length > 0) {
                     await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
-                }                
+                }
                 //find available shifts
-                let shifts = await this.findShiftCandidates(service, obs,simultaneousOffers);
+                let shifts = await this.findShiftCandidates(service, obs, simultaneousOffers);
 
                 // threshold defining the total time span of this offer
                 const offerSearchThreshold = offerSearchSpan + Date.now();
@@ -241,13 +241,11 @@ class ServiceES {
                         console.log("-------------------------")
                         //selected shift
                         const shift = shifts[i];
-                        console.log("TS PRE OFFER ===> ", Date.now());
-                        await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs,false);
-                        console.log("TS POST OFFER ===> ", Date.now());
+                        await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs, false);
                         previouslySelectedShifts.push(shift);
                         simultaneousSendCount++;
                         //console.log("LOCAL COUNT => ", simultaneousSendCount);
-                        if (simultaneousSendCount >= simultaneousOffers) { 
+                        if (simultaneousSendCount >= simultaneousOffers) {
 
                             await timer(offerShiftSpan).toPromise();
                             simultaneousSendCount = 0;
@@ -308,7 +306,7 @@ class ServiceES {
 
     }
 
-    imperativeServiceOfferAlgorithmBeta$(serviceId, minDistance, maxDistance, referrerDriverDocumentId,offer) {
+    imperativeServiceOfferAlgorithmBeta$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, offer) {
         return Observable.create(async obs => {
             // precalculated offer params
             const offerTotalSpan = parseInt((offer || {}).offerServiceOfferTotalSpan || process.env.SERVICE_OFFER_TOTAL_SPAN);
@@ -318,8 +316,8 @@ class ServiceES {
             const simultaneousOffers = parseInt((offer || {}).offerSimultaneousOffers || 1);
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId, simultaneousOffers })}`);
 
-            
-            let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs,simultaneousOffers);
+
+            let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs, simultaneousOffers);
 
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
@@ -355,7 +353,7 @@ class ServiceES {
                         previouslySelectedShifts.push(shift);
                         simultaneousSendCount++;
                         //console.log("LOCAL COUNT => ", simultaneousSendCount);
-                        if (simultaneousSendCount >= simultaneousOffers) { 
+                        if (simultaneousSendCount >= simultaneousOffers) {
                             await timer(offerShiftSpan).toPromise();
                             simultaneousSendCount = 0;
                         }
@@ -433,7 +431,7 @@ class ServiceES {
                     offer: {
                         searchCount: 0,
                         shifts: {},
-                        params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan,simultaneousOffers }
+                        params: { minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, simultaneousOffers }
                     }
                 }).toPromise();
         }
@@ -441,7 +439,7 @@ class ServiceES {
             throw new Error(`Service not found when trying to offer at imperativeServiceOfferAlgorithm; serviceId=${serviceId}; retries=${retries}`);
         }
         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
-        return service;        
+        return service;
     }
 
     /**
@@ -506,7 +504,7 @@ class ServiceES {
         return shifts;
     }
 
-    async resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts = [], obs){
+    async resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts = [], obs) {
         const businessId = service.businessId;
         const serviceOffer = {
             _id: service._id,
@@ -545,13 +543,7 @@ class ServiceES {
         const businessId = shift.businessId;
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
-        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){ 
-            console.log("TS PRE SHIFT TO SERVICE ====> ", Date.now());
-        }
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
-        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-            console.log("TS POST SHIFT TO SERVICE ====> ", Date.now());
-        }
         const serviceOffer = {
             _id: service._id,
             timestamp: Date.now(),
@@ -578,20 +570,14 @@ class ServiceES {
             const driverUsername = driverUsernamesToNotify[i];
             const init = Date.now();
             await driverAppLinkBroker.sendServiceEventToDrivers$(businessId, driverUsername, 'ServiceOffered', serviceOffer).toPromise();
-            if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-            console.log("TS TOTAL ===> ", (Date.now() - init))
-            }
             obs.next(`sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${Date.now() - init}`);
-        }
-        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-            console.log("TOTAL TIME FOR====> ", (Date.now() -initFor));
         }
 
 
 
         const initEventTime = Date.now();
         // sends the Event-sourcing offer Event 
-        await eventSourcing.eventStore.emitEvent$(
+        eventSourcing.eventStore.emitEvent$(
             ServiceES.buildEventSourcingEvent(
                 'Service',
                 service._id,
@@ -604,9 +590,13 @@ class ServiceES {
                 },
                 'SYSTEM', 1, true
             )
-        ).toPromise();
-        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-            console.log("TOTAL TIME EVENT ====> ", (Date.now() -initEventTime));
+        ).subscribe(res => { },
+            error => {
+                console.error(`${dateFormat(new Date(), "isoDateTime")} offerServiceToShift ERROR: ${error}`)
+            },
+            () => { });
+        if (businessId === "165e291d-5135-4674-aa25-a157933b2784") {
+            console.log("TOTAL TIME EVENT ====> ", (Date.now() - initEventTime));
         }
     }
 
@@ -633,17 +623,17 @@ class ServiceES {
                     this.generatePayPerServiceTransaction$(dbService, timestamp)
                 )),
                 map(([dbService, a]) =>
-                    (
-                        {
-                            dbService,
-                            formattedService: {
-                                ...dbService,
-                                pickUp: this.formatPickUpDropOff(dbService.pickUp),
-                                dropOff: this.formatPickUpDropOff(dbService.dropOff),
-                                state: 'ASSIGNED' // the state might not be persisted yet
-                            }
+                (
+                    {
+                        dbService,
+                        formattedService: {
+                            ...dbService,
+                            pickUp: this.formatPickUpDropOff(dbService.pickUp),
+                            dropOff: this.formatPickUpDropOff(dbService.dropOff),
+                            state: 'ASSIGNED' // the state might not be persisted yet
                         }
-                    )
+                    }
+                )
                 ),
                 mergeMap(({ dbService, formattedService }) => {
                     return forkJoin(
