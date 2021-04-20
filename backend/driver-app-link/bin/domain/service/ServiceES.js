@@ -573,8 +573,6 @@ class ServiceES {
             obs.next(`sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${Date.now() - init}`);
         }
 
-
-
         const initEventTime = Date.now();
         // sends the Event-sourcing offer Event 
         eventSourcing.eventStore.emitEvent$(
