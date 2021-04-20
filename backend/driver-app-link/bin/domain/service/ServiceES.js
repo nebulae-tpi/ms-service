@@ -237,11 +237,13 @@ class ServiceES {
                     // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
                     let simultaneousSendCount = 0;
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
+                        console.log("POST TS ========> ", Date.now());
+                        console.log("-------------------------")
                         //selected shift
                         const shift = shifts[i];
-                        //console.log("TS PRE OFFER ===> ", Date.now());
+                        console.log("TS PRE OFFER ===> ", Date.now());
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs,false);
-                        //console.log("TS POST OFFER ===> ", Date.now());
+                        console.log("TS POST OFFER ===> ", Date.now());
                         previouslySelectedShifts.push(shift);
                         simultaneousSendCount++;
                         //console.log("LOCAL COUNT => ", simultaneousSendCount);
@@ -571,20 +573,23 @@ class ServiceES {
         const driverUsernamesToNotify = resendToAll
             ? [shift.driver.username, ...previouslySelectedShifts.map(s => s.driver.username)]
             : [shift.driver.username];
+        const initFor = Date.now();
         for (let i = 0; i < driverUsernamesToNotify.length; i++) {
             const driverUsername = driverUsernamesToNotify[i];
             const init = Date.now();
-            if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-            console.log("TS PRE PUBLISH ====> ", Date.now());
-            }
             await driverAppLinkBroker.sendServiceEventToDrivers$(businessId, driverUsername, 'ServiceOffered', serviceOffer).toPromise();
             if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-            console.log("TS POST PUBLISH ====> ", Date.now());
             console.log("TS TOTAL ===> ", (Date.now() - init))
             }
             obs.next(`sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${Date.now() - init}`);
         }
+        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
+            console.log("TOTAL TIME FOR====> ", (Date.now() -initFor));
+        }
 
+
+
+        const initEventTime = Date.now();
         // sends the Event-sourcing offer Event 
         await eventSourcing.eventStore.emitEvent$(
             ServiceES.buildEventSourcingEvent(
@@ -600,6 +605,9 @@ class ServiceES {
                 'SYSTEM', 1, true
             )
         ).toPromise();
+        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
+            console.log("TOTAL TIME EVENT====> ", (Date.now() -initEventTime));
+        }
     }
 
     /**
