@@ -237,13 +237,11 @@ class ServiceES {
                     // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
                     let simultaneousSendCount = 0;
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
-                        console.log("**********************************")
-                        console.log("PRE TS ========> ", Date.now())
                         //selected shift
                         const shift = shifts[i];
-                        console.log("TS PRE OFFER ===> ", Date.now());
+                        //console.log("TS PRE OFFER ===> ", Date.now());
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs,false);
-                        console.log("TS POST OFFER ===> ", Date.now());
+                        //console.log("TS POST OFFER ===> ", Date.now());
                         previouslySelectedShifts.push(shift);
                         simultaneousSendCount++;
                         //console.log("LOCAL COUNT => ", simultaneousSendCount);
@@ -254,9 +252,9 @@ class ServiceES {
                             await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
                         }
                         //re-eval service state\/
-                        console.log("TS PRE UPDATE SERVICE ===> ", Date.now());
+                        //console.log("TS PRE UPDATE SERVICE ===> ", Date.now());
                         service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.offerCount": 1 }).toPromise();
-                        console.log("TS POST UPDATE SERVICE ===> ", Date.now());
+                        //console.log("TS POST UPDATE SERVICE ===> ", Date.now());
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
                         needToBeCancelledBySystem = service.state === 'REQUESTED';
@@ -545,8 +543,9 @@ class ServiceES {
         const businessId = shift.businessId;
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
+        console.log("TS PRE SHIFT TO SERVICE ====> ", Date.now());
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
-
+        console.log("TS POST SHIFT TO SERVICE ====> ", Date.now());
 
         const serviceOffer = {
             _id: service._id,
@@ -572,7 +571,10 @@ class ServiceES {
         for (let i = 0; i < driverUsernamesToNotify.length; i++) {
             const driverUsername = driverUsernamesToNotify[i];
             const init = Date.now();
+            console.log("TS PRE PUBLISH ====> ", Date.now());
             await driverAppLinkBroker.sendServiceEventToDrivers$(businessId, driverUsername, 'ServiceOffered', serviceOffer).toPromise();
+            console.log("TS POST PUBLISH ====> ", Date.now());
+            console.log("TS TOTAL ===> ", (Date.now() - init))
             obs.next(`sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${Date.now() - init}`);
         }
 
