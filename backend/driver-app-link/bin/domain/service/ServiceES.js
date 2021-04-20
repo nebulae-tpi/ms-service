@@ -543,7 +543,7 @@ class ServiceES {
         const businessId = shift.businessId;
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
-        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
+        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){ 
             console.log("TS PRE SHIFT TO SERVICE ====> ", Date.now());
         }
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
