@@ -237,9 +237,13 @@ class ServiceES {
                     // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
                     let simultaneousSendCount = 0;
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
+                        console.log("**********************************")
+                        console.log("PRE TS ========> ", Date.now())
                         //selected shift
                         const shift = shifts[i];
+                        console.log("TS PRE OFFER ===> ", Date.now());
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs,false);
+                        console.log("TS POST OFFER ===> ", Date.now());
                         previouslySelectedShifts.push(shift);
                         simultaneousSendCount++;
                         //console.log("LOCAL COUNT => ", simultaneousSendCount);
@@ -250,10 +254,14 @@ class ServiceES {
                             await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
                         }
                         //re-eval service state\/
+                        console.log("TS PRE UPDATE SERVICE ===> ", Date.now());
                         service = await ServiceDA.updateOfferParamsAndfindById$(serviceId, undefined, { "offer.offerCount": 1 }).toPromise();
+                        console.log("TS POST UPDATE SERVICE ===> ", Date.now());
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
                         needToBeCancelledBySystem = service.state === 'REQUESTED';
+                        console.log("POST TS ========> ", Date.now());
+                        console.log("-------------------------")
                     }
                 } else {
                     if (service.offer.params.minDistance !== 0) {
