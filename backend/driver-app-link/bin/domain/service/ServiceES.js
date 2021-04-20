@@ -237,7 +237,7 @@ class ServiceES {
                     // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
                     let simultaneousSendCount = 0;
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
-                        console.log("POST TS ========> ", Date.now());
+                        console.log("PRE TS ========> ", Date.now());
                         console.log("-------------------------")
                         //selected shift
                         const shift = shifts[i];
@@ -550,7 +550,7 @@ class ServiceES {
         }
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
         if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-        console.log("TS POST SHIFT TO SERVICE ====> ", Date.now());
+            console.log("TS POST SHIFT TO SERVICE ====> ", Date.now());
         }
         const serviceOffer = {
             _id: service._id,
@@ -606,7 +606,7 @@ class ServiceES {
             )
         ).toPromise();
         if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
-            console.log("TOTAL TIME EVENT====> ", (Date.now() -initEventTime));
+            console.log("TOTAL TIME EVENT ====> ", (Date.now() -initEventTime));
         }
     }
 
