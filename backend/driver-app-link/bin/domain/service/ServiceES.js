@@ -543,10 +543,13 @@ class ServiceES {
         const businessId = shift.businessId;
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
-        console.log("TS PRE SHIFT TO SERVICE ====> ", Date.now());
+        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
+            console.log("TS PRE SHIFT TO SERVICE ====> ", Date.now());
+        }
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
+        if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
         console.log("TS POST SHIFT TO SERVICE ====> ", Date.now());
-
+        }
         const serviceOffer = {
             _id: service._id,
             timestamp: Date.now(),
@@ -571,10 +574,14 @@ class ServiceES {
         for (let i = 0; i < driverUsernamesToNotify.length; i++) {
             const driverUsername = driverUsernamesToNotify[i];
             const init = Date.now();
+            if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
             console.log("TS PRE PUBLISH ====> ", Date.now());
+            }
             await driverAppLinkBroker.sendServiceEventToDrivers$(businessId, driverUsername, 'ServiceOffered', serviceOffer).toPromise();
+            if(businessId ==="165e291d-5135-4674-aa25-a157933b2784"){
             console.log("TS POST PUBLISH ====> ", Date.now());
             console.log("TS TOTAL ===> ", (Date.now() - init))
+            }
             obs.next(`sendServiceEventToDrivers$(businessId, ${driverUsername}, 'ServiceOffered', serviceOffer) = ${Date.now() - init}`);
         }
 
