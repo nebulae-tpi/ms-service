@@ -673,7 +673,7 @@ class ServiceES {
                 new Event({
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
-                    aggregateType: "Wallet",
+                    aggregateType: "WalletTransaction",
                     aggregateId: uuidv4(),
                     data: tx,
                     user: "SYSTEM"
@@ -711,7 +711,7 @@ class ServiceES {
                 new Event({
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
-                    aggregateType: "Wallet",
+                    aggregateType: "WalletTransaction",
                     aggregateId: uuidv4(),
                     data: tx,
                     user: "SYSTEM"
