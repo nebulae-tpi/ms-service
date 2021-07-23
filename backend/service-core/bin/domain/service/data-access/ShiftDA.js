@@ -34,6 +34,19 @@ class ShiftDA {
         .findOne(query, { projection }));
   }
 
+  static findOpenShiftAndUpdateById$(_id, shiftOnAcceptServiceProcess, projection = undefined) {
+    const query = { _id, state: 'AVAILABLE' };
+    const update = {shiftOnAcceptServiceProcess}
+    return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
+      .findOneAndUpdate(query,
+        update, { 
+        projection,
+        upsert: false,
+        returnOriginal: true,
+       }));
+  }
+
+
   static removeShifShiftOnAcceptServiceProcesstById$(_id) {
     const query = { _id};
     const update = {shiftOnAcceptServiceProcess: 0}

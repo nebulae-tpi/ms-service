@@ -117,7 +117,7 @@ class ServiceCQRS {
    * @param {*} authToken 
    */
   acceptServiceOffer$({ root, args, jwt }, authToken) {
-    const { serviceId, shiftId } = args;
+    const { serviceId, shiftId, businessId } = args;
     const location = !args.location ? undefined : {
       type: "Point",
       coordinates: [args.location.lng, args.location.lat]
@@ -126,11 +126,29 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
-      mergeMap(request => { 
+      mergeMap(request => {
         const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000")
-        return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1 }).pipe(
-          first(shift => shift, undefined),
-          tap(shift => { if (!shift) { throw ERROR_23101; }; }),//  invalid shift
+        if(businessId && businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+          console.log("CONSULTA Y MODIFICA CON EL TS ===> ", shiftOnAcceptServiceProcess)
+          return ShiftDA.findOpenShiftAndUpdateById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
+        }else {
+          return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
+        }
+      }),
+      first(shift => shift, undefined),
+          tap(shift => { 
+            if(businessId && businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+              console.log("INGRESA AL TAP Y VALIDA ===> ", shift);
+              if (!shift || Date.now() < (shift.shiftOnAcceptServiceProcess || 0)) { 
+                console.log("CAE EN TRHOW DE TAP")
+                throw ERROR_23101; 
+              };
+            }else {
+              if (!shift) { 
+                throw ERROR_23101; 
+              };
+            }
+         }),//  invalid shift
           map(shift => ({
             _id: shift._id,
             vehicle: {
@@ -154,12 +172,11 @@ class ServiceCQRS {
           mapTo(this.buildCommandAck()), // async command acknowledge
           //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
           mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-          catchError(err => ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(request.shiftId).pipe(
+          catchError(err => {
+            console.log("SE GENERA ERROR", err)
+            return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
             mergeMap(() => GraphqlResponseTools.handleError$(err, true))
-          ) )
-        )
-      }),
-      catchError(err => GraphqlResponseTools.handleError$(err, true))
+          )} )
     );
   }
 
