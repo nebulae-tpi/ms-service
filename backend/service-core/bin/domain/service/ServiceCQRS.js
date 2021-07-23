@@ -126,7 +126,7 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
-      mergeMap(request => {
+      mergeMap(request => { 
         const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000")
         return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1 }).pipe(
           first(shift => shift, undefined),

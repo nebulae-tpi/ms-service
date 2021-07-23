@@ -13,7 +13,7 @@ spec:
         app: service-core
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.servicecore:2.9.13 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
+      - image: DOCKERHUB/service.backend.servicecore:2.9.14 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
         name: service-core
         volumeMounts:
         - name: google-application-credentials
@@ -58,7 +58,7 @@ spec:
         - name: BROKER_TYPE
           value: PUBSUB
         - name: SHIFT_ACCEPT_SERVICE_THRESHOLD=1000
-          value: 1000
+          value: "1000"
         # BACKEND PARAMETERS
         - name: GMT_TO_SERVE
           value: "GMT-5"

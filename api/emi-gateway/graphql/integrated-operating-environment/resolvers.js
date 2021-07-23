@@ -31,7 +31,7 @@ const READ_WRITE_ROLES = ["OPERATOR", "POI", "OPERATION-SUPERVISOR"];
 const READ_ROLES = ["PLATFORM-ADMIN", "BUSINESS-OWNER", "OPERATOR", "POI", "OPERATION-SUPERVISOR"];
 
 module.exports = {
-  Query: {
+  Query: { 
     IOEService: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'IOEService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', READ_ROLES).pipe(
         switchMapTo(

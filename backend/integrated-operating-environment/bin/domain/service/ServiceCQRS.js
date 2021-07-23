@@ -123,7 +123,7 @@ class ServiceCQRS {
     //ServiceCQRS.log(`ServiceCQRS.cancelService RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles, "ioe.ServiceCQRS", "cancelService", PERMISSION_DENIED,
-      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "OPERATOR", "OPERATION-SUPERVISOR"])
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "POI", "OPERATOR", "OPERATION-SUPERVISOR"])
       .pipe(
         mapTo(args),
         tap(request => this.validateServiceCancellationRequestInput(request)),
