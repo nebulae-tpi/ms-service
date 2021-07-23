@@ -128,55 +128,47 @@ class ServiceCQRS {
       tap(request => this.validateServiceAcceptOfferInput(request)),
       mergeMap(request => {
         const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000")
-        if(shiftId === "c6eb6ebd-7198-4d8a-b46c-34c2cf30dadf-2107"){
-          console.log("CONSULTA Y MODIFICA CON EL TS ===> ", shiftOnAcceptServiceProcess)
-          return ShiftDA.findOpenShiftAndUpdateById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
-        }else {
-          return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
-        }
+        // if(shiftId === "c6eb6ebd-7198-4d8a-b46c-34c2cf30dadf-2107"){
+        //   console.log("CONSULTA Y MODIFICA CON EL TS ===> ", shiftOnAcceptServiceProcess)
+        return ShiftDA.findOpenShiftAndUpdateById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
+        // }else {
+        //   return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
+        // }
       }),
       first(shift => shift, undefined),
-          tap(shift => { 
-            if(shiftId === "c6eb6ebd-7198-4d8a-b46c-34c2cf30dadf-2107"){
-              console.log("INGRESA AL TAP Y VALIDA ===> ", shift);
-              if (!shift || Date.now() < (shift.shiftOnAcceptServiceProcess || 0)) { 
-                console.log("CAE EN TRHOW DE TAP")
-                throw ERROR_23101; 
-              };
-            }else {
-              if (!shift) { 
-                throw ERROR_23101; 
-              };
-            }
-         }),//  invalid shift
-          map(shift => ({
-            _id: shift._id,
-            vehicle: {
-              licensePlate: shift.vehicle.licensePlate,
-              id: shift.vehicle.id
-            },
-            driver: {
-              fullname: shift.driver.fullname,
-              username: shift.driver.username,
-              documentId: shift.driver.documentId,
-              id: shift.driver.id
-            },
-          })),
-          mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
-          mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
-            'Service',
-            serviceId,
-            'ServiceAssigned',
-            { ...service, skipPersist: true },
-            authToken))), //Build and send event (event-sourcing)
-          mapTo(this.buildCommandAck()), // async command acknowledge
-          //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
-          mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-          catchError(err => {
-            console.log("SE GENERA ERROR", err)
-            return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
-            mergeMap(() => GraphqlResponseTools.handleError$(err, true))
-          )} )
+      tap(shift => {
+          if (!shift || Date.now() < (shift.shiftOnAcceptServiceProcess || 0)) {
+            throw ERROR_23101;
+          };
+      }),//  invalid shift
+      map(shift => ({
+        _id: shift._id,
+        vehicle: {
+          licensePlate: shift.vehicle.licensePlate,
+          id: shift.vehicle.id
+        },
+        driver: {
+          fullname: shift.driver.fullname,
+          username: shift.driver.username,
+          documentId: shift.driver.documentId,
+          id: shift.driver.id
+        },
+      })),
+      mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
+      mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+        'Service',
+        serviceId,
+        'ServiceAssigned',
+        { ...service, skipPersist: true },
+        authToken))), //Build and send event (event-sourcing)
+      mapTo(this.buildCommandAck()), // async command acknowledge
+      //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => {
+        return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
+          mergeMap(() => GraphqlResponseTools.handleError$(err, true))
+        )
+      })
     );
   }
 
