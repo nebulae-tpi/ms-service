@@ -113,7 +113,7 @@ class ServiceCQRS {
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
-  }
+  } 
 
 
   /**  

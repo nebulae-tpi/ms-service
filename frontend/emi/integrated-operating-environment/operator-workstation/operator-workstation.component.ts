@@ -68,7 +68,7 @@ export interface Tile {
   cols: number;
   rows: number;
   text: string;
-} 
+}  
 
 const HORIZONTAL_INBOX_COLS = 15;
 const VERTICAL_INBOX_ROWS = 10;

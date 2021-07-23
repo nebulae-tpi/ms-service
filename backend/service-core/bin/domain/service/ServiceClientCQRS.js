@@ -22,7 +22,7 @@ const {
   ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229,
 } = require("../../tools/customError");
 
-const { ShiftDA, ServiceDA } = require('./data-access')
+const { ShiftDA, ServiceDA } = require('./data-access');
 
 
 const VALID_SERVICE_CLIENT_TIP_TYPES = ['CASH', 'VIRTUAL_WALLET'];
