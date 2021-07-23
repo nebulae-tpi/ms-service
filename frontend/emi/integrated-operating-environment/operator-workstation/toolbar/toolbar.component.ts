@@ -273,7 +273,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   showRequestServiceDialog(type?) {
     if (this.isThereAnOpenDialog()) { return; }
-    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')) {
+    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR') && !this.userRoles.includes('POI')) {
       this.showMessageSnackbar('ERRORS.2');
       return;
     }
@@ -396,7 +396,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableServiceCancelCommand($event?) {
     if (this.isThereAnOpenDialog()) { return; }
-    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')) {
+    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR') && !this.userRoles.includes('POI')) {
       this.showMessageSnackbar('ERRORS.2');
       return;
     }
@@ -408,7 +408,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
    */
   sendDatatableServiceAssignCommand($event?) {
     if (this.isThereAnOpenDialog()) { return; }
-    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')) {
+    if (!this.userRoles.includes('OPERATOR') && !this.userRoles.includes('OPERATION-SUPERVISOR')  && !this.userRoles.includes('POI')) {
       this.showMessageSnackbar('ERRORS.2');
       return;
     }
