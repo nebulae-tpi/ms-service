@@ -127,28 +127,32 @@ class ServiceCQRS {
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
       mergeMap(request => {
-        const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000")
-        if(shiftId === "fadd70a9-8c45-4072-981b-955a8fefd53a-2107"){
-          console.log("llega peticion con args ===> ", args);
-          console.log("CONSULTA Y MODIFICA CON EL TS ===> ", shiftOnAcceptServiceProcess)
-          return ShiftDA.findOpenShiftAndUpdateById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
-        }else {
-          return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
-        }
+        const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000");
+        return ShiftDA.findOpenShiftAndUpdateById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 });
+        // if(shiftId === "fadd70a9-8c45-4072-981b-955a8fefd53a-2107"){
+        //   console.log("llega peticion con args ===> ", args);
+        //   console.log("CONSULTA Y MODIFICA CON EL TS ===> ", shiftOnAcceptServiceProcess)
+          
+        // }else {
+        //   return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
+        // }
       }), 
       first(shift => shift, undefined),
           tap(shift => { 
-            if(shiftId === "fadd70a9-8c45-4072-981b-955a8fefd53a-2107"){
-              console.log("INGRESA AL TAP Y VALIDA ===> ", shift);
-              if (!shift || (Date.now() < (shift.shiftOnAcceptServiceProcess || 0))) { 
-                console.log("CAE EN TRHOW DE TAP")
-                throw ERROR_23101; 
-              };
-            }else {
-              if (!shift) { 
-                throw ERROR_23101; 
-              };
-            }
+            if (!shift || (Date.now() < (shift.shiftOnAcceptServiceProcess || 0))) { 
+              throw ERROR_23101; 
+            };
+            // if(shiftId === "fadd70a9-8c45-4072-981b-955a8fefd53a-2107"){
+            //   console.log("INGRESA AL TAP Y VALIDA ===> ", shift);
+            //   if (!shift || (Date.now() < (shift.shiftOnAcceptServiceProcess || 0))) { 
+            //     console.log("CAE EN TRHOW DE TAP")
+            //     throw ERROR_23101; 
+            //   };
+            // }else {
+            //   if (!shift) { 
+            //     throw ERROR_23101; 
+            //   };
+            // }
          }),//  invalid shift
           map(shift => ({
             _id: shift._id,
@@ -174,7 +178,6 @@ class ServiceCQRS {
           //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
           mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
           catchError(err => {
-            console.log("SE GENERA ERROR", err)
             return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
             mergeMap(() => GraphqlResponseTools.handleError$(err, true))
           )} )
