@@ -130,7 +130,7 @@ class ServiceCQRS {
         const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000")
         return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1 }).pipe(
           first(shift => shift, undefined),
-          tap(shift => { if (!shift || Date.now() < (shift.shiftOnAcceptServiceProcess || 0)) { throw ERROR_23101; }; }),//  invalid shift
+          tap(shift => { if (!shift) { throw ERROR_23101; }; }),//  invalid shift
           map(shift => ({
             _id: shift._id,
             vehicle: {

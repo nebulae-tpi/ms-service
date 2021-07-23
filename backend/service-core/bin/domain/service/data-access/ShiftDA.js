@@ -31,12 +31,7 @@ class ShiftDA {
     const query = { _id, state: 'AVAILABLE' };
     const update = {shiftOnAcceptServiceProcess}
     return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
-      .findOneAndUpdate(query,
-        update, { 
-        projection,
-        upsert: false,
-        returnOriginal: true,
-       }));
+        .findOne(query, { projection }));
   }
 
   static removeShifShiftOnAcceptServiceProcesstById$(_id) {
