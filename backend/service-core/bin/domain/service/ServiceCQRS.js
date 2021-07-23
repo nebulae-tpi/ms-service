@@ -134,7 +134,7 @@ class ServiceCQRS {
         // }else {
         //   return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
         // }
-      }),
+      }), 
       first(shift => shift, undefined),
       tap(shift => {
           if (!shift || Date.now() < (shift.shiftOnAcceptServiceProcess || 0)) {
