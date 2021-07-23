@@ -3,6 +3,7 @@
 require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Shift";
+const { ERROR_23104 } = require("../../../tools/customError");
 const { CustomError } = require("../../../tools/customError");
 const { map, mergeMap, first, filter } = require("rxjs/operators");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
@@ -43,7 +44,12 @@ class ShiftDA {
         projection,
         upsert: false,
         returnOriginal: true,
-       }));
+       })).pipe(
+        map(result => result.value),
+        filter(v => v),
+        first(),
+        catchError(err => throwError(ERROR_23104)), // possible concurrent modification
+      );
   }
 
 
