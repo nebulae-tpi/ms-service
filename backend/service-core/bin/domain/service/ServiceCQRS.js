@@ -117,7 +117,7 @@ class ServiceCQRS {
    * @param {*} authToken 
    */
   acceptServiceOffer$({ root, args, jwt }, authToken) {
-    const { serviceId, shiftId, businessId } = args;
+    const { serviceId, shiftId } = args;
     const location = !args.location ? undefined : {
       type: "Point",
       coordinates: [args.location.lng, args.location.lat]
@@ -128,7 +128,7 @@ class ServiceCQRS {
       tap(request => this.validateServiceAcceptOfferInput(request)),
       mergeMap(request => {
         const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000")
-        if(businessId && businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+        if(shiftId === "c6eb6ebd-7198-4d8a-b46c-34c2cf30dadf-2107"){
           console.log("CONSULTA Y MODIFICA CON EL TS ===> ", shiftOnAcceptServiceProcess)
           return ShiftDA.findOpenShiftAndUpdateById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
         }else {
@@ -137,7 +137,7 @@ class ServiceCQRS {
       }),
       first(shift => shift, undefined),
           tap(shift => { 
-            if(businessId && businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+            if(shiftId === "c6eb6ebd-7198-4d8a-b46c-34c2cf30dadf-2107"){
               console.log("INGRESA AL TAP Y VALIDA ===> ", shift);
               if (!shift || Date.now() < (shift.shiftOnAcceptServiceProcess || 0)) { 
                 console.log("CAE EN TRHOW DE TAP")
