@@ -50,7 +50,7 @@ class ServiceCQRS {
     //ServiceCQRS.log(`ServiceCQRS.reportServiceAsArrived RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceClientCQRS", "SendMessageToDriver", PERMISSION_DENIED, ["CLIENT"]).pipe(
       mapTo(args),
-      mergeMap(message => 
+      mergeMap(message =>
         ServiceDA.findById$(message.serviceId, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, message })))
       ),
       tap(({ service, message }) => { if (!service) throw ERROR_23223; }),// service does not exists
@@ -75,9 +75,9 @@ class ServiceCQRS {
     );
   }
 
-    /**  
-   * Send message to the client
-   */
+  /**  
+ * Send message to the client
+ */
   sendMessageToClient$({ root, args, jwt }, authToken) {
     ServiceCQRS.log(`ServiceCQRS.sendMessageToClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "sendMessageToClient", PERMISSION_DENIED, ["DRIVER"]).pipe(
@@ -90,19 +90,20 @@ class ServiceCQRS {
       mergeMap(({ service, message }) => {
         console.log('Envia mensaje a ES');
         return eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
-        'Service',
-        message.serviceId,
-        'ServiceMessageSent',
-        {
-          from: authToken.preferred_username,
-          to: service.client.username,
-          message: {
-            predefinedMessageId: message.message.predefinedMessageId,
-            textMessage: message.message.textMessage
+          'Service',
+          message.serviceId,
+          'ServiceMessageSent',
+          {
+            from: authToken.preferred_username,
+            to: service.client.username,
+            message: {
+              predefinedMessageId: message.message.predefinedMessageId,
+              textMessage: message.message.textMessage
+            },
+            type: 'CLIENT'
           },
-          type: 'CLIENT'
-        },
-        authToken))}), //Build and send event (event-sourcing)
+          authToken))
+      }), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
       //tap(x => ServiceCQRS.log(`ServiceCQRS.assignService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
@@ -125,32 +126,39 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "acceptServiceOffer", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceAcceptOfferInput(request)),
-      mergeMap(request => ShiftDA.findOpenShiftById$(request.shiftId, { state: 1, driver: 1, vehicle: 1 })),
-      first(shift => shift, undefined),
-      tap(shift => { if (!shift) { throw ERROR_23101; }; }),//  invalid shift
-      map(shift => ({
-        _id: shift._id,
-        vehicle: {
-          licensePlate: shift.vehicle.licensePlate,
-          id: shift.vehicle.id
-        },
-        driver: {
-          fullname: shift.driver.fullname,
-          username: shift.driver.username,
-          documentId: shift.driver.documentId,
-          id: shift.driver.id
-        },
-      })),
-      mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
-      mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
-        'Service',
-        serviceId,
-        'ServiceAssigned',
-        { ...service, skipPersist: true },
-        authToken))), //Build and send event (event-sourcing)
-      mapTo(this.buildCommandAck()), // async command acknowledge
-      //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
-      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      mergeMap(request => {
+        const shiftOnAcceptServiceProcess = Date.now() + parseInt(process.env.SHIFT_ACCEPT_SERVICE_THRESHOLD || "1000")
+        return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1 }).pipe(
+          first(shift => shift, undefined),
+          tap(shift => { if (!shift || Date.now() < (shift.shiftOnAcceptServiceProcess || 0)) { throw ERROR_23101; }; }),//  invalid shift
+          map(shift => ({
+            _id: shift._id,
+            vehicle: {
+              licensePlate: shift.vehicle.licensePlate,
+              id: shift.vehicle.id
+            },
+            driver: {
+              fullname: shift.driver.fullname,
+              username: shift.driver.username,
+              documentId: shift.driver.documentId,
+              id: shift.driver.id
+            },
+          })),
+          mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
+          mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+            'Service',
+            serviceId,
+            'ServiceAssigned',
+            { ...service, skipPersist: true },
+            authToken))), //Build and send event (event-sourcing)
+          mapTo(this.buildCommandAck()), // async command acknowledge
+          //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+          mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+          catchError(err => ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(request.shiftId).pipe(
+            mergeMap(() => GraphqlResponseTools.handleError$(err, true))
+          ) )
+        )
+      }),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
     );
   }
@@ -382,7 +390,7 @@ class ServiceCQRS {
         request.id,
         'ServiceCompleted',
         {
-          timestamp : Date.now()
+          timestamp: Date.now()
         },
         authToken))), //Build and send event (event-sourcing)
       mapTo(this.buildCommandAck()), // async command acknowledge
@@ -545,11 +553,13 @@ class ServiceCQRS {
     const pickUpMarker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
     const dropOffMarker = (!service || !service.dropOff || !service.dropOff.marker) ? undefined : { lng: service.dropOff.marker.coordinates[0], lat: service.dropOff.marker.coordinates[1] };
 
-    return !service ? undefined : { ...service,
+    return !service ? undefined : {
+      ...service,
       vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' },
       pickUp: { ...service.pickUp, marker: pickUpMarker },
       dropOff: { ...service.dropOff, marker: dropOffMarker },
-      route: undefined, id: service._id };
+      route: undefined, id: service._id
+    };
   }
 
 

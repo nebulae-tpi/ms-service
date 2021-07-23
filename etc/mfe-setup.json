@@ -185,7 +185,8 @@
           "OPERATOR",
           "OPERATION-SUPERVISOR",
           "BUSINESS-OWNER",
-          "PLATFORM-ADMIN"
+          "PLATFORM-ADMIN",
+          "POI"
         ],
         "default": false
       },

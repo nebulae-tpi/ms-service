@@ -27,10 +27,23 @@ class ShiftDA {
    * Gets Shift by its _id
    * @returns {Observable}
    */
-  static findOpenShiftById$(_id, projection = undefined) {
+  static findOpenShiftById$(_id, shiftOnAcceptServiceProcess, projection = undefined) {
     const query = { _id, state: 'AVAILABLE' };
+    const update = {shiftOnAcceptServiceProcess}
     return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
-      .findOne(query, { projection }));
+      .findOneAndUpdate(query,
+        update, { 
+        projection,
+        upsert: false,
+        returnOriginal: true,
+       }));
+  }
+
+  static removeShifShiftOnAcceptServiceProcesstById$(_id) {
+    const query = { _id};
+    const update = {shiftOnAcceptServiceProcess: 0}
+    return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
+      .update(query, update));
   }
 
   /**
