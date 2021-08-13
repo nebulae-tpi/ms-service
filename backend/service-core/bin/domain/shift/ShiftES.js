@@ -153,7 +153,7 @@ class ShiftES {
                 eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(data.serviceId, data.location, user)).pipe(mapTo(shift)),
                 of(shift).pipe(
                     mergeMap(() => {
-                        if (shifts && shift.state === "BUSY") {
+                        if (shift && shift.state === "BUSY") {
                             return ServiceDA.findOpenedServiceByShift$(shift._id).pipe(
                                 mergeMap(service => {
                                     if (service && service._id) {
