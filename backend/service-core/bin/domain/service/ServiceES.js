@@ -90,13 +90,28 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceRequested$({ data }) {
-        // console.log(`*** ServiceES: handleServiceRequested: `, data); //DEBUG: DELETE LINE
+        //console.log(`*** ServiceES: handleServiceRequested: `, data); //DEBUG: DELETE LINE
         return ServiceDA.insertService$(data)
             .pipe(
-                tap(() => this.queueAndGroupServiceEvent(data))
+                tap(result => {
+                    const customRes = JSON.parse(JSON.stringify(result));
+                    if (customRes && (customRes.upserted || []).length > 0) {
+                        this.queueAndGroupServiceEvent(data)
+                    }
+                }),
+                catchError(err => {
+                    const errJson = JSON.parse(JSON.stringify(errJson));
+                    if (!errJson || !errJson.code || errJson.code !== 11000) {
+                        throw new Error(err)
+                    }
+                    else {
+                        console.error("Llega error puro ====> ", err);
+                        return of({});
+                    }
+                })
             );
     }
-    
+
 
     /**
      * Handles EventSourcing Event ServiceAssigned
@@ -121,7 +136,7 @@ class ServiceES {
                         'ShiftStateChanged',
                         { _id: shiftId, state: 'BUSY' },
                         user
-                ))
+                    ))
             ),
             // mergeMap(() => ServiceDA.findById$(aid, { "client.id": 1 } ) ),
             // mergeMap(service => ClientDA.findById$(service.client.id) ),

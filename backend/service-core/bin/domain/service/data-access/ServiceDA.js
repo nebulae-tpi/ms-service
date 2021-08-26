@@ -48,14 +48,16 @@ class ServiceDA {
    * sets dropOffETA eta
    * @returns {Observable}
    */
-  static setDropOffETA$(_id, dropOffETA) {
-    return defer(
-      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
-        { _id },
+   static insertService$(service) {
+    const _id = service._id;
+    delete service._id;
+    return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
+      .updateOne(
+        { _id},
         {
-          $set: { dropOffETA, lastModificationTimestamp: Date.now() }
+          $setOnInsert: { ...service}
         },
-        { upsert: false }
+        { upsert: true }
       )
     );
   }
