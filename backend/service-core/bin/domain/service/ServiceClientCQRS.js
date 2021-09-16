@@ -189,7 +189,7 @@ class ServiceClientCQRS {
       mapTo(args),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
-      tap(({ service, request }) => { if (!service.open) throw ERROR_23224; }),// service is already closed
+      tap(({ service, request }) => { if (!service.closed) throw ERROR_23224; }),// service is already closed
       mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
         'Service',
         request.id,
