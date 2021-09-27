@@ -76,10 +76,10 @@ class ServiceES {
 
     formatServiceToGraphQLSchema(service) {
         const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };
-
+        const dropOffMarker = (!service || !service.dropOff || !service.dropOff.marker) ? undefined : { lng: service.dropOff.marker.coordinates[0], lat: service.dropOff.marker.coordinates[1] };
         const location = (!service || !service.location) ? undefined : { lng: service.location.coordinates[0], lat: service.location.coordinates[1] };
 
-        return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, location: location };
+        return !service ? undefined : { ...service, vehicle: { plate: service.vehicle ? service.vehicle.licensePlate : '' }, dropOff: {...service.dropOff,marker: dropOffMarker},pickUp: { ...service.pickUp, marker }, route: undefined, id: service._id, location: location };
     }
 
     //#endregion
