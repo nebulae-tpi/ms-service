@@ -36,7 +36,7 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
-    OpenShift: (root, args, context, info) => {
+    OpenShift: (root, args, context, info) => { 
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'OpenShift', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Shift", "drivergateway.graphql.query.OpenShift", { root, args, jwt: context.encodedToken }, 2000)

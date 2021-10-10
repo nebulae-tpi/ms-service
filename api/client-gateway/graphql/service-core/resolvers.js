@@ -56,7 +56,7 @@ module.exports = {
     },
   },
   Mutation: {
-    RequestService: (root, args, context, info) => {
+    RequestService: (root, args, context, info) => { 
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'RequestService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.RequestService", { root, args, jwt: context.encodedToken }, 2000)

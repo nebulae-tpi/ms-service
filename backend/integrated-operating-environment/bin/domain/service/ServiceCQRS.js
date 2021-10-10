@@ -124,7 +124,7 @@ class ServiceCQRS {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles, "ioe.ServiceCQRS", "cancelService", PERMISSION_DENIED,
       ["PLATFORM-ADMIN", "BUSINESS-OWNER", "BUSINESS-ADMIN", "SATELLITE", "POI", "OPERATOR", "OPERATION-SUPERVISOR"])
-      .pipe(
+      .pipe( 
         mapTo(args),
         tap(request => this.validateServiceCancellationRequestInput(request)),
         mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),

@@ -44,7 +44,7 @@ class ClientCQRS {
       mergeMap(roles => ClientDA.getClientSatellite$(authToken.clientId)),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err))
-    );
+    ); 
   }
 
   /**

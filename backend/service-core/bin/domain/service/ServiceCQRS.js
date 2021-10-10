@@ -314,7 +314,7 @@ class ServiceCQRS {
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// shift does not exists
       tap(({ service, request }) => { if (!service.open) throw ERROR_23224; }),// shift is already closed
-
+ 
       // mergeMap(({ service }) => forkJoin(
       //   iif( () =>  args.shiftId )
       // )),
