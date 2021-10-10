@@ -652,13 +652,31 @@ class ServiceES {
 
     payAppClientAgreement$({ businessId, client, driver, request }, timestamp) {
         return of({}).pipe(
-            map(() => {
+            mergeMap(() => {
                 if(((request || {}).sourceChannel !== "APP_CLIENT" || 
                 businessId !== "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab")){
-                    return undefined;
-                }else {
+                    return of(undefined);
+                }else if(client.referrerDriverCode && client.referrerDriverCode !== null){
                     console.log("payAppClientAgreement$ ==> ", {businessId, client, driver});        
-                    return ({
+                    return DriverDA.getDriverByDriverCode$(client.referrerDriverCode).pipe(
+                        map(referrerDriver => {
+                            return {
+                                _id: Crosscutting.generateDateBasedUuid(),
+                                businessId,
+                                type: "MOVEMENT",
+                                // notes: mba.notes,
+                                concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                                timestamp: timestamp || Date.now(),
+                                amount: parseInt(process.env.APP_DRIVER_AGREEMENT),
+                                fromId: driver.id,
+                                toId: businessId,
+                                clientId: client.id,
+                                referrerDriverId: referrerDriver._id
+                            };
+                        })
+                    );                    
+                }else {
+                    return {
                         _id: Crosscutting.generateDateBasedUuid(),
                         businessId,
                         type: "MOVEMENT",
@@ -668,9 +686,8 @@ class ServiceES {
                         amount: parseInt(process.env.APP_DRIVER_AGREEMENT),
                         fromId: driver.id,
                         toId: businessId,
-                        clientId: client.id,
-                        driverCode: client.referrerDriverCode
-                    })                    
+                        clientId: client.id
+                    };
                 }
                 }
             ),
