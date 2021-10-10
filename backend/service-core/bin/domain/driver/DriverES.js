@@ -9,7 +9,8 @@ const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 
-const { ShiftDA } = require('./data-access')
+const { ShiftDA } = require('./data-access');
+const { DriverDA } = require("./data-access");
 
 /**
  * Singleton instance
@@ -46,6 +47,10 @@ class DriverES {
                     this.buildShiftDriverBlockAddedEsEvent(_id, { key: data.blockKey, notes: data.notes, startTime: undefined, endTime: data.endTime }, user))
                 ), //Build and send ShiftDriverBlockAdded event (event-sourcing)
             );
+    }
+
+    handleDriverCodeAdded$(DriverCodeAddedEvent) {          
+        return DriverDA.addDriverCode$(DriverCodeAddedEvent.aid, DriverCodeAddedEvent.data.driverCode);
     }
     //#region Object builders
 

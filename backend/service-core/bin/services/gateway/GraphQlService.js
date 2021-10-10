@@ -188,7 +188,15 @@ class GraphQlService {
       },
       {
         aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.RequestAppService"
+      },
+      {
+        aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.CancelServiceByClient"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.CancelAppServiceByClient"
       },
       {
         aggregateType: "Service",
@@ -307,8 +315,16 @@ class GraphQlService {
         fn: ServiceClientCQRS.requestServices$,
         obj: ServiceClientCQRS
       },
+      "clientgateway.graphql.mutation.RequestAppService": {
+        fn: ServiceClientCQRS.requestAppServices$,
+        obj: ServiceClientCQRS
+      },
       "clientgateway.graphql.mutation.CancelServiceByClient": {
         fn: ServiceClientCQRS.cancelServicebyClient$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.mutation.CancelAppServiceByClient": {
+        fn: ServiceClientCQRS.cancelAppServicebyClient$,
         obj: ServiceClientCQRS
       },
       "clientgateway.graphql.mutation.ChangeServiceState": {

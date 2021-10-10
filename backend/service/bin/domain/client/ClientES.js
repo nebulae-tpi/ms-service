@@ -36,6 +36,10 @@ class ClientES {
     handleClientSatelliteInfoUpdated$({ aid, data}){
         return ClientDA.updateClientSatelliteInfo$(aid, data);
     }
+
+    handleDriverAssociatedToClient$(DriverAssociatedToClientEvent) {          
+        return ClientDA.addDriverCode$(DriverAssociatedToClientEvent.aid, DriverAssociatedToClientEvent.data.referrerDriverCode);
+    }
 }
 
 

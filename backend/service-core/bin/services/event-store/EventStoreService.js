@@ -140,6 +140,7 @@ class EventStoreService {
       //DRIVER
       DriverBlockRemoved: { fn: DriverES.handleDriverBlockRemoved$, obj: DriverES },
       DriverBlockAdded: { fn: DriverES.handleDriverBlockAdded$, obj: DriverES },
+      DriverCodeAdded: { fn: DriverES.handleDriverCodeAdded$, obj: DriverES },
       //VEHICLE
       VehicleBlockRemoved: { fn: VehicleES.handleVehicleBlockRemoved$, obj: VehicleES },
       VehicleBlockAdded: { fn: VehicleES.handleVehicleBlockAdded$, obj: VehicleES },
@@ -187,6 +188,10 @@ class EventStoreService {
       //DRIVER  
       { aggregateType: "Driver", eventType: "DriverBlockRemoved" },
       { aggregateType: "Driver", eventType: "DriverBlockAdded" },
+      {
+        aggregateType: "Driver",
+        eventType: "DriverCodeAdded"
+      },
       //SERVICE
       { aggregateType: "Service", eventType: "ServiceRequested" },
       { aggregateType: "Service", eventType: "ServiceAssigned" },

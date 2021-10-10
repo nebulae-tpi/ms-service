@@ -191,7 +191,8 @@ class ShiftES {
                 username: shift.driver.username,
                 blocks: shift.driver.blocks,
                 active: true,
-                wallet: shift.driver.wallet
+                wallet: shift.driver.wallet,
+                driverCode: shift.driver.driverCode
             },
             vehicle: {
                 plate: shift.vehicle.licensePlate,

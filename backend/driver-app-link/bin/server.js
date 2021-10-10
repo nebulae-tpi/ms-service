@@ -13,7 +13,7 @@ const driverAppLinkBroker = require('./services/driver-app-link/DriverAppLinkBro
 const shift = require('./domain/shift');
 const service = require('./domain/service');
 const business = require('./domain/business');
-
+const DriverDA = require('./data/DriverDA');
 
 
 const start = () => {
@@ -25,7 +25,8 @@ const start = () => {
             driverAppLinkBroker.start$(),
             shift.start$,
             service.start$,
-            business.start$
+            business.start$,
+            DriverDA.start$()
         ),        
         graphQlService.start$()
     ).subscribe(

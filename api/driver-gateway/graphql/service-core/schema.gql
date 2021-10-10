@@ -39,6 +39,7 @@ type Driver {
    wallet: DriverWallet
    "Active flag"
    active: Boolean
+   driverCode: String
 }
 
 type DriverWallet {

@@ -113,6 +113,19 @@ class ClientDA {
     );
   }
 
+  static addDriverCode$(id, referrerDriverCode) {
+    const collection = mongoDB.db.collection(CollectionName);
+    
+    return defer(()=>
+        collection.updateOne(
+          { _id: id},
+          {
+            $set: {referrerDriverCode}
+          }
+        )
+    );
+  }
+
 
 
 }

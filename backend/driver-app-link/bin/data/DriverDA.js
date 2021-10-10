@@ -1,8 +1,9 @@
 "use strict";
 
 let mongoDB = undefined;
-const CollectionName = "Driver";
-const { CustomError } = require("../../../tools/customError");
+//const mongoDB = require('./MongoDB')();
+const COLLECTION_NAME = "Driver";
+const { CustomError } = require("../tools/customError");
 const { map } = require("rxjs/operators");
 const { of, Observable, defer } = require("rxjs");
 
@@ -13,31 +14,24 @@ class DriverDA {
         mongoDB = mongoDbInstance;
         observer.next("using given mongo instance");
       } else {
-        mongoDB = require("../../../data/MongoDB").singleton();
+        mongoDB = require("./MongoDB").singleton();
         observer.next("using singleton system-wide mongo instance");
       }
       observer.complete();
     });
   }
 
-  static addDriverCode$(_id,driverCode) {
+  /**
+   * Gets a driver by its id and business(Optional).
+   */
+  static getDriver$(id) {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
 
-      return defer(() => collection.updateOne(
-        { _id },
-        {
-          $set: { driverCode }
-        } 
-      ))
-  }
+    const query = {
+      _id: id      
+    };
 
-  /**
-   * Gets Driver by its _id
-   */
-  static findById$(_id, projection = undefined) {
-    const collection = mongoDB.db.collection(CollectionName);
-    const query = { _id };
-    return defer(() => collection.findOne(query,{projection}));
+    return defer(() => collection.findOne(query));
   }
 
 }

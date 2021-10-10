@@ -8,6 +8,7 @@ const uuidv4 = require("uuid/v4");
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
+const DriverDA = require('../../data/DriverDA');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLinkBroker")();
@@ -612,12 +613,13 @@ class ServiceES {
                     {
                         "timestamp": 1, "requestedFeatures": 1, "pickUp": 1, "dropOff": 1, "tripCost": 1,
                         "verificationCode": 1, "fareDiscount": 1, "fare": 1, "state": 1, "tip": 1, "client": 1,
-                        "driver": 1, "businessId": 1, "shiftId": 1
+                        "driver": 1, "businessId": 1, "shiftId": 1, "request": 1
                     })
                 ),
                 mergeMap(dbService => forkJoin(
                     of(dbService),
                     this.payClientAgreement$(dbService, timestamp),
+                    this.payAppClientAgreement$(dbService, timestamp),
                     this.generatePayPerServiceTransaction$(dbService, timestamp)
                 )),
                 map(([dbService, a]) =>
@@ -647,6 +649,45 @@ class ServiceES {
             );
     }
 
+
+    payAppClientAgreement$({ businessId, client, driver, request }, timestamp) {
+        console.log("payClientAgreement$ ==> ", {businessId, client, driver});        
+        return of({}).pipe(
+            map(() => {
+                if(((request || {}).sourceChannel !== "APP_CLIENT" || 
+                businessId !== "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab")){
+                    return undefined;
+                }else {
+                    return ({
+                        _id: Crosscutting.generateDateBasedUuid(),
+                        businessId,
+                        type: "MOVEMENT",
+                        // notes: mba.notes,
+                        concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                        timestamp: timestamp || Date.now(),
+                        amount: parseInt(process.env.APP_DRIVER_AGREEMENT),
+                        fromId: driver.id,
+                        toId: businessId,
+                        clientId: client.id,
+                        driverCode: client.referrerDriverCode
+                    })                    
+                }
+                }
+            ),
+            //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
+            mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
+                new Event({
+                    eventType: "WalletTransactionCommited",
+                    eventTypeVersion: 1,
+                    aggregateType: "Wallet",
+                    aggregateId: uuidv4(),
+                    data: tx,
+                    user: "SYSTEM"
+                })
+            )
+            )
+        );
+    }
     /**
      * (todo) makespaymento to doorman
      * @param {*} service  

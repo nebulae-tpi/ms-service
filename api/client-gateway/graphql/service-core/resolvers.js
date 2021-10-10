@@ -64,10 +64,26 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
+    RequestAppService: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'RequestAppService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.RequestAppService", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
     CancelServiceByClient: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.CancelServiceByClient", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
+    CancelAppServiceByClient: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelAppServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.CancelAppServiceByClient", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();

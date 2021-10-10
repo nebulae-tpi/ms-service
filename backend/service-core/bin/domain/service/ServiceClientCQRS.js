@@ -131,6 +131,34 @@ class ServiceClientCQRS {
     );
   }
 
+  requestAppServices$({ root, args, jwt }, authToken) {
+    
+    const { id, tripCost, client } = args;
+    args.fareDiscount = client ? 0 : 0; // second zero means 0% discount
+    args.fareDiscount = (tripCost && tripCost > 0) ? 0 : args.fareDiscount;
+    
+    // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
+    .pipe( 
+      mergeMap(() => !client
+        ? ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, {_id: 1})
+          .pipe(
+            toArray(),
+            mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
+          )
+          : of({})
+      ),    
+      mapTo({ ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId, ...args.client } }),
+      // tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
+      tap(request => this.validateServiceRequestInput(request)),
+      mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, "APP_CLIENT"))), //Build and send ServiceRequested event (event-sourcing)
+      mapTo(this.buildCommandAck()), // async command acknowledge
+     // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err, true))
+    );
+  }
+
     /**  
    * cancelService
    */
@@ -139,6 +167,30 @@ class ServiceClientCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceCancellationRequestInput({...request, authorType: 'CLIENT'})),
+      mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
+      tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
+      tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
+      mergeMap(({ service, request }) => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+        'Service',
+        request.id,
+        'ServiceCancelledByClient',
+        { reason: request.reason, notes: request.notes },
+        authToken))), //Build and send event (event-sourcing)
+      mapTo(this.buildCommandAck()), // async command acknowledge
+      //tap(x => ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => GraphqlResponseTools.handleError$(err, true))
+    );
+  }
+
+  /**  
+   * cancelService
+   */
+   cancelAppServicebyClient$({ root, args, jwt }, authToken) {
+    //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
+      mapTo(args),
+      tap(request => this.validateServiceCancellationRequestInput({...request, authorType: 'APP_CLIENT'})),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
       tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
@@ -300,7 +352,7 @@ class ServiceClientCQRS {
    * @param {*} shift 
    * @returns {Event}
    */
-  buildServiceRequestedEsEvent(authToken, request) {
+  buildServiceRequestedEsEvent(authToken, request, sourceChannel = "CLIENT") {
     // All of the request performed by a client must have a fare discount of 0.1 (10%)
     let { requestedFeatures, fare, pickUp, tip, dropOff, tripCost, fareDiscount= 0.1 } = request;
 
@@ -358,7 +410,7 @@ class ServiceClientCQRS {
         lastModificationTimestamp: Date.now(),
         closed: false,
         request: {
-          sourceChannel: "CLIENT",
+          sourceChannel,
           destChannel: "DRIVER_APP",
           // creationOperatorId: authToken.userId,
           // creationOperatorUsername: authToken.preferred_username,

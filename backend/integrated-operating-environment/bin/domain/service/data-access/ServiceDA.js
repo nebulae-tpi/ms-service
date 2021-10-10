@@ -43,6 +43,9 @@ class ServiceDA {
       query.state = { "$in": states };
     }
     if (channels && channels.length > 0) {
+      if(channels.includes("CLIENT")){
+        channels.push("APP_CLIENT")
+      }
       query["request.sourceChannel"] = { "$in": channels };
     } else {
       query["request.sourceChannel"] = { "$in": ['UNDEFINED'] };

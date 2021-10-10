@@ -202,6 +202,25 @@ type Query {
 
 type Mutation {
    "Request a new service"
+   RequestAppService(
+      # "client info"
+      client: ClientInput
+      "Passenger pick up location"
+      pickUp: LocationInput!
+      "Payment type key"
+      paymentType: String!
+      "Requested features keys"
+      requestedFeatures: [String]
+      "Passenger drop off location"
+      dropOff: LocationInput
+      "Tip given to the driver"
+      tip: Int,
+      "Trip cost"
+      tripCost: Int
+
+   ): CommandAck @requireAuth
+
+   "Request a new service"
    RequestService(
       # "client info"
       client: ClientInput
@@ -222,6 +241,16 @@ type Mutation {
 
    "Cancel a requested service"
    CancelServiceByClient(
+      "Service Identifier"
+      id: String!
+      "cancellation reason"
+      reason: String!
+      "cancellation additional notes"
+      notes: String        
+   ): CommandAck @requireAuth
+
+    "Cancel a requested service"
+   CancelAppServiceByClient(
       "Service Identifier"
       id: String!
       "cancellation reason"
