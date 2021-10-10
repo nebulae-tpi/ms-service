@@ -676,7 +676,7 @@ class ServiceES {
                         })
                     );                    
                 }else {
-                    return {
+                    return of({
                         _id: Crosscutting.generateDateBasedUuid(),
                         businessId,
                         type: "MOVEMENT",
@@ -687,7 +687,7 @@ class ServiceES {
                         fromId: driver.id,
                         toId: businessId,
                         clientId: client.id
-                    };
+                    });
                 }
                 }
             ),
