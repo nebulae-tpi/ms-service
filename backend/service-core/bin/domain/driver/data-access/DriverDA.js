@@ -1,7 +1,7 @@
 "use strict";
 
 let mongoDB = undefined;
-const CollectionName = "Driver";
+const COLLECTION_NAME = "Driver";
 const { CustomError } = require("../../../tools/customError");
 const { map } = require("rxjs/operators");
 const { of, Observable, defer } = require("rxjs");
@@ -35,7 +35,7 @@ class DriverDA {
    * Gets Driver by its _id
    */
   static findById$(_id, projection = undefined) {
-    const collection = mongoDB.db.collection(CollectionName);
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
     const query = { _id };
     return defer(() => collection.findOne(query,{projection}));
   }
