@@ -40,6 +40,10 @@ class ClientES {
     handleDriverAssociatedToClient$(DriverAssociatedToClientEvent) {          
         return ClientDA.addDriverCode$(DriverAssociatedToClientEvent.aid, DriverAssociatedToClientEvent.data.referrerDriverCode);
     }
+
+    handleEndClientCreated$({aid, data}){
+        return ClientDA.createClient$(data);
+      }
 }
 
 

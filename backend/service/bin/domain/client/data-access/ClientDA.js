@@ -126,6 +126,11 @@ class ClientDA {
     );
   }
 
+  static createClient$(client) {
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.insertOne(client));
+  }
+
 
 
 }
