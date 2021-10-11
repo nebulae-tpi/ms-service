@@ -137,7 +137,7 @@ class ServiceClientCQRS {
   partialPaymentService$({ root, args, jwt }, authToken) {
 
     const { serviceId, amount } = args;
-
+    console.log("PAYMENT ARGS ====> ",args);
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "partialPaymentService", PERMISSION_DENIED, ["CLIENT"])
       .pipe(
@@ -145,7 +145,7 @@ class ServiceClientCQRS {
         map(service => {
           return {
             _id: Crosscutting.generateDateBasedUuid(),
-            businessId,
+            businessId: authToken.businessId,
             type: "MOVEMENT",
             // notes: mba.notes,
             concept: "APP_CLIENT_PARTIAL_PAYMENT",
