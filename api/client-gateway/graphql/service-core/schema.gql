@@ -220,6 +220,13 @@ type Mutation {
 
    ): CommandAck @requireAuth
 
+
+   "Partial payment service"
+   PartialPaymentService(
+      serviceId: String
+      amount: Double
+   ): CommandAck @requireAuth
+
    "Request a new service"
    RequestService(
       # "client info"

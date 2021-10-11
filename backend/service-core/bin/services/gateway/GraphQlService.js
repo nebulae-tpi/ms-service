@@ -192,6 +192,10 @@ class GraphQlService {
       },
       {
         aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.PartialPaymentService"
+      },
+      {
+        aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.CancelServiceByClient"
       },
       {
@@ -335,6 +339,10 @@ class GraphQlService {
         fn: ServiceClientCQRS.sendMessageToDriver$,
         obj: ServiceClientCQRS
       },      
+      "clientgateway.graphql.mutation.PartialPaymentService": {
+        fn: ServiceClientCQRS.partialPaymentService$,
+        obj: ServiceClientCQRS
+      },
 
       // SERVICES
       "emigateway.graphql.query.ServiceCoreService": {

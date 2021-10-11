@@ -56,6 +56,14 @@ module.exports = {
     },
   },
   Mutation: {
+    PartialPaymentService: (root, args, context, info) => { 
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'PartialPaymentService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.PartialPaymentService", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
     RequestService: (root, args, context, info) => { 
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'RequestService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
         switchMapTo(
