@@ -481,8 +481,12 @@ class ServiceES {
 
             // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
 
-
-            return driverMainPocketAmount >= (clientTip + payPerServicePrice);
+            if(((service || {}).request || {}).sourceChannel === "APP_CLIENT"){
+                return driverMainPocketAmount >= (clientTip + parseInt(process.env.APP_DRIVER_AGREEMENT) + payPerServicePrice);
+            }else {
+                return driverMainPocketAmount >= (clientTip + payPerServicePrice);
+            }
+            
 
         });
 
@@ -658,7 +662,7 @@ class ServiceES {
                     return of(undefined);
                 }else if(client.referrerDriverCode && client.referrerDriverCode !== null){
                     console.log("payAppClientAgreement$ ==> ", {businessId, client, driver});        
-                    return DriverDA.getDriverByDriverCode$(client.referrerDriverCode).pipe(
+                    return DriverDA.getDriverByDriverCode$(parseInt(client.referrerDriverCode)).pipe(
                         map(referrerDriver => {
                             return {
                                 _id: Crosscutting.generateDateBasedUuid(),
@@ -671,7 +675,7 @@ class ServiceES {
                                 fromId: driver.id,
                                 toId: businessId,
                                 clientId: client.id,
-                                referrerDriverId: referrerDriver._id
+                                referrerDriverId: (referrerDriver || {})._id
                             };
                         })
                     );                    
