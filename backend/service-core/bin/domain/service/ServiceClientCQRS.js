@@ -21,7 +21,7 @@ const {
   ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229,
 } = require("../../tools/customError");
 
-const { ShiftDA, ServiceDA } = require('./data-access');
+const { ShiftDA, ServiceDA, ClientDA } = require('./data-access');
 
  
 const VALID_SERVICE_CLIENT_TIP_TYPES = ['CASH', 'VIRTUAL_WALLET'];
@@ -151,7 +151,13 @@ class ServiceClientCQRS {
           )
           : of({})
       ),    
-      mapTo({ ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId, ...args.client } }),
+      mergeMap(() => {
+        return ClientDA.findById$(authToken.clientId).pipe(
+          map(tempClient => {
+            return { ...args, businessId: authToken.businessId, client: { id: authToken.clientId, referrerDriverCode: tempClient.referrerDriverCode, businessId: authToken.businessId, ...args.client } }
+          })
+        )
+      }),
       // tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
       tap(request => this.validateServiceRequestInput(request)),
       mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, "APP_CLIENT"))), //Build and send ServiceRequested event (event-sourcing)
