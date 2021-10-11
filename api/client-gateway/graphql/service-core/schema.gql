@@ -224,7 +224,7 @@ type Mutation {
    "Partial payment service"
    PartialPaymentService(
       serviceId: String
-      amount: Double
+      amount: Float
    ): CommandAck @requireAuth
 
    "Request a new service"
