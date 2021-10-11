@@ -657,8 +657,7 @@ class ServiceES {
     payAppClientAgreement$({ businessId, client, driver, request }, timestamp) {
         return of({}).pipe(
             mergeMap(() => {
-                if(((request || {}).sourceChannel !== "APP_CLIENT" || 
-                businessId !== "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab")){
+                if((request || {}).sourceChannel !== "APP_CLIENT"){
                     return of(undefined);
                 }else if(client.referrerDriverCode && client.referrerDriverCode !== null){
                     console.log("payAppClientAgreement$ ==> ", {businessId, client, driver});        
