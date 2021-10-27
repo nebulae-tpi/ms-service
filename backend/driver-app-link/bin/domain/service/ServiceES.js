@@ -623,6 +623,7 @@ class ServiceES {
                 mergeMap(dbService => forkJoin(
                     of(dbService),
                     this.payClientAgreement$(dbService, timestamp),
+                    this.payPlatformClientAgreement$(dbService, timestamp),
                     this.payAppClientAgreement$(dbService, timestamp),
                     this.generatePayPerServiceTransaction$(dbService, timestamp)
                 )),
@@ -653,6 +654,41 @@ class ServiceES {
             );
     }
 
+    payPlatformClientAgreement$({ businessId, client, driver, request }, timestamp) {
+        return of({}).pipe(
+            map(() => {
+                if((request || {}).sourceChannel !== "OPERATOR" || businessId !== "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                    return undefined;
+                }else if(!client.id || client.id === null){    
+                    return {
+                        _id: Crosscutting.generateDateBasedUuid(),
+                        businessId,
+                        type: "MOVEMENT",
+                        // notes: mba.notes,
+                        concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                        timestamp: timestamp || Date.now(),
+                        amount: parseInt(process.env.APP_DRIVER_AGREEMENT),
+                        fromId: driver.id,
+                        toId: businessId
+                    };                    
+                }
+                }
+            ),
+            //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
+            mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
+                new Event({
+                    eventType: "WalletTransactionCommited",
+                    eventTypeVersion: 1,
+                    aggregateType: "Wallet",
+                    aggregateId: uuidv4(),
+                    data: tx,
+                    user: "SYSTEM"
+                })
+            )
+            )
+        );
+    }
+
 
     payAppClientAgreement$({ businessId, client, driver, request }, timestamp) {
         return of({}).pipe(
@@ -660,7 +696,6 @@ class ServiceES {
                 if((request || {}).sourceChannel !== "APP_CLIENT"){
                     return of(undefined);
                 }else if(client.referrerDriverCode && client.referrerDriverCode !== null){
-                    console.log("payAppClientAgreement$ ==> ", {businessId, client, driver});        
                     return DriverDA.getDriverByDriverCode$(parseInt(client.referrerDriverCode)).pipe(
                         map(referrerDriver => {
                             return {
@@ -708,6 +743,7 @@ class ServiceES {
             )
         );
     }
+
     /**
      * (todo) makespaymento to doorman
      * @param {*} service  
