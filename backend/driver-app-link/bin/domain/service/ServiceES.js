@@ -657,7 +657,7 @@ class ServiceES {
     payPlatformClientAgreement$({ businessId, client, driver, request }, timestamp) {
         return of({}).pipe(
             map(() => {
-                if((request || {}).sourceChannel !== "OPERATOR" || businessId !== "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                if((request || {}).sourceChannel !== "OPERATOR"){
                     return undefined;
                 }else if(!client.id || client.id === null){    
                     return {
