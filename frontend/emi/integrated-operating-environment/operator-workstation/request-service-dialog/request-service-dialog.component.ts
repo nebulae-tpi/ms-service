@@ -335,7 +335,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
             lng: this.selectedGooglePlace.coords.longitude
           }
         },
-        fareDiscount: !environment.disableBusinessFareDiscountList.split(",").some(d => d === this.selectedBusinessId) && this.data.type === 1 ? 0.1 : undefined,
+        fareDiscount: undefined,
         tip: rawRequest.clientTip
       };
     }
