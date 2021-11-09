@@ -481,7 +481,7 @@ class ServiceES {
 
             // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
 
-            if(((service || {}).request || {}).sourceChannel === "APP_CLIENT" || ((!service.client.id || client.id === null) && service.businessId !== "b19c067e-57b4-468f-b970-d0101a31cacb")){
+            if(((service || {}).request || {}).sourceChannel === "APP_CLIENT" || (!service.client.id || client.id === null)){
                 
                 return driverMainPocketAmount >= (clientTip + parseInt(process.env.APP_DRIVER_AGREEMENT) + payPerServicePrice);
             }else {
