@@ -216,13 +216,13 @@
     ],
     "environmentVars": {
       "default": {
-        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb,165e291d-5135-4674-aa25-a157933b2784"
+        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb,165e291d-5135-4674-aa25-a157933b2784,75cafa6d-0f27-44be-aa27-c2c82807742d"
       },
       "local": {
-        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb,165e291d-5135-4674-aa25-a157933b2784"
+        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb,165e291d-5135-4674-aa25-a157933b2784,75cafa6d-0f27-44be-aa27-c2c82807742d"
       },
       "prod": {
-        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb,165e291d-5135-4674-aa25-a157933b2784"
+        "disableBusinessFareDiscountList": "b19c067e-57b4-468f-b970-d0101a31cacb,165e291d-5135-4674-aa25-a157933b2784,75cafa6d-0f27-44be-aa27-c2c82807742d"
       }     
     }
   }
