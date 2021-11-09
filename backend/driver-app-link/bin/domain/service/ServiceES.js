@@ -481,7 +481,8 @@ class ServiceES {
 
             // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
 
-            if(((service || {}).request || {}).sourceChannel === "APP_CLIENT"){
+            if(((service || {}).request || {}).sourceChannel === "APP_CLIENT" || (!(service.client||{}).id || (service.client || {}).id === null)){
+                
                 return driverMainPocketAmount >= (clientTip + parseInt(process.env.APP_DRIVER_AGREEMENT) + payPerServicePrice);
             }else {
                 return driverMainPocketAmount >= (clientTip + payPerServicePrice);
@@ -657,7 +658,7 @@ class ServiceES {
     payPlatformClientAgreement$({ businessId, client, driver, request }, timestamp) {
         return of({}).pipe(
             map(() => {
-                if((request || {}).sourceChannel !== "OPERATOR" || businessId !== "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                if((request || {}).sourceChannel !== "OPERATOR" || businessId === "b19c067e-57b4-468f-b970-d0101a31cacb"){
                     return undefined;
                 }else if(!client.id || client.id === null){    
                     return {
