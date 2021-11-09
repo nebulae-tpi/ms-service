@@ -339,7 +339,6 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         tip: rawRequest.clientTip
       };
     }
-    console.log("RAW REQUEST ===> ", rawRequest)
     this.requestService(rawRequest);
     this.form.patchValue({ client: null });
     this.selectedGooglePlace = null;
