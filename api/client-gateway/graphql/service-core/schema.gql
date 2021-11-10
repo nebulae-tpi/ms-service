@@ -217,6 +217,7 @@ type Mutation {
       tip: Int,
       "Trip cost"
       tripCost: Int
+      destinationCost: Int
 
    ): CommandAck @requireAuth
 

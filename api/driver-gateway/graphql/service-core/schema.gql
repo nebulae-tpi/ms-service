@@ -153,6 +153,7 @@ type Service {
    state: String
    "Trip cost"
    tripCost: Int
+   destinationCost: Int
 }
 
 input ChatMessageInput {
