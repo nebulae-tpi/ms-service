@@ -178,9 +178,16 @@ class ServiceCQRS {
           //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
           mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
           catchError(err => {
-            return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
-            mergeMap(() => GraphqlResponseTools.handleError$(err, true))
-          )} )
+            if(shiftId){
+              return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
+                mergeMap(() => GraphqlResponseTools.handleError$(err, true))
+              )
+            }else {
+              console.log("Shift id not found ====> ", err)
+              return GraphqlResponseTools.handleError$(err, true)
+            }
+           
+          } )
     );
   }
 
