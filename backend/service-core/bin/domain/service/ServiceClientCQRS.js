@@ -180,6 +180,7 @@ class ServiceClientCQRS {
     args.fareDiscount = (tripCost && tripCost > 0) ? 0 : args.fareDiscount;
     args.destinationCost = (destinationCost && destinationCost > 0 && destinationCost < 4200) ? 4200 : args.destinationCost
 
+    
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
       .pipe(

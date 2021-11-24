@@ -560,7 +560,8 @@ class ServiceES {
             expirationTime: offerTotalThreshold,
             tripCost: service.tripCost,
             destinationCost: service.destinationCost
-        };
+        }; 
+        
         if (serviceOffer.pickUp.neighborhood && BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
             serviceOffer.pickUp.addressLine1 = '---';
             serviceOffer.pickUp.addressLine2 = '';
