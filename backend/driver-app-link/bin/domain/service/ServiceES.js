@@ -558,7 +558,8 @@ class ServiceES {
             dropOff: { ...service.dropOff, location: undefined },
             dropOffSpecialType: service.dropOffSpecialType,
             expirationTime: offerTotalThreshold,
-            tripCost: service.tripCost
+            tripCost: service.tripCost,
+            destinationCost: service.destinationCost
         };
         if (serviceOffer.pickUp.neighborhood && BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
             serviceOffer.pickUp.addressLine1 = '---';
