@@ -99,6 +99,7 @@ type Service {
    _id: String
    "Service created timestamp."
    timestamp: BigInt
+   client: Client
    "Service vehicle"
    vehicle: Vehicle
    "driver info"
@@ -133,6 +134,8 @@ type Service {
    pickUpETA: BigInt
    "Closed state"
    closed: Boolean
+   tripCost: Int
+   destinationCost: Int
 }
 
 type ServiceMessage {
