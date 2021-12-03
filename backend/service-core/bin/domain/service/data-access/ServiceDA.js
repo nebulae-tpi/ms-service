@@ -338,7 +338,7 @@ class ServiceDA {
  */
   static findHistoricalServiceByClient$(clientId, year, month, page, count, projection = undefined) {
     const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
-    const query = { "client.id": clientId };
+    const query = { "client.id": clientId, state: "DONE" };
     console.log("QUERY HISTORY CLIENT ===> ", query)
     const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
     return defer(() =>
