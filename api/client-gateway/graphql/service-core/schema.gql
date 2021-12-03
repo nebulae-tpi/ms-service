@@ -134,7 +134,9 @@ type Service {
    pickUpETA: BigInt
    "Closed state"
    closed: Boolean
+   "Trip cost"
    tripCost: Int
+   "Trip cost"
    destinationCost: Int
 }
 
