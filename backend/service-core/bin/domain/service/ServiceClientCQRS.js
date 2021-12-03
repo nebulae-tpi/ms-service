@@ -67,6 +67,7 @@ class ServiceClientCQRS {
  */
   queryHistoricalClientServices$({ root, args, jwt }, authToken) {
     const { clientId } = authToken;
+    console.log("CONSULTA CLIENT HISTORY");
     let { year, month, page, count } = args;
 
     const currentYear = new Date().getFullYear();
