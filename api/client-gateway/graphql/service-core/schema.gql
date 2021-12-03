@@ -136,7 +136,7 @@ type Service {
    closed: Boolean
    "Trip cost"
    tripCost: Int
-   "Trip cost"
+   "Destination cost"
    destinationCost: Int
 }
 
