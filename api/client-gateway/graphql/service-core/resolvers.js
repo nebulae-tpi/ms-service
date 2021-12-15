@@ -73,6 +73,14 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
+    RequestDeliveryService: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'RequestDeliveryService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.RequestDeliveryService", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
     RequestAppService: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'RequestAppService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
         switchMapTo(

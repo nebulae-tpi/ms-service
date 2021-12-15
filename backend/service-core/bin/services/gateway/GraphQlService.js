@@ -192,6 +192,10 @@ class GraphQlService {
       },
       {
         aggregateType: "Service",
+        messageType: "clientgateway.graphql.mutation.RequestDeliveryService"
+      },
+      {
+        aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.PartialPaymentService"
       },
       {
@@ -321,6 +325,10 @@ class GraphQlService {
       },
       "clientgateway.graphql.mutation.RequestAppService": {
         fn: ServiceClientCQRS.requestAppServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.mutation.RequestDeliveryService": {
+        fn: ServiceClientCQRS.RequestDeliveryService$,
         obj: ServiceClientCQRS
       },
       "clientgateway.graphql.mutation.CancelServiceByClient": {

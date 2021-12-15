@@ -226,6 +226,26 @@ type Mutation {
 
    ): CommandAck @requireAuth
 
+      "Request a new service"
+   RequestDeliveryService(
+      # "client info"
+      client: ClientInput
+      "Passenger pick up location"
+      pickUp: LocationInput!
+      "Payment type key"
+      paymentType: String!
+      "Requested features keys"
+      requestedFeatures: [String]
+      "Passenger drop off location"
+      dropOff: LocationInput
+      "Tip given to the driver"
+      tip: Int,
+      "Trip cost"
+      productCost: Int
+      destinationCost: Int
+
+   ): CommandAck @requireAuth
+
 
    "Partial payment service"
    PartialPaymentService(

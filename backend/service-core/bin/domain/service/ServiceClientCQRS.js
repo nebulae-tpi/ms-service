@@ -29,11 +29,13 @@ const VALID_SERVICE_PAYMENT_TYPES = ['CASH', 'CREDIT_CARD'];
 const VALID_SERVICE_REQUEST_FEATURES = ['AC', 'TRUNK', 'ROOF_RACK', 'PETS', 'BIKE_RACK'];
 const VALID_SERVICE_CANCEL_BY_DRIVER_REASONS = ['MECHANICAL_FAILURE', 'INVALID_ADDRESS', 'USER_DOESNT_ANSWER', 'CONGESTION_ON_THE_ROAD', 'DRUNK_USER', 'BRING_PET', 'USER_IS_NOT_HERE', 'VEHICLE_FROM_OTHER_COMPANY', 'DIFFERENT_TRIP_SERVICE', 'SERVICE_CODE'];
 const VALID_SERVICE_CANCEL_BY_CLIENT_REASONS = ['PLATE_DOESNT_MATCH', 'IS_NOT_THE_DRIVER', 'IT_TAKES_TOO_MUCH_TIME', 'DOESNT_REQUIRED'];
+const VALID_SERVICE_CANCEL_BY_CLIENT_REASONS = ['PLATE_DOESNT_MATCH', 'IS_NOT_THE_DRIVER', 'IT_TAKES_TOO_MUCH_TIME', 'DOESNT_REQUIRED'];
 const VALID_SERVICE_CANCEL_BY_OPERATOR_REASONS = ['IT_TAKES_TOO_MUCH_TIME', 'DOESNT_REQUIRED', 'OTHER'];
 const VALID_SERVICE_CANCEL_BY_AUTHORS = ['DRIVER', 'CLIENT', 'OPERATOR'];
 const VALID_SERVICE_CANCEL_REASON_BY_AUTHOR = {
   'CLIENT': VALID_SERVICE_CANCEL_BY_CLIENT_REASONS,
-  'APP_CLIENT': VALID_SERVICE_CANCEL_BY_CLIENT_REASONS
+  'APP_CLIENT': VALID_SERVICE_CANCEL_BY_CLIENT_REASONS,
+  'APP_DELIVERY': VALID_SERVICE_CANCEL_BY_CLIENT_REASONS
 };
 
 /**
@@ -203,6 +205,38 @@ class ServiceClientCQRS {
         // tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
         tap(request => this.validateServiceRequestInput(request)),
         mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, "APP_CLIENT"))), //Build and send ServiceRequested event (event-sourcing)
+        mapTo(this.buildCommandAck()), // async command acknowledge
+        // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err, true))
+      );
+  }
+
+  RequestDeliveryService$({ root, args, jwt }, authToken) {
+
+    const { id, productCost, client, destinationCost } = args;
+
+    // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
+      .pipe(
+        mergeMap(() => !client
+          ? ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, { _id: 1 })
+            .pipe(
+              toArray(),
+              mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
+            )
+          : of({})
+        ),
+        mergeMap(() => {
+          return ClientDA.findById$(authToken.clientId).pipe(
+            map(tempClient => {
+              return { ...args, businessId: authToken.businessId, client: { id: authToken.clientId, referrerDriverCode: tempClient.referrerDriverCode, businessId: authToken.businessId, ...args.client } }
+            })
+          )
+        }),
+        // tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
+        tap(request => this.validateServiceRequestInput(request)),
+        mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, "APP_DELIVERY"))), //Build and send ServiceRequested event (event-sourcing)
         mapTo(this.buildCommandAck()), // async command acknowledge
         // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
         mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
