@@ -138,6 +138,8 @@ type Service {
    tripCost: Int
    "Destination cost"
    destinationCost: Int
+   "Product cost"
+   productCost: Int
 }
 
 type ServiceMessage {
@@ -223,6 +225,8 @@ type Mutation {
       "Trip cost"
       tripCost: Int
       destinationCost: Int
+      "Product cost"
+      productCost: Int
 
    ): CommandAck @requireAuth
 
@@ -243,6 +247,8 @@ type Mutation {
       "Trip cost"
       productCost: Int
       destinationCost: Int
+      "Product cost"
+      productCost: Int
 
    ): CommandAck @requireAuth
 

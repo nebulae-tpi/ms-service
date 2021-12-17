@@ -154,6 +154,8 @@ type Service {
    "Trip cost"
    tripCost: Int
    destinationCost: Int
+   "Product cost"
+   productCost: Int
 }
 
 input ChatMessageInput {
