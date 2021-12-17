@@ -213,10 +213,10 @@ class ServiceClientCQRS {
 
   RequestDeliveryService$({ root, args, jwt }, authToken) {
 
-    const { id, productCost, client, destinationCost } = args;
-
+    const {  client} = args;
+    console.log("LLEGA OFERTA ===> ", args)
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
       .pipe(
         mergeMap(() => !client
           ? ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, { _id: 1 })
@@ -437,8 +437,9 @@ class ServiceClientCQRS {
    * @returns {Event}
    */
   buildServiceRequestedEsEvent(authToken, request, sourceChannel = "CLIENT") {
+    console.log("REQUEST PARA CONSTRUIR ===> ", request);
     // All of the request performed by a client must have a fare discount of 0.1 (10%)
-    let { requestedFeatures, fare, pickUp, tip, dropOff, tripCost, fareDiscount = 0.1 } = request;
+    let { requestedFeatures, fare, pickUp, tip, dropOff, tripCost, fareDiscount = 0 } = request;
 
     pickUp = !pickUp ? undefined : {
       ...pickUp,
