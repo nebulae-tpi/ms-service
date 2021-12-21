@@ -218,14 +218,6 @@ class ServiceClientCQRS {
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
       .pipe(
-        mergeMap(() => !client
-          ? ServiceDA.findCurrentServicesRequestedByClient$(authToken.clientId, { _id: 1 })
-            .pipe(
-              toArray(),
-              mergeMap(services => iif(() => services != null && services.length > 0, throwError(ERROR_23212), of('')))
-            )
-          : of({})
-        ),
         mergeMap(() => {
           return ClientDA.findById$(authToken.clientId).pipe(
             map(tempClient => {
@@ -235,9 +227,10 @@ class ServiceClientCQRS {
         }),
         // tap(request => console.log('CLIENT REQUEST ==> ', {...request})),
         tap(request => this.validateServiceRequestInput(request)),
-        mergeMap(request => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, "APP_DELIVERY"))), //Build and send ServiceRequested event (event-sourcing)
-        mapTo(this.buildCommandAck()), // async command acknowledge
-        // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+        mergeMap(request => {
+          const newService = this.buildServiceRequestedEsEvent(authToken, request, "APP_DELIVERY");
+          return eventSourcing.eventStore.emitEvent$().pipe(mapTo(newService))
+        }), //Build and send ServiceRequested event (event-sourcing)
         mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
         catchError(err => GraphqlResponseTools.handleError$(err, true))
       );

@@ -250,7 +250,7 @@ type Mutation {
       "Product cost"
       productCost: Int
 
-   ): CommandAck @requireAuth
+   ): Service @requireAuth
 
 
    "Partial payment service"
