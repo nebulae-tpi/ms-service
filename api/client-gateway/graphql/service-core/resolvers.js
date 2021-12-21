@@ -138,7 +138,7 @@ module.exports = {
               const serviceClientId = payload.ClientServiceUpdatedSubscription.client.id;
               const serviceUsername = payload.ClientServiceUpdatedSubscription.client.username;
 
-              if (context.authToken.realm_access.roles.includes("CLIENT")) {
+              if (context.authToken.realm_access.roles.includes("CLIENT") || context.authToken.realm_access.roles.includes("SATELLITE")) {
                 // context.authToken.businessId === businessId && 
                 return (context.authToken.clientId && context.authToken.clientId === serviceClientId) 
                 || (context.authToken.preferred_username && context.authToken.preferred_username === serviceUsername);
