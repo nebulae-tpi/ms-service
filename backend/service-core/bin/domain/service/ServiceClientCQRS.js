@@ -214,7 +214,6 @@ class ServiceClientCQRS {
   RequestDeliveryService$({ root, args, jwt }, authToken) {
 
     const {  client} = args;
-    console.log("LLEGA OFERTA ===> ", args)
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
       .pipe(
@@ -231,7 +230,7 @@ class ServiceClientCQRS {
           const newService = this.buildServiceRequestedEsEvent(authToken, request, "APP_DELIVERY");
           return eventSourcing.eventStore.emitEvent$(newService).pipe(mapTo(newService))
         }), //Build and send ServiceRequested event (event-sourcing)
-        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$({...rawResponse.data, _id: rawResponse.aid})),
         catchError(err => GraphqlResponseTools.handleError$(err, true))
       );
   }
