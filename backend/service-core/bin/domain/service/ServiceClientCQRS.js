@@ -229,6 +229,7 @@ class ServiceClientCQRS {
         tap(request => this.validateServiceRequestInput(request)),
         mergeMap(request => {
           const newService = this.buildServiceRequestedEsEvent(authToken, request, "APP_DELIVERY");
+          console.log("NEW SERVICE ===> ", newService);
           return eventSourcing.eventStore.emitEvent$().pipe(mapTo(newService))
         }), //Build and send ServiceRequested event (event-sourcing)
         mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
