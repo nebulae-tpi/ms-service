@@ -100,7 +100,7 @@ type IOEStateChange{
     "state timestamp"
     timestamp: BigInt
     "location"
-    location: IOEPoint
+    location: Point
     "notes"
     notes: String
 }
