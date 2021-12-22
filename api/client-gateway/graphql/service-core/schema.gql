@@ -93,6 +93,18 @@ type Location {
    notes: String
 }
 
+"Service State Changes"
+type IOEStateChange{
+    "service state"
+    state: String
+    "state timestamp"
+    timestamp: BigInt
+    "location"
+    location: IOEPoint
+    "notes"
+    notes: String
+}
+
 "Service info"
 type Service {
    "Service Identifier"
@@ -114,6 +126,7 @@ type Service {
    verificationCode: String
    "Requested features keys"
    requestedFeatures: [String]
+   stateChanges: [IOEStateChange]
    "Payment type key"
    paymentType: String
    "Applicable fare discount"
