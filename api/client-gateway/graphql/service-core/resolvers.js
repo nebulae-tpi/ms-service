@@ -106,7 +106,7 @@ module.exports = {
       ).toPromise();
     },
     CancelAppServiceByClient: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelAppServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelAppServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.CancelAppServiceByClient", { root, args, jwt: context.encodedToken }, 2000)
         ),

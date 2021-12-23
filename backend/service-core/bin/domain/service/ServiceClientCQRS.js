@@ -279,7 +279,7 @@ class ServiceClientCQRS {
    */
   cancelAppServicebyClient$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT", "SATELLITE"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceCancellationRequestInput({ ...request, authorType: 'APP_CLIENT' })),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
