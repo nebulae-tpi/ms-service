@@ -213,7 +213,11 @@ class GraphQlService {
       {
         aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.SendMessageToDriver"
-      },      
+      },    
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.ServiceById"
+      },    
       //DRIVER
       {
         aggregateType: "Driver",
@@ -317,6 +321,10 @@ class GraphQlService {
       },
       "clientgateway.graphql.query.HistoricalClientServices": {
         fn: ServiceClientCQRS.queryHistoricalClientServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.ServiceById": {
+        fn: ServiceClientCQRS.queryServiceById$,
         obj: ServiceClientCQRS
       },
       "clientgateway.graphql.mutation.RequestService": {

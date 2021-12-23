@@ -94,6 +94,21 @@ class ServiceClientCQRS {
       );
   }
 
+  queryServiceById$({ root, args, jwt }, authToken) {
+    console.log("CONSULTA CLIENT HISTORY");
+    let { id } = args;
+
+    //ServiceCQRS.log(`ServiceCQRS.queryHistoricalClientServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryServiceById", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
+      .pipe(
+        mergeMapTo(ServiceDA.findById$(id)),
+        map(service => this.formatServiceToGraphQLSchema(service)),
+        //tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalClientServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINEs
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err, true))
+      );
+  }
+
 
   /**
    * Handler for request made from client gateway
