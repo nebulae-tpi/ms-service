@@ -218,6 +218,12 @@ type Query {
       page: Int,
       count: Int
    ): [Service] @requireAuth 
+   HistoricalDeliveryServices(
+      initTimestamp: BigInt
+      endTimestamp: BigInt
+      driverId: String
+      vehicleId: String
+   ): [Service] @requireAuth 
 }
 
 type Mutation {

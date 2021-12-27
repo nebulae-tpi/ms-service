@@ -94,6 +94,40 @@ class ServiceClientCQRS {
       );
   }
 
+  /**  
+ * Queries and return a historical Service done by the client
+ */
+   queryHistoricalDeliveryServices$({ root, args, jwt }, authToken) {
+    const { clientId } = authToken;
+    // const { initTimestamp, endTimestamp, driverId, vehicleId } = args;
+    console.log("CONSULTA CLIENT HISTORY", args);
+    let { year, month, page, count } = args;
+    
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+
+    year = (!year || year < 2019 || year > currentYear) ? currentYear : year;
+    month = (!month || month < 1 || month > 12) ? currentMonth : month;
+    page = (!page || page < 0 || page > 100) ? 0 : page;
+    count = (!count || count < 1 || count > 100) ? 20 : count;
+
+    // if (filter.dateInit && filter.dateEnd){
+    //   query["metadata.createdAt"] = { $gte: filter.dateInit, $lt: filter.dateEnd }
+    // }
+
+    //ServiceCQRS.log(`ServiceCQRS.queryHistoricalClientServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryHistoricalDeliveryServices", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
+      .pipe(
+        mergeMapTo(ServiceDA.findHistoricalServiceByClient$(clientId, args, page, count)),
+        map(service => this.formatServiceToGraphQLSchema(service)),
+        toArray(),
+        first(arr => arr, []),
+        //tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalClientServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINEs
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err, true))
+      );
+  }
+
 
   /**
    * Handler for request made from client gateway
@@ -220,7 +254,7 @@ class ServiceClientCQRS {
         mergeMap(() => {
           return ClientDA.findById$(authToken.clientId).pipe(
             map(tempClient => {
-              return { ...args, businessId: authToken.businessId, client: { id: authToken.clientId, referrerDriverCode: tempClient.referrerDriverCode, businessId: authToken.businessId, ...args.client } }
+              return { ...args, businessId: authToken.businessId, client: { id: authToken.clientId,  businessId: authToken.businessId, ...args.client } }
             })
           )
         }),

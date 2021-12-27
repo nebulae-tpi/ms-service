@@ -184,6 +184,10 @@ class GraphQlService {
       },
       {
         aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.HistoricalDeliveryServices"
+      },
+      {
+        aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.RequestService"
       },
       {
@@ -317,6 +321,10 @@ class GraphQlService {
       },
       "clientgateway.graphql.query.HistoricalClientServices": {
         fn: ServiceClientCQRS.queryHistoricalClientServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.HistoricalDeliveryServices": {
+        fn: ServiceClientCQRS.queryHistoricalDeliveryServices$,
         obj: ServiceClientCQRS
       },
       "clientgateway.graphql.mutation.RequestService": {

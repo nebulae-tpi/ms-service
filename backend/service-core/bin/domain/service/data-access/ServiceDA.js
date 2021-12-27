@@ -48,14 +48,14 @@ class ServiceDA {
    * sets dropOffETA eta
    * @returns {Observable}
    */
-   static insertService$(service) {
+  static insertService$(service) {
     const _id = service._id;
     delete service._id;
     return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
       .updateOne(
-        { _id},
+        { _id },
         {
-          $setOnInsert: { ...service}
+          $setOnInsert: { ...service }
         },
         { upsert: true }
       )
@@ -336,7 +336,29 @@ class ServiceDA {
   /**
  * Finds an historical service by client
  */
-  static findHistoricalServiceByClient$(clientId, year, month, page, count, projection = undefined) {
+  static findHistoricalServiceByClient$(clientId, filter = {}, page, count) {
+    const year = new Date(filter.initTimestamp).getFullYear().toString().substring(2);
+    const month = (new Date(filter.initTimestamp).getMonth() + 1).toString();
+    const yymm = `${year}${month > 9 ? month.toString() : '0' + month.toString()}`;
+    
+    const query = {};
+    if (filter.initTimestamp && filter.endTimestamp){
+      query["timestamp"] = { $gte: filter.initTimestamp, $lt: filter.endTimestamp }
+    }
+
+    console.log("QUERY HISTORY CLIENT ===> ", query)
+    const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
+    return defer(() =>
+      mongoDB.extractAllFromMongoCursor$(
+        bd.collection(CollectionName).find(query, process).sort({ timestamp: -1 }).skip(page * count).limit(count)
+      )
+    );
+  }
+
+  /**
+ * Finds an historical service by client
+ */
+  static findHistoricalServiceList$(clientId, year, month, page, count, projection = undefined) {
     const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
     const query = { "client.id": clientId, state: "DONE" };
     console.log("QUERY HISTORY CLIENT ===> ", query)

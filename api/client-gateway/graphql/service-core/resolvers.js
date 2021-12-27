@@ -32,9 +32,17 @@ function getResponseFromBackEnd$(response) {
 module.exports = {
   Query: {
     HistoricalClientServices: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalClientServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalClientServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE' ]).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.HistoricalClientServices", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
+    HistoricalDeliveryServices: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalDeliveryServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE' ]).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.HistoricalDeliveryServices", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
