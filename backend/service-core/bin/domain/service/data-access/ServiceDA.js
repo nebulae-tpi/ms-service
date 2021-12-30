@@ -29,6 +29,7 @@ class ServiceDA {
    */
   static findById$(_id, projection = undefined) {
     const query = { _id };
+
     return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
       .findOne(query, { projection }));
   }
@@ -346,7 +347,15 @@ class ServiceDA {
       query["timestamp"] = { $gte: filter.initTimestamp, $lt: filter.endTimestamp }
     }
 
-    console.log("QUERY HISTORY CLIENT ===> ", query)
+    if(filter.driverId){
+      query["driverId"] = filter.driverId;
+    }
+
+    if(filter.vehicleId){
+      query["vehicleId"] = filter.vehicleId;
+    }
+
+    // console.log("QUERY HISTORY CLIENT ===> ", query);
     const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
     return defer(() =>
       mongoDB.extractAllFromMongoCursor$(
@@ -361,7 +370,7 @@ class ServiceDA {
   static findHistoricalServiceList$(clientId, year, month, page, count, projection = undefined) {
     const yymm = `${year.toString().substring(2)}${month > 9 ? month.toString() : '0' + month.toString()}`;
     const query = { "client.id": clientId, state: "DONE" };
-    console.log("QUERY HISTORY CLIENT ===> ", query)
+    // console.log("QUERY HISTORY CLIENT ===> ", query)
     const bd = mongoDB.getHistoricalDbByYYMM(yymm); // for now we are quering onlyu current month
     return defer(() =>
       mongoDB.extractAllFromMongoCursor$(

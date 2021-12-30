@@ -4,7 +4,7 @@
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
 const { of, interval, forkJoin, throwError, iif } = require("rxjs");
-const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first, toArray } = require('rxjs/operators');
+const { mapTo, mergeMap, catchError, map, mergeMapTo, tap, first, toArray, filter } = require('rxjs/operators');
 
 const RoleValidator = require("../../tools/RoleValidator");
 const { Event } = require("@nebulae/event-store");
@@ -21,7 +21,7 @@ const {
   ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229,
 } = require("../../tools/customError");
 
-const { ShiftDA, ServiceDA, ClientDA } = require('./data-access');
+const { ShiftDA, ServiceDA, ClientDA, DriverDA, VehicleDA } = require('./data-access');
 
 
 const VALID_SERVICE_CLIENT_TIP_TYPES = ['CASH', 'VIRTUAL_WALLET'];
@@ -68,7 +68,7 @@ class ServiceClientCQRS {
  */
   queryHistoricalClientServices$({ root, args, jwt }, authToken) {
     const { clientId } = authToken;
-    console.log("CONSULTA CLIENT HISTORY");
+    // console.log("CONSULTA CLIENT HISTORY");
     let { year, month, page, count } = args;
 
     const currentYear = new Date().getFullYear();
@@ -94,15 +94,12 @@ class ServiceClientCQRS {
       );
   }
 
-  /**  
- * Queries and return a historical Service done by the client
- */
-   queryHistoricalDeliveryServices$({ root, args, jwt }, authToken) {
+  queryHistoricalDeliveryServices$({ root, args, jwt }, authToken) {
     const { clientId } = authToken;
     // const { initTimestamp, endTimestamp, driverId, vehicleId } = args;
-    console.log("CONSULTA CLIENT HISTORY", args);
+    // console.log("CONSULTA CLIENT HISTORY", args);
     let { year, month, page, count } = args;
-    
+
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
@@ -122,13 +119,69 @@ class ServiceClientCQRS {
         map(service => this.formatServiceToGraphQLSchema(service)),
         toArray(),
         first(arr => arr, []),
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err, true))
+      );
+  }
+
+  queryServiceById$({ root, args, jwt }, authToken) {
+    console.log("CONSULTA CLIENT HISTORY");
+    let { id } = args;
+
+    //ServiceCQRS.log(`ServiceCQRS.queryHistoricalClientServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryServiceById", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
+      .pipe(
+        mergeMapTo(ServiceDA.findById$(id)),
+        map(service => this.formatServiceToGraphQLSchema(service)),
         //tap(x => ServiceCQRS.log(`ServiceCQRS.queryHistoricalClientServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINEs
         mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
         catchError(err => GraphqlResponseTools.handleError$(err, true))
       );
   }
 
+  /**
+   * 
+   * @param {*} param0 
+   * @param {*} authToken 
+   * @returns 
+   */
+  queryServiceHistoryDriverListing$({ root, args, jwt }, authToken) {
+    const { filterInput } = args;
 
+    if(authToken.businessId){
+      filterInput.businessId = authToken.businessId;
+    }
+
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryServiceHistoryDriverListing", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
+      .pipe(
+        mergeMapTo(DriverDA.getDriverList$(filterInput).pipe(toArray())),
+        map((listing) => ({ listing: listing || [] })),
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err, true))
+      );
+  }
+
+  /**
+   * 
+   * @param {*} param0 
+   * @param {*} authToken 
+   * @returns 
+   */
+   queryServiceHistoryVehicleListing$({ root, args, jwt }, authToken) {
+    const { filterInput } = args;
+
+    if(authToken.businessId){
+      filterInput.businessId = authToken.businessId;
+    }
+
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "queryServiceHistoryVehicleListing", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
+      .pipe(
+        mergeMapTo(VehicleDA.getVehicleList$(filterInput).pipe(toArray())),
+        map((listing) => ({ listing: listing || [] })),
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+        catchError(err => GraphqlResponseTools.handleError$(err, true))
+      );
+  }
   /**
    * Handler for request made from client gateway
    * @param {*} param0 
@@ -173,7 +226,7 @@ class ServiceClientCQRS {
   partialPaymentService$({ root, args, jwt }, authToken) {
 
     const { serviceId, amount } = args;
-    console.log("PAYMENT ARGS ====> ",args);
+    // console.log("PAYMENT ARGS ====> ", args);
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "partialPaymentService", PERMISSION_DENIED, ["CLIENT"])
       .pipe(
@@ -216,7 +269,7 @@ class ServiceClientCQRS {
     args.fareDiscount = (tripCost && tripCost > 0) ? 0 : args.fareDiscount;
     args.destinationCost = (destinationCost && destinationCost > 0 && destinationCost < 4200) ? 4200 : args.destinationCost
 
-    
+
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT"])
       .pipe(
@@ -247,14 +300,14 @@ class ServiceClientCQRS {
 
   RequestDeliveryService$({ root, args, jwt }, authToken) {
 
-    const {  client} = args;
+    const { client } = args;
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "requestServices", PERMISSION_DENIED, ["CLIENT", "SATELLITE"])
       .pipe(
         mergeMap(() => {
           return ClientDA.findById$(authToken.clientId).pipe(
             map(tempClient => {
-              return { ...args, businessId: authToken.businessId, client: { id: authToken.clientId,  businessId: authToken.businessId, ...args.client } }
+              return { ...args, businessId: authToken.businessId, client: { id: authToken.clientId, businessId: authToken.businessId, ...args.client } }
             })
           )
         }),
@@ -264,7 +317,7 @@ class ServiceClientCQRS {
           const newService = this.buildServiceRequestedEsEvent(authToken, request, "APP_DELIVERY");
           return eventSourcing.eventStore.emitEvent$(newService).pipe(mapTo(newService))
         }), //Build and send ServiceRequested event (event-sourcing)
-        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$({...rawResponse.data, _id: rawResponse.aid})),
+        mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$({ ...rawResponse.data, _id: rawResponse.aid })),
         catchError(err => GraphqlResponseTools.handleError$(err, true))
       );
   }
@@ -274,7 +327,7 @@ class ServiceClientCQRS {
  */
   cancelServicebyClient$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT", "SATELLITE"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceCancellationRequestInput({ ...request, authorType: 'CLIENT' })),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
@@ -298,7 +351,7 @@ class ServiceClientCQRS {
    */
   cancelAppServicebyClient$({ root, args, jwt }, authToken) {
     //ServiceCQRS.log(`ServiceCQRS.cancelServicebyClient RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
-    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT"]).pipe(
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "cancelServicebyClient", PERMISSION_DENIED, ["CLIENT", "SATELLITE"]).pipe(
       mapTo(args),
       tap(request => this.validateServiceCancellationRequestInput({ ...request, authorType: 'APP_CLIENT' })),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1, state: 1, closed: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
@@ -463,7 +516,7 @@ class ServiceClientCQRS {
    * @returns {Event}
    */
   buildServiceRequestedEsEvent(authToken, request, sourceChannel = "CLIENT") {
-    console.log("REQUEST PARA CONSTRUIR ===> ", request);
+    // console.log("REQUEST PARA CONSTRUIR ===> ", request);
     // All of the request performed by a client must have a fare discount of 0.1 (10%)
     let { requestedFeatures, fare, pickUp, tip, dropOff, tripCost, fareDiscount = 0 } = request;
 

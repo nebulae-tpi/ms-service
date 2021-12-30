@@ -32,15 +32,24 @@ function getResponseFromBackEnd$(response) {
 module.exports = {
   Query: {
     HistoricalClientServices: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalClientServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE' ]).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalClientServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.HistoricalClientServices", { root, args, jwt: context.encodedToken }, 2000)
         ),
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
+    ServiceById: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'ServiceById', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.ServiceById", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
     HistoricalDeliveryServices: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalDeliveryServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE' ]).pipe(
+      console.log("LLEGA QUERY")
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalDeliveryServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.HistoricalDeliveryServices", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -55,6 +64,16 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
+
+    CurrentDeliveryServices: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CurrentServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.CurrentServices", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
+
     CurrentServices: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CurrentServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
         switchMapTo(
@@ -63,9 +82,26 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
+
+    ServiceHistoryDriverListing: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'ServiceHistoryDriverListing', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.ServiceHistoryDriverListing", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
+    ServiceHistoryVehicleListing: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'ServiceHistoryVehicleListing', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Service", "clientgateway.graphql.query.ServiceHistoryVehicleListing", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
   },
   Mutation: {
-    PartialPaymentService: (root, args, context, info) => { 
+    PartialPaymentService: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'PartialPaymentService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.PartialPaymentService", { root, args, jwt: context.encodedToken }, 2000)
@@ -73,7 +109,7 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
-    RequestService: (root, args, context, info) => { 
+    RequestService: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'RequestService', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.RequestService", { root, args, jwt: context.encodedToken }, 2000)
@@ -98,7 +134,7 @@ module.exports = {
       ).toPromise();
     },
     CancelServiceByClient: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.CancelServiceByClient", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -106,7 +142,7 @@ module.exports = {
       ).toPromise();
     },
     CancelAppServiceByClient: (root, args, context, info) => {
-      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelAppServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT']).pipe(
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'CancelAppServiceByClient', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['CLIENT', 'SATELLITE']).pipe(
         switchMapTo(
           broker.forwardAndGetReply$("Service", "clientgateway.graphql.mutation.CancelAppServiceByClient", { root, args, jwt: context.encodedToken }, 2000)
         ),
@@ -133,40 +169,40 @@ module.exports = {
   //// SUBSCRIPTIONS ///////
   Subscription: {
     ClientServiceUpdatedSubscription: {
-        subscribe: withFilter(
-            (payload, variables, context, info) => {
-                return pubsub.asyncIterator("ClientServiceUpdatedSubscription");
-            },
-            (payload, variables, context, info) => {
-              if(payload.ClientServiceUpdatedSubscription.closed){
-                return false
-              }              
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          return pubsub.asyncIterator("ClientServiceUpdatedSubscription");
+        },
+        (payload, variables, context, info) => {
+          if (payload.ClientServiceUpdatedSubscription.closed) {
+            return false
+          }
 
-              const businessId = payload.ClientServiceUpdatedSubscription.businessId;
-              const serviceClientId = payload.ClientServiceUpdatedSubscription.client.id;
-              const serviceUsername = payload.ClientServiceUpdatedSubscription.client.username;
+          const businessId = payload.ClientServiceUpdatedSubscription.businessId;
+          const serviceClientId = payload.ClientServiceUpdatedSubscription.client.id;
+          const serviceUsername = payload.ClientServiceUpdatedSubscription.client.username;
 
-              if (context.authToken.realm_access.roles.includes("CLIENT") || context.authToken.realm_access.roles.includes("SATELLITE")) {
-                // context.authToken.businessId === businessId && 
-                return (context.authToken.clientId && context.authToken.clientId === serviceClientId) 
-                || (context.authToken.preferred_username && context.authToken.preferred_username === serviceUsername);
-              }
+          if (context.authToken.realm_access.roles.includes("CLIENT") || context.authToken.realm_access.roles.includes("SATELLITE")) {
+            // context.authToken.businessId === businessId && 
+            return (context.authToken.clientId && context.authToken.clientId === serviceClientId)
+              || (context.authToken.preferred_username && context.authToken.preferred_username === serviceUsername);
+          }
 
-              return false;
-            }
-        )
+          return false;
+        }
+      )
     },
     ServiceMessageSubscription: {
       subscribe: withFilter(
-          (payload, variables, context, info) => {
-              return pubsub.asyncIterator("ServiceMessageSubscription");
-          },
-          (payload, variables, context, info) => {
-            const username = context.authToken.preferred_username;
-            return payload.ServiceMessageSubscription.to === username;
-          }
+        (payload, variables, context, info) => {
+          return pubsub.asyncIterator("ServiceMessageSubscription");
+        },
+        (payload, variables, context, info) => {
+          const username = context.authToken.preferred_username;
+          return payload.ServiceMessageSubscription.to === username;
+        }
       )
-  }
+    }
   }
 };
 
@@ -175,13 +211,13 @@ module.exports = {
 
 const eventDescriptors = [
   {
-      backendEventName: 'ClientServiceUpdatedSubscription',
-      gqlSubscriptionName: 'ClientServiceUpdatedSubscription',
-      dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
-      onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
-      onEvent: (evt, descriptor) => {
-          //console.log(`Event of type  ${descriptor.backendEventName} arraived`);
-      },// OPTIONAL, only use if needed
+    backendEventName: 'ClientServiceUpdatedSubscription',
+    gqlSubscriptionName: 'ClientServiceUpdatedSubscription',
+    dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
+    onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
+    onEvent: (evt, descriptor) => {
+      //console.log(`Event of type  ${descriptor.backendEventName} arraived`);
+    },// OPTIONAL, only use if needed
   },
   {
     backendEventName: 'ServiceMessageSubscription',
@@ -189,9 +225,9 @@ const eventDescriptors = [
     dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
     onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
     onEvent: (evt, descriptor) => {
-        console.log(`Event of type  ${descriptor.backendEventName} arraived`);
+      console.log(`Event of type  ${descriptor.backendEventName} arraived`);
     },// OPTIONAL, only use if needed
-},
+  },
 ];
 
 /**
@@ -199,31 +235,31 @@ const eventDescriptors = [
 */
 eventDescriptors.forEach(descriptor => {
   broker
-      .getMaterializedViewsUpdates$([descriptor.backendEventName])
-      .subscribe(
-          evt => {
-              if (descriptor.onEvent) {
-                  descriptor.onEvent(evt, descriptor);
-              }
-              const payload = {};
-              payload[descriptor.gqlSubscriptionName] = descriptor.dataExtractor ? descriptor.dataExtractor(evt) : evt.data
-              pubsub.publish(descriptor.gqlSubscriptionName, payload);
-          },
+    .getMaterializedViewsUpdates$([descriptor.backendEventName])
+    .subscribe(
+      evt => {
+        if (descriptor.onEvent) {
+          descriptor.onEvent(evt, descriptor);
+        }
+        const payload = {};
+        payload[descriptor.gqlSubscriptionName] = descriptor.dataExtractor ? descriptor.dataExtractor(evt) : evt.data
+        pubsub.publish(descriptor.gqlSubscriptionName, payload);
+      },
 
-          error => {
-              if (descriptor.onError) {
-                  descriptor.onError(error, descriptor);
-              }
-              console.error(
-                  `Error listening ${descriptor.gqlSubscriptionName}`,
-                  error
-              );
-          },
+      error => {
+        if (descriptor.onError) {
+          descriptor.onError(error, descriptor);
+        }
+        console.error(
+          `Error listening ${descriptor.gqlSubscriptionName}`,
+          error
+        );
+      },
 
-          () =>
-              console.log(
-                  `${descriptor.gqlSubscriptionName} listener STOPPED`
-              )
-      );
+      () =>
+        console.log(
+          `${descriptor.gqlSubscriptionName} listener STOPPED`
+        )
+    );
 });
 
