@@ -164,6 +164,46 @@ type ServiceMessage {
    message: ChatMessage!
 }
 
+"Driver info."
+type Driver {
+   id: String
+   "Driver name"
+   name: String
+   "lastname"
+   lastname: String
+   "Active flag"
+   active: Boolean
+   documentId: String
+}
+
+"Vehicle Info"
+type Vehicle {
+   id: String
+   "plate"
+   licensePlate: String
+   active: Boolean
+}
+
+type ServiceHistoryDriverListing {
+  "Listing"
+  listing: [Driver]
+}
+
+type ServiceHistoryVehicleListing{
+   "Listing"
+  listing: [Vehicle]
+}
+
+input ServiceHistoryMngDriverFilterInput {
+  "Document"
+  document: String
+}
+
+input ServiceHistoryMngVehicleFilterInput{
+   "plate"
+   plate: String
+}
+
 "Client info."
 input ClientInput {
     "Client ID"
@@ -220,6 +260,15 @@ type Query {
       page: Int,
       count: Int
    ): [Service] @requireAuth 
+   HistoricalDeliveryServices(
+      initTimestamp: BigInt
+      endTimestamp: BigInt
+      driverId: String
+      vehicleId: String
+   ): [Service] @requireAuth 
+   
+   ServiceHistoryDriverListing(filterInput: ServiceHistoryMngDriverFilterInput ): ServiceHistoryDriverListing @requireAuth
+   ServiceHistoryVehicleListing(filterInput: ServiceHistoryMngVehicleFilterInput): ServiceHistoryVehicleListing @requireAuth
 }
 
 type Mutation {

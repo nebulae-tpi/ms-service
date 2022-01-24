@@ -85,6 +85,8 @@ type ServiceDriverVehicleBlock{
 input ServiceVehicleAssignmentFilterInput {
   "ID of the business"
   businessId: String
+  "Filter text"
+  filterText: String
   "Name"
   name: String
   "lastname"

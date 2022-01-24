@@ -56,25 +56,38 @@
                 id="driverDocumentId" maxlength="20" />
             </mat-form-field>
 
-            <mat-form-field>
-              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.DRIVER_FULLNAME' | translate}}" formControlName="driverFullname"
-                id="driverFullname" maxlength="20" />
+            <mat-form-field fxFlex="95">
+              <input matInput [formControl]="driverNameFilterCtrl" name="driverNameFilterCtrl"
+                placeholder="{{ 'SERVICE.SERVICE_FILTERS.DRIVER_FULLNAME' | translate }}" [matAutocomplete]="autoVal"
+                cdkFocusInitial>
+            
+              <mat-autocomplete panelWidth="200" #autoVal="matAutocomplete" autoActiveFirstOption clearOnBlur='true'
+                (optionSelected)='onDriverSelected($event.option.value)' [displayWith]="driverDisplayFn">
+                <mat-option *ngFor="let driver of queriedDriversByAutocomplete$ | async" [value]="driver">
+                  <mat-icon>person_pin_circle</mat-icon>
+                  <span class="text-boxed text-uppercase">{{ driver ? driver.name+ ' ' + driver.lastname: '' }} </span>
+                </mat-option>
+              </mat-autocomplete>
             </mat-form-field>
 
-            <mat-form-field *ngIf="false">
-              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_USERNAME' | translate}}" formControlName="clientUsername"
-                id="clientUsername" maxlength="20" />
-            </mat-form-field>
-
-            <mat-form-field>
-              <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.CLIENT_FULLNAME' | translate}}" formControlName="clientFullname"
-                id="clientFullname" maxlength="20" />
+            <mat-form-field fxFlex="95">
+              <input matInput [formControl]="clientNameFilterCtrl" name="clientNameFilterCtrl"
+                placeholder="{{ 'SERVICE.SERVICE_FILTERS.CLIENT_FULLNAME' | translate }}" [matAutocomplete]="auto"
+                cdkFocusInitial>
+            
+              <mat-autocomplete panelWidth="200" #auto="matAutocomplete" autoActiveFirstOption clearOnBlur='true'
+                (optionSelected)='onClientSelected($event.option.value)' [displayWith]="clientDisplayFn">
+                <mat-option *ngFor="let client of queriedClientsByAutocomplete$ | async" [value]="client">
+                  <mat-icon>person_pin_circle</mat-icon>
+                  <span class="text-boxed text-uppercase">{{ client.generalInfo ? client.generalInfo.name: '' }} </span>
+                </mat-option>
+              </mat-autocomplete>
             </mat-form-field>
 
             <mat-form-field>
               <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.LICENSE_PLATE' | translate}}" formControlName="vehicleLicensePlate"
                 id="vehicleLicensePlate" maxlength="20" />
-            </mat-form-field>
+            </mat-form-field>            
 
             <!-- <mat-form-field>
                 <input

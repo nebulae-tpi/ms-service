@@ -49,7 +49,9 @@ class DriverDA {
     if (filter.businessId) {
       query.businessId = filter.businessId;
     }
-
+    if(filter.filterText){
+      query["$or"] = [{name: { $regex: filter.filterText, $options: "i" }}, {lastname: { $regex: filter.filterText, $options: "i" }}];
+    }
     if (filter.name) {
       query["name"] = { $regex: filter.name, $options: "i" };
     }

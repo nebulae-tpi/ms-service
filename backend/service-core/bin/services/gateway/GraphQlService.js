@@ -184,6 +184,18 @@ class GraphQlService {
       },
       {
         aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.HistoricalDeliveryServices"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.ServiceHistoryDriverListing"
+      },
+      {
+        aggregateType: "Service",
+        messageType: "clientgateway.graphql.query.ServiceHistoryVehicleListing"
+      },
+      {
+        aggregateType: "Service",
         messageType: "clientgateway.graphql.mutation.RequestService"
       },
       {
@@ -321,6 +333,18 @@ class GraphQlService {
       },
       "clientgateway.graphql.query.HistoricalClientServices": {
         fn: ServiceClientCQRS.queryHistoricalClientServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.HistoricalDeliveryServices": {
+        fn: ServiceClientCQRS.queryHistoricalDeliveryServices$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.ServiceHistoryDriverListing": {
+        fn: ServiceClientCQRS.queryServiceHistoryDriverListing$,
+        obj: ServiceClientCQRS
+      },
+      "clientgateway.graphql.query.ServiceHistoryVehicleListing": {
+        fn: ServiceClientCQRS.queryServiceHistoryVehicleListing$,
         obj: ServiceClientCQRS
       },
       "clientgateway.graphql.query.ServiceById": {

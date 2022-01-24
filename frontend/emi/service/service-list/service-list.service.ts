@@ -9,6 +9,13 @@ import {
   ServiceServicesSize,
   ServiceServiceUpdatedSubscription
 } from '../gql/service';
+
+import {
+  ServiceClientSatellites
+} from '../gql/Client';
+import {
+  ServiceDrivers
+} from '../gql/Driver';
 import * as moment from 'moment';
 
 @Injectable()
@@ -63,6 +70,32 @@ export class ServiceListService {
       errorPolicy: 'all'
     });
   }
+
+  getClientsByFilter(clientText: String, limit: number): Observable<any> {
+    return this.gateway.apollo
+      .query<any>({
+        query: ServiceClientSatellites,
+        variables: {
+          clientText: clientText,
+          limit: limit
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+  getDriversByFilter(driverText: String, businessId: String): Observable<any> {
+    const paginationInput = {page: 0, count: 5, sort: -1}
+    return this.gateway.apollo
+      .query<any>({
+        query: ServiceDrivers,
+        variables: {
+          filterInput: {filterText: driverText, businessId},
+          paginationInput
+        },
+        errorPolicy: 'all'
+      });
+  }
+
 
 
 

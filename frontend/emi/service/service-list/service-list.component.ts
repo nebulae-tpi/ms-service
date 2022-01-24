@@ -26,10 +26,11 @@ import {
   startWith,
   debounceTime,
   distinctUntilChanged,
-  take
+  take,
+  toArray
 } from 'rxjs/operators';
 
-import { Subject, of, forkJoin, combineLatest } from 'rxjs';
+import { Subject, of, forkJoin, combineLatest, Observable, iif, from } from 'rxjs';
 
 ////////// ANGULAR MATERIAL //////////
 import {
@@ -80,6 +81,10 @@ import { ToolbarService } from '../../../toolbar/toolbar.service';
 export class ServiceListComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
+  queriedClientsByAutocomplete$: Observable<any[]>;
+  queriedDriversByAutocomplete$: Observable<any[]>;
+  clientNameFilterCtrl: FormControl;
+  driverNameFilterCtrl: FormControl;
 
   stateList: string[] = ['REQUESTED', 'ASSIGNED', 'ARRIVED', 'ON_BOARD', 'DONE', 'CANCELLED_CLIENT', 'CANCELLED_DRIVER', 'CANCELLED_OPERATOR', 'CANCELLED_SYSTEM'];
 
@@ -137,6 +142,8 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     this.updatePaginatorDataSubscription();
     this.loadLastFilters();
     this.refreshTableSubscription();
+    this.buildClientNameFilterCtrl();
+    this.buildDriverNameFilterCtrl();
   }
 
   onInitDateChange() {
@@ -159,6 +166,80 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       });
     }
 
+  }
+
+  onClientSelected(client) {
+    this.filterForm.patchValue({ client });
+  }
+
+  onDriverSelected(driver) {
+    this.filterForm.patchValue({ driver });
+  }
+
+  /**
+  * extract client name from client object
+  * @param client
+  */
+  clientDisplayFn(client) {
+    return client ? client.generalInfo.name : '';
+  }
+
+  driverDisplayFn(driver) {
+    console.log("DRIVER TO DISPLAY")
+    return driver ? driver.name+ " "+ driver.lastname : '';
+  }
+
+  buildClientNameFilterCtrl() {
+    this.clientNameFilterCtrl = new FormControl();
+    this.queriedClientsByAutocomplete$ = this.clientNameFilterCtrl.valueChanges.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      tap((selected) => {
+        if (typeof selected === 'string' || selected instanceof String) {
+          //this.filterForm.patchValue({ client: null });
+        }
+      }),
+      filter(text => (typeof text === 'string' || text instanceof String)),
+      mergeMap(x => iif(() => !x, of([]), this.getAllSatelliteClientsFiltered$(x, 3)))
+    );
+  }
+
+  buildDriverNameFilterCtrl() {
+    this.driverNameFilterCtrl = new FormControl();
+    this.queriedDriversByAutocomplete$ = this.driverNameFilterCtrl.valueChanges.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      tap((selected) => {
+        if (typeof selected === 'string' || selected instanceof String) {
+          //this.filterForm.patchValue({ client: null });
+        }
+      }),
+      filter(text => (typeof text === 'string' || text instanceof String)),
+      mergeMap(x => iif(() => !x, of([]), this.getAllDriversFiltered$(x)))
+    );
+  }
+
+  getAllSatelliteClientsFiltered$(filterText: String, limit: number): Observable<any[]> {
+    return this.ServiceListservice
+      .getClientsByFilter(filterText, limit)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter(resp => !resp.errors),
+        map(clientSatellites => clientSatellites.data.ServiceClientSatellites)
+      );
+  }
+
+  getAllDriversFiltered$(filterText: String): Observable<any[]> {
+    return this.ServiceListservice
+      .getDriversByFilter(filterText, this.toolbarService.onSelectedBusiness$.getValue().id)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter(resp => !resp.errors),
+        map(drivers => {
+          console.log("DRIVERS ===> ", drivers.data.ServiceDrivers);
+          return drivers.data.ServiceDrivers
+        })
+      );
   }
 
   onEndDateChange() {
@@ -339,16 +420,18 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       filter(([filterValue, paginator, selectedBusiness]) => (filterValue != null && paginator != null)),
       map(([filterValue, paginator, selectedBusiness]) => {
         // console.log('filterForm --> ', this.filterForm.getRawValue());
-
+        const clientObj = this.clientNameFilterCtrl as any;
+        const driverObj = this.driverNameFilterCtrl as any;
+        console.log("driverObj ===> ",typeof driverObj.value === "string" )
         const filterInput = {
           businessId: selectedBusiness ? selectedBusiness.id : null,
           initTimestamp: filterValue.initTimestamp ? filterValue.initTimestamp.valueOf() : null,
           endTimestamp: filterValue.endTimestamp ? filterValue.endTimestamp.valueOf() : null,
           driverDocumentId: filterValue.driverDocumentId,
-          driverFullname: filterValue.driverFullname,
+          driverFullname: driverObj && (typeof driverObj.value === "string" || !driverObj.value) ? null : ((driverObj || {}).value || {}).name+ " "+((driverObj || {}).value || {}).lastname,
           vehicleLicensePlate: filterValue.vehicleLicensePlate,
           clientUsername: filterValue.clientUsername,
-          clientFullname: filterValue.clientFullname,
+          clientFullname: (((clientObj || {}).value || {}).generalInfo || {}).name,
           states: filterValue.states.filter(control => control.active === true).map(control => control.name),
           showClosedServices: filterValue.showClosedServices
         };
