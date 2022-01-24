@@ -13,7 +13,7 @@ spec:
         app: service
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.service:1.0.25
+      - image: DOCKERHUB/service.backend.service:1.0.26
         name: service
         volumeMounts:
         - name: google-application-credentials

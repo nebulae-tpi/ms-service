@@ -163,19 +163,19 @@ class ServiceDA {
     }
 
     if (filter.driverFullname) {
-      query["driver.fullname"] = { $regex: filter.driverFullname, $options: "i" };
+      query["driver.fullname"] = filter.driverFullname;
     }
 
     if (filter.vehicleLicensePlate) {
-      query["vehicle.licensePlate"] = { $regex: filter.vehicleLicensePlate, $options: "i" };
+      query["vehicle.licensePlate"] = filter.vehicleLicensePlate;
     }
 
     if (filter.clientUsername) {
-      query["client.username"] = { $regex: filter.clientUsername, $options: "i" };
+      query["client.username"] = filter.clientUsername
     }
 
     if (filter.clientFullname) {
-      query["client.fullname"] = { $regex: filter.clientFullname, $options: "i" };
+      query["client.fullname"] = filter.clientFullname
     }
 
     if (filter.states && filter.states.length > 0) {
@@ -192,7 +192,7 @@ class ServiceDA {
     
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
-
+    console.log("QUERY COUNT ====> ", query);
     return of(initDate)
     .pipe(
       map(date => mongoDB.getHistoricalDb(date)),
