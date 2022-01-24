@@ -142,7 +142,6 @@ class ServiceDA {
         .find(query, {projection})
         .skip(pagination.count * pagination.page)
         .limit(pagination.count)
-        .sort({ timestamp: pagination.sort });
 
         return mongoDB.extractAllFromMongoCursor$(cursor);
       })
