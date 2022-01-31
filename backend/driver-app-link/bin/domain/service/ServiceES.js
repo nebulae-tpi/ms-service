@@ -627,7 +627,7 @@ class ServiceES {
                 mergeMap(dbService => forkJoin(
                     of(dbService),
                     this.payClientAgreement$(dbService, timestamp),
-                    this.payPlatformClientAgreement$(dbService, timestamp),
+                    //this.payPlatformClientAgreement$(dbService, timestamp),
                     this.payAppClientAgreement$(dbService, timestamp),
                     this.generatePayPerServiceTransaction$(dbService, timestamp)
                 )),
