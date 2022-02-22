@@ -485,7 +485,7 @@ class ServiceES {
                 
                 return driverMainPocketAmount >= (clientTip + parseInt(process.env.APP_DRIVER_AGREEMENT) + payPerServicePrice);
             }else {
-                return driverMainPocketAmount >= (clientTip + payPerServicePrice);
+                return (clientTip + payPerServicePrice) > 0 ? driverMainPocketAmount >= (clientTip + payPerServicePrice) : true;
             }
             
 
