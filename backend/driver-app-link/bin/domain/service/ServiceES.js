@@ -34,7 +34,6 @@ class ServiceES {
      */
     handleServiceRequested$({ aid, data }) {
         //console.log(`ServiceES: handleServiceRequested: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
-
         const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
         const localHour = localDate.getHours();
         const extendedDistanceHours = ((data.offer || {}).offerExtendedDistanceHours || (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4")).split('_').map(h => parseInt(h));

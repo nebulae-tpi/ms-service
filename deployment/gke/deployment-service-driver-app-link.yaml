@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.driverapplink:2.10.73 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: DOCKERHUB/service.backend.driverapplink:2.10.74 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -105,9 +105,9 @@ spec:
         - name: BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS
           value: ""
         - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
-          value: "0_1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20_21_22_23"
+          value: "6_7_8_9_10_12_13_14_16_17_18_19"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE
-          value: "2500"
+          value: "800"
         - name: APP_DRIVER_AGREEMENT
           value: "1000"
         # - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
