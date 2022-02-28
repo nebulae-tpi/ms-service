@@ -37,7 +37,6 @@ class ServiceES {
         const localDate = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
         const localHour = localDate.getHours();
         const extendedDistanceHours = ((data.offer || {}).offerExtendedDistanceHours || (process.env.SERVICE_OFFER_EXTENDED_DISTANCE_HOURS || "22_23_0_1_2_3_4")).split('_').map(h => parseInt(h));
-        console.log("EXTENDED HOURS ===> ", extendedDistanceHours);
         let maxDistance = data.client.offerMaxDistance || parseInt((data.offer || {}).offerMaxDistance || process.env.SERVICE_OFFER_MAX_DISTANCE);
         if (extendedDistanceHours.includes(localHour)) {
             let extendedDistance = parseInt((data.offer || {}).offerExtendedDistance || (process.env.SERVICE_OFFER_EXTENDED_DISTANCE || "1500"));
@@ -45,8 +44,6 @@ class ServiceES {
                 maxDistance = extendedDistance;
             }
         }
-        console.log("MAX DISTANCE ===> ", {maxDistance, clientMaxDistance: data.client.offerMaxDistance, offerMaxDistance: (data.offer || {}).offerMaxDistance});
-        console.log("****************")
         const SERVICE_OFFER_MAX_DISTANCE_MIN = parseInt((data.offer || {}).offerMaxDistanceMin || process.env.SERVICE_OFFER_MAX_DISTANCE_MIN);
         maxDistance = (maxDistance < SERVICE_OFFER_MAX_DISTANCE_MIN) ? SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
 
