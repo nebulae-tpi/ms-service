@@ -47,6 +47,12 @@ class ServiceES {
         const SERVICE_OFFER_MAX_DISTANCE_MIN = parseInt((data.offer || {}).offerMaxDistanceMin || process.env.SERVICE_OFFER_MAX_DISTANCE_MIN);
         maxDistance = (maxDistance < SERVICE_OFFER_MAX_DISTANCE_MIN) ? SERVICE_OFFER_MAX_DISTANCE_MIN : maxDistance;
 
+        //TODO: esto es una solucion temporal para la modificacion masiva de la distancia de oferta parta los satelites
+        //ESTO SOBRESCRIBE LA DISTANCA CONFIGURADA EN EL SATELITE
+        if(data.client.tipClientId){
+            maxDistance = parseInt(process.env.SERVICE_SATELLITE_OFFER_MAX_DISTANCE || maxDistance);
+        }
+
         const minDistance = data.client.offerMinDistance || parseInt((data.offer || {}).offerMinDistance || process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
         const referrerDriverDocumentId = data.client.referrerDriverDocumentId;

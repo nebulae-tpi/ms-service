@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.driverapplink:2.10.77 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: DOCKERHUB/service.backend.driverapplink:2.10.78 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -92,6 +92,8 @@ spec:
         # SERVICE OFFER SPANS CONFIG
         - name: SERVICE_OFFER_MAX_DISTANCE_MIN
           value: "1200"
+        - name: SERVICE_SATELLITE_OFFER_MAX_DISTANCE
+          value: "1500"  
         - name: SERVICE_OFFER_MAX_DISTANCE
           value: "800"
         - name: SERVICE_OFFER_MIN_DISTANCE
