@@ -617,7 +617,7 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceAssigned$({ aid, data, timestamp }) {
+    handleServiceAssigned$({ aid, av, data, timestamp }) {
         //console.log(`ServiceES: handleServiceAssigned: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({})
             .pipe(
@@ -631,10 +631,10 @@ class ServiceES {
                 ),
                 mergeMap(dbService => forkJoin(
                     of(dbService),
-                    this.payClientAgreement$(dbService, timestamp),
+                    this.payClientAgreement$(dbService, timestamp, aid, av),
                     //this.payPlatformClientAgreement$(dbService, timestamp),
-                    this.payAppClientAgreement$(dbService, timestamp),
-                    this.generatePayPerServiceTransaction$(dbService, timestamp)
+                    this.payAppClientAgreement$(dbService, timestamp, aid, av),
+                    this.generatePayPerServiceTransaction$(dbService, timestamp, aid, av)
                 )),
                 map(([dbService, a]) =>
                 (
@@ -689,7 +689,7 @@ class ServiceES {
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
                     aggregateType: "Wallet",
-                    aggregateId: uuidv4(),
+                    aggregateId: driver.id,
                     data: tx,
                     user: "SYSTEM"
                 })
@@ -699,7 +699,7 @@ class ServiceES {
     }
 
 
-    payAppClientAgreement$({ businessId, client, driver, request }, timestamp) {
+    payAppClientAgreement$({ businessId, client, driver, request }, timestamp, aid, av) {
         return of({}).pipe(
             mergeMap(() => {
                 if((request || {}).sourceChannel !== "APP_CLIENT"){
@@ -709,6 +709,7 @@ class ServiceES {
                         map(referrerDriver => {
                             return {
                                 _id: Crosscutting.generateDateBasedUuid(),
+                                sourceEvent: {aid, av},
                                 businessId,
                                 type: "MOVEMENT",
                                 // notes: mba.notes,
@@ -744,7 +745,7 @@ class ServiceES {
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
                     aggregateType: "Wallet",
-                    aggregateId: uuidv4(),
+                    aggregateId: driver.id,
                     data: tx,
                     user: "SYSTEM"
                 })
@@ -757,7 +758,7 @@ class ServiceES {
      * (todo) makespaymento to doorman
      * @param {*} service  
      */
-    payClientAgreement$({ businessId, client, driver }, timestamp) {
+    payClientAgreement$({ businessId, client, driver }, timestamp, aid, av) {
         // console.log("payClientAgreement$ ==> ", {businessId, client, driver});        
         return of({}).pipe(
             map(() => (client.tipType != "VIRTUAL_WALLET")
@@ -765,6 +766,7 @@ class ServiceES {
                 : ({
                     _id: Crosscutting.generateDateBasedUuid(),
                     businessId: businessId,
+                    sourceEvent: {aid, av},
                     type: "MOVEMENT",
                     // notes: mba.notes,
                     concept: "CLIENT_AGREEMENT_PAYMENT",
@@ -780,7 +782,7 @@ class ServiceES {
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
                     aggregateType: "Wallet",
-                    aggregateId: uuidv4(),
+                    aggregateId: driver.id,
                     data: tx,
                     user: "SYSTEM"
                 })
@@ -789,7 +791,7 @@ class ServiceES {
         );
     }
 
-    generatePayPerServiceTransaction$(dbService, timestamp) {
+    generatePayPerServiceTransaction$(dbService, timestamp, aid, av) {
         // console.log(JSON.stringify({ dbService }));
         const { shiftId, driver, businessId } = dbService;
         const projection = { "payPerServicePrice": 1, "subscriptionType": 1 };
@@ -800,6 +802,7 @@ class ServiceES {
                 if (subscriptionType == "PAY_PER_SERVICE") {
                     return ({
                         _id: Crosscutting.generateDateBasedUuid(),
+                        sourceEvent: {aid, av},
                         businessId: businessId,
                         type: "MOVEMENT",
                         notes: `Turno: ${shiftId}; Servicio: ${dbService._id}`,
@@ -818,7 +821,7 @@ class ServiceES {
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
                     aggregateType: "Wallet",
-                    aggregateId: uuidv4(),
+                    aggregateId: driver.id,
                     data: tx,
                     user: "SYSTEM"
                 })
