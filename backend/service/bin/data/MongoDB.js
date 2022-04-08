@@ -93,6 +93,10 @@ class MongoDB {
       await historicalDB.collection("Service").createIndex({ businessId: 1, closed: 1, "request.ownerOperatorId": 1 }, { background: true })
         .catch((err) => console.log(`Failed to create index: ${err}`));
 
+      observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ businessId_1_closed_1_state_1_client.username_1_client.fullname_1 })`);
+      await historicalDB.collection("Service").createIndex({businessId: 1, closed: 1, state: 1, "client.username": 1, "client.fullname": 1, "vehicle.licensePlate": 1, "driver.fullname": 1, "driver.documentId": 1}, { background: true,  name: "businessId_1_closed_1_state_1_client.username_1_client.fullname_1" })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
       observer.next(`Creating index for ${historicalDB.databaseName}.Service => ({ state: 1, "driver.id": 1 }, { background: true })`);
       await historicalDB.collection("Service").createIndex({ state: 1, "driver.id": 1 }, { background: true })
         .catch((err) => console.log(`Failed to create index: ${err}`));
