@@ -29,6 +29,7 @@ query IOEServices($serviceStatesFilter: [String], $serviceChannelsFilter: [Strin
     client{
       # this field cant be featched due at bug in apollo client https://github.com/apollographql/apollo-client/issues/3903
       # id, 
+      clientId
       businessId,
       fullname,
       username,
@@ -124,6 +125,7 @@ export const IOEServiceSubscription = gql`
         requestedFeatures,
         client{
           # id,
+          clientId
           businessId,
           fullname,
           username,
