@@ -142,6 +142,7 @@ input RequestInput{
 type IOEClient {
     "Client ID"
     id: String
+    clientId: String
     "Business ID"
     businessId: String
     "Full name"

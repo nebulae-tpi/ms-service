@@ -577,7 +577,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     if (selectedRow) {
       let rawRequest = {
         client: {
-          id: null,
+          id: ((selectedRow || {}).client || {}).clientId,
           fullname: selectedRow.client_name.toUpperCase(),
           username: null,
           tip: selectedRow.serviceRef.tip,
@@ -597,7 +597,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
           addressLine2: selectedRow.serviceRef.pickUp.addressLine2,
         },
         paymentType:  'CASH',
-        requestedFeatures: [],
+        requestedFeatures: (selectedRow.requestedFeatures || []),
         dropOff: null,
         // dropOffSpecialType: destinationOptionsGroup,
         fareDiscount: selectedRow.serviceRef.fareDiscount,
