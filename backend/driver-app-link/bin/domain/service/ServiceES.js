@@ -208,7 +208,7 @@ class ServiceES {
             const simultaneousOffers = parseInt((offer || {}).offerSimultaneousOffers || 1);
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId, simultaneousOffers })}`);
 
-            //console.log('imperativeServiceOfferAlgorithm: inpu:',JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId }));
+            console.log(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId, simultaneousOffers })}`);
 
             let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs, simultaneousOffers);
             //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
@@ -243,8 +243,6 @@ class ServiceES {
                     // offers this service while the service is in REQUESTED state and have not exceed the offerSearchThreshold
                     let simultaneousSendCount = 0;
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
-                        console.log("PRE TS ========> ", Date.now());
-                        console.log("-------------------------")
                         //selected shift
                         const shift = shifts[i];
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs, false);
@@ -255,7 +253,7 @@ class ServiceES {
 
                             await timer(offerShiftSpan).toPromise();
                             simultaneousSendCount = 0;
-                            await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
+                            //await this.resendOfferServiceToShifts(service, offerTotalThreshold, previouslySelectedShifts, obs);
                         }
                         //re-eval service state\/
                         //console.log("TS PRE UPDATE SERVICE ===> ", Date.now());
@@ -264,8 +262,6 @@ class ServiceES {
                         obs.next(`queried Service: ${JSON.stringify({ state: service.state, minDistance: service.offer.params.minDistance })}`);
                         needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
                         needToBeCancelledBySystem = service.state === 'REQUESTED';
-                        console.log("POST TS ========> ", Date.now());
-                        console.log("-------------------------")
                     }
                 } else {
                     if (service.offer.params.minDistance !== 0) {

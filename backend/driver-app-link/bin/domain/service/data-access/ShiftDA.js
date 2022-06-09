@@ -36,8 +36,9 @@ class ShiftDA {
     if (requestedFeatures && requestedFeatures.length > 0) {
       query['vehicle.features'] = { $all: requestedFeatures };
     }
-    for (let i = 0, len = ignoredShiftsIds.length; i < len; i++) {
-      query[`offer.shifts.${ignoredShiftsIds[i]}`] = { $exists: false };
+    const ignoredIds = ignoredShiftsIds.map(id=> ({_id: {"$ne": id}}));
+    if(ignoredIds && ignoredIds.length> 0){
+      query[`$and`] = ignoredIds;
     }
 
     const aggregateQuery = [
