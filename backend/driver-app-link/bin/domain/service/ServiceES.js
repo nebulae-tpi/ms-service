@@ -96,13 +96,13 @@ class ServiceES {
         });
     }
 
-    imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId) {
+    imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, offer) {
         return Observable.create(async obs => {
 
             // precalculated offer params
-            const offerTotalSpan = parseInt(process.env.SERVICE_OFFER_TOTAL_SPAN);
-            const offerSearchSpan = parseInt(process.env.SERVICE_OFFER_SEARCH_SPAN);
-            const offerShiftSpan = parseInt(process.env.SERVICE_OFFER_SHIFT_SPAN);
+            const offerTotalSpan = parseInt((offer || {}).offerServiceOfferTotalSpan || process.env.SERVICE_OFFER_TOTAL_SPAN);
+            const offerSearchSpan = parseInt((offer || {}).offerServiceOfferSearchSpan || process.env.SERVICE_OFFER_SEARCH_SPAN);
+            const offerShiftSpan = parseInt((offer || {}).offerServiceOfferShiftSpan || process.env.SERVICE_OFFER_SHIFT_SPAN);
             const offerTotalThreshold = offerTotalSpan + Date.now();
             obs.next(`input params: ${JSON.stringify({ minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, offerTotalThreshold, referrerDriverDocumentId })}`);
 
