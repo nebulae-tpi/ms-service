@@ -13,7 +13,7 @@ spec:
         app: service-core
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.servicecore:2.9.57 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
+      - image: DOCKERHUB/service.backend.servicecore:2.9.58 # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE # SERVICE-CORE 
         name: service-core
         volumeMounts:
         - name: google-application-credentials
@@ -64,6 +64,8 @@ spec:
           value: "GMT-5"
         - name: NEARBY_VEHICLES_RATIOMTS
           value: "1500"
+        - name: APP_DRIVER_AGREEMENT
+          value: "1000"
         # RESET LOCK INITIALIZE BACKED
         - name: LOCKVERSION
           value: "07-05-19_03"

@@ -132,62 +132,88 @@ class ServiceCQRS {
         // if(shiftId === "fadd70a9-8c45-4072-981b-955a8fefd53a-2107"){
         //   console.log("llega peticion con args ===> ", args);
         //   console.log("CONSULTA Y MODIFICA CON EL TS ===> ", shiftOnAcceptServiceProcess)
-          
+
         // }else {
         //   return ShiftDA.findOpenShiftById$(request.shiftId, shiftOnAcceptServiceProcess, { state: 1, driver: 1, vehicle: 1, shiftOnAcceptServiceProcess: 1 })
         // }
-      }), 
+      }),
       first(shift => shift, undefined),
-          tap(shift => { 
-            if (!shift || (Date.now() < (shift.shiftOnAcceptServiceProcess || 0))) { 
-              throw ERROR_23101; 
-            };
-            // if(shiftId === "fadd70a9-8c45-4072-981b-955a8fefd53a-2107"){
-            //   console.log("INGRESA AL TAP Y VALIDA ===> ", shift);
-            //   if (!shift || (Date.now() < (shift.shiftOnAcceptServiceProcess || 0))) { 
-            //     console.log("CAE EN TRHOW DE TAP")
-            //     throw ERROR_23101; 
-            //   };
-            // }else {
-            //   if (!shift) { 
-            //     throw ERROR_23101; 
-            //   };
-            // }
-         }),//  invalid shift
-          map(shift => ({
-            _id: shift._id,
-            vehicle: {
-              licensePlate: shift.vehicle.licensePlate,
-              id: shift.vehicle.id
-            },
-            driver: {
-              fullname: shift.driver.fullname,
-              username: shift.driver.username,
-              documentId: shift.driver.documentId,
-              id: shift.driver.id
-            },
-          })),
-          mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
-          mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
-            'Service',
-            serviceId,
-            'ServiceAssigned',
-            { ...service, skipPersist: true },
-            authToken))), //Build and send event (event-sourcing)
-          mapTo(this.buildCommandAck()), // async command acknowledge
-          //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
-          mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
-          catchError(err => {
-            if(shiftId){
-              return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
-                mergeMap(() => GraphqlResponseTools.handleError$(err, true))
-              )
-            }else {
-              console.log("Shift id not found ====> ", err)
-              return GraphqlResponseTools.handleError$(err, true)
-            }
-           
-          } )
+      mergeMap(shift => {
+        if (!shift) { return of(shift) }
+        else {
+          return ServiceDA.findById$(serviceId,{request: 1, client: 1}).pipe(
+            map(service => {
+              const tipType = service.client.tipType; // === "VIRTUAL_WALLET"
+              const driverMainPocketAmount = (((shift.driver || {}).wallet || {}).pockets || {}).main || 0;
+  
+              const clientTip = (tipType === "VIRTUAL_WALLET")
+                  ? service.client.tip || 0 : 0;
+  
+              const payPerServicePrice = (shift.subscriptionType == "PAY_PER_SERVICE")
+                  ? shift.payPerServicePrice || 0 : 0;
+  
+              // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
+  
+              if(((service || {}).request || {}).sourceChannel === "APP_CLIENT"){
+                  
+                  return (driverMainPocketAmount >= (clientTip + parseInt(process.env.APP_DRIVER_AGREEMENT|| "1000") + payPerServicePrice)) ? shift : undefined;
+              }else {
+                  return ((clientTip + payPerServicePrice) > 0 ? driverMainPocketAmount >= (clientTip + payPerServicePrice) : true) ? shift : undefined;
+              }
+            })
+          );
+        }
+      }),
+      tap(shift => {
+        if (!shift || (Date.now() < (shift.shiftOnAcceptServiceProcess || 0))) {
+          throw ERROR_23101;
+        };
+        // if(shiftId === "fadd70a9-8c45-4072-981b-955a8fefd53a-2107"){
+        //   console.log("INGRESA AL TAP Y VALIDA ===> ", shift);
+        //   if (!shift || (Date.now() < (shift.shiftOnAcceptServiceProcess || 0))) { 
+        //     console.log("CAE EN TRHOW DE TAP")
+        //     throw ERROR_23101; 
+        //   };
+        // }else {
+        //   if (!shift) { 
+        //     throw ERROR_23101; 
+        //   };
+        // }
+      }),//  invalid shift
+      map(shift => ({
+        _id: shift._id,
+        vehicle: {
+          licensePlate: shift.vehicle.licensePlate,
+          id: shift.vehicle.id
+        },
+        driver: {
+          fullname: shift.driver.fullname,
+          username: shift.driver.username,
+          documentId: shift.driver.documentId,
+          id: shift.driver.id
+        },
+      })),
+      mergeMap(shift => ServiceDA.assignService$(serviceId, shift._id, shift.driver, shift.vehicle, location, { shiftId: 1, vehicle: 1, driver: 1, location: 1, _id: 0 })),
+      mergeMap(service => eventSourcing.eventStore.emitEvent$(this.buildEventSourcingEvent(
+        'Service',
+        serviceId,
+        'ServiceAssigned',
+        { ...service, skipPersist: true },
+        authToken))), //Build and send event (event-sourcing)
+      mapTo(this.buildCommandAck()), // async command acknowledge
+      //tap(x => ServiceCQRS.log(`ServiceCQRS.acceptServiceOffer RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
+      mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
+      catchError(err => {
+        if (shiftId) {
+          return ShiftDA.removeShifShiftOnAcceptServiceProcesstById$(shiftId).pipe(
+            mergeMap(() => GraphqlResponseTools.handleError$(err, true))
+          )
+        } else {
+          console.log("Shift id not found ====> ", err)
+          return GraphqlResponseTools.handleError$(err, true)
+        }
+
+      })
     );
   }
 
@@ -321,7 +347,7 @@ class ServiceCQRS {
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// shift does not exists
       tap(({ service, request }) => { if (!service.open) throw ERROR_23224; }),// shift is already closed
- 
+
       // mergeMap(({ service }) => forkJoin(
       //   iif( () =>  args.shiftId )
       // )),
