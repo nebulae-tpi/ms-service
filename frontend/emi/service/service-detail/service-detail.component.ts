@@ -44,6 +44,7 @@ import { ServiceDetailService } from './service-detail.service';
   templateUrl: './service-detail.component.html',
   styleUrls: ['./service-detail.component.scss']
 })
+
 // tslint:disable-next-line:class-name
 export class ServiceDetailComponent implements OnInit, OnDestroy {
   // Subject to unsubscribe
