@@ -67,6 +67,8 @@ jobs:
           root: ~/nebulae/
           paths:
             - frontend
+      - store_artifacts:
+          path: /home/circleci/nebulae/frontend/emi/
             
 # ################ API ################
 
