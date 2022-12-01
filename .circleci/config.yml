@@ -63,12 +63,13 @@ jobs:
             gitChanged frontend || export FRONTEND_SHELL_PATH=~/nebulae/frontend/emi
             gitChanged frontend || ( cd ~/nebulae/frontend/shell && sh deployment/docker/build-docker-hub.sh && cd ~/nebulae/repo/ )
             gitChanged frontend || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/frontend/DOCKERHUB_GENERATED_IMAGE_DIGEST
+            tar -czvf /home/circleci/nebulae/mydir.tar.gz /home/circleci/nebulae/frontend/emi/
       - persist_to_workspace:
           root: ~/nebulae/
           paths:
             - frontend
       - store_artifacts:
-          path: /home/circleci/nebulae/frontend/emi/
+          path: /home/circleci/nebulae/mydir.tar.gz
             
 # ################ API ################
 
