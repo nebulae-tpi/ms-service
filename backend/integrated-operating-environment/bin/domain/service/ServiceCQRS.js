@@ -304,7 +304,9 @@ class ServiceCQRS {
         businessId: authToken.businessId,
         timestamp: Date.now(),
         requestedFeatures: (requestedFeatures && requestedFeatures.length == 0) ? undefined : requestedFeatures,//no empty requestedFeatures
-        fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
+        
+        //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
+        //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
         fare: fare <= 0 ? undefined : fare,
         state: 'REQUESTED',
         stateChanges: [{
