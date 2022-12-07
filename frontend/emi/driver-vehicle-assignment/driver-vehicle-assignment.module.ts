@@ -14,8 +14,6 @@ import { ToolbarService } from '../../toolbar/toolbar.service';
 import { DialogComponent } from './dialog/dialog.component';
 
 
-
-
 const routes: Routes = [
   {
     path: '',
