@@ -418,28 +418,13 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         filter(() => (this.data.type === 0 && client != null) || ( this.data.type === 1 && this.selectedGooglePlace)),
         map(requestNumber => (this.generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount))),
         tap(rqst => console.log('Enviando REQUEST ==> ', JSON.stringify(rqst))),
-        mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
-        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
         (result: any) => {
-          if (result.data && result.data.IOERequestService && result.data.IOERequestService.accepted) {
-            this.showMessageSnackbar('SERVICES.REQUEST_SERVICE_SUCCESS');
-          }
-          const errorMessage = (result.errors || [])[0];
-          if(errorMessage && (errorMessage.extensions || {}).code){
-            this.showConfirmationDialog$("El cliente actualmente tiene solicitado un servicio por el operador "+ errorMessage.message.split("===>")[1]+ ".\n¿Desea solicitar el servicio duplicado?", "Servicio Duplicado").pipe(
-              map(() => {
-                return this.generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount, true)
-              }),
-              mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
-            ).subscribe(() => {})
-          }
-          
+          console.log("RESULT ===> ", result)
+          this.operatorWorkstationService.requestServiceSubject$.next(result)
         },
         error => {
-          this.showMessageSnackbar('SERVICES.ERROR_OPERATION');
-          console.log('Error ==> ', error);
         }
       );
   }

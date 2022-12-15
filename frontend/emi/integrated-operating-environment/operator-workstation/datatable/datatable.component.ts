@@ -31,7 +31,8 @@ import {
   debounceTime,
   distinctUntilChanged,
   bufferTime,
-  throttleTime
+  throttleTime,
+  catchError
 } from 'rxjs/operators';
 
 import { Subject, from, of, forkJoin, Observable, concat, timer } from 'rxjs';
@@ -61,6 +62,7 @@ import { KeycloakService } from 'keycloak-angular';
 import { OperatorWorkstationService } from '../operator-workstation.service';
 import { ToolbarService } from '../../../../toolbar/toolbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { ForceServiceDialogComponent } from '../force-service-dialog/force-service.component';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -146,6 +148,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.queryUserSpecs();
     this.listenLayoutChanges();
+    this.listenServiceRequests();
     this.listenToolbarCommands();
     await this.resetData();
     this.subscribeIOEServicesListener();
@@ -164,7 +167,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
         },
         error => {
           this.showMessageSnackbar('SERVICES.ERROR_OPERATION');
-          console.log('Error ==> ', error);
         }
       );
   }
@@ -208,6 +210,51 @@ export class DatatableComponent implements OnInit, OnDestroy {
         // console.log(`DatatableComponent.listenLayoutChanges: Completed`)
       },
     );
+  }
+
+  listenServiceRequests() {
+    this.operatorWorkstationService.requestServiceSubject$.pipe(
+      filter(s => (s || {}).request),
+      mergeMap(ioeRequest => {
+        return this.operatorWorkstationService.requestService$(ioeRequest).pipe(
+          mergeMap(result => {
+            if (result.data && result.data.IOERequestService && result.data.IOERequestService.accepted) {
+              this.showMessageSnackbar('SERVICES.REQUEST_SERVICE_SUCCESS');
+            }
+            const errorMessage = (result.errors || [])[0];
+            if (errorMessage && (errorMessage.extensions || {}).code) {
+              this.showConfirmationDialog$("El cliente actualmente tiene solicitado un servicio por el operador " + errorMessage.message.split("===>")[1] + ".\n¿Desea solicitar el servicio duplicado?", "Servicio Duplicado").pipe(
+                mergeMap(() => this.operatorWorkstationService.requestService$({ ...ioeRequest, forced: true })),
+              ).subscribe(() => { })
+            }
+            return of(undefined)
+          })
+        )
+      }),
+      takeUntil(this.ngUnsubscribe),
+    ).subscribe(
+      (result: any) => {
+      },
+      error => {
+        this.listenServiceRequests();
+        this.showMessageSnackbar('SERVICES.ERROR_OPERATION');
+      }
+    );
+  }
+
+  showConfirmationDialog$(dialogMessage, dialogTitle) {
+    return this.dialog
+      // Opens confirm dialog
+      .open(ForceServiceDialogComponent, {
+        data: {
+          dialogMessage,
+          dialogTitle
+        }
+      })
+      .afterClosed()
+      .pipe(
+        filter(okButton => okButton),
+      );
   }
 
   /**
@@ -575,9 +622,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
     const selectedRow = this.getSelectedRow();
     if (selectedRow) {
       let rawRequest = {
-        client: {...selectedRow.serviceRef.client, __typename: undefined, businessId: undefined, clientId: undefined, id: (selectedRow.serviceRef.client || {}).id},
-        pickUp: {...selectedRow.serviceRef.pickUp, __typename: undefined, marker: {...selectedRow.serviceRef.pickUp.marker, __typename: undefined}},
-        paymentType:  'CASH',
+        client: { ...selectedRow.serviceRef.client, __typename: undefined, businessId: undefined, clientId: undefined, id: (selectedRow.serviceRef.client || {}).id },
+        pickUp: { ...selectedRow.serviceRef.pickUp, __typename: undefined, marker: { ...selectedRow.serviceRef.pickUp.marker, __typename: undefined } },
+        paymentType: 'CASH',
         requestedFeatures: (selectedRow.serviceRef.requestedFeatures || []),
         dropOff: null,
         // dropOffSpecialType: destinationOptionsGroup,
@@ -732,7 +779,6 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
   onRowSelected(serviceRow) {
-    console.log(serviceRow);
     this.selectedServiceId = serviceRow.serviceRef.id;
     this.partialData = this.partialData.map(pd => ({ ...pd, selected: this.selectedServiceId === pd.id ? '>' : '', }));
   }

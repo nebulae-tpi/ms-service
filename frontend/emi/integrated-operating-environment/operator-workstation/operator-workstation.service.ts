@@ -45,6 +45,11 @@ export class OperatorWorkstationService {
    * layout dimension observable
    */
   layoutChanges$ = new BehaviorSubject(undefined);
+
+  /**
+   * layout dimension observable
+   */
+  requestServiceSubject$ = new BehaviorSubject(undefined);
   /**
    * toolbar commands bus
    */
