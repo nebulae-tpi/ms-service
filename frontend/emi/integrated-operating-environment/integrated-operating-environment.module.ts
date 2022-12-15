@@ -28,6 +28,7 @@ import { MapComponent as GodsEyeMapComponent } from './gods-eye/map/map.componen
 import { AgmCoreModule, GoogleMapsAPIWrapper } from '@agm/core';
 import { environment } from '../../../../environments/environment';
 import { CurrencyMaskModule } from 'ng2-currency-mask';
+import { ForceServiceDialogComponent } from './operator-workstation/force-service-dialog/force-service.component';
 
 
 
@@ -66,6 +67,7 @@ const routes: Routes = [
     WorkstationInboxComponent,
     WorkstationDatatableComponent,
     WorkstationRequestServiceDialogComponent,
+    ForceServiceDialogComponent,
 
     GodsEyeComponent,
     GodsEyeToolbarComponent,
@@ -74,7 +76,7 @@ const routes: Routes = [
     ServiceCardComponent,
     GodsEyeMapComponent
   ],
-  entryComponents: [WorkstationRequestServiceDialogComponent],
+  entryComponents: [WorkstationRequestServiceDialogComponent, ForceServiceDialogComponent],
   providers: [OperatorWorkstationService, GodsEyeService, HotkeysService, DatePipe]
 })
 

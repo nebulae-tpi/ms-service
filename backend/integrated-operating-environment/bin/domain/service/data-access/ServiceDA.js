@@ -35,6 +35,18 @@ class ServiceDA {
   }
 
   /**
+  * Gets service by its _id.
+  * @returns {Observable}
+  */
+  static findByClientId$(clientId, currentYYMM, projection = undefined) {
+    const query = { "client.id": clientId, state: "REQUESTED" };
+    return defer(() =>
+      mongoDB.getHistoricalDbByYYMM(currentYYMM).collection(CollectionName).findOne(query, { projection })
+    );
+  }
+
+
+  /**
    * Finds services by filters
    */
   static findByFilters$(businessId, states, channels, operatorId, page, count, monthsToAdd = 0, projection = undefined) {
@@ -43,7 +55,7 @@ class ServiceDA {
       query.state = { "$in": states };
     }
     if (channels && channels.length > 0) {
-      if(channels.includes("CLIENT")){
+      if (channels.includes("CLIENT")) {
         channels.push("APP_CLIENT")
       }
       query["request.sourceChannel"] = { "$in": channels };

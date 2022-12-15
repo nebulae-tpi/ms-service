@@ -72,6 +72,7 @@ import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 //////////  Angular Google Maps API //////////
 import { MapsAPILoader } from '@agm/core';
 import { environment } from '../../../../../../environments/environment';
+import { ForceServiceDialogComponent } from '../force-service-dialog/force-service.component';
 
 const SPECIAL_DESTINATION_PRICE_MODS = { '5000': 5000, '10000': 10000 };
 
@@ -335,7 +336,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
             lng: this.selectedGooglePlace.coords.longitude
           }
         },
-        fareDiscount: !environment.disableBusinessFareDiscountList.split(",").some(d => d === this.selectedBusinessId) && this.data.type === 1 ? 0.1 : undefined,
+        fareDiscount: undefined,
         tip: rawRequest.clientTip
       };
     }
@@ -345,6 +346,69 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     this.dialogRef.close();
   }
 
+  showConfirmationDialog$(dialogMessage, dialogTitle) {
+    return this.dialog
+      // Opens confirm dialog
+      .open(ForceServiceDialogComponent, {
+        data: {
+          dialogMessage,
+          dialogTitle
+        }
+      })
+      .afterClosed()
+      .pipe(
+        filter(okButton => okButton),
+      );
+  }
+  generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount, forced = false){
+    return {
+      client: {
+        id: client._id,
+        fullname: client.generalInfo.name,
+        username: client.auth ? client.auth.username : null,
+        tip : this.doorMenOptions
+          ? this.doorMenOptions[this.selectedIndexDoorman].tip
+          : (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
+            ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
+            : client.satelliteInfo
+              ? client.satelliteInfo.tip
+              : 0,
+        tipType: this.doorMenOptions
+          ? this.doorMenOptions[this.selectedIndexDoorman].tipType
+          : client.satelliteInfo ? client.satelliteInfo.tipType : '',
+        tipClientId: this.doorMenOptions ? this.doorMenOptions[this.selectedIndexDoorman].clientId : client._id,
+        referrerDriverDocumentId: client.satelliteInfo ? client.satelliteInfo.referrerDriverDocumentId : null,
+        offerMinDistance: client.satelliteInfo ? client.satelliteInfo.offerMinDistance : null,
+        offerMaxDistance: client.satelliteInfo ? client.satelliteInfo.offerMaxDistance : null,
+      },
+      pickUp: {
+        marker: {
+          lat: client.location.lat,
+          lng: client.location.lng,
+        },
+        unaccurateLocation: client.generalInfo.unaccurateLocation,
+        polygon: null,
+        city: client.generalInfo.city,
+        zone: client.generalInfo.zone,
+        neighborhood: client.generalInfo.neighborhood,
+        addressLine1: client.generalInfo.addressLine1,
+        addressLine2: client.generalInfo.addressLine2,
+        notes: client.generalInfo.notes
+      },
+      forced,
+      paymentType,
+      requestedFeatures: featureOptionsGroup,
+      dropOff: null,
+      // dropOffSpecialType: destinationOptionsGroup,
+      fareDiscount,
+      fare,
+      tip,
+      request: {
+        sourceChannel: 'OPERATOR',
+        destChannel: 'DRIVER_APP',
+      }
+    }
+  }
   /**
    * Send the request service command to the server
    */
@@ -352,52 +416,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
     return range(1, quantity || 1)
       .pipe(
         filter(() => (this.data.type === 0 && client != null) || ( this.data.type === 1 && this.selectedGooglePlace)),
-        map(requestNumber => ({
-          client: {
-            id: client._id,
-            fullname: client.generalInfo.name,
-            username: client.auth ? client.auth.username : null,
-            tip : this.doorMenOptions
-              ? this.doorMenOptions[this.selectedIndexDoorman].tip
-              : (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
-                ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
-                : client.satelliteInfo
-                  ? client.satelliteInfo.tip
-                  : 0,
-            tipType: this.doorMenOptions
-              ? this.doorMenOptions[this.selectedIndexDoorman].tipType
-              : client.satelliteInfo ? client.satelliteInfo.tipType : '',
-            tipClientId: this.doorMenOptions ? this.doorMenOptions[this.selectedIndexDoorman].clientId : client._id,
-            referrerDriverDocumentId: client.satelliteInfo ? client.satelliteInfo.referrerDriverDocumentId : null,
-            offerMinDistance: client.satelliteInfo ? client.satelliteInfo.offerMinDistance : null,
-            offerMaxDistance: client.satelliteInfo ? client.satelliteInfo.offerMaxDistance : null,
-          },
-          pickUp: {
-            marker: {
-              lat: client.location.lat,
-              lng: client.location.lng,
-            },
-            unaccurateLocation: client.generalInfo.unaccurateLocation,
-            polygon: null,
-            city: client.generalInfo.city,
-            zone: client.generalInfo.zone,
-            neighborhood: client.generalInfo.neighborhood,
-            addressLine1: client.generalInfo.addressLine1,
-            addressLine2: client.generalInfo.addressLine2,
-            notes: client.generalInfo.notes
-          },
-          paymentType,
-          requestedFeatures: featureOptionsGroup,
-          dropOff: null,
-          // dropOffSpecialType: destinationOptionsGroup,
-          fareDiscount,
-          fare,
-          tip,
-          request: {
-            sourceChannel: 'OPERATOR',
-            destChannel: 'DRIVER_APP',
-          }
-        })),
+        map(requestNumber => (this.generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount))),
         tap(rqst => console.log('Enviando REQUEST ==> ', JSON.stringify(rqst))),
         mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
         takeUntil(this.ngUnsubscribe)
@@ -407,6 +426,16 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           if (result.data && result.data.IOERequestService && result.data.IOERequestService.accepted) {
             this.showMessageSnackbar('SERVICES.REQUEST_SERVICE_SUCCESS');
           }
+          const errorMessage = (result.errors || [])[0];
+          if(errorMessage && (errorMessage.extensions || {}).code){
+            this.showConfirmationDialog$("El cliente actualmente tiene solicitado un servicio por el operador "+ errorMessage.message.split("===>")[1]+ ".\n¿Desea solicitar el servicio duplicado?", "Servicio Duplicado").pipe(
+              map(() => {
+                return this.generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount, true)
+              }),
+              mergeMap(ioeRequest => this.operatorWorkstationService.requestService$(ioeRequest)),
+            ).subscribe(() => {})
+          }
+          
         },
         error => {
           this.showMessageSnackbar('SERVICES.ERROR_OPERATION');
@@ -461,7 +490,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
    * @param messageKey Key of the message to i18n
    * @param detailMessageKey Key of the detail message to i18n
    */
-  showMessageSnackbar(messageKey, detailMessageKey?) {
+  showMessageSnackbar(messageKey, detailMessageKey?, duration= 2000) {
     const translationData = [];
     if (messageKey) {
       translationData.push(messageKey);
@@ -476,7 +505,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         messageKey ? data[messageKey] : '',
         detailMessageKey ? data[detailMessageKey] : '',
         {
-          duration: 2000
+          duration
         }
       );
     });

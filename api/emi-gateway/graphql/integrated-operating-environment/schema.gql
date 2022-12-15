@@ -381,6 +381,7 @@ type Mutation {
         tip: Int
         "request metadata"
         request: RequestInput
+        forced: Boolean
     ): IOECommandAck
 
     "Cancel a requested service"

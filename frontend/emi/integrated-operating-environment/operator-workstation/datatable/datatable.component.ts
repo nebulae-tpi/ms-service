@@ -573,29 +573,10 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
   duplicateService() {
     const selectedRow = this.getSelectedRow();
-    console.log("Selected ROW===> ", selectedRow)
     if (selectedRow) {
       let rawRequest = {
-        client: {
-          id: ((selectedRow || {}).serviceRef.client || {}).clientId,
-          fullname: selectedRow.client_name.toUpperCase(),
-          username: null,
-          tip: selectedRow.serviceRef.tip,
-          referrerDriverDocumentId:  null,
-          offerMinDistance:  null,
-          offerMaxDistance: null,
-        },
-        pickUp: {
-          marker: {
-            lat: selectedRow.serviceRef.pickUp.marker.lat,
-            lng: selectedRow.serviceRef.pickUp.marker.lng,
-          },
-          polygon: null,
-          unaccurateLocation: selectedRow.serviceRef.pickUp.unaccurateLocation,
-          neighborhood: selectedRow.serviceRef.pickUp.neighborhood,
-          addressLine1: selectedRow.serviceRef.pickUp.addressLine1,
-          addressLine2: selectedRow.serviceRef.pickUp.addressLine2,
-        },
+        client: {...selectedRow.serviceRef.client, __typename: undefined, businessId: undefined, clientId: undefined, id: (selectedRow.serviceRef.client || {}).id},
+        pickUp: {...selectedRow.serviceRef.pickUp, __typename: undefined, marker: {...selectedRow.serviceRef.pickUp.marker, __typename: undefined}},
         paymentType:  'CASH',
         requestedFeatures: (selectedRow.serviceRef.requestedFeatures || []),
         dropOff: null,

@@ -18,7 +18,7 @@ const {
   INTERNAL_SERVER_ERROR_CODE,
   PERMISSION_DENIED,
   ERROR_23100, ERROR_23101, ERROR_23102, ERROR_23103, ERROR_23104, ERROR_23105,
-  ERROR_23200, ERROR_23201, ERROR_23202, ERROR_23203, ERROR_23204, ERROR_23205, ERROR_23206, ERROR_23207, ERROR_23208, ERROR_23209, ERROR_23210, ERROR_23211,
+  ERROR_23200, ERROR_23201, ERROR_23202, ERROR_23203, ERROR_23204, ERROR_23205, ERROR_23206, ERROR_23207, ERROR_23208, ERROR_23209, ERROR_23210, ERROR_23212, ERROR_23211,
   ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229,
 } = require("../../tools/customError");
 
@@ -99,11 +99,23 @@ class ServiceCQRS {
    * @param {*} authToken 
    */
   requestServices$({ root, args, jwt }, authToken) {
-    const { id } = args;
+    const { id, forced } = args;
     //ServiceCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "ioe.ServiceCQRS", "requestServices", PERMISSION_DENIED, READ_WRITE_ROLES).pipe(
       mapTo(args),
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
+      mergeMap(request => {
+        const currentYYMM = dateFormat(new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), "yymm")
+        return ServiceDA.findByClientId$(request.client.id, currentYYMM).pipe(
+          tap(serviceToValidate => {
+            console.log("ARGS ===> ", args)
+            if(serviceToValidate && serviceToValidate._id && !forced){
+              throw new CustomError('RequestServicesError', `RequestServices`, 23212, 'Client with requested service ===>' + serviceToValidate.request.creationOperatorUsername)
+            }
+          }),
+          mapTo(request)
+        )
+      }),
       mergeMap(request => BusinessDA.getBusiness$(authToken.businessId).pipe(
         map(business => ([request,business]))
       )),

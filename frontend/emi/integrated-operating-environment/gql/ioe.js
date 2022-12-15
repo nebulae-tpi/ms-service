@@ -2,8 +2,8 @@ import gql from "graphql-tag";
 
 // MUTATIONS
 export const IOERequestService = gql`
-  mutation IOERequestService($client: IOEClientInput!, $pickUp: IOELocationInput!, $paymentType: String!, $requestedFeatures: [String], $dropOff: IOELocationInput, $dropOffSpecialType: String, $fareDiscount: Float, $fare: Int, $tip: Int, $request: RequestInput){
-    IOERequestService(client: $client, pickUp: $pickUp, paymentType: $paymentType, requestedFeatures: $requestedFeatures, dropOff: $dropOff, dropOffSpecialType: $dropOffSpecialType, fareDiscount: $fareDiscount, fare: $fare, tip: $tip,  request: $request){
+  mutation IOERequestService($client: IOEClientInput!, $pickUp: IOELocationInput!, $paymentType: String!, $requestedFeatures: [String], $dropOff: IOELocationInput, $dropOffSpecialType: String, $fareDiscount: Float, $fare: Int, $tip: Int, $request: RequestInput, $forced: Boolean){
+    IOERequestService(client: $client, pickUp: $pickUp, paymentType: $paymentType, requestedFeatures: $requestedFeatures, dropOff: $dropOff, dropOffSpecialType: $dropOffSpecialType, fareDiscount: $fareDiscount, fare: $fare, tip: $tip,  request: $request, forced: $forced){
       accepted
     }
   }

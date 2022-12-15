@@ -136,6 +136,7 @@ export class OperatorWorkstationService {
           fareDiscount: IOERequest.fareDiscount,
           fare: IOERequest.fare,
           tip: IOERequest.tip,
+          forced: IOERequest.forced,
           request: IOERequest.request
         },
         errorPolicy: 'all'
