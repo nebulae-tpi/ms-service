@@ -105,16 +105,21 @@ class ServiceCQRS {
       mapTo(args),
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
       mergeMap(request => {
-        const currentYYMM = dateFormat(new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), "yymm")
-        return ServiceDA.findByClientId$(request.client.id, currentYYMM).pipe(
-          tap(serviceToValidate => {
-            console.log("ARGS ===> ", args)
-            if(serviceToValidate && serviceToValidate._id && !forced){
-              throw new CustomError('RequestServicesError', `RequestServices`, 23212, 'Client with requested service ===>' + serviceToValidate.request.creationOperatorUsername)
-            }
-          }),
-          mapTo(request)
-        )
+        const currentYYMM = dateFormat(new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), "yymm");
+        if(request.client.id !== undefined){
+          return ServiceDA.findByClientId$(request.client.id, currentYYMM).pipe(
+            tap(serviceToValidate => {
+              if(serviceToValidate && serviceToValidate._id && !forced){
+                throw new CustomError('RequestServicesError', `RequestServices`, 23212, 'Client with requested service ===>' + serviceToValidate.request.creationOperatorUsername)
+              }
+            }),
+            mapTo(request)
+          )
+        }
+        else {
+          return of(request)
+        }
+        
       }),
       mergeMap(request => BusinessDA.getBusiness$(authToken.businessId).pipe(
         map(business => ([request,business]))
