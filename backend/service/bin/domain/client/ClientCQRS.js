@@ -53,6 +53,7 @@ class ClientCQRS {
    * @param {*} authToken 
    */
   getSatelliteClients$({ args }, authToken) {
+    console.log("TEST =====>")
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "Client",
@@ -73,7 +74,7 @@ class ClientCQRS {
       mergeMap(rawResponse => {
         return GraphqlResponseTools.buildSuccessResponse$(rawResponse);
       }),
-      catchError(err => GraphqlResponseTools.handleError$(err))
+      //catchError(err => GraphqlResponseTools.handleError$(err))
     );
   }
 

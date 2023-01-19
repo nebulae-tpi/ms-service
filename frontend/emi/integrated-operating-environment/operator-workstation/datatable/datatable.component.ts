@@ -222,7 +222,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
               this.showMessageSnackbar('SERVICES.REQUEST_SERVICE_SUCCESS');
             }
             const errorMessage = (result.errors || [])[0];
-            if (errorMessage && (errorMessage.extensions || {}).code) {
+            if (errorMessage && (errorMessage.extensions || {}).code === 23212) {
               this.showConfirmationDialog$("El cliente actualmente tiene solicitado un servicio por el operador " + errorMessage.message.split("===>")[1] + ".\n¿Desea solicitar el servicio duplicado?", "Servicio Duplicado").pipe(
                 mergeMap(() => this.operatorWorkstationService.requestService$({ ...ioeRequest, forced: true })),
               ).subscribe(() => { })

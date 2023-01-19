@@ -106,7 +106,7 @@ class ServiceCQRS {
       tap(request => this.validateServiceRequestInput({ ...request, businessId: authToken.businessId })),
       mergeMap(request => {
         const currentYYMM = dateFormat(new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), "yymm");
-        if(request.client.id !== undefined){
+        if(request.client.id !== null){
           return ServiceDA.findByClientId$(request.client.id, currentYYMM).pipe(
             tap(serviceToValidate => {
               if(serviceToValidate && serviceToValidate._id && !forced){
@@ -125,7 +125,7 @@ class ServiceCQRS {
         map(business => ([request,business]))
       )),
       mergeMap(([request,business]) => eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, business))), //Build and send ServiceRequested event (event-sourcing)
-      mapTo(this.buildCommandAck()), // async command acknowledge
+      mapTo(this.buildCommandAck()), // async comman--d acknowledge
       // tap(x => ServiceCQRS.log(`ServiceCQRS.requestServices RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
       catchError(err => GraphqlResponseTools.handleError$(err, true))
