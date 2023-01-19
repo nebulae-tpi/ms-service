@@ -13,7 +13,7 @@ spec:
         app: integrated-operating-environment
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.integratedoperatingenvironment:1.2.26 # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment 
+      - image: DOCKERHUB/service.backend.integratedoperatingenvironment:1.2.27 # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment # integrated-operating-environment 
         name: integrated-operating-environment
         volumeMounts:
         - name: google-application-credentials
