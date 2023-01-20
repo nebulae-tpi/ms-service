@@ -29,7 +29,7 @@ class ClientBotLinkCQRS {
     //#region Object builders
 
     processMessageReceived$({ args }, authToken) {
-        console.log("ARGS ===> ", args);
+        console.log("ARGS ====> ", args);
         return of("TEST")
       }
 
