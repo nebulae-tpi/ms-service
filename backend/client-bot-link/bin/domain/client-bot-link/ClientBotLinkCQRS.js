@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, timer, forkJoin, Observable, iif, from, empty } = require("rxjs");
+const { of, timer, forkJoin, Observable, iif, from, empty, defer } = require("rxjs");
 const { toArray, mergeMap, map, tap, filter, delay, mapTo, switchMap } = require('rxjs/operators');
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
@@ -29,8 +29,32 @@ class ClientBotLinkCQRS {
     //#region Object builders
 
     processMessageReceived$({ args }, authToken) {
-        console.log("ARGS ====> ", args);
-        return of("TEST")
+        return from(args.messages).pipe(
+            mergeMap(message => {
+                const content = {
+                    "recipient_type": "individual",
+                    "to": message.from,
+                    "type": "text",
+                    "text": {
+                        "body": "ESTOY VIVO!!!!!"
+                    }
+                  }
+                return defer(()=> {
+                    return fetch("https://waba.360dialog.io/v1/messages/", {
+                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                        mode: 'cors', // no-cors, *cors, same-origin
+                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'D360-API-KEY': process.env.D360_API_KEY,
+                        },
+                        redirect: 'follow', // manual, *follow, error
+                        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                        body: JSON.stringify(content) 
+                      });
+                })
+            })
+        )
       }
 
 
