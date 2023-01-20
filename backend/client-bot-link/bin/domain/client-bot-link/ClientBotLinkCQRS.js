@@ -29,58 +29,64 @@ class ClientBotLinkCQRS {
     //#region Object builders
 
     processMessageReceived$({ args }, authToken) {
-        return from(args.messages).pipe(
-            tap(message => {
-                const content = {
-                    "recipient_type": "individual",
-                    "to": message.from,
-                    "type": "text",
-                    "text": {
-                        "body": "ESTOY VIVO!!!!!"
-                    }
-                  }
-                const options = {
-                    protocol: 'https:',
-                    hostname: 'waba.360dialog.io',
-                    path: '/v1/messages/',
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'D360-API-KEY': process.env.D360_API_KEY,
-                    }
-                  }
-                const req = https.request(options, res => {
-                    let data = ''
-                
-                    res.on('data', chunk => {
-                      data += chunk
-                    })
-                
-                    res.on('end', () => {
-                      console.log(JSON.parse(data))
-                    })
-                  })
-                  .on('error', err => {
-                    console.log('Error: ', err.message)
-                  })
-                req.write(JSON.stringify(content))
-                req.end()
-                // return defer(()=> {
-                //     return fetch("https://waba.360dialog.io/v1/messages/", {
-                //         method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                //         mode: 'cors', // no-cors, *cors, same-origin
-                //         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-                //         headers: {
-                //           'Content-Type': 'application/json',
-                //           'D360-API-KEY': process.env.D360_API_KEY,
-                //         },
-                //         redirect: 'follow', // manual, *follow, error
-                //         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                //         body: JSON.stringify(content) 
-                //       });
-                // })
-            })
-        )
+        console.log("MESSAGES ====> ", args)
+        if(args.messages){
+            return from(args.messages).pipe(
+                tap(message => {
+                    const content = {
+                        "recipient_type": "individual",
+                        "to": message.from,
+                        "type": "text",
+                        "text": {
+                            "body": "ESTOY VIVO!!!!!"
+                        }
+                      }
+                    const options = {
+                        protocol: 'https:',
+                        hostname: 'waba.360dialog.io',
+                        path: '/v1/messages/',
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'D360-API-KEY': process.env.D360_API_KEY,
+                        }
+                      }
+                    const req = https.request(options, res => {
+                        let data = ''
+                    
+                        res.on('data', chunk => {
+                          data += chunk
+                        })
+                    
+                        res.on('end', () => {
+                          console.log(JSON.parse(data))
+                        })
+                      })
+                      .on('error', err => {
+                        console.log('Error: ', err.message)
+                      })
+                    req.write(JSON.stringify(content))
+                    req.end()
+                    // return defer(()=> {
+                    //     return fetch("https://waba.360dialog.io/v1/messages/", {
+                    //         method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    //         mode: 'cors', // no-cors, *cors, same-origin
+                    //         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    //         headers: {
+                    //           'Content-Type': 'application/json',
+                    //           'D360-API-KEY': process.env.D360_API_KEY,
+                    //         },
+                    //         redirect: 'follow', // manual, *follow, error
+                    //         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    //         body: JSON.stringify(content) 
+                    //       });
+                    // })
+                })
+            )
+        }else {
+            return of("IGNORED")
+        }
+        
       }
 
 
