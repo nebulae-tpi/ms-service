@@ -328,6 +328,33 @@ jobs:
           paths: 
             - backend
 
+  build-backend-client-bot-link:    
+    working_directory: ~/nebulae/
+    docker:
+      - image: circleci/node:10.15.1
+        command: bash
+    steps:
+      - attach_workspace:
+          at: ~/nebulae
+      - setup_remote_docker      
+      - run:
+          name: Build docker image for backend <client-bot-link>
+          command: |
+            source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
+            cd ~/nebulae/repo/
+            mkdir ~/nebulae/backend
+            cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/client-bot-link/
+            export DOCKERHUB_IMAGE=service.backend.client-bot-link
+            export DOCKERHUB_TAG=1.0.0  # client-bot-link
+            gitChanged backend/client-bot-link || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/client-bot-link/
+            gitChanged backend/client-bot-link || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+            gitChanged backend/client-bot-link || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
+            gitChanged backend/client-bot-link || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest      
+      - persist_to_workspace:
+          root: ~/nebulae/
+          paths: 
+            - backend
+
 # ################ DEPLOYMENT ################ 
 
   deploy-dev:
@@ -460,6 +487,15 @@ workflows:
             branches:
               only:
                 - develop
+      - build-backend-client-bot-link:
+          context: TPI
+          requires:
+            - prepare
+            - build-mbinit      
+          filters:
+            branches:
+              only:
+                - develop
       - deploy-dev:
           context: TPI
           requires:
@@ -469,6 +505,7 @@ workflows:
             - build-api-emi            
             - build-backend-driver-app-link
             - build-backend-integrated-operating-environment
+            - build-backend-client-bot-link
             - build-backend-service
             - build-backend-service-core
           filters:
@@ -551,6 +588,16 @@ workflows:
             branches:
               only:
                 - master
+      - build-backend-client-bot-link:
+          context: TPI_PROD
+          name: build-backend-client-bot-link-prod
+          requires:
+            - prepare
+            - build-mbinit      
+          filters:
+            branches:
+              only:
+                - master
       - deploy-dev:
           context: TPI_PROD
           name: deploy-dev-prod
@@ -561,6 +608,7 @@ workflows:
             - build-api-emi-prod            
             - build-backend-driver-app-link-prod
             - build-backend-integrated-operating-environment-prod
+            - build-backend-client-bot-link-prod
             - build-backend-service-prod
             - build-backend-service-core-prod
           filters:
