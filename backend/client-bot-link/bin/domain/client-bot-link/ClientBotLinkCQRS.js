@@ -33,15 +33,8 @@ class ClientBotLinkCQRS {
     if (args.messages) {
       return from(args.messages).pipe(
         tap(message => {
-          this.markMessageAsRead(message)
-          const content = {
-            "recipient_type": "individual",
-            "to": message.from,
-            "type": "text",
-            "text": {
-              "body": "ESTOY VIVO!!!!!"
-            }
-          }
+          this.markMessageAsRead(message);
+          const content = this.assignAction(message);
           const options = {
             protocol: 'https:',
             hostname: 'waba.360dialog.io',
@@ -76,6 +69,115 @@ class ClientBotLinkCQRS {
 
   }
 
+  assignAction(message) {
+    const content = {
+      "recipient_type": "individual",
+      "to": message.from,
+      "type": "interactive",
+    }
+
+    switch (message.text.body) {
+      case "Nueva Lista":
+        content.interactive = {
+          "type": "list",
+          "header": {
+            "type": "text",
+            "text": "Hola, Bienvenido al TX Bot"
+          },
+          "body": {
+            "text": "Nueva lista generada"
+          },
+          "footer": {
+            "text": ""
+          },
+          "action": {
+            "button": "cta-button-content",
+            "sections": [
+              {
+                "title": "Opciones Interactivas",
+                "rows": [
+                  {
+                    "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
+                    "title": "Nueva Lista"
+                  },
+                  {
+                    "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
+                    "title": "Nuevo Boton"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        break;
+      case "Nuevo Boton":
+        content.interactive = {
+          "type": "button",
+          "header": {
+            "type": "text",
+            "text": "Ejemplo Boton Interactivo"
+          },
+          "body": {
+            "text": "Este es un ejemplo de boton interactivo"
+          },
+          "footer": {
+            "text": "pie de pagína"
+          },
+          "action": {
+            "buttons": [
+              {
+                "type": "reply",
+                "reply": {
+                  "id": "a3c3596f-6339-4cdd-870b-26b7957285cb",
+                  "title": "Boton 1"
+                }
+              },
+              {
+                "type": "reply",
+                "reply": {
+                  "id": "a4d5f308-e3b6-4b3a-b820-3699b47cbfb8",
+                  "title": "Boton 2"
+                }
+              }
+            ]
+          }
+        }
+        break;
+      default:
+        content.interactive = {
+          "type": "list",
+          "header": {
+            "type": "text",
+            "text": "Hola, Bienvenido al TX Bot"
+          },
+          "body": {
+            "text": "Este es un ejemplo de mensajes interactivos, por favor seleccione una opción de la lista presentada"
+          },
+          "footer": {
+            "text": ""
+          },
+          "action": {
+            "button": "cta-button-content",
+            "sections": [
+              {
+                "title": "Opciones Interactivas",
+                "rows": [
+                  {
+                    "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
+                    "title": "Nueva Lista"
+                  },
+                  {
+                    "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
+                    "title": "Nuevo Boton"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        break;
+    }
+  }
 
   markMessageAsRead(message) {
     const content = {
