@@ -60,7 +60,7 @@ class ClientBotLinkCQRS {
             })
 
             res.on('end', () => {
-              console.log(JSON.parse(data))
+              //console.log(JSON.parse(data))
             })
           })
             .on('error', err => {
@@ -99,7 +99,7 @@ class ClientBotLinkCQRS {
       })
 
       res.on('end', () => {
-        console.log(JSON.parse(data))
+        console.log("RESP  ===> ", JSON.parse(data))
       })
     })
       .on('error', err => {
