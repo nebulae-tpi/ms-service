@@ -31,10 +31,12 @@ class ClientBotLinkCQRS {
   processMessageReceived$({ args }, authToken) {
     console.log("MESSAGES ====> ", JSON.stringify(args));
     if (args.messages) {
+      const concacts = args.contacts;
       return from(args.messages).pipe(
         tap(message => {
           this.markMessageAsRead(message);
-          const content = this.assignAction(message);
+          const profileName = ((concacts.find(c => c.wa_id === message.from) || {}).profile || {}).name;
+          const content = this.assignAction(message, profileName);
           const options = {
             protocol: 'https:',
             hostname: 'waba.360dialog.io',
@@ -69,20 +71,20 @@ class ClientBotLinkCQRS {
 
   }
 
-  assignAction(message) {
+  assignAction(message, name) {
     const content = {
       "recipient_type": "individual",
       "to": message.from,
       "type": "interactive",
     }
 
-    switch ((message.interactive|| {}).type) {
-      case "list_reply":
+    switch (((message.interactive|| {}).list_reply || {}).title) {
+      case "Nueva Lista":
         content.interactive = {
           "type": "list",
           "header": {
             "type": "text",
-            "text": "Hola, Bienvenido al TX Bot"
+            "text": `Hola ${name}, Bienvenido al TX Bot`
           },
           "body": {
             "text": "Nueva lista generada"
@@ -148,7 +150,7 @@ class ClientBotLinkCQRS {
           "type": "list",
           "header": {
             "type": "text",
-            "text": "Hola, Bienvenido al TX Bot"
+            "text": `Hola ${name}, Bienvenido al TX Bot`
           },
           "body": {
             "text": "Este es un ejemplo de mensajes interactivos, por favor seleccione una opción de la lista presentada"
