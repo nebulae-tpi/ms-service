@@ -93,7 +93,7 @@ class ClientBotLinkCQRS {
             "text": ""
           },
           "action": {
-            "button": "cta-button-content",
+            "button": "menú",
             "sections": [
               {
                 "title": "Opciones Interactivas",
@@ -159,7 +159,7 @@ class ClientBotLinkCQRS {
             "text": ""
           },
           "action": {
-            "button": "cta-button-content",
+            "button": "menú",
             "sections": [
               {
                 "title": "Opciones Interactivas",
