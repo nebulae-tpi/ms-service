@@ -76,8 +76,8 @@ class ClientBotLinkCQRS {
       "type": "interactive",
     }
 
-    switch (message.text.body) {
-      case "Nueva Lista":
+    switch ((message.interactive|| {}).type) {
+      case "list_reply":
         content.interactive = {
           "type": "list",
           "header": {
