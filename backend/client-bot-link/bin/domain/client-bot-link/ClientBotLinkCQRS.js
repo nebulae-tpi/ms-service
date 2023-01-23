@@ -177,6 +177,7 @@ class ClientBotLinkCQRS {
         }
         break;
     }
+    return content;
   }
 
   markMessageAsRead(message) {
