@@ -46,7 +46,7 @@ class ClientBotLinkCQRS {
       const concacts = args.contacts;
       return from(args.messages).pipe(
         mergeMap(message => {
-          return BotConversationDA.getBotConversation$(message.from, message.timestamp).pipe(
+          return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
                 this.continueConversation(message)
