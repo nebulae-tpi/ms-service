@@ -163,7 +163,9 @@ class ClientBotLinkCQRS {
   }
   
   initConversation$(id, conversationContent){
-    return ClientDA.getClientByPhoneNumber$(conversationContent.waId.replace("57", "")).pipe(
+    const phoneNumber = conversationContent.waId.replace("57", "");
+    console.log("PHONE NUMBER ===> ", phoneNumber);
+    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber)).pipe(
       mergeMap(client => {
         if((client || {})._id){
           return BotConversationDA.createConversation$(id, conversationContent).pipe(
