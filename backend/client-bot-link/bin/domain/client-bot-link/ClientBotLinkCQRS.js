@@ -51,72 +51,7 @@ class ClientBotLinkCQRS {
               if ((conversation || {})._id) {
                 this.continueConversation(message,conversation)
                 //ACA REALIZAR EL PROCESO DE SOLICITUD DE SERVICIO
-                return of({}).pipe(
-                  tap(() => {
-                    const content = {
-                      "recipient_type": "individual",
-                      "to": message.from,
-                      "type": "interactive",
-                      "interactive": {
-                        "type": "button",
-                        "header": {
-                          "type": "text",
-                          "text": "Continuación del proceso"
-                        },
-                        "body": {
-                          "text": "En creacion"
-                        },
-                        "footer": {
-                          "text": ""
-                        },
-                        "action": {
-                          "buttons": [
-                            {
-                              "type": "reply",
-                              "reply": {
-                                "id": "a3c3596f-6339-4cdd-870b-26b7957285cb",
-                                "title": "TEST"
-                              }
-                            },
-                            {
-                              "type": "reply",
-                              "reply": {
-                                "id": "a4d5f308-e3b6-4b3a-b820-3699b47cbfb8",
-                                "title": "TEST2"
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    }
-                    const options = {
-                      protocol: 'https:',
-                      hostname: 'waba.360dialog.io',
-                      path: '/v1/messages/',
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'D360-API-KEY': process.env.D360_API_KEY,
-                      }
-                    }
-                    const req = https.request(options, res => {
-                      let data = ''
-
-                      res.on('data', chunk => {
-                        data += chunk
-                      })
-
-                      res.on('end', () => {
-                        //console.log(JSON.parse(data))
-                      })
-                    })
-                      .on('error', err => {
-                        console.log('Error: ', err.message)
-                      })
-                    req.write(JSON.stringify(content))
-                    req.end();
-                  })
-                )
+                return of({});
               } else {
                 return this.initConversation$(message.from, {
                   waId: message.from,
@@ -194,7 +129,7 @@ class ClientBotLinkCQRS {
             "to": conversationContent.waId,
             "type": "text",
             "text": {
-              "body": `UBICACION????`
+              "body": `UBICACION ===> ${(location || {}).latitude}, ${(location ||{}).longitude}`
             }
           }
           break;
