@@ -25,6 +25,7 @@ class BotConversationDA {
 
   static getBotConversation$(waId, timestamp) {
     const collection = mongoDB.db.collection(CollectionName);
+    console.log("QUERY ===> ", { 'waId': waId, expirationTimestamp: {$gte: timestamp} })
     return defer(() => collection.findOne({ 'waId': waId, expirationTimestamp: {$gte: timestamp} }));
   }
 
