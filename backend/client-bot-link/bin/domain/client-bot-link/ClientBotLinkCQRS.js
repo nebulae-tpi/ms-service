@@ -129,7 +129,7 @@ class ClientBotLinkCQRS {
             "to": conversationContent.waId,
             "type": "text",
             "text": {
-              "body": `UBICACION ===> ${(location || {}).latitude}, ${(location ||{}).longitude}`
+              "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location ||{}).longitude}`
             }
           }
           break;
