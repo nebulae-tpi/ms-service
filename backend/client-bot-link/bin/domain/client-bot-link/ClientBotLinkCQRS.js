@@ -36,7 +36,7 @@ class ClientBotLinkCQRS {
         mergeMap(message => {
           return BotConversationDA.getBotConversation$(message.from, message.timestamp).pipe(
             mergeMap(conversation => {
-              if(conversation._id){
+              if((conversation || {})._id){
                 //ACA REALIZAR EL PROCESO DE SOLICITUD DE SERVICIO
                 return of({}).pipe(
                   tap(() =>{
