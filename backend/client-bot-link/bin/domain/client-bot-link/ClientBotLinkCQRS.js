@@ -177,7 +177,7 @@ class ClientBotLinkCQRS {
 
   continueConversation(message) {
     let content;
-    switch (message.interactive.button_reply.id) {
+    switch (((message.interactive || {}).button_reply || {}).id) {
       case "a3c3596f-6339-4cdd-870b-26b7957285cb":
         content = {
           "recipient_type": "individual",
