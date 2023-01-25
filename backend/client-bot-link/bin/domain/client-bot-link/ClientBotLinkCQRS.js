@@ -163,7 +163,7 @@ class ClientBotLinkCQRS {
   }
   
   initConversation$(id, conversationContent){
-    return ClientDA.getClientByPhoneNumber$(conversationContent.waId).pipe(
+    return ClientDA.getClientByPhoneNumber$(conversationContent.waId.replace("57", "")).pipe(
       mergeMap(client => {
         if((client || {})._id){
           return BotConversationDA.createConversation$(id, conversationContent).pipe(
