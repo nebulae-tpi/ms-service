@@ -28,6 +28,24 @@ class BotConversationDA {
     return defer(() => collection.findOne({ 'waId': waId, expirationTimestamp: {$gte: timestamp} }));
   }
 
+  static updateExpirationTs$(id, timestamp) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    return defer(() =>
+      collection.updateOne(
+        { waId: id },
+        {
+          $set: {
+            expirationTimestamp: timestamp
+          }
+        },
+        {
+          upsert: true
+        }
+      )
+    );
+  }
+
   static createConversation$(id, conversation) {
     const collection = mongoDB.db.collection(CollectionName);
 
