@@ -49,7 +49,7 @@ class ClientBotLinkCQRS {
           return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
-                this.continueConversation(message)
+                this.continueConversation(message,conversation)
                 //ACA REALIZAR EL PROCESO DE SOLICITUD DE SERVICIO
                 return of({}).pipe(
                   tap(() => {
@@ -175,7 +175,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  continueConversation(message) {
+  continueConversation(message, conversationContent) {
     let content;
     switch (((message.interactive || {}).button_reply || {}).id) {
       case "a3c3596f-6339-4cdd-870b-26b7957285cb":
