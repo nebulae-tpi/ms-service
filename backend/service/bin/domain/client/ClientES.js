@@ -33,6 +33,10 @@ class ClientES {
         )
     }
 
+    handleClientSatelliteIdUpdated$({ aid, data}){
+        return ClientDA.updateClientSatelliteId$(aid, data);
+    }
+
     handleClientSatelliteInfoUpdated$({ aid, data}){
         return ClientDA.updateClientSatelliteInfo$(aid, data);
     }

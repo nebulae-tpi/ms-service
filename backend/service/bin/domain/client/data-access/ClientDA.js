@@ -113,6 +113,29 @@ class ClientDA {
     );
   }
 
+
+  /**
+   * modifies the satellite info of the indicated Client 
+   * @param {*} id  Client ID
+   * @param {*} ClientSatelliteInfo  New general information of the Client
+   */
+   static updateClientSatelliteId$(id, satelliteId) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    return defer(()=>
+        collection.findOneAndUpdate(
+          { _id: id },
+          {
+            $set: { satelliteId: satelliteId }
+          },{
+            returnOriginal: false
+          }
+        )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
+    );
+  }
+
   static addDriverCode$(id, referrerDriverCode) {
     const collection = mongoDB.db.collection(CollectionName);
     

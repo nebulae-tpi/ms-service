@@ -30,26 +30,14 @@ class ClientBotLinkCQRS {
 
   processMessageReceived$({ args }, authToken) {
     console.log("MESSAGES ====> ", JSON.stringify(args));
-    if (args.statuses) {
-      return from(args.statuses).pipe(
-        mergeMap(status => {
-          if ((status.conversation || {}).expiration_timestamp) {
-            return BotConversationDA.updateExpirationTs$(status.message.recipient_id, status.conversation.expiration_timestamp)
-          }
-          else {
-            return of({});
-          }
-        })
-      )
-    }
-    else if (args.messages) {
+    if (args.messages) {
       const concacts = args.contacts;
       return from(args.messages).pipe(
         mergeMap(message => {
           return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
-                this.continueConversation(message,conversation)
+                this.continueConversation(message,conversation, client)
                 //ACA REALIZAR EL PROCESO DE SOLICITUD DE SERVICIO
                 return of({});
               } else {
@@ -57,17 +45,7 @@ class ClientBotLinkCQRS {
                   waId: message.from,
                   timestamp: message.timestamp,
                   client: {},
-                  process: {
-                    type: "STARTED",
-                    startTs: message.timestamp
-                  },
-                  processHistory: [
-                    {
-                      type: "STARTED",
-                      startTs: message.timestamp
-                    }
-                  ]
-                })
+                }, message)
               }
             })
           )
@@ -112,6 +90,12 @@ class ClientBotLinkCQRS {
 
   continueConversation(message, conversationContent) {
     let content;
+    if(((message || {}).text || {}).body){
+
+    }
+    else {
+
+    }
     switch (((message.interactive || {}).button_reply || {}).id) {
       case "a3c3596f-6339-4cdd-870b-26b7957285cb":
         content = {
@@ -162,75 +146,14 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  initConversation$(id, conversationContent) {
+  initConversation$(id, conversationContent,message) {
     const phoneNumber = conversationContent.waId.replace("57", "");
     return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber)).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
-          return BotConversationDA.createConversation$(id, conversationContent).pipe(
+          return BotConversationDA.createConversation$(id, {...conversationContent, client}).pipe(
             tap(() => {
-              const content = {
-                "recipient_type": "individual",
-                "to": conversationContent.waId,
-                "type": "interactive",
-                "interactive": {
-                  "type": "button",
-                  "header": {
-                    "type": "text",
-                    "text": "Hola, Bienvenido al TX BOT"
-                  },
-                  "body": {
-                    "text": "Por favor seleccione una opción"
-                  },
-                  "footer": {
-                    "text": ""
-                  },
-                  "action": {
-                    "buttons": [
-                      {
-                        "type": "reply",
-                        "reply": {
-                          "id": "a3c3596f-6339-4cdd-870b-26b7957285cb",
-                          "title": "Solicitar Servicio"
-                        }
-                      },
-                      {
-                        "type": "reply",
-                        "reply": {
-                          "id": "a4d5f308-e3b6-4b3a-b820-3699b47cbfb8",
-                          "title": "Cancelar Servicio"
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-              const options = {
-                protocol: 'https:',
-                hostname: 'waba.360dialog.io',
-                path: '/v1/messages/',
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'D360-API-KEY': process.env.D360_API_KEY,
-                }
-              }
-              const req = https.request(options, res => {
-                let data = ''
-
-                res.on('data', chunk => {
-                  data += chunk
-                })
-
-                res.on('end', () => {
-                  //console.log(JSON.parse(data))
-                })
-              })
-                .on('error', err => {
-                  console.log('Error: ', err.message)
-                })
-              req.write(JSON.stringify(content))
-              req.end();
+              this.continueConversation(message, conversationContent);
             })
           )
         } else {

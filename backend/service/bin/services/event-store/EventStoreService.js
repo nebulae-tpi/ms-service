@@ -204,6 +204,10 @@ class EventStoreService {
         fn: ClientES.handleEndClientCreated$,
         obj: ClientES
       },
+      ClientSatelliteIdUpdated: {
+        fn: ClientES.handleClientSatelliteIdUpdated$,
+        obj: ClientES
+      },
       ClientSatelliteInfoUpdated: {
         fn: ClientES.handleClientSatelliteInfoUpdated$,
         obj: ClientES
@@ -338,6 +342,10 @@ class EventStoreService {
       {
         aggregateType: "Client",
         eventType: "EndClientCreated"
+      },
+      {
+        aggregateType: "Client",
+        eventType: "ClientSatelliteIdUpdated"
       },
       {
         aggregateType: "Client",
