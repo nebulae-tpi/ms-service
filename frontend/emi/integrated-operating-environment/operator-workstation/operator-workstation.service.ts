@@ -49,7 +49,7 @@ export class OperatorWorkstationService {
   /**
    * layout dimension observable
    */
-  requestServiceSubject$ = new BehaviorSubject(undefined);
+  requestServiceSubject$ = new Subject();
   /**
    * toolbar commands bus
    */

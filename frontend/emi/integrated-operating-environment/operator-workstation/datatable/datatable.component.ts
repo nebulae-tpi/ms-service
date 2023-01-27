@@ -214,7 +214,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
 
   listenServiceRequests() {
     this.operatorWorkstationService.requestServiceSubject$.pipe(
-      filter(s => (s || {}).request),
+      filter(s => ((s as any) || {}).request),
       mergeMap(ioeRequest => {
         return this.operatorWorkstationService.requestService$(ioeRequest).pipe(
           mergeMap(result => {

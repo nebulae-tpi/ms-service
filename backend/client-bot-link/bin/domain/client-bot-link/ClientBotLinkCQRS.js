@@ -37,7 +37,7 @@ class ClientBotLinkCQRS {
           return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
-                this.continueConversation(message,conversation, client)
+                this.continueConversation(message, conversation, client)
                 //ACA REALIZAR EL PROCESO DE SOLICITUD DE SERVICIO
                 return of({});
               } else {
@@ -88,10 +88,95 @@ class ClientBotLinkCQRS {
 
   }
 
+  buildServiceRequestedEsEvent(authToken, rqst, business) {
+
+    let { requestedFeatures, fareDiscount, fare, pickUp, tip, dropOff, request } = rqst;
+
+    pickUp = !pickUp ? undefined : {
+      ...pickUp,
+      marker: pickUp.marker ? { type: "Point", coordinates: [pickUp.marker.lng, pickUp.marker.lat] } : {},
+      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+    };
+    dropOff = !dropOff ? undefined : {
+      ...dropOff,
+      marker: dropOff.marker ? { type: "Point", coordinates: [dropOff.marker.lng, dropOff.marker.lat] } : {},
+      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+    };
+
+
+    const _id = Crosscutting.generateDateBasedUuid();
+    const requestObj = {
+      aggregateType: 'Service',
+      aggregateId: _id,
+      eventType: 'ServiceRequested',
+      eventTypeVersion: 1,
+      user: authToken.preferred_username,
+      data: {
+        ...rqst,
+        pickUp,
+        dropOff,
+        client: {
+          id: authToken.clientId,
+          businessId: authToken.businessId,
+          username: authToken.preferred_username,
+          ...rqst.client,
+        },
+        _id,
+        businessId: authToken.businessId,
+        timestamp: Date.now(),
+        requestedFeatures: (requestedFeatures && requestedFeatures.length == 0) ? undefined : requestedFeatures,//no empty requestedFeatures
+        
+        //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
+        //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
+        fare: fare <= 0 ? undefined : fare,
+        state: 'REQUESTED',
+        stateChanges: [{
+          state: 'REQUESTED',
+          timestamp: Date.now(),
+          location: pickUp.marker,
+        }],
+        tip: tip <= 0 ? undefined : tip,
+        route: { type: "LineString", coordinates: [] },
+        lastModificationTimestamp: Date.now(),
+        closed: false,
+        request: {
+          ...request,
+          creationOperatorId: authToken.userId,
+          creationOperatorUsername: authToken.preferred_username,
+          ownerOperatorId: authToken.userId,
+          ownerOperatorUsername: authToken.preferred_username,
+        }
+      }
+    };
+
+    if (business.attributes && business.attributes.length > 0) { 
+      requestObj.data.offer = business.attributes
+        .filter(attr => {
+          return attr && attr.key.substr(0, 5).toUpperCase() === "OFFER"
+        })
+        .map(attr => {
+        const obj = {};
+        obj[attr.key]=attr.value;
+        return obj;
+      }).reduce((acc, val) => {
+        return {...acc, ...val}
+      },{});
+    }
+    return new Event(requestObj);
+  }
+  
   continueConversation(message, conversationContent) {
     let content;
-    if(((message || {}).text || {}).body){
+    if (((message || {}).text || {}).body) {
+      if (message.text.body.contains("🚕") || message.text.body.contains("🚖") || message.text.body.contains("🚙") || message.text.body.contains("🚘")) {+
+        eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, business))
+        message.text.body.length
+      }
+      else if (!isNaN(message.text.body)) {
 
+      }else{
+
+      }
     }
     else {
 
@@ -107,16 +192,16 @@ class ClientBotLinkCQRS {
           }
         }
         break;
-        default:
-          content = {
-            "recipient_type": "individual",
-            "to": conversationContent.waId,
-            "type": "text",
-            "text": {
-              "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location ||{}).longitude}`
-            }
+      default:
+        content = {
+          "recipient_type": "individual",
+          "to": conversationContent.waId,
+          "type": "text",
+          "text": {
+            "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location || {}).longitude}`
           }
-          break;
+        }
+        break;
     }
     const options = {
       protocol: 'https:',
@@ -146,12 +231,12 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  initConversation$(id, conversationContent,message) {
+  initConversation$(id, conversationContent, message) {
     const phoneNumber = conversationContent.waId.replace("57", "");
     return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber)).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
-          return BotConversationDA.createConversation$(id, {...conversationContent, client}).pipe(
+          return BotConversationDA.createConversation$(id, { ...conversationContent, client }).pipe(
             tap(() => {
               this.continueConversation(message, conversationContent);
             })
