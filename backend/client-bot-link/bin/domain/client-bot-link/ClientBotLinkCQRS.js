@@ -235,7 +235,7 @@ class ClientBotLinkCQRS {
     return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, {satelliteId: 1})).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
-          return ClientDA.getClient$(client._id).pipe(
+          return ClientDA.getClient$(client.satelliteId).pipe(
             mergeMap(satelliteClient => {
               const c = {...satelliteClient, associatedClientId: client._id}
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
