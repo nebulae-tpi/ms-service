@@ -37,7 +37,7 @@ class ClientBotLinkCQRS {
           return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
-                this.continueConversation(message, conversation, client)
+                this.continueConversation(message, conversation, conversation.client)
                 //ACA REALIZAR EL PROCESO DE SOLICITUD DE SERVICIO
                 return of({});
               } else {
