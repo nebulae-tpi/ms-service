@@ -10,7 +10,9 @@ class Crosscutting {
      * Generates a unique UUID/v4 with an extra number at the end describing the yaer and month (-yymm)
      */
     static generateDateBasedUuid() {
-        return `${uuidv4()}-${dateFormat(new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), "yymm")}`;
+        const currentDate = new Date(new Date().toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+        const yymm = dateFormat(currentDate, "yymm");
+        return `${uuidv4()}-${yymm}`;
     }
 
 }
