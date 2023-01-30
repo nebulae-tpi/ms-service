@@ -145,7 +145,7 @@ class ClientBotLinkCQRS {
   continueConversation(message, conversationContent, client) {
     let content;
     if (((message || {}).text || {}).body) {
-      if (message.text.body.contains("🚕") || message.text.body.contains("🚖") || message.text.body.contains("🚙") || message.text.body.contains("🚘")) {+
+      if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {+
         eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
         content = {
           "recipient_type": "individual",
