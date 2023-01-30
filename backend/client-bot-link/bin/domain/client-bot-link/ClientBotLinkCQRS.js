@@ -94,6 +94,7 @@ class ClientBotLinkCQRS {
     };
 
     const _id = Crosscutting.generateDateBasedUuid();
+    console.log("SERVICE ID ===> ", _id)
     const requestObj = {
       aggregateType: 'Service',
       aggregateId: _id,
