@@ -88,21 +88,10 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(authToken, rqst, business) {
-
-    let { requestedFeatures, fareDiscount, fare, pickUp, tip, dropOff, request } = rqst;
-
-    pickUp = !pickUp ? undefined : {
-      ...pickUp,
-      marker: pickUp.marker ? { type: "Point", coordinates: [pickUp.marker.lng, pickUp.marker.lat] } : {},
-      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
+  buildServiceRequestedEsEvent(client) {
+    const pickUp = {
+      marker:  { type: "Point", coordinates: [client.location.lng, client.location.lat] },
     };
-    dropOff = !dropOff ? undefined : {
-      ...dropOff,
-      marker: dropOff.marker ? { type: "Point", coordinates: [dropOff.marker.lng, dropOff.marker.lat] } : {},
-      polygon: undefined, //TODO: se debe convertir de graphql a geoJSON
-    };
-
 
     const _id = Crosscutting.generateDateBasedUuid();
     const requestObj = {
@@ -110,99 +99,109 @@ class ClientBotLinkCQRS {
       aggregateId: _id,
       eventType: 'ServiceRequested',
       eventTypeVersion: 1,
-      user: authToken.preferred_username,
+      user: "SYSTEM",
       data: {
-        ...rqst,
         pickUp,
-        dropOff,
+        dropOff: undefined,
         client: {
-          id: authToken.clientId,
-          businessId: authToken.businessId,
-          username: authToken.preferred_username,
-          ...rqst.client,
+          id: client._id,
+          businessId: "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab",
+          username: "N/A",
+          fullname: client.generalInfo.name,
+          tipClientId: client.associatedClientId,
+          tip: client.satelliteInfo.tip,
+          referrerDriverDocumentId: client.referrerDriverDocumentId,
+          offerMinDistance: client.satelliteInfo.offerMinDistance,
+          offerMaxDistance: client.satelliteInfo.offerMaxDistance
         },
         _id,
-        businessId: authToken.businessId,
+        businessId: "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab",
         timestamp: Date.now(),
-        requestedFeatures: (requestedFeatures && requestedFeatures.length == 0) ? undefined : requestedFeatures,//no empty requestedFeatures
+        requestedFeatures: undefined,
         
         //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
         //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
-        fare: fare <= 0 ? undefined : fare,
+        fare: 0,
         state: 'REQUESTED',
         stateChanges: [{
           state: 'REQUESTED',
           timestamp: Date.now(),
           location: pickUp.marker,
         }],
-        tip: tip <= 0 ? undefined : tip,
+        tip: 0,
         route: { type: "LineString", coordinates: [] },
         lastModificationTimestamp: Date.now(),
         closed: false,
         request: {
-          ...request,
-          creationOperatorId: authToken.userId,
-          creationOperatorUsername: authToken.preferred_username,
-          ownerOperatorId: authToken.userId,
-          ownerOperatorUsername: authToken.preferred_username,
-        }
+            sourceChannel : "CLIENT",
+            destChannel : "DRIVER_APP"
+          }
+        
       }
     };
-
-    if (business.attributes && business.attributes.length > 0) { 
-      requestObj.data.offer = business.attributes
-        .filter(attr => {
-          return attr && attr.key.substr(0, 5).toUpperCase() === "OFFER"
-        })
-        .map(attr => {
-        const obj = {};
-        obj[attr.key]=attr.value;
-        return obj;
-      }).reduce((acc, val) => {
-        return {...acc, ...val}
-      },{});
-    }
     return new Event(requestObj);
   }
   
-  continueConversation(message, conversationContent) {
+  continueConversation(message, conversationContent, client) {
     let content;
     if (((message || {}).text || {}).body) {
       if (message.text.body.contains("🚕") || message.text.body.contains("🚖") || message.text.body.contains("🚙") || message.text.body.contains("🚘")) {+
-        eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(authToken, request, business))
+        eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
+        content = {
+          "recipient_type": "individual",
+          "to": conversationContent.waId,
+          "type": "text",
+          "text": {
+            "body": `Servicio ejecutado correctamente`
+          }
+        }
         message.text.body.length
       }
       else if (!isNaN(message.text.body)) {
-
+        content = {
+          "recipient_type": "individual",
+          "to": conversationContent.waId,
+          "type": "text",
+          "text": {
+            "body": `ELSE IF`
+          }
+        }
       }else{
-
+        content = {
+          "recipient_type": "individual",
+          "to": conversationContent.waId,
+          "type": "text",
+          "text": {
+            "body": `ELSE`
+          }
+        }
       }
     }
     else {
-
-    }
-    switch (((message.interactive || {}).button_reply || {}).id) {
-      case "a3c3596f-6339-4cdd-870b-26b7957285cb":
-        content = {
-          "recipient_type": "individual",
-          "to": conversationContent.waId,
-          "type": "text",
-          "text": {
-            "body": `Para poder realizar la solicitud de servicio se debe compartir la ubicación (Presionar el icono 📎 o +, seleccionar la opción "ubicación" y "envia tu ubicación actual. \nPuedes ver un video tutorial para compartir la ubicación desde el celular \n VIDEO AQUI)`
+      switch (((message.interactive || {}).button_reply || {}).id) {
+        case "a3c3596f-6339-4cdd-870b-26b7957285cb":
+          content = {
+            "recipient_type": "individual",
+            "to": conversationContent.waId,
+            "type": "text",
+            "text": {
+              "body": `Para poder realizar la solicitud de servicio se debe compartir la ubicación (Presionar el icono 📎 o +, seleccionar la opción "ubicación" y "envia tu ubicación actual. \nPuedes ver un video tutorial para compartir la ubicación desde el celular \n VIDEO AQUI)`
+            }
           }
-        }
-        break;
-      default:
-        content = {
-          "recipient_type": "individual",
-          "to": conversationContent.waId,
-          "type": "text",
-          "text": {
-            "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location || {}).longitude}`
+          break;
+        default:
+          content = {
+            "recipient_type": "individual",
+            "to": conversationContent.waId,
+            "type": "text",
+            "text": {
+              "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location || {}).longitude}`
+            }
           }
-        }
-        break;
+          break;
+      }
     }
+    
     const options = {
       protocol: 'https:',
       hostname: 'waba.360dialog.io',
@@ -233,12 +232,17 @@ class ClientBotLinkCQRS {
 
   initConversation$(id, conversationContent, message) {
     const phoneNumber = conversationContent.waId.replace("57", "");
-    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber)).pipe(
+    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, {satelliteId: 1})).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
-          return BotConversationDA.createConversation$(id, { ...conversationContent, client }).pipe(
-            tap(() => {
-              this.continueConversation(message, conversationContent);
+          return ClientDA.getClient$(client._id).pipe(
+            mergeMap(satelliteClient => {
+              const c = {...satelliteClient, associatedClientId: client._id}
+              return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
+                tap(() => {
+                  this.continueConversation(message, conversationContent,c);
+                })
+              )
             })
           )
         } else {

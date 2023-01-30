@@ -25,13 +25,22 @@ class ClientDA {
     /**
    * Gets a client satellite by the client id
    */
-  static getClientByPhoneNumber$(waId) {
+  static getClientByPhoneNumber$(waId, projection) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
       "generalInfo.phone": waId
     };
-    return defer(() => collection.findOne(query));
+    return defer(() => collection.findOne(query, projection));
+  }
+
+  static getClient$(id, projection) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    const query = {
+      "_id": id
+    };
+    return defer(() => collection.findOne(query, projection));
   }
 
 
