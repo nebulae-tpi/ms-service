@@ -141,10 +141,10 @@ class ClientBotLinkCQRS {
     return new Event(requestObj);
   }
   
-  sendTextMessage(text){
+  sendTextMessage(text, waId){
     const content = {
       "recipient_type": "individual",
-      "to": conversationContent.waId,
+      "to": waId,
       "type": "text",
       "text": {
         "body": text
@@ -188,7 +188,7 @@ class ClientBotLinkCQRS {
         }),
         toArray(),
         tap(() => {
-          this.sendTextMessage(`Servicio ejecutado correctamente`)
+          this.sendTextMessage(`Servicio ejecutado correctamente`, conversationContent.waId)
         })
        )
         
@@ -197,13 +197,13 @@ class ClientBotLinkCQRS {
       else if (!isNaN(message.text.body)) {
         return of({}).pipe(
           tap(() => {
-            this.sendTextMessage(`ELSE IF`)
+            this.sendTextMessage(`ELSE IF`, conversationContent.waId)
           })
         )
       }else{
         return of({}).pipe(
           tap(() => {
-            this.sendTextMessage(`ELSE`)
+            this.sendTextMessage(`ELSE`, conversationContent.waId)
           })
         )
       }

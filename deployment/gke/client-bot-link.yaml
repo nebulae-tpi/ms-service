@@ -13,7 +13,7 @@ spec:
         app: client-bot-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.clientbotlink:1.0.33 # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link 
+      - image: DOCKERHUB/service.backend.clientbotlink:1.0.34 # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link 
         name: client-bot-link
         volumeMounts:
         - name: google-application-credentials
