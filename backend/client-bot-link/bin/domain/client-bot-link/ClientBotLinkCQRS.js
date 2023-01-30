@@ -37,9 +37,7 @@ class ClientBotLinkCQRS {
           return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
-                this.continueConversation(message, conversation, conversation.client)
-                //ACA REALIZAR EL PROCESO DE SOLICITUD DE SERVICIO
-                return of({});
+                return this.continueConversation$(message, conversation, conversation.client)
               } else {
                 return this.initConversation$(message.from, {
                   waId: message.from,
@@ -143,66 +141,15 @@ class ClientBotLinkCQRS {
     return new Event(requestObj);
   }
   
-  continueConversation(message, conversationContent, client) {
-    let content;
-    if (((message || {}).text || {}).body) {
-      if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {+
-        eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
-        content = {
-          "recipient_type": "individual",
-          "to": conversationContent.waId,
-          "type": "text",
-          "text": {
-            "body": `Servicio ejecutado correctamente`
-          }
-        }
-        message.text.body.length
-      }
-      else if (!isNaN(message.text.body)) {
-        content = {
-          "recipient_type": "individual",
-          "to": conversationContent.waId,
-          "type": "text",
-          "text": {
-            "body": `ELSE IF`
-          }
-        }
-      }else{
-        content = {
-          "recipient_type": "individual",
-          "to": conversationContent.waId,
-          "type": "text",
-          "text": {
-            "body": `ELSE`
-          }
-        }
+  sendTextMessage(text){
+    const content = {
+      "recipient_type": "individual",
+      "to": conversationContent.waId,
+      "type": "text",
+      "text": {
+        "body": text
       }
     }
-    else {
-      switch (((message.interactive || {}).button_reply || {}).id) {
-        case "a3c3596f-6339-4cdd-870b-26b7957285cb":
-          content = {
-            "recipient_type": "individual",
-            "to": conversationContent.waId,
-            "type": "text",
-            "text": {
-              "body": `Para poder realizar la solicitud de servicio se debe compartir la ubicación (Presionar el icono 📎 o +, seleccionar la opción "ubicación" y "envia tu ubicación actual. \nPuedes ver un video tutorial para compartir la ubicación desde el celular \n VIDEO AQUI)`
-            }
-          }
-          break;
-        default:
-          content = {
-            "recipient_type": "individual",
-            "to": conversationContent.waId,
-            "type": "text",
-            "text": {
-              "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location || {}).longitude}`
-            }
-          }
-          break;
-      }
-    }
-    
     const options = {
       protocol: 'https:',
       hostname: 'waba.360dialog.io',
@@ -231,6 +178,64 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
+  continueConversation$(message, conversationContent, client) {
+    let content;
+    if (((message || {}).text || {}).body) {
+      if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
+       return range(1,message.text.body.length).pipe(
+        mergeMap(() => {
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
+        }),
+        toArray(),
+        tap(() => {
+          this.sendTextMessage(`Servicio ejecutado correctamente`)
+        })
+       )
+        
+        
+      }
+      else if (!isNaN(message.text.body)) {
+        return of({}).pipe(
+          tap(() => {
+            this.sendTextMessage(`ELSE IF`)
+          })
+        )
+      }else{
+        return of({}).pipe(
+          tap(() => {
+            this.sendTextMessage(`ELSE`)
+          })
+        )
+      }
+    }
+    else {
+      switch (((message.interactive || {}).button_reply || {}).id) {
+        case "a3c3596f-6339-4cdd-870b-26b7957285cb":
+          content = {
+            "recipient_type": "individual",
+            "to": conversationContent.waId,
+            "type": "text",
+            "text": {
+              "body": `Para poder realizar la solicitud de servicio se debe compartir la ubicación (Presionar el icono 📎 o +, seleccionar la opción "ubicación" y "envia tu ubicación actual. \nPuedes ver un video tutorial para compartir la ubicación desde el celular \n VIDEO AQUI)`
+            }
+          }
+          break;
+        default:
+          content = {
+            "recipient_type": "individual",
+            "to": conversationContent.waId,
+            "type": "text",
+            "text": {
+              "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location || {}).longitude}`
+            }
+          }
+          break;
+      }
+    }
+    
+    
+  }
+
   initConversation$(id, conversationContent, message) {
     const phoneNumber = conversationContent.waId.replace("57", "");
     return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, {satelliteId: 1})).pipe(
@@ -240,8 +245,8 @@ class ClientBotLinkCQRS {
             mergeMap(satelliteClient => {
               const c = {...satelliteClient, associatedClientId: client._id}
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
-                tap(() => {
-                  this.continueConversation(message, conversationContent,c);
+                mergeMap(() => {
+                  return this.continueConversation$(message, conversationContent,c);
                 })
               )
             })
