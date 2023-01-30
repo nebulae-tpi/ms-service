@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, timer, forkJoin, Observable, iif, from, empty, defer } = require("rxjs");
+const { of, timer, forkJoin, Observable, iif, from, empty, defer, range } = require("rxjs");
 const { toArray, mergeMap, map, tap, filter, delay, mapTo, switchMap } = require('rxjs/operators');
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
