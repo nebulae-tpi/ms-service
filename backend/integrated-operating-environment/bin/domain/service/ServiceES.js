@@ -168,11 +168,11 @@ class ServiceES {
             filter(s => s),
             map(service => {
                 if(service.state === "CANCELLED_OPERATOR"){
-                    console.log("Se recibe cancelación previo al formato ===> ", {name: service.client.fullname, id: evt.aid})
+                    console.log("Se recibe cancelación previo al formato ===> ", {name: service.client.fullname, id: service._id})
                 }
                 const formatedData = this.formatServiceToGraphqlIOEService(service);
                 if(service.state === "CANCELLED_OPERATOR"){
-                    console.log("pasa el formato formato ===> ", {name: service.client.fullname, id: evt.aid})
+                    console.log("pasa el formato formato ===> ", {name: service.client.fullname, id: service._id})
                 }
                 return formatedData;
             }),
