@@ -2,7 +2,7 @@
 
 
 const { of, iif, forkJoin, Observable } = require("rxjs");
-const { mapTo, mergeMap, mergeMapTo, map, toArray, filter, delay } = require('rxjs/operators');
+const { mapTo, mergeMap, mergeMapTo, map, toArray, filter, delay, tap } = require('rxjs/operators');
 
 const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
@@ -166,7 +166,16 @@ class ServiceES {
             delay(1000),
             mergeMap(evt => ServiceDA.findById$(evt.aid)),
             filter(s => s),
-            map(service => this.formatServiceToGraphqlIOEService(service)),
+            map(service => {
+                if(service.state === "CANCELLED_OPERATOR"){
+                    console.log("Se recibe cancelación previo al formato ===> ", service.client.fullname)
+                }
+                const formatedData = this.formatServiceToGraphqlIOEService(service);
+                if(service.state === "CANCELLED_OPERATOR"){
+                    console.log("pasa el formato formato ===> ", service.client.fullname)
+                }
+                return formatedData;
+            }),
             mergeMap(ioeService => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEService`, ioeService))
         );
     }

@@ -182,13 +182,13 @@ class ClientBotLinkCQRS {
     let content;
     if (((message || {}).text || {}).body) {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
-       return range(1,message.text.body.length).pipe(
+       return range(1,message.text.body.length/2).pipe(
         mergeMap(() => {
           return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
         }),
         toArray(),
         tap(() => {
-          this.sendTextMessage(`Servicio ejecutado correctamente`, conversationContent.waId)
+          this.sendTextMessage(`Servicio creado exitosamente`, conversationContent.waId)
         })
        )
         
