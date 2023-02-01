@@ -46,6 +46,30 @@ class ServiceDA {
   }
 
 
+  static getServices$(filter) {
+    const query = {};
+
+    if (filter.clientId) {
+      query["client.id"] = filter.clientId;
+    }
+    if (filter.states && filter.states.length > 0) {
+      query["state"] = { $in: filter.states};
+    }    
+    
+    const initDate = new Date(Date.now());
+    console.log("QUERY COUNT ====> ", query);
+    return of(initDate)
+    .pipe(
+      map(date => mongoDB.getHistoricalDb(date)),
+      map(db => db.collection(COLLECTION_NAME)),
+      mergeMap(collection => {
+        const cursor = collection.find(query);
+        return mongoDB.extractAllFromMongoCursor$(cursor);
+      })
+    );
+  }
+
+
 }
 /**
  * @returns {ServiceDA}

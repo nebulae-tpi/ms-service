@@ -10,6 +10,7 @@ const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
+const dateFormat = require('dateformat');
 
 const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS || "").split(',');
 
@@ -94,6 +95,11 @@ class ClientBotLinkCQRS {
   buildServiceRequestedEsEvent(client) {
     const pickUp = {
       marker:  { type: "Point", coordinates: [client.location.lng, client.location.lat] },
+      addressLine1: client.generalInfo.addressLine1,
+      addressLine2: client.generalInfo.addressLine2,
+      city: client.generalInfo.city,
+      neighborhood: client.generalInfo.neighborhood,
+      zone: client.generalInfo.zone
     };
 
     const _id = Crosscutting.generateDateBasedUuid();
@@ -183,11 +189,68 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
+  sendInteractiveButtonMessage(headerText, bodyText, buttons, waId){
+    const content = {
+      "recipient_type": "individual",
+      "to": waId,
+      "type": "interactive",
+      "interactive": {
+        "type": "button",
+        "header": {
+          "type": "text",
+          "text": headerText
+        },
+        "body": {
+          "text": bodyText
+        },
+        "footer": {
+          "text": ""
+        },
+        "action": {
+          "buttons": buttons.map(button => {
+            return {
+              "type": "reply",
+              "reply": {
+                "id": button.id,
+                "title": button.text
+              }
+            }
+          })
+        }
+      }
+    }
+    const options = {
+      protocol: 'https:',
+      hostname: 'waba.360dialog.io',
+      path: '/v1/messages/',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': process.env.D360_API_KEY,
+      }
+    }
+    const req = https.request(options, res => {
+      let data = ''
+
+      res.on('data', chunk => {
+        data += chunk
+      })
+
+      res.on('end', () => {
+        //console.log(JSON.parse(data))
+      })
+    })
+      .on('error', err => {
+        console.log('Error: ', err.message)
+      })
+    req.write(JSON.stringify(content))
+    req.end();
+  }
+
   continueConversation$(message, conversationContent, client, serviceCount) {
     let content;
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
-    console.log("Service count ===> ", serviceCount)
     let servicesToRequest = 0; 
     if (((message || {}).text || {}).body) {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
@@ -209,15 +272,58 @@ class ClientBotLinkCQRS {
         }
       }
       else if (!isNaN(message.text.body)) {
-        return of({}).pipe(
-          tap(() => {
-            this.sendTextMessage(`ELSE IF`, conversationContent.waId)
+        servicesToRequest = parseInt(message.text.body);
+        const availableServices = availableServiceCount - servicesToRequest
+        if(availableServices >= 0 && availableServices <=5){
+          return range(1,servicesToRequest).pipe(
+            mergeMap(() => {
+              return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
+            }),
+            toArray(),
+            tap(() => {
+              this.sendTextMessage(`Servicio creado exitosamente`, conversationContent.waId)
+            })
+           )
+        }else {
+          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${availableServiceCount} servicios`, conversationContent.waId);
+          return of({})
+        }
+      }
+      else if(message.text.body === "?" || message.text.body === "❓"){
+        return ServiceDA.getServices$({clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
+          toArray(),
+          tap(result => {
+            if(result.length> 0){
+              const buttons = [
+                {id: "cancelServiceBtn",
+                text: "Cancelar servicios"}
+              ];
+              this.sendInteractiveButtonMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
+                const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                const ddhh = dateFormat(currentDate, "DD:HH");
+                const assignedData = val.service.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
+                acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
+                return acc;
+              },""), buttons, conversationContent.waId)
+            }else {
+              this.sendTextMessage(`Actualmente no se tienen servicios activos`, conversationContent.waId)
+            }
+            
           })
-        )
-      }else{
+        );
+      }
+      else{
         return of({}).pipe(
           tap(() => {
-            this.sendTextMessage(`ELSE`, conversationContent.waId)
+            const buttons = [
+              {id: "rqstServiceBtn",
+              text: "Solicitar un servicio"},
+              {id: "infoServiceBtn",
+              text: "Info de servicios"},
+              {id: "cancelServiceBtn",
+              text: "Cancelar servicios"}
+            ]
+            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚕🚕\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
           })
         )
       }
