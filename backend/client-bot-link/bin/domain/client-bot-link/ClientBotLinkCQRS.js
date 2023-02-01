@@ -185,7 +185,7 @@ class ClientBotLinkCQRS {
 
   continueConversation$(message, conversationContent, client, serviceCount) {
     let content;
-    const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT);
+    const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
     let servicesToRequest = 0;
     if (((message || {}).text || {}).body) {
