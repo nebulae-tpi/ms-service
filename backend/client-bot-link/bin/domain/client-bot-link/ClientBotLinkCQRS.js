@@ -39,7 +39,6 @@ class ClientBotLinkCQRS {
               if ((conversation || {})._id) {
                 return ServiceDA.getServiceSize$({clientId: conversation.client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
                   mergeMap(serviceCount => {
-                    console.log("RESULT ==> ", result)
                     return this.continueConversation$(message, conversation, conversation.client, serviceCount)
                   })
                 )
