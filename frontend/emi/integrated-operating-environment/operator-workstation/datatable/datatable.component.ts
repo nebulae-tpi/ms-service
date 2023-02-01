@@ -336,6 +336,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (services: any) => {
+          services.forEach(s => {
+            if(s.state === "CANCELLED_OPERATOR" && (s.client || {}).clientId){
+              console.log("SERVICIO CANCELADO ====> ", {client: s.client.fullname, id: s.id})
+            }
+          });
           this.appendData(services);
         },
         (error) => console.error(`DatatableComponent.subscribeIOEServicesListener: Error => ${JSON.stringify(error)}`),
@@ -412,7 +417,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
         additions++
       }
     }
-    console.log(`evts:${services.length}, adds:${additions}, del:${deletions}, upd:${updates} uhm:${uhm}`);
+    //console.log(`evts:${services.length}, adds:${additions}, del:${deletions}, upd:${updates} uhm:${uhm}`);
     this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
     await this.recalculatePartialData();
   }
