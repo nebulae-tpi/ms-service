@@ -202,7 +202,8 @@ class ClientBotLinkCQRS {
             })
            )
         }else {
-          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${servicesToRequest - (serviceLimit - availableServiceCount)} servicios`, conversationContent.waId)
+          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${servicesToRequest - (serviceLimit - availableServiceCount)} servicios`, conversationContent.waId);
+          return of({})
         }
       }
       else if (!isNaN(message.text.body)) {
