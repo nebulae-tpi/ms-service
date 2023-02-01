@@ -192,7 +192,7 @@ class ClientBotLinkCQRS {
     if (((message || {}).text || {}).body) {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
         servicesToRequest = message.text.body.length/2;
-        const availableServices = servicesToRequest - (availableServiceCount)
+        const availableServices = availableServiceCount - servicesToRequest
         if(availableServices >= 0 && availableServices <=5){
           return range(1,servicesToRequest).pipe(
             mergeMap(() => {
