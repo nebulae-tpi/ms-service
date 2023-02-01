@@ -300,7 +300,7 @@ class ClientBotLinkCQRS {
               this.sendInteractiveButtonMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
                 const ddhh = dateFormat(currentDate, "DD:HH");
-                const assignedData = val.service.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
+                const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
                 acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
                 return acc;
               },""), buttons, conversationContent.waId)
