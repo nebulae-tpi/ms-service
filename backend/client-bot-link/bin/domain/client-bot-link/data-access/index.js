@@ -4,13 +4,14 @@ const { concat } = require('rxjs');
 
 const BusinessDA = require('./BusinessDA');
 const BotConversationDA = require('./BotConversationDA')
-const ClientDA = require('./ClientDA')
+const ClientDA = require('./ClientDA');
+const ServiceDA = require('./ServiceDA');
 
 module.exports = {
   /**
    * Data-Access start workflow
    */
-  start$: concat(BusinessDA.start$(), BotConversationDA.start$(), ClientDA.start$()),
+  start$: concat(BusinessDA.start$(), BotConversationDA.start$(), ClientDA.start$(), ServiceDA.start$()),
   /**
    * @returns {BusinessDA}
    */
@@ -22,5 +23,9 @@ module.exports = {
    /**
    * @returns {ClientDA}
    */
-    ClientDA
+    ClientDA,
+    /**
+   * @returns {ServiceDA}
+   */
+     ServiceDA
 }; 

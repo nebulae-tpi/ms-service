@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 
 const { concat, forkJoin } = require('rxjs');
-const { BotConversationDA, ClientDA } = require('./domain/client-bot-link/data-access');
+const { BotConversationDA, ClientDA, ServiceDA } = require('./domain/client-bot-link/data-access');
 const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
@@ -22,6 +22,7 @@ const start = () => {
         mongoDB.start$(),     
         BotConversationDA.start$(),
         ClientDA.start$(), 
+        ServiceDA.start$(),
         graphQlService.start$()
     ).subscribe(
         (evt) => console.log(evt),

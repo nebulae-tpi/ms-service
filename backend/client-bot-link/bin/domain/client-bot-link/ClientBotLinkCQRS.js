@@ -13,7 +13,7 @@ const eventSourcing = require("../../tools/EventSourcing")();
 
 const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS || "").split(',');
 
-const { BusinessDA, BotConversationDA, ClientDA } = require('./data-access')
+const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-access')
 
 /**
  * Singleton instance
@@ -37,7 +37,13 @@ class ClientBotLinkCQRS {
           return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
-                return this.continueConversation$(message, conversation, conversation.client)
+                return ServiceDA.getServiceSize$({clientId: conversation.client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
+                  mergeMap(serviceCount => {
+                    console.log("RESULT ==> ", result)
+                    return this.continueConversation$(message, conversation, conversation.client, serviceCount)
+                  })
+                )
+                
               } else {
                 return this.initConversation$(message.from, {
                   waId: message.from,
@@ -178,21 +184,27 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  continueConversation$(message, conversationContent, client) {
+  continueConversation$(message, conversationContent, client, serviceCount) {
     let content;
+    const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT);
+    const availableServiceCount = serviceLimit - serviceCount;
+    let servicesToRequest = 0;
     if (((message || {}).text || {}).body) {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
-       return range(1,message.text.body.length/2).pipe(
-        mergeMap(() => {
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
-        }),
-        toArray(),
-        tap(() => {
-          this.sendTextMessage(`Servicio creado exitosamente`, conversationContent.waId)
-        })
-       )
-        
-        
+        servicesToRequest = message.text.body.length/2;
+        if(servicesToRequest >= (serviceLimit - availableServiceCount)){
+          return range(1,servicesToRequest).pipe(
+            mergeMap(() => {
+              return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
+            }),
+            toArray(),
+            tap(() => {
+              this.sendTextMessage(`Servicio creado exitosamente`, conversationContent.waId)
+            })
+           )
+        }else {
+          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${servicesToRequest - (serviceLimit - availableServiceCount)} servicios`, conversationContent.waId)
+        }
       }
       else if (!isNaN(message.text.body)) {
         return of({}).pipe(
@@ -246,7 +258,12 @@ class ClientBotLinkCQRS {
               const c = {...satelliteClient, associatedClientId: client._id}
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
                 mergeMap(() => {
-                  return this.continueConversation$(message, conversationContent,c);
+                  return ServiceDA.getServiceSize$({clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
+                    mergeMap(result => {
+                      console.log("RESULT ==> ", result)
+                      return this.continueConversation$(message, conversationContent,c);
+                    })
+                  )
                 })
               )
             })
