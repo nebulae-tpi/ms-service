@@ -192,7 +192,7 @@ class ClientBotLinkCQRS {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
         servicesToRequest = message.text.body.length/2;
         const availableServices = servicesToRequest - (serviceLimit - availableServiceCount)
-        if(availableServices >= 0){
+        if(availableServices >= 0 && availableServices <=5){
           return range(1,servicesToRequest).pipe(
             mergeMap(() => {
               return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
@@ -203,7 +203,7 @@ class ClientBotLinkCQRS {
             })
            )
         }else {
-          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${availableServices} servicios`, conversationContent.waId);
+          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${serviceLimit - availableServiceCount} servicios`, conversationContent.waId);
           return of({})
         }
       }
