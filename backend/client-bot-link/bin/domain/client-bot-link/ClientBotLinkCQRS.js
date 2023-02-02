@@ -378,11 +378,11 @@ class ClientBotLinkCQRS {
           tap(() => {
             const buttons = [
               {id: "rqstServiceBtn",
-              text: "Solicitar un servicio"},
+              text: "Solicitar servicio"},
               {id: "infoServiceBtn",
               text: "Info de servicios"},
               {id: "cancelServiceBtn",
-              text: "Cancelar servicios"}
+              text: "Cancelar servicio"}
             ]
             this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚕🚕\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
           })
