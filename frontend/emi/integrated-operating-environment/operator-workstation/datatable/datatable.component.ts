@@ -445,11 +445,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
     let page = 0;
     while (moreDataAvailable) {
       console.log(`datatable.queryAllDataFromServer: nextPage=${page}`);
-      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId, page++, 10, monthsToAdd, undefined).toPromise();
+      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId, page++, 100, monthsToAdd, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
         data.push(...gqlResult.data.IOEServices);
       }
-      moreDataAvailable = (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length == 10);
+      moreDataAvailable = (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length == 100);
     }
     console.log(`datatable.queryAllDataFromServer: totalCount=${data.length}`);
     return data;

@@ -14,7 +14,7 @@ class EventSourcing {
             {
                 type: process.env.EVENT_STORE_BROKER_TYPE,
                 eventsTopic: process.env.EVENT_STORE_BROKER_EVENTS_TOPIC,
-                eventsTopicSubscription: `${process.env.EVENT_STORE_BROKER_EVENTS_TOPIC}_service-ioe`,
+                eventsTopicSubscription: `${process.env.EVENT_STORE_BROKER_EVENTS_TOPIC}_client_bot_link`,
                 brokerUrl: process.env.EVENT_STORE_BROKER_URL,
                 projectId: process.env.EVENT_STORE_BROKER_PROJECT_ID,
             },
