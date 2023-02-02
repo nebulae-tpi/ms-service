@@ -210,7 +210,16 @@ class ClientBotLinkCQRS {
           "sections": [
             {
               "title": listTitle,
-              "rows": list
+              "rows": [
+                {
+                  "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
+                  "title": "Nueva Lista"
+                },
+                {
+                  "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
+                  "title": "Nuevo Boton"
+                }
+              ]
             }
           ]
         }
