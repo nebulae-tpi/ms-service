@@ -348,14 +348,17 @@ class ClientBotLinkCQRS {
         return ServiceDA.getServices$({clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
           toArray(),
           tap(result => {
-            const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
-            const ddhh = dateFormat(currentDate, "HH:MM");
+           
             if(result.length> 0){
               const listElements = result.map(val => {
+                const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                const ddhh = dateFormat(currentDate, "HH:MM");
                 const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
                 return {id: `CANCEL_${val._id}`, text: `${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`}
               }); 
               this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
+                const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                const ddhh = dateFormat(currentDate, "HH:MM");
                 const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
                 acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
                 return acc;
