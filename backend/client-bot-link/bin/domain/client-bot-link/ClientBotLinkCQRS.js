@@ -216,6 +216,8 @@ class ClientBotLinkCQRS {
       }
     }
 
+    console.log("CONTENT ===> ", JSON.stringify(content))
+
     const options = {
       protocol: 'https:',
       hostname: 'waba.360dialog.io',
@@ -354,7 +356,7 @@ class ClientBotLinkCQRS {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
                 const ddhh = dateFormat(currentDate, "HH:MM");
                 const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
-                return {id: `CANCEL_${val._id}`, title: `${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}`}
+                return {id: `C_${val._id}`, title: `${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}`}
               }); 
               this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
