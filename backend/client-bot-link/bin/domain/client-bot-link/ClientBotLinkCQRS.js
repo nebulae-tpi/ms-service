@@ -296,7 +296,7 @@ class ClientBotLinkCQRS {
               const buttons = [
                 {id: "cancelServiceBtn",
                 text: "Cancelar servicios"}
-              ];
+              ]; 
               this.sendInteractiveButtonMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
                 const ddhh = dateFormat(currentDate, "HH:MM");
