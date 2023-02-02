@@ -276,6 +276,7 @@ class ClientBotLinkCQRS {
         }
       }
     }
+    console.log("CONTENT ===> ", content);
     const options = {
       protocol: 'https:',
       hostname: 'waba.360dialog.io',
