@@ -364,7 +364,7 @@ class ClientBotLinkCQRS {
         return this.requestService$(serviceCount, parseInt(message.text.body), client, conversationContent.waId);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
-        return this.infoService$(client._id)
+        return this.infoService$(client._id, conversationContent.waId)
       }
       else {
         return of({}).pipe(
@@ -392,7 +392,7 @@ class ClientBotLinkCQRS {
         case "infoServiceBtn":
           return of({}).pipe(
             tap(() => {
-              this.infoService$(client._id)
+              this.infoService$(client._id, conversationContent.waId)
             })
           )
         default:
