@@ -162,7 +162,10 @@ class ServiceES {
 
 
     transmitEventToFrontEnd$(serviceEvent) {
-        console.log("SERVICE EVENT ===> ", serviceEvent)
+        if(serviceEvent.et === "ServiceCancelledByOperator"){
+            console.log("LLEGA EVENTO DE CANCELACIÓN ===> ", serviceEvent)
+        }
+        
         return of(serviceEvent).pipe(
             delay(1000),
             mergeMap(evt => ServiceDA.findById$(evt.aid)),
@@ -172,9 +175,6 @@ class ServiceES {
                     console.log("Se recibe cancelación previo al formato ===> ", {name: service.client.fullname, id: service._id})
                 }
                 const formatedData = this.formatServiceToGraphqlIOEService(service);
-                if(service.state === "CANCELLED_OPERATOR"){
-                    console.log("pasa el formato formato ===> ", {name: service.client.fullname, id: service._id})
-                }
                 return formatedData;
             }),
             mergeMap(ioeService => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEService`, ioeService))
