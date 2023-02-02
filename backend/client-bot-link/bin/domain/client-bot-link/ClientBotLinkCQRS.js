@@ -188,7 +188,7 @@ class ClientBotLinkCQRS {
   }
 
   sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId){
-    
+    console.log("LIST ===> ", JSON.stringify(list))
     const content = {
       "recipient_type": "individual",
       "to": waId,
@@ -210,23 +210,13 @@ class ClientBotLinkCQRS {
           "sections": [
             {
               "title": listTitle,
-              "rows": [
-                {
-                  "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
-                  "title": "Nueva Lista"
-                },
-                {
-                  "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
-                  "title": "Nuevo Boton"
-                }
-              ]
+              "rows": list
             }
           ]
         }
       }
     }
 
-    console.log("content ==> ", content)
     const options = {
       protocol: 'https:',
       hostname: 'waba.360dialog.io',
