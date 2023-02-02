@@ -187,7 +187,7 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  sendInteractiveListMessage(headerText, bodyText, listTitle, list, waId){
+  sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId){
     
     const content = {
       "recipient_type": "individual",
@@ -197,29 +197,20 @@ class ClientBotLinkCQRS {
         "type": "list",
         "header": {
           "type": "text",
-          "text": `Hola, Bienvenido al TX Bot`
+          "text": headerText
         },
         "body": {
-          "text": "Nueva lista generada"
+          "text": bodyText
         },
         "footer": {
           "text": ""
         },
         "action": {
-          "button": "menú",
+          "button": listButton,
           "sections": [
             {
-              "title": "Opciones Interactivas",
-              "rows": [
-                {
-                  "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
-                  "title": "Nueva Lista"
-                },
-                {
-                  "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
-                  "title": "Nuevo Boton"
-                }
-              ]
+              "title": listTitle,
+              "rows": list
             }
           ]
         }
@@ -373,7 +364,7 @@ class ClientBotLinkCQRS {
                 const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
                 acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
                 return acc;
-              },""), "Cancelar Servicio",listElements, conversationContent.waId)
+              },""), "Cancelar Servicio", "Servicios",listElements, conversationContent.waId)
             }else {
               this.sendTextMessage(`Actualmente no se tienen servicios activos`, conversationContent.waId)
             }
