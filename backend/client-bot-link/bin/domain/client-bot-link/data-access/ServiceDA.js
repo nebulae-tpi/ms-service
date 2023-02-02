@@ -70,6 +70,25 @@ class ServiceDA {
   }
 
 
+  static setCancelStateAndReturnService$(_id, state,  timestamp, projection = undefined) {
+    const update = {
+      $set: { state, lastModificationTimestamp: timestamp, lastStateChangeTimestamp: timestamp },
+      $push: {
+        "stateChanges": { state, timestamp, location: null, reason: "OTHER", notes: "" },
+      }
+    };
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
+        { _id },
+        update
+      )
+    ).pipe(
+      map(result => result.value),
+      filter(v => v)
+    );
+  }
+
+
 }
 /**
  * @returns {ServiceDA}

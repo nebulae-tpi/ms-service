@@ -36,12 +36,12 @@ class ClientBotLinkCQRS {
           return BotConversationDA.getBotConversation$(message.from).pipe(
             mergeMap(conversation => {
               if ((conversation || {})._id) {
-                return ServiceDA.getServiceSize$({clientId: conversation.client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
+                return ServiceDA.getServiceSize$({ clientId: conversation.client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
                   mergeMap(serviceCount => {
                     return this.continueConversation$(message, conversation, conversation.client, serviceCount)
                   })
                 )
-                
+
               } else {
                 return this.initConversation$(message.from, {
                   waId: message.from,
@@ -92,7 +92,7 @@ class ClientBotLinkCQRS {
 
   buildServiceRequestedEsEvent(client) {
     const pickUp = {
-      marker:  { type: "Point", coordinates: [client.location.lng, client.location.lat] },
+      marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
       addressLine2: client.generalInfo.addressLine2,
       city: client.generalInfo.city,
@@ -126,7 +126,7 @@ class ClientBotLinkCQRS {
         businessId: "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab",
         timestamp: Date.now(),
         requestedFeatures: undefined,
-        
+
         //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
         //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
         fare: 0,
@@ -141,16 +141,16 @@ class ClientBotLinkCQRS {
         lastModificationTimestamp: Date.now(),
         closed: false,
         request: {
-            sourceChannel : "CLIENT",
-            destChannel : "DRIVER_APP"
-          }
-        
+          sourceChannel: "CLIENT",
+          destChannel: "DRIVER_APP"
+        }
+
       }
     };
     return new Event(requestObj);
   }
-  
-  sendTextMessage(text, waId){
+
+  sendTextMessage(text, waId) {
     const content = {
       "recipient_type": "individual",
       "to": waId,
@@ -187,7 +187,7 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId){
+  sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId) {
     const content = {
       "recipient_type": "individual",
       "to": waId,
@@ -246,7 +246,7 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  sendInteractiveButtonMessage(headerText, bodyText, buttons, waId){
+  sendInteractiveButtonMessage(headerText, bodyText, buttons, waId) {
     const content = {
       "recipient_type": "individual",
       "to": waId,
@@ -305,132 +305,128 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
+  requestService$(serviceCount, serviceToRqstCount, waId) {
+    const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
+    const availableServiceCount = serviceLimit - serviceCount;
+    const servicesToRequest = serviceToRqstCount;
+    const availableServices = availableServiceCount - servicesToRequest
+    if (availableServices >= 0 && availableServices <= 5) {
+      return range(1, servicesToRequest).pipe(
+        mergeMap(() => {
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
+        }),
+        toArray(),
+        tap(() => {
+          this.sendTextMessage(`Servicio creado exitosamente`, waId)
+        })
+      )
+    } else {
+      this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${availableServiceCount} servicios`, waId);
+      return of({})
+    }
+  }
+
+  infoService$(clientId, waId){
+    return ServiceDA.getServices$({ clientId: clientId, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+      toArray(),
+      tap(result => {
+        if (result.length > 0) {
+          const listElements = result.map(val => {
+            const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+            const ddhh = dateFormat(currentDate, "HH:MM");
+            const assignedData = val.state === "REQUESTED" ? "" : `, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
+            return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${val.pickUp.addressLine1}${assignedData}` }
+          });
+          this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc, val) => {
+            const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+            const ddhh = dateFormat(currentDate, "HH:MM");
+            const assignedData = val.state === "REQUESTED" ? "" : `, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
+            acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
+            return acc;
+          }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
+        } else {
+          this.sendTextMessage(`Actualmente no se tienen servicios activos`, waId)
+        }
+      })
+    )
+    
+  }
+
   continueConversation$(message, conversationContent, client, serviceCount) {
     let content;
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
-    let servicesToRequest = 0; 
     if (((message || {}).text || {}).body) {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
-        servicesToRequest = message.text.body.length/2;
-        const availableServices = availableServiceCount - servicesToRequest
-        if(availableServices >= 0 && availableServices <=5){
-          return range(1,servicesToRequest).pipe(
-            mergeMap(() => {
-              return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
-            }),
-            toArray(),
-            tap(() => {
-              this.sendTextMessage(`Servicio creado exitosamente`, conversationContent.waId)
-            })
-           )
-        }else {
-          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${availableServiceCount} servicios`, conversationContent.waId);
-          return of({})
-        }
+        return this.requestService$(serviceCount, message.text.body.length / 2, conversationContent.waId);
       }
       else if (!isNaN(message.text.body)) {
-        servicesToRequest = parseInt(message.text.body);
-        const availableServices = availableServiceCount - servicesToRequest
-        if(availableServices >= 0 && availableServices <=5){
-          return range(1,servicesToRequest).pipe(
-            mergeMap(() => {
-              return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
-            }),
-            toArray(),
-            tap(() => {
-              this.sendTextMessage(`Servicio creado exitosamente`, conversationContent.waId)
-            })
-           )
-        }else {
-          this.sendTextMessage(`El maximo numero de servicios activos al tiempo son ${serviceLimit}, actualemente tienes posibilidad de tomar ${availableServiceCount} servicios`, conversationContent.waId);
-          return of({})
-        }
+        return this.requestService$(serviceCount, parseInt(message.text.body), conversationContent.waId);
       }
-      else if(message.text.body === "?" || message.text.body === "❓"){
-        return ServiceDA.getServices$({clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
-          toArray(),
-          tap(result => {
-           console.log("result.length ===> ", result.length)
-            if(result.length> 0){
-              const listElements = result.map(val => {
-                const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
-                const ddhh = dateFormat(currentDate, "HH:MM");
-                const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
-                return {id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${val.pickUp.addressLine1}${assignedData}`}
-              }); 
-              this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
-                const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
-                const ddhh = dateFormat(currentDate, "HH:MM");
-                const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
-                acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
-                return acc;
-              },""), "Cancelar Servicio", "Servicios",listElements, conversationContent.waId)
-            }else {
-              this.sendTextMessage(`Actualmente no se tienen servicios activos`, conversationContent.waId)
-            }
-            
-          })
-        );
+      else if (message.text.body === "?" || message.text.body === "❓") {
+        return this.infoService$(client._id)
       }
-      else{
+      else {
         return of({}).pipe(
           tap(() => {
             const buttons = [
-              {id: "rqstServiceBtn",
-              text: "Solicitar servicio"},
-              {id: "infoServiceBtn",
-              text: "Info de servicios"},
-              {id: "cancelServiceBtn",
-              text: "Cancelar servicio"}
+              {
+                id: "rqstServiceBtn",
+                text: "Solicitar 1 servicio"
+              },
+              {
+                id: "infoServiceBtn",
+                text: "Info de servicios"
+              }
             ]
-            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚕🚕\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
+            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
           })
         )
       }
     }
     else {
-      switch (((message.interactive || {}).button_reply || {}).id) {
-        case "a3c3596f-6339-4cdd-870b-26b7957285cb":
-          content = {
-            "recipient_type": "individual",
-            "to": conversationContent.waId,
-            "type": "text",
-            "text": {
-              "body": `Para poder realizar la solicitud de servicio se debe compartir la ubicación (Presionar el icono 📎 o +, seleccionar la opción "ubicación" y "envia tu ubicación actual. \nPuedes ver un video tutorial para compartir la ubicación desde el celular \n VIDEO AQUI)`
-            }
-          }
-          break;
+      const interactiveResp = ((message.interactive || {}).button_reply || {}).id
+      switch (interactiveResp) {
+        case "rqstServiceBtn":
+          return this.requestService$(serviceCount, 1, conversationContent.waId)
+        case "infoServiceBtn":
+          return of({}).pipe(
+            tap(() => {
+              this.infoService$(client._id)
+            })
+          )
         default:
-          content = {
-            "recipient_type": "individual",
-            "to": conversationContent.waId,
-            "type": "text",
-            "text": {
-              "body": `UBICACION ===> ${(message.location || {}).latitude}, ${(message.location || {}).longitude}`
-            }
+          if(interactiveResp.includes("CANCEL_")){
+            return ServiceDA.setCancelStateAndReturnService$(interactiveResp.replace("CANCEL_",""), "CANCELLED_CLIENT", Date.now(), {timestamp: 1}).pipe(
+              tap(val => {
+                const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                const ddhh = dateFormat(currentDate, "HH:MM");
+                this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
+              })
+            )
+          }else {
+            return of({});
           }
-          break;
       }
     }
-    
-    
+
+
   }
 
   initConversation$(id, conversationContent, message) {
     const phoneNumber = conversationContent.waId.replace("57", "");
-    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, {satelliteId: 1})).pipe(
+    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, { satelliteId: 1 })).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
           return ClientDA.getClient$(client.satelliteId).pipe(
             mergeMap(satelliteClient => {
-              const c = {...satelliteClient, associatedClientId: client._id}
+              const c = { ...satelliteClient, associatedClientId: client._id }
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
                 mergeMap(() => {
-                  return ServiceDA.getServiceSize$({clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
+                  return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
                     mergeMap(result => {
                       console.log("RESULT ==> ", result)
-                      return this.continueConversation$(message, conversationContent,c);
+                      return this.continueConversation$(message, conversationContent, c);
                     })
                   )
                 })
