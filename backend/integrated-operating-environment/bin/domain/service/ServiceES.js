@@ -162,6 +162,7 @@ class ServiceES {
 
 
     transmitEventToFrontEnd$(serviceEvent) {
+        console.log("SERVICE EVENT ===> ", serviceEvent)
         return of(serviceEvent).pipe(
             delay(1000),
             mergeMap(evt => ServiceDA.findById$(evt.aid)),
