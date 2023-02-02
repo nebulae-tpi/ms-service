@@ -29,7 +29,6 @@ class ClientBotLinkCQRS {
   //#region Object builders
 
   processMessageReceived$({ args }, authToken) {
-    console.log("MESSAGES ====> ", JSON.stringify(args));
     if (args.messages) {
       const concacts = args.contacts;
       return from(args.messages).pipe(
@@ -188,6 +187,63 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
+  sendInteractiveListMessage(headerText, bodyText, listTitle, list, waId){
+    
+    const content = {
+      "recipient_type": "individual",
+      "to": waId,
+      "type": "interactive",
+      "interactive": {
+        "type": "list",
+        "header": {
+          "type": "text",
+          "text": headerText
+        },
+        "body": {
+          "text": bodyText
+        },
+        "footer": {
+          "text": ""
+        },
+        "action": {
+          "button": "menú",
+          "sections": [
+            {
+              "title": listTitle,
+              "rows": list
+            }
+          ]
+        }
+      }
+    }
+    const options = {
+      protocol: 'https:',
+      hostname: 'waba.360dialog.io',
+      path: '/v1/messages/',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': process.env.D360_API_KEY,
+      }
+    }
+    const req = https.request(options, res => {
+      let data = ''
+
+      res.on('data', chunk => {
+        data += chunk
+      })
+
+      res.on('end', () => {
+        //console.log(JSON.parse(data))
+      })
+    })
+      .on('error', err => {
+        console.log('Error: ', err.message)
+      })
+    req.write(JSON.stringify(content))
+    req.end();
+  }
+
   sendInteractiveButtonMessage(headerText, bodyText, buttons, waId){
     const content = {
       "recipient_type": "individual",
@@ -293,17 +349,18 @@ class ClientBotLinkCQRS {
           toArray(),
           tap(result => {
             if(result.length> 0){
-              const buttons = [
-                {id: "cancelServiceBtn",
-                text: "Cancelar servicios"}
-              ]; 
-              this.sendInteractiveButtonMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
+              const listElements = result.map(val => {
+                const ddhh = dateFormat(currentDate, "HH:MM");
+                const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
+                return {id: `CANCEL_${val._id}`, text: `${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`}
+              }); 
+              this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
                 const ddhh = dateFormat(currentDate, "HH:MM");
                 const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
                 acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
                 return acc;
-              },""), buttons, conversationContent.waId)
+              },""), "Cancelar Servicio",listElements, conversationContent.waId)
             }else {
               this.sendTextMessage(`Actualmente no se tienen servicios activos`, conversationContent.waId)
             }
