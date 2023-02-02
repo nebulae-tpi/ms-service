@@ -153,6 +153,11 @@ class ServiceCQRS {
           request.authorType === 'CLIENT' ? 'ServiceCancelledByClient' : request.authorType === 'DRIVER' ? 'ServiceCancelledByDriver' : 'ServiceCancelledByOperator',
           { reason: request.reason, notes: request.notes },
           authToken))), //Build and send event (event-sourcing)
+        tap(() => {
+          if(args.authorType !== 'CLIENT' && args.authorType !== 'DRIVER'){
+            console.log("CANCELACIÓN ENVIADA ====> ", args.id)
+          }
+        }),
         mapTo(this.buildCommandAck()), // async command acknowledge
         //tap(x => ServiceCQRS.log(`ServiceCQRS.cancelService RESP: ${JSON.stringify(x)}`)),//DEBUG: DELETE LINE
         mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
