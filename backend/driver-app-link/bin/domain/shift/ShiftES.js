@@ -52,7 +52,7 @@ class ShiftES {
      * @param {*} shiftWalletUpdatedEvt 
      */
     handleShiftWalletUpdated$({ aid, data }) {
-        console.log(`ShiftES: handleShiftWalletUpdated: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
+        //console.log(`ShiftES: handleShiftWalletUpdated: ${JSON.stringify({ aid, data })} `);  //DEBUG: DELETE LINE
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
         return of({})
         .pipe(

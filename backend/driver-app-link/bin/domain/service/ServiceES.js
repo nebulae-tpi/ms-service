@@ -913,6 +913,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCancelledByOperator$({ aid, data }) {
+        console.log("LLEGA CANCELACIÓN AL DRIVER APP LINK =====> ", aid);
         //console.log(`ServiceES: handleServiceCancelledByOperator: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
             delay(300),
