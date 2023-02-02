@@ -188,7 +188,6 @@ class ClientBotLinkCQRS {
   }
 
   sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId){
-    console.log("LIST ===> ", JSON.stringify(list))
     const content = {
       "recipient_type": "individual",
       "to": waId,
@@ -355,7 +354,7 @@ class ClientBotLinkCQRS {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
                 const ddhh = dateFormat(currentDate, "HH:MM");
                 const assignedData = val.state === "REQUESTED" ? "" :`, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
-                return {id: `CANCEL_${val._id}`, text: `${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`}
+                return {id: `CANCEL_${val._id}`, title: `${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}`}
               }); 
               this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc,val) => {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
