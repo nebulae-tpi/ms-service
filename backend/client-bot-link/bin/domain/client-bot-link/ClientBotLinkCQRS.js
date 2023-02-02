@@ -216,6 +216,8 @@ class ClientBotLinkCQRS {
         }
       }
     }
+
+    console.log("content ==> ", content)
     const options = {
       protocol: 'https:',
       hostname: 'waba.360dialog.io',
@@ -348,7 +350,7 @@ class ClientBotLinkCQRS {
         return ServiceDA.getServices$({clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"]}).pipe(
           toArray(),
           tap(result => {
-           
+           console.log("result.length ===> ", result.length)
             if(result.length> 0){
               const listElements = result.map(val => {
                 const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
