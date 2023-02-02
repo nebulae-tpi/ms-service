@@ -305,7 +305,7 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestService$(serviceCount, serviceToRqstCount, waId) {
+  requestService$(serviceCount, serviceToRqstCount, client, waId) {
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
     const servicesToRequest = serviceToRqstCount;
@@ -358,10 +358,10 @@ class ClientBotLinkCQRS {
     const availableServiceCount = serviceLimit - serviceCount;
     if (((message || {}).text || {}).body) {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
-        return this.requestService$(serviceCount, message.text.body.length / 2, conversationContent.waId);
+        return this.requestService$(serviceCount, message.text.body.length / 2, client, conversationContent.waId);
       }
       else if (!isNaN(message.text.body)) {
-        return this.requestService$(serviceCount, parseInt(message.text.body), conversationContent.waId);
+        return this.requestService$(serviceCount, parseInt(message.text.body), client, conversationContent.waId);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id)
@@ -388,7 +388,7 @@ class ClientBotLinkCQRS {
       const interactiveResp = ((message.interactive || {}).button_reply || {}).id
       switch (interactiveResp) {
         case "rqstServiceBtn":
-          return this.requestService$(serviceCount, 1, conversationContent.waId)
+          return this.requestService$(serviceCount, 1, client, conversationContent.waId)
         case "infoServiceBtn":
           return of({}).pipe(
             tap(() => {
