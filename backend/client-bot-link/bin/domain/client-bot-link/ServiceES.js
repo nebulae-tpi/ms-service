@@ -6,6 +6,7 @@ const ServiceDA = require('./data-access/ServiceDA');
 const { forkJoin, of, interval, from, throwError, concat, Observable, Subject } = require('rxjs');
 const Crosscutting = require('../../tools/Crosscutting');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
+const https = require('https');
 
 /**
  * Singleton instance
