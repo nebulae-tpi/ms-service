@@ -24,6 +24,7 @@ class ServiceES {
    * @param {*} serviceEvent service event
    */
   handleServiceAssignedEvents$(serviceEvent) {
+    console.log("SERVICIO ASIGNADO ===> ", serviceEvent.aid);
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if(service.client.phone){
@@ -65,7 +66,9 @@ class ServiceES {
     })
       .on('error', err => {
         console.log('Error: ', err.message)
-      })
+      });
+
+    console.log("CONTENT ASSIGNED ===> ", JSON.stringify(content))
     req.write(JSON.stringify(content))
     req.end();
   }
