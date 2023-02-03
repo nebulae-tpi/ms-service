@@ -78,7 +78,7 @@ class ServiceDA {
       }
     };
     return defer(
-      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(COLLECTION_NAME).findOneAndUpdate(
         { _id },
         update
       )
