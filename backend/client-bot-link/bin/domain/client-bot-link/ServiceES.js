@@ -24,6 +24,7 @@ class ServiceES {
    * @param {*} serviceEvent service event
    */
   handleServiceAssignedEvents$(serviceEvent) {
+    console.log("LLEGA EVENTO ASIGNADO ===> ", serviceEvent);
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehiculo de placas ${service.vehicle.licensePlate}`, service.client.associatedClientPhoneNumber)
