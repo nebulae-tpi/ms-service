@@ -385,7 +385,8 @@ class ClientBotLinkCQRS {
       }
     }
     else {
-      const interactiveResp = ((message.interactive || {}).button_reply || {}).id
+      const interactiveResp = ((message.interactive || {}).button_reply || {}).id;
+      console.log("MESSAGE ===> ", message);
       switch (interactiveResp) {
         case "rqstServiceBtn":
           return this.requestService$(serviceCount, 1, client, conversationContent.waId)
