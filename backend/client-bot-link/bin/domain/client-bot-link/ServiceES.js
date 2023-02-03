@@ -1,6 +1,5 @@
 'use strict'
 
-const { of } = require("rxjs");
 const { tap, mergeMap, catchError, map, mapTo, groupBy, debounceTime, filter } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const ServiceDA = require('../service/data-access/ServiceDA');
