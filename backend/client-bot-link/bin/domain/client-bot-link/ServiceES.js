@@ -28,7 +28,7 @@ class ServiceES {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if(service.client.phone){
-          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehiculo de placas ${service.vehicle.licensePlate}`, service.client.phone)
+          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehiculo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`)
         }
       })
     );
