@@ -2,7 +2,7 @@
 
 const { tap, mergeMap, catchError, map, mapTo, groupBy, debounceTime, filter } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
-const ServiceDA = require('../service/data-access/ServiceDA');
+const ServiceDA = require('./data-access/ServiceDA');
 const { forkJoin, of, interval, from, throwError, concat, Observable, Subject } = require('rxjs');
 const Crosscutting = require('../../tools/Crosscutting');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
