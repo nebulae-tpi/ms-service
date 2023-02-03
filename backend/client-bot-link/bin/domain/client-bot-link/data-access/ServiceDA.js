@@ -7,7 +7,7 @@ let mongoDB = undefined;
 const COLLECTION_NAME = "Service";
 const DatabaseName = "historical_";
 const { CustomError } = require("../../../tools/customError");
-const { map, mergeMap, reduce, tap } = require("rxjs/operators");
+const { map, mergeMap, reduce, tap, filter } = require("rxjs/operators");
 const { of, Observable, defer, from, range } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
 
