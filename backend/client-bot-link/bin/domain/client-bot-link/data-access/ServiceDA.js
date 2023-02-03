@@ -25,6 +25,17 @@ class ServiceDA {
     });
   }
 
+  static getService$(id) {
+    //Get the last four digits to decide in which database we have to look for the information
+    const monthYear = id.substr(id.length - 4);
+    const collection = mongoDB.client.db(`${DatabaseName}${monthYear}`).collection(COLLECTION_NAME);
+
+    const query = {
+      _id: id      
+    };
+    return defer(() => collection.findOne(query));
+  }
+  
   static getServiceSize$(filter) {
     const query = {};
 

@@ -117,6 +117,7 @@ class ClientBotLinkCQRS {
           username: "N/A",
           fullname: client.generalInfo.name,
           tipClientId: client.associatedClientId,
+          phone: client.associatedClientPhoneNumber,
           tip: client.satelliteInfo.tip,
           referrerDriverDocumentId: client.referrerDriverDocumentId,
           offerMinDistance: client.satelliteInfo.offerMinDistance,
@@ -141,7 +142,7 @@ class ClientBotLinkCQRS {
         lastModificationTimestamp: Date.now(),
         closed: false,
         request: {
-          sourceChannel: "CLIENT",
+          sourceChannel: "CHAT_BOT",
           destChannel: "DRIVER_APP"
         }
 
@@ -421,7 +422,7 @@ class ClientBotLinkCQRS {
         if ((client || {})._id) {
           return ClientDA.getClient$(client.satelliteId).pipe(
             mergeMap(satelliteClient => {
-              const c = { ...satelliteClient, associatedClientId: client._id }
+              const c = { ...satelliteClient, associatedClientId: client._id, associatedClientPhoneNumber: phoneNumber }
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
                 mergeMap(() => {
                   return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(

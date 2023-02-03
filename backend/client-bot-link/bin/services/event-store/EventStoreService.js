@@ -2,6 +2,7 @@
 const { of, from, concat } = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
 const { map, switchMap, filter, mergeMap, concatMap } = require('rxjs/operators');
+const { ServiceES } = require("../../domain/client-bot-link");
 /**
  * Singleton instance
  */
@@ -120,6 +121,7 @@ class EventStoreService {
 
   generateFunctionMap() {
     return {
+      ServiceAssigned: { fn: ServiceES.handleServiceAssignedEvents$, obj: ServiceES },
     };
   }
 
@@ -128,6 +130,7 @@ class EventStoreService {
   */
   generateAggregateEventsArray() {
     return [      
+      { aggregateType: "Service", eventType: "ServiceAssigned" },
     ]
   }
 }
