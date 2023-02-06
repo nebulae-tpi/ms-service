@@ -358,7 +358,7 @@ class ClientBotLinkCQRS {
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
     if (((message || {}).text || {}).body) {
-      const charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎️🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length
+      const charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length
       console.log("ARRAY ===> ", [...message.text.body])
       console.log("CHAR COUNT ===> ", charCount)
       if (charCount > 0) {
