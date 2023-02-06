@@ -283,7 +283,7 @@ class ClientBotLinkCQRS {
             acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh} ${assignedData}\n`
             return acc;
           }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
-        } else {
+        } else { 
           this.sendTextMessage(`Actualmente no se tienen servicios activos`, waId)
         }
       })
