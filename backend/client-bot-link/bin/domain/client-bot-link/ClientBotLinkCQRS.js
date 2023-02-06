@@ -359,6 +359,8 @@ class ClientBotLinkCQRS {
     const availableServiceCount = serviceLimit - serviceCount;
     if (((message || {}).text || {}).body) {
       const charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎️🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length
+      console.log("ARRAY ===> ", [...message.text.body])
+      console.log("CHAR COUNT ===> ", charCount)
       if (charCount > 0) {
         return this.requestService$(serviceCount, charCount, client, conversationContent.waId);
       }
