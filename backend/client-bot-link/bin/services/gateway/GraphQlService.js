@@ -150,7 +150,6 @@ class GraphQlService {
    * returns a map that assocs GraphQL request with its processor
    */
   generateFunctionMap() {
-    //SHIFT
     return {
       "clientgateway.graphql.mutation.ClientBotLinkMessageReceived": {
         fn: ClientBotLinkCQRS.processMessageReceived$,
