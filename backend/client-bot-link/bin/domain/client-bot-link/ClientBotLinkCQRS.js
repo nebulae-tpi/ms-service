@@ -392,12 +392,7 @@ class ClientBotLinkCQRS {
         case "rqstServiceBtn":
           return this.requestService$(serviceCount, 1, client, conversationContent.waId)
         case "infoServiceBtn":
-          return of({}).pipe(
-            tap(() => {
-              console.log("PARAMS INFO ===> ", {id: client._id, waId: conversationContent.waId});
-              this.infoService$(client._id, conversationContent.waId)
-            })
-          )
+          return this.infoService$(client._id, conversationContent.waId)
         default:
           if(interactiveResp.includes("CANCEL_")){
             return ServiceDA.setCancelStateAndReturnService$(interactiveResp.replace("CANCEL_",""), "CANCELLED_CLIENT", Date.now(), {timestamp: 1}).pipe(
