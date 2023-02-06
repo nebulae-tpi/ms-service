@@ -290,7 +290,12 @@ class ClientBotLinkCQRS {
         }),
         toArray(),
         tap(() => {
-          this.sendTextMessage(`Servicio creado exitosamente`, waId)
+          if(servicesToRequest > 1){
+            this.sendTextMessage(`Se han creado ${servicesToRequest} servicios exitosamente`, waId)
+          }else {
+            this.sendTextMessage(`Se ha creado ${servicesToRequest} servicio exitosamente`, waId)
+          }
+          
         })
       )
     } else {
@@ -318,7 +323,7 @@ class ClientBotLinkCQRS {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
             const assignedData = val.state === "REQUESTED" ? "" : `Conductor: ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
-            acc = `- Solicitado a las ${ddhh} ${assignedData}\n`
+            acc = `${acc}- Solicitado a las ${ddhh} ${assignedData}\n`
             return acc;
           }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
         } else { 
