@@ -142,7 +142,7 @@ class ClientBotLinkCQRS {
         lastModificationTimestamp: Date.now(),
         closed: false,
         request: {
-          sourceChannel: "CHAT_SATELLITE",
+          sourceChannel: "CHAT_SATELITE",
           destChannel: "DRIVER_APP"
         }
 
