@@ -307,13 +307,13 @@ class ClientBotLinkCQRS {
           const listElements = result.map(val => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
-            const assignedData = val.state === "REQUESTED" ? "" : `, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
+            const assignedData = val.state === "REQUESTED" ? "" : `Conductor ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
             return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${val.pickUp.addressLine1}${assignedData}` }
           });
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc, val) => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
-            const assignedData = val.state === "REQUESTED" ? "" : `, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
+            const assignedData = val.state === "REQUESTED" ? "" : `Conductor: ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
             acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
             return acc;
           }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
