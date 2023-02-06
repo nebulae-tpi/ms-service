@@ -34,7 +34,6 @@ class ServiceES {
    * @param {*} serviceEvent service event
    */
   handleServiceAssignedEvents$(serviceEvent) {
-    console.log("SERVICIO ASIGNADO ===> ", serviceEvent.aid);
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
@@ -49,7 +48,6 @@ class ServiceES {
    * @param {*} serviceEvent service event
    */
   handleServiceOnBoardEvent$(serviceEvent) {
-    console.log("SERVICIO A BORDO ===> ", serviceEvent.aid);
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
@@ -65,7 +63,6 @@ class ServiceES {
  * @param {*} serviceEvent service event
  */
   handleServiceArrivedEvent$(serviceEvent) {
-    console.log("SERVICIO ARRIVED ===> ", serviceEvent.aid);
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
@@ -97,7 +94,6 @@ class ServiceES {
  * @param {*} serviceEvent service event
  */
   handleServiceCancelledByOperatorEvents$(serviceEvent) {
-    console.log("SERVICIO ARRIVED ===> ", serviceEvent.aid);
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
@@ -114,7 +110,6 @@ class ServiceES {
  * @param {*} serviceEvent service event
  */
    handleServiceCancelledBySystemEvents$(serviceEvent) {
-    console.log("SERVICIO ARRIVED ===> ", serviceEvent.aid);
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {

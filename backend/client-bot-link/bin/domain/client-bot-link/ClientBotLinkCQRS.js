@@ -387,13 +387,14 @@ class ClientBotLinkCQRS {
     }
     else {
       const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
-      console.log("MESSAGE ===> ", message);
+      console.log("interactiveResp ===> ", interactiveResp);
       switch (interactiveResp) {
         case "rqstServiceBtn":
           return this.requestService$(serviceCount, 1, client, conversationContent.waId)
         case "infoServiceBtn":
           return of({}).pipe(
             tap(() => {
+              console.log("PARAMS INFO ===> ", {id: client._id, waId: conversationContent.waId});
               this.infoService$(client._id, conversationContent.waId)
             })
           )
