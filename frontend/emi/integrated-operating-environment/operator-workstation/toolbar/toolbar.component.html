@@ -97,6 +97,12 @@
             {{ 'TOOLBAR.CHANNELS.CLIENTS' | translate }}
         </mat-checkbox>
     </button>
+    <button mat-menu-item (click)="$event.stopPropagation()">
+        <mat-icon>phone_iphone</mat-icon>
+        <mat-checkbox (change)="updateChannelFilters($event, 'CHAT_SATELITE', true)" [checked]="channelsFilter.includes('CHAT_SATELITE')">
+            {{ 'TOOLBAR.CHANNELS.CHAT_SATELITE' | translate }}
+        </mat-checkbox>
+    </button>
     <!-- <button mat-menu-item (click)="$event.stopPropagation()">
         <mat-icon>call</mat-icon>
         <mat-checkbox (change)="updateChannelFilters($event, 'IVR')" [checked]="channelsFilter.includes('IVR')">
