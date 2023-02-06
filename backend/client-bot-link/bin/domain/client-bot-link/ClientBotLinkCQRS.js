@@ -308,13 +308,17 @@ class ClientBotLinkCQRS {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
             const assignedData = val.state === "REQUESTED" ? "" : `Conductor ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
-            return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${val.pickUp.addressLine1}${assignedData}` }
+            return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${assignedData}` }
           });
+
+          if(listElements.length > 0){
+            listElements.push({ id: `CancelAllServiceBtn`, description: `Cancelar Todos` })
+          }
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc, val) => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
             const assignedData = val.state === "REQUESTED" ? "" : `Conductor: ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
-            acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
+            acc = `- Solicitado a las ${ddhh} ${assignedData}\n`
             return acc;
           }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
         } else { 
@@ -426,7 +430,6 @@ class ClientBotLinkCQRS {
                 mergeMap(() => {
                   return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
                     mergeMap(result => {
-                      console.log("RESULT ==> ", result)
                       return this.continueConversation$(message, conversationContent, c);
                     })
                   )
@@ -437,6 +440,7 @@ class ClientBotLinkCQRS {
         } else {
           return of({}).pipe(
             tap(() => {
+              this.sendTextMessage(`Hola, Bienvenido al TX BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de TX Plus para realizar el proceso de registro`, conversationContent.waId)
               const content = {
                 "recipient_type": "individual",
                 "to": conversationContent.waId,
