@@ -122,6 +122,11 @@ class EventStoreService {
   generateFunctionMap() {
     return {
       ServiceAssigned: { fn: ServiceES.handleServiceAssignedEvents$, obj: ServiceES },
+      ServiceArrived: { fn: ServiceES.handleServiceArrivedEvent$, obj: ServiceES },
+      ServicePassengerBoarded: { fn: ServiceES.handleServiceOnBoardEvent$, obj: ServiceES },
+      ServiceCancelledByDriver: { fn: ServiceES.handleServiceCancelledByDriverEvents$, obj: ServiceES },
+      ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperatorEvents$, obj: ServiceES },
+      ServiceCancelledBySystem: { fn: ServiceES.handleServiceCancelledBySystemEvents$, obj: ServiceES },
     };
   }
 
@@ -131,6 +136,11 @@ class EventStoreService {
   generateAggregateEventsArray() {
     return [      
       { aggregateType: "Service", eventType: "ServiceAssigned" },
+      { aggregateType: "Service", eventType: "ServiceArrived" },
+      { aggregateType: "Service", eventType: "ServicePassengerBoarded" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
+      { aggregateType: "Service", eventType: "ServiceCancelledByOperator" },
+      { aggregateType: "Service", eventType: "ServiceCancelledBySystem" },
     ]
   }
 }
