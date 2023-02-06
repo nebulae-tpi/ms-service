@@ -359,6 +359,8 @@ class ClientBotLinkCQRS {
     const availableServiceCount = serviceLimit - serviceCount;
     if (((message || {}).text || {}).body) {
       if (message.text.body.includes("🚕") || message.text.body.includes("🚖") || message.text.body.includes("🚙") || message.text.body.includes("🚘")) {
+        const charCount = [...message.text.body];
+        console.log("CHAR COUNT ===> ", charCount)
         return this.requestService$(serviceCount, message.text.body.length / 2, client, conversationContent.waId);
       }
       else if (!isNaN(message.text.body)) {
