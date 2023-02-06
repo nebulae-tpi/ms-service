@@ -37,6 +37,7 @@ export const locale = {
         OPERATORS: 'Operators',
         CLIENTS: 'Clients',
         IVR: 'IVR',
+        CHAT_SATELITE: 'Chat Satellite',
         SATELLITES: 'Satellites',
         WHATSAPP: 'Whatsapp',
         FACEBOOK_MSG: 'Facebook Messenger'

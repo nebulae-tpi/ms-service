@@ -487,7 +487,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED,
       args: [this.channelsFilter]
     });
-
+ 
 
   }
 
