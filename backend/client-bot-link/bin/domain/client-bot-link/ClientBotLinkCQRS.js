@@ -28,68 +28,6 @@ class ClientBotLinkCQRS {
 
   //#region Object builders
 
-  processMessageReceived$({ args }, authToken) {
-    if (args.messages) {
-      const concacts = args.contacts;
-      return from(args.messages).pipe(
-        mergeMap(message => {
-          return BotConversationDA.getBotConversation$(message.from).pipe(
-            mergeMap(conversation => {
-              if ((conversation || {})._id) {
-                return ServiceDA.getServiceSize$({ clientId: conversation.client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
-                  mergeMap(serviceCount => {
-                    return this.continueConversation$(message, conversation, conversation.client, serviceCount)
-                  })
-                )
-
-              } else {
-                return this.initConversation$(message.from, {
-                  waId: message.from,
-                  timestamp: message.timestamp,
-                  client: {},
-                }, message)
-              }
-            })
-          )
-        }),
-        tap(message => {
-          this.markMessageAsRead(message);
-          const profileName = ((concacts.find(c => c.wa_id === message.from) || {}).profile || {}).name;
-          const content = this.assignAction(message, profileName);
-          const options = {
-            protocol: 'https:',
-            hostname: 'waba.360dialog.io',
-            path: '/v1/messages/',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'D360-API-KEY': process.env.D360_API_KEY,
-            }
-          }
-          const req = https.request(options, res => {
-            let data = ''
-
-            res.on('data', chunk => {
-              data += chunk
-            })
-
-            res.on('end', () => {
-              //console.log(JSON.parse(data))
-            })
-          })
-            .on('error', err => {
-              console.log('Error: ', err.message)
-            })
-          req.write(JSON.stringify(content))
-          req.end();
-        })
-      )
-    } else {
-      return of("IGNORED")
-    }
-
-  }
-
   buildServiceRequestedEsEvent(client) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
@@ -335,14 +273,14 @@ class ClientBotLinkCQRS {
           const listElements = result.map(val => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
-            const assignedData = val.state === "REQUESTED" ? "" : `, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
-            return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${val.pickUp.addressLine1}${assignedData}` }
+            const assignedData = val.state === "REQUESTED" ? "" : `Conductor ${val.driver.fullname}, Placas ${val.vehicle.licensePlate}`
+            return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${assignedData}` }
           });
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc, val) => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
-            const assignedData = val.state === "REQUESTED" ? "" : `, tomado por ${val.driver.fullname} en el vehículo identificado con las placas ${val.vehicle.licensePlate}`
-            acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh}${assignedData}\n`
+            const assignedData = val.state === "REQUESTED" ? "" : `Conductor ${val.driver.fullname}, Placas ${val.vehicle.licensePlate}`
+            acc = `- ${val.pickUp.addressLine1} solicitado a las ${ddhh} ${assignedData}\n`
             return acc;
           }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
         } else {
@@ -396,15 +334,45 @@ class ClientBotLinkCQRS {
           return this.requestService$(serviceCount, 1, client, conversationContent.waId)
         case "infoServiceBtn":
           return this.infoService$(client._id, conversationContent.waId)
+        case "CancelAllServiceBtn":
+          return ServiceDA.getServices$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+            mergeMap(val => {
+              return eventSourcing.eventStore.emitEvent$(new Event({
+                aggregateType: 'Service',
+                aggregateId: val._id,
+                eventType: "ServiceCancelledByClient",
+                eventTypeVersion: 1,
+                user: conversationContent.waId,
+                data: { reason: null, notes: "" }
+              })).pipe(
+                tap(() => {
+                  const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                  const ddhh = dateFormat(currentDate, "HH:MM");
+                  this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
+                })
+              )
+            })
+          );
         default:
           if(interactiveResp.includes("CANCEL_")){
-            return ServiceDA.setCancelStateAndReturnService$(interactiveResp.replace("CANCEL_",""), "CANCELLED_CLIENT", Date.now(), {timestamp: 1}).pipe(
-              tap(val => {
-                const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
-                const ddhh = dateFormat(currentDate, "HH:MM");
-                this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
+            return ServiceDA.getService$(interactiveResp.replace("CANCEL_","")).pipe(
+              mergeMap(val => {
+                return eventSourcing.eventStore.emitEvent$(new Event({
+                  aggregateType: 'Service',
+                  aggregateId: val._id,
+                  eventType: "ServiceCancelledByClient",
+                  eventTypeVersion: 1,
+                  user: conversationContent.waId,
+                  data: { reason: null, notes: "" }
+                })).pipe(
+                  tap(() => {
+                    const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                    const ddhh = dateFormat(currentDate, "HH:MM");
+                    this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
+                  })
+                )
               })
-            )
+            );
           }else {
             return of({});
           }
@@ -500,116 +468,6 @@ class ClientBotLinkCQRS {
 
   }
 
-  assignAction(message, name) {
-    const content = {
-      "recipient_type": "individual",
-      "to": message.from,
-      "type": "interactive",
-    }
-
-    switch (((message.interactive || {}).list_reply || {}).title) {
-      case "Nueva Lista":
-        content.interactive = {
-          "type": "list",
-          "header": {
-            "type": "text",
-            "text": `Hola ${name}, Bienvenido al TX Bot`
-          },
-          "body": {
-            "text": "Nueva lista generada"
-          },
-          "footer": {
-            "text": ""
-          },
-          "action": {
-            "button": "menú",
-            "sections": [
-              {
-                "title": "Opciones Interactivas",
-                "rows": [
-                  {
-                    "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
-                    "title": "Nueva Lista"
-                  },
-                  {
-                    "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
-                    "title": "Nuevo Boton"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-        break;
-      case "Nuevo Boton":
-        content.interactive = {
-          "type": "button",
-          "header": {
-            "type": "text",
-            "text": "Ejemplo Boton Interactivo"
-          },
-          "body": {
-            "text": "Este es un ejemplo de boton interactivo"
-          },
-          "footer": {
-            "text": "pie de pagína"
-          },
-          "action": {
-            "buttons": [
-              {
-                "type": "reply",
-                "reply": {
-                  "id": "a3c3596f-6339-4cdd-870b-26b7957285cb",
-                  "title": "Boton 1"
-                }
-              },
-              {
-                "type": "reply",
-                "reply": {
-                  "id": "a4d5f308-e3b6-4b3a-b820-3699b47cbfb8",
-                  "title": "Boton 2"
-                }
-              }
-            ]
-          }
-        }
-        break;
-      default:
-        content.interactive = {
-          "type": "list",
-          "header": {
-            "type": "text",
-            "text": `Hola ${name}, Bienvenido al TX Bot`
-          },
-          "body": {
-            "text": "Este es un ejemplo de mensajes interactivos, por favor seleccione una opción de la lista presentada"
-          },
-          "footer": {
-            "text": ""
-          },
-          "action": {
-            "button": "menú",
-            "sections": [
-              {
-                "title": "Opciones Interactivas",
-                "rows": [
-                  {
-                    "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
-                    "title": "Nueva Lista"
-                  },
-                  {
-                    "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
-                    "title": "Nuevo Boton"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-        break;
-    }
-    return content;
-  }
 
   markMessageAsRead(message) {
     const content = {
