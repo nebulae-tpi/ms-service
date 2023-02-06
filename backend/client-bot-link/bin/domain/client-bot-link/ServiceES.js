@@ -7,6 +7,7 @@ const { forkJoin, of, interval, from, throwError, concat, Observable, Subject } 
 const Crosscutting = require('../../tools/Crosscutting');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const https = require('https');
+const dateFormat = require('dateformat');
 
 /**
  * Singleton instance
