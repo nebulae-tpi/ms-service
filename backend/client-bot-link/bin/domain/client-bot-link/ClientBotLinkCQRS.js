@@ -299,7 +299,7 @@ class ClientBotLinkCQRS {
     }
   }
 
-  infoService$(clientId, waId){
+  infoService$(clientId, waId) {
     return ServiceDA.getServices$({ clientId: clientId, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
       toArray(),
       tap(result => {
@@ -322,7 +322,7 @@ class ClientBotLinkCQRS {
         }
       })
     )
-    
+
   }
 
   continueConversation$(message, conversationContent, client, serviceCount) {
@@ -369,7 +369,27 @@ class ClientBotLinkCQRS {
         case "infoServiceBtn":
           return this.infoService$(client._id, conversationContent.waId)
         case "CancelAllServiceBtn":
-            return ServiceDA.getServices$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+          return ServiceDA.getServices$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+            mergeMap(val => {
+              return eventSourcing.eventStore.emitEvent$(new Event({
+                aggregateType: 'Service',
+                aggregateId: val._id,
+                eventType: "ServiceCancelledByClient",
+                eventTypeVersion: 1,
+                user: conversationContent.waId,
+                data: { reason: null, notes: "" }
+              })).pipe(
+                tap(() => {
+                  const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                  const ddhh = dateFormat(currentDate, "HH:MM");
+                  this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
+                })
+              )
+            })
+          );
+        default:
+          if (interactiveResp.includes("CANCEL_")) {
+            return ServiceDA.getService$(interactiveResp.replace("CANCEL_", "")).pipe(
               mergeMap(val => {
                 return eventSourcing.eventStore.emitEvent$(new Event({
                   aggregateType: 'Service',
@@ -387,32 +407,11 @@ class ClientBotLinkCQRS {
                 )
               })
             );
-          default:
-            if(interactiveResp.includes("CANCEL_")){
-              return ServiceDA.getService$(interactiveResp.replace("CANCEL_","")).pipe(
-                mergeMap(val => {
-                  return eventSourcing.eventStore.emitEvent$(new Event({
-                    aggregateType: 'Service',
-                    aggregateId: val._id,
-                    eventType: "ServiceCancelledByClient",
-                    eventTypeVersion: 1,
-                    user: conversationContent.waId,
-                    data: { reason: null, notes: "" }
-                  })).pipe(
-                    tap(() => {
-                      const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
-                      const ddhh = dateFormat(currentDate, "HH:MM");
-                      this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
-                    })
-                  )
-                })
-              );
-            }else {
-              return of({});
-            }
+          } else {
+            return of({});
+          }
+      }
     }
-
-
   }
 
   initConversation$(id, conversationContent, message) {
