@@ -312,7 +312,7 @@ class ClientBotLinkCQRS {
           });
 
           if(listElements.length > 0){
-            listElements.push({ id: `CancelAllServiceBtn`, description: `Cancelar Todos` })
+            listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` })
           }
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc, val) => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
