@@ -443,8 +443,8 @@ class ClientBotLinkCQRS {
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
                 mergeMap(() => {
                   return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
-                    mergeMap(result => {
-                      return this.continueConversation$(message, conversationContent, c);
+                    mergeMap(serviceCount => {
+                      return this.continueConversation$(message, conversationContent, c, serviceCount);
                     })
                   )
                 })
