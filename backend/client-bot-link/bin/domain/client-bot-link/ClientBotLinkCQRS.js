@@ -390,14 +390,12 @@ class ClientBotLinkCQRS {
               })).pipe(
                 toArray(),
                 tap(res => {
+                  console.log("RES ===> ", res);
                   if (res.length > 0) {
                     this.sendTextMessage(`Todos los servicios pendientes han sido cancelados exitosamente`, conversationContent.waId)
                   } else {
                     this.sendTextMessage(`Actualmente no hay servicios por cancelar`, conversationContent.waId)
                   }
-                  const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
-                  const ddhh = dateFormat(currentDate, "HH:MM");
-
                 })
               )
             })
