@@ -292,9 +292,9 @@ class ClientBotLinkCQRS {
         toArray(),
         tap(() => {
           if (servicesToRequest > 1) {
-            this.sendTextMessage(`Se han creado ${servicesToRequest} servicios exitosamente`, waId)
+            this.sendTextMessage(`Se han solicitado ${servicesToRequest} servicios exitosamente`, waId)
           } else {
-            this.sendTextMessage(`Se ha creado ${servicesToRequest} servicio exitosamente`, waId)
+            this.sendTextMessage(`Se ha solicitado un servicio exitosamente`, waId)
           }
 
         })

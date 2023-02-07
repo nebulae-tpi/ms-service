@@ -123,7 +123,7 @@ class ServiceES {
               text: "Cancelar Busqueda"
             }
           ]
-          this.sendInteractiveButtonMessage(`Aun no hemos podido encontrar un servicio para tí`, `¿deseas continuar?`, buttons, `57${service.client.phone}`);
+          this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttons, `57${service.client.phone}`);
         }
       })
     );
