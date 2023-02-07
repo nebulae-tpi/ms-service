@@ -290,12 +290,12 @@ class ClientBotLinkCQRS {
         }),
         toArray(),
         tap(() => {
-          if(servicesToRequest > 1){
+          if (servicesToRequest > 1) {
             this.sendTextMessage(`Se han creado ${servicesToRequest} servicios exitosamente`, waId)
-          }else {
+          } else {
             this.sendTextMessage(`Se ha creado ${servicesToRequest} servicio exitosamente`, waId)
           }
-          
+
         })
       )
     } else {
@@ -316,7 +316,7 @@ class ClientBotLinkCQRS {
             return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${assignedData}` }
           });
 
-          if(listElements.length > 0){
+          if (listElements.length > 0) {
             listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` })
           }
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc, val) => {
@@ -326,7 +326,7 @@ class ClientBotLinkCQRS {
             acc = `${acc}- Solicitado a las ${ddhh} ${assignedData}\n`
             return acc;
           }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
-        } else { 
+        } else {
           this.sendTextMessage(`Actualmente no se tienen servicios activos`, waId)
         }
       })
@@ -388,10 +388,16 @@ class ClientBotLinkCQRS {
                 user: conversationContent.waId,
                 data: { reason: null, notes: "" }
               })).pipe(
-                tap(() => {
+                toArray(),
+                tap(res => {
+                  if (res.length > 0) {
+                    this.sendTextMessage(`Todos los servicios pendientes han sido cancelados exitosamente`, conversationContent.waId)
+                  } else {
+                    this.sendTextMessage(`Actualmente no hay servicios por cancelar`, conversationContent.waId)
+                  }
                   const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
                   const ddhh = dateFormat(currentDate, "HH:MM");
-                  this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
+
                 })
               )
             })
@@ -400,20 +406,25 @@ class ClientBotLinkCQRS {
           if (interactiveResp.includes("CANCEL_")) {
             return ServiceDA.getService$(interactiveResp.replace("CANCEL_", "")).pipe(
               mergeMap(val => {
-                return eventSourcing.eventStore.emitEvent$(new Event({
-                  aggregateType: 'Service',
-                  aggregateId: val._id,
-                  eventType: "ServiceCancelledByClient",
-                  eventTypeVersion: 1,
-                  user: conversationContent.waId,
-                  data: { reason: null, notes: "" }
-                })).pipe(
-                  tap(() => {
-                    const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
-                    const ddhh = dateFormat(currentDate, "HH:MM");
-                    this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
-                  })
-                )
+                const STATES_TO_CLOSE_SERVICE = ["ON_BOARD", "DONE", "CANCELLED_DRIVER", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_SYSTEM"];
+                if (STATES_TO_CLOSE_SERVICE.includes(val.state)) {
+                  this.sendTextMessage(`El servicio seleccionado ya se ha finalizado por lo que no se pudo realizar el proceso de cancelación`, conversationContent.waId)
+                  return of({})
+                }
+                else {
+                  const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                  const ddhh = dateFormat(currentDate, "HH:MM");
+                  this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId)
+                  return eventSourcing.eventStore.emitEvent$(new Event({
+                    aggregateType: 'Service',
+                    aggregateId: val._id,
+                    eventType: "ServiceCancelledByClient",
+                    eventTypeVersion: 1,
+                    user: conversationContent.waId,
+                    data: { reason: null, notes: "" }
+                  }))
+                }
+
               })
             );
           } else {
@@ -446,61 +457,6 @@ class ClientBotLinkCQRS {
           return of({}).pipe(
             tap(() => {
               this.sendTextMessage(`Hola, Bienvenido al TX BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de TX Plus para realizar el proceso de registro`, conversationContent.waId)
-              const content = {
-                "recipient_type": "individual",
-                "to": conversationContent.waId,
-                "type": "interactive",
-                "interactive": {
-                  "type": "button",
-                  "header": {
-                    "type": "text",
-                    "text": "Hola, Bienvenido al TX BOT"
-                  },
-                  "body": {
-                    "text": "Actualmente no hay un usuario registrado en nuestro sistema,  se requiere hacer el proceso de registro para poder utilizar las funciones del BOT"
-                  },
-                  "footer": {
-                    "text": ""
-                  },
-                  "action": {
-                    "buttons": [
-                      {
-                        "type": "reply",
-                        "reply": {
-                          "id": "a3c3596f-6339-4cdd-870b-26b7957285cb",
-                          "title": "OK"
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-              const options = {
-                protocol: 'https:',
-                hostname: 'waba.360dialog.io',
-                path: '/v1/messages/',
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'D360-API-KEY': process.env.D360_API_KEY,
-                }
-              }
-              const req = https.request(options, res => {
-                let data = ''
-
-                res.on('data', chunk => {
-                  data += chunk
-                })
-
-                res.on('end', () => {
-                  //console.log(JSON.parse(data))
-                })
-              })
-                .on('error', err => {
-                  console.log('Error: ', err.message)
-                })
-              req.write(JSON.stringify(content))
-              req.end();
             })
           )
         }
