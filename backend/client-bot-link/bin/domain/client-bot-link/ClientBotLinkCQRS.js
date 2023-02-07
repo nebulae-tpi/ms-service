@@ -89,6 +89,7 @@ class ClientBotLinkCQRS {
           username: "N/A",
           fullname: client.generalInfo.name,
           tipClientId: client.associatedClientId,
+          tipType: client.satelliteInfo.tipType,
           phone: client.associatedClientPhoneNumber,
           tip: client.satelliteInfo.tip,
           referrerDriverDocumentId: client.referrerDriverDocumentId,
