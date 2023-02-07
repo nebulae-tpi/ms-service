@@ -39,7 +39,7 @@ class ServiceDA {
   * @returns {Observable}
   */
   static findByClientId$(clientId, currentYYMM, projection = undefined) {
-    const query = { "client.id": clientId, state: "REQUESTED" };
+    const query = { "client.id": clientId, state: {$in: ["REQUESTED", "ASSIGNED", "ARRIVED"]} };
     return defer(() =>
       mongoDB.getHistoricalDbByYYMM(currentYYMM).collection(CollectionName).findOne(query, { projection })
     );
