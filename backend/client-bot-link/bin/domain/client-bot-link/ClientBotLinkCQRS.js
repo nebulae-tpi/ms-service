@@ -387,18 +387,17 @@ class ClientBotLinkCQRS {
                 eventTypeVersion: 1,
                 user: conversationContent.waId,
                 data: { reason: null, notes: "" }
-              })).pipe(
-                toArray(),
-                tap(res => {
-                  console.log("RES ===> ", res);
-                  if (res.length > 0) {
-                    this.sendTextMessage(`Todos los servicios pendientes han sido cancelados exitosamente`, conversationContent.waId)
-                  } else {
-                    this.sendTextMessage(`Actualmente no hay servicios por cancelar`, conversationContent.waId)
-                  }
-                })
-              )
-            })
+              }))
+            }),
+            toArray(),
+            tap(res => {
+                console.log("RES ===> ", res);
+                if (res.length > 0) {
+                  this.sendTextMessage(`Todos los servicios pendientes han sido cancelados exitosamente`, conversationContent.waId)
+                } else {
+                  this.sendTextMessage(`Actualmente no hay servicios por cancelar`, conversationContent.waId)
+                }
+              })
           );
         default:
           if (interactiveResp.includes("CANCEL_")) {
