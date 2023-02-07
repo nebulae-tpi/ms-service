@@ -388,7 +388,7 @@ class ClientBotLinkCQRS {
                 user: conversationContent.waId,
                 data: { reason: null, notes: "" }
               }))
-            }),
+            }), 
             toArray(),
             tap(res => {
                 console.log("RES ===> ", res);
