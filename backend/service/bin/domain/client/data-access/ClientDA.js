@@ -150,6 +150,20 @@ class ClientDA {
     );
   }
 
+
+  static updateGeneralInfo$(id, generalInfo) {
+    const collection = mongoDB.db.collection(CollectionName);
+    
+    return defer(()=>
+        collection.updateOne(
+          { _id: id},
+          {
+            $set: {generalInfo}
+          }
+        )
+    );
+  }
+
   static createClient$(client) {
     const collection = mongoDB.db.collection(CollectionName);
     return defer(() => collection.insertOne(client));

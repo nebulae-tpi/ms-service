@@ -45,7 +45,7 @@ class EventStoreService {
     return from(this.aggregateEventsArray).pipe(
       map(aggregateEvent => ({ ...aggregateEvent, onErrorHandler, onCompleteHandler })),
       map(params => this.subscribeEventHandler(params))
-    );      
+    );
   }
 
   /**
@@ -70,7 +70,7 @@ class EventStoreService {
     const handler = this.functionMap[eventType];
     const subscription =
       //MANDATORY:  AVOIDS ACK REGISTRY DUPLICATIONS
-      eventSourcing.eventStore.ensureAcknowledgeRegistry$(aggregateType,mbeKey).pipe(
+      eventSourcing.eventStore.ensureAcknowledgeRegistry$(aggregateType, mbeKey).pipe(
         mergeMap(() => eventSourcing.eventStore.getEventListener$(aggregateType, mbeKey, false)),
         filter(evt => evt.et === eventType),
         mergeMap(evt => concat(
@@ -110,7 +110,7 @@ class EventStoreService {
   subscribeEventRetrieval$({ aggregateType, eventType }) {
     const handler = this.functionMap[eventType];
     //MANDATORY:  AVOIDS ACK REGISTRY DUPLICATIONS
-    return eventSourcing.eventStore.ensureAcknowledgeRegistry$(aggregateType,mbeKey).pipe(
+    return eventSourcing.eventStore.ensureAcknowledgeRegistry$(aggregateType, mbeKey).pipe(
       switchMap(() => eventSourcing.eventStore.retrieveUnacknowledgedEvents$(aggregateType, mbeKey)),
       filter(evt => evt.et === eventType),
       concatMap(evt => concat(
@@ -121,7 +121,7 @@ class EventStoreService {
     );
   }
 
-  
+
   ////////////////////////////////////////////////////////////////////////////////////////
   /////////////////// CONFIG SECTION, ASSOC EVENTS AND PROCESSORS BELOW     //////////////
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -143,11 +143,11 @@ class EventStoreService {
       },
       DriverAuthCreated: {
         fn: DriverES.handleDriverAuthCreated$,
-        obj: DriverES 
+        obj: DriverES
       },
       DriverAuthDeleted: {
         fn: DriverES.handleDriverAuthDeleted$,
-        obj: DriverES 
+        obj: DriverES
       },
       VehicleAssigned: {
         fn: DriverES.handleVehicleAssigned$,
@@ -157,7 +157,7 @@ class EventStoreService {
         fn: DriverES.handleVehicleUnassigned$,
         obj: DriverES
       },
-      DriverBlockAdded:{
+      DriverBlockAdded: {
         fn: DriverES.handleDriverBlockAdded$,
         obj: DriverES
       },
@@ -181,7 +181,7 @@ class EventStoreService {
       VehicleFeaturesUpdated: {
         fn: VehicleES.handleVehicleFeaturesUpdated$,
         obj: VehicleES
-      },      
+      },
       VehicleBlockRemoved: {
         fn: VehicleES.handleVehicleBlockRemoved$,
         obj: VehicleES
@@ -216,6 +216,11 @@ class EventStoreService {
         fn: ClientES.handleDriverAssociatedToClient$,
         obj: ClientES
       },
+      ClientGeneralInfoUpdated: {
+        fn: ClientES.handleClientGeneralInfoUpdated$,
+        obj: ClientES
+      },
+
       //SERVICE
       ServiceRequested: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceAssigned: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
@@ -355,6 +360,11 @@ class EventStoreService {
         aggregateType: "Client",
         eventType: "ClientSatelliteInfoUpdated"
       },
+      {
+        aggregateType: "Client",
+        eventType: "ClientGeneralInfoUpdated"
+      },
+
       //SERVICE
       { aggregateType: "Service", eventType: "ServiceRequested" },
       { aggregateType: "Service", eventType: "ServiceAssigned" },
@@ -366,7 +376,7 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceDropOffETAReported" },
       { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
       { aggregateType: "Service", eventType: "ServiceCancelledByClient" },
-      { aggregateType: "Service", eventType: "ServiceCancelledByOperator" }, 
+      { aggregateType: "Service", eventType: "ServiceCancelledByOperator" },
       { aggregateType: "Service", eventType: "ServiceClosed" },
       // SHIFT
       { aggregateType: "Shift", eventType: "ShiftLocationReported" },
@@ -381,7 +391,7 @@ class EventStoreService {
       {
         aggregateType: "Business",
         eventType: "BusinessGeneralInfoUpdated"
-      }, 
+      },
     ]
   }
 }

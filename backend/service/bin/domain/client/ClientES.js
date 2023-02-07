@@ -45,6 +45,10 @@ class ClientES {
         return ClientDA.addDriverCode$(DriverAssociatedToClientEvent.aid, DriverAssociatedToClientEvent.data.referrerDriverCode);
     }
 
+    handleClientGeneralInfoUpdated$(evt) {          
+        return ClientDA.updateGeneralInfo$(evt.aid, evt.data);
+    }
+
     handleEndClientCreated$({aid, data}){
         return ClientDA.createClient$(data);
       }

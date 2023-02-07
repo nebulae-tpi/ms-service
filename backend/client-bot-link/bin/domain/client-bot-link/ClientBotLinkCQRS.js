@@ -85,7 +85,7 @@ class ClientBotLinkCQRS {
         dropOff: undefined,
         client: {
           id: client._id,
-          businessId: "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab",
+          businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
           username: "N/A",
           fullname: client.generalInfo.name,
           tipClientId: client.associatedClientId,
@@ -97,7 +97,7 @@ class ClientBotLinkCQRS {
           offerMaxDistance: client.satelliteInfo.offerMaxDistance
         },
         _id,
-        businessId: "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab",
+        businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
         timestamp: Date.now(),
         requestedFeatures: undefined,
 
