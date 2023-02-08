@@ -344,7 +344,7 @@ class ClientBotLinkCQRS {
       let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊".includes(c)).length;
       let specialCharCount = [...message.text.body].filter(c => "🥶⛄🧊".includes(c)).length;
       const specialDoubleCharCount = [...message.text.body].filter(c => "❄️".includes(c)).length;
-      charCount = specialCharCount + (charCount / 2);
+      charCount = charCount + (specialDoubleCharCount / 2);
       specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
       
       if (charCount > 0) {
