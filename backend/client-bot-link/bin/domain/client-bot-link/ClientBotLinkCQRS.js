@@ -62,7 +62,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client) {
+  buildServiceRequestedEsEvent(client,acEnabled) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -99,7 +99,7 @@ class ClientBotLinkCQRS {
         _id,
         businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
         timestamp: Date.now(),
-        requestedFeatures: undefined,
+        requestedFeatures: acEnabled ? ["AC"] :undefined,
 
         //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
         //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
@@ -279,15 +279,17 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestService$(serviceCount, serviceToRqstCount, client, waId) {
+  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId) {
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
     const servicesToRequest = serviceToRqstCount;
+    let specialServiceToRqstCountVal = specialServiceToRqstCount;
     const availableServices = availableServiceCount - servicesToRequest
     if (availableServices >= 0 && availableServices <= 5) {
       return range(1, servicesToRequest).pipe(
         mergeMap(() => {
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client));
+          const acEnabled = --specialServiceToRqstCountVal > 0;
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled));
         }),
         toArray(),
         tap(() => {
@@ -340,14 +342,13 @@ class ClientBotLinkCQRS {
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
     if (((message || {}).text || {}).body) {
-      const charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length
-      console.log("ARRAY ===> ", [...message.text.body])
-      console.log("CHAR COUNT ===> ", charCount)
+      const charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶❄️☃️⛄🌬️🧊".includes(c)).length
+      const specialCharCount = [...message.text.body].filter(c => "🥶❄️☃️⛄🌬️🧊".includes(c)).length
       if (charCount > 0) {
-        return this.requestService$(serviceCount, charCount, client, conversationContent.waId);
+        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId);
       }
       else if (!isNaN(message.text.body)) {
-        return this.requestService$(serviceCount, parseInt(message.text.body), client, conversationContent.waId);
+        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
@@ -372,10 +373,23 @@ class ClientBotLinkCQRS {
     }
     else {
       const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
-      console.log("interactiveResp ===> ", interactiveResp);
+      if(!interactiveResp){
+        const buttons = [
+          {
+            id: "rqstServiceBtn",
+            text: "Solicitar 1 servicio"
+          },
+          {
+            id: "infoServiceBtn",
+            text: "Info de servicios"
+          }
+        ]
+        this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
+        return of({});
+      }
       switch (interactiveResp) {
         case "rqstServiceBtn":
-          return this.requestService$(serviceCount, 1, client, conversationContent.waId)
+          return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId)
         case "infoServiceBtn":
           return this.infoService$(client._id, conversationContent.waId)
         case "CancelAllServiceBtn":
