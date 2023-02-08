@@ -341,10 +341,10 @@ class ClientBotLinkCQRS {
     let content;
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     if (((message || {}).text || {}).body) {
-      const charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊".includes(c)).length;
+      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊".includes(c)).length;
       let specialCharCount = [...message.text.body].filter(c => "🥶⛄🧊".includes(c)).length;
       const specialDoubleCharCount = [...message.text.body].filter(c => "❄️".includes(c)).length;
-      charCount = specialCharCount + (specialDoubleCharCount / 2);
+      charCount = specialCharCount + (charCount / 2);
       specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
       
       if (charCount > 0) {
