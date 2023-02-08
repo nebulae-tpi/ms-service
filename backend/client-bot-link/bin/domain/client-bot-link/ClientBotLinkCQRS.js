@@ -63,6 +63,7 @@ class ClientBotLinkCQRS {
   }
 
   buildServiceRequestedEsEvent(client,acEnabled) {
+    console.log("acEnabled ==> ",acEnabled)
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -288,7 +289,7 @@ class ClientBotLinkCQRS {
     if (availableServices >= 0 && availableServices <= 5) {
       return range(1, servicesToRequest).pipe(
         mergeMap(() => {
-          const acEnabled = --specialServiceToRqstCountVal > 0;
+          const acEnabled = (specialServiceToRqstCountVal--) > 0;
           return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled));
         }),
         toArray(),
