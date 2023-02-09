@@ -33,24 +33,11 @@ class ClientBotLinkCQRS {
       const concacts = args.contacts;
       return from(args.messages).pipe(
         mergeMap(message => {
-          return BotConversationDA.getBotConversation$(message.from).pipe(
-            mergeMap(conversation => {
-              if ((conversation || {})._id) {
-                return ServiceDA.getServiceSize$({ clientId: conversation.client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
-                  mergeMap(serviceCount => {
-                    return this.continueConversation$(message, conversation, conversation.client, serviceCount)
-                  })
-                )
-
-              } else {
-                return this.initConversation$(message.from, {
-                  waId: message.from,
-                  timestamp: message.timestamp,
-                  client: {},
-                }, message)
-              }
-            })
-          )
+          return this.initConversation$(message.from, {
+            waId: message.from,
+            timestamp: message.timestamp,
+            client: {},
+          }, message)
         }),
         tap(message => {
           this.markMessageAsRead(message);

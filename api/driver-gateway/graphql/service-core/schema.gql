@@ -192,6 +192,8 @@ type Mutation {
       vehiclePlate: String
       "Device Identifier"
       deviceIdentifier: String
+      "App Version"
+      appVersion: String
    ): CommandAck @requireAuth
 
    "Stop currently open shift"
