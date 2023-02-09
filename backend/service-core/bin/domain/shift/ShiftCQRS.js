@@ -56,9 +56,10 @@ class ShiftCQRS {
    */
   startShift$({ root, args, jwt }, authToken) {    
     const vehiclePlate = args.vehiclePlate.toUpperCase();
+    const appVersion = args.appVersion;
     const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
     const { businessId, driverId } = authToken;
-
+    console.log("APP VERSION ===> ", appVersion);
     //ShiftCQRS.log(`ShiftCQRS.startShift RQST: ${JSON.stringify({ vehiclePlate, driverId, businessId })}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
