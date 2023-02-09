@@ -366,10 +366,10 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         id: client._id,
         fullname: client.generalInfo.name,
         username: client.auth ? client.auth.username : null,
-        tip : this.doorMenOptions
+        tip : (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
+        ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
+          : this.doorMenOptions
           ? this.doorMenOptions[this.selectedIndexDoorman].tip
-          : (destinationOptionsGroup && SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup])
-            ? SPECIAL_DESTINATION_PRICE_MODS[destinationOptionsGroup]
             : client.satelliteInfo
               ? client.satelliteInfo.tip
               : 0,
