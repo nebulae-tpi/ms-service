@@ -152,13 +152,14 @@ class ClientDA {
 
 
   static updateGeneralInfo$(id, generalInfo) {
+    delete generalInfo._id;
     const collection = mongoDB.db.collection(CollectionName);
     
     return defer(()=>
         collection.updateOne(
           { _id: id},
           {
-            $set: {generalInfo}
+            $set: {...generalInfo}
           }
         )
     );
