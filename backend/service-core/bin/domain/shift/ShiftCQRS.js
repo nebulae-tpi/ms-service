@@ -17,7 +17,7 @@ const {
   DefaultError,
   INTERNAL_SERVER_ERROR_CODE,
   PERMISSION_DENIED,
-  ERROR_23010, ERROR_23011, ERROR_23012, ERROR_23013, ERROR_23014, ERROR_23015, ERROR_23016, ERROR_23020, ERROR_23021, ERROR_23025, ERROR_23026, ERROR_23027, ERROR_23028,
+  ERROR_23010, ERROR_23011, ERROR_23012, ERROR_23013, ERROR_23014, ERROR_23015, ERROR_23016, ERROR_23017, ERROR_23020, ERROR_23021, ERROR_23025, ERROR_23026, ERROR_23027, ERROR_23028,
 } = require("../../tools/customError");
 
 const { ShiftDA, VehicleDA, DriverDA, ServiceDA, BusinessDA } = require('./data-access')
@@ -66,7 +66,13 @@ class ShiftCQRS {
       mergeMapTo(ShiftDA.findOpenShiftByVehiclePlate$(vehiclePlate).pipe(tap(shift => { if (shift) throw ERROR_23011; }))),  // Vehicle has an open shift verification
       tap(() => {
         if(vehiclePlate === "FQX351"){
-          console.log("ARGS ==> ", args);          
+          // const versionValues = appVersion ? appVersion.split("-")[0].split(".") : [];
+
+          // if(versionValues.length > 0){
+
+          // }
+          // versionValues[0]
+          // if (!appVersion || ) throw ERROR_23017       
         }
       }),
       mergeMapTo(

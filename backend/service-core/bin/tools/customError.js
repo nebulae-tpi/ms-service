@@ -57,6 +57,7 @@ module.exports = {
   ERROR_23014: new CustomError('StartShiftError', `StartShift`, 23014, 'No se puede iniciar el turno: el vehículo no está asignado al conductor'),
   ERROR_23015: new CustomError('StartShiftError', `StartShift`, 23015, 'No se puede iniciar el turno: vehículo no registrado.  Por favor comunicarse con el administrador del sistema'),
   ERROR_23016: new CustomError('StartShiftError', `StartShift`, 23016, 'No se puede iniciar el turno: conductor no registrado.  Por favor comunicarse con el administrador del sistema'),
+  ERROR_23017: new CustomError('StartShiftError', `StopShift`, 23017, 'No se puede iniciar el turno: La versión del APP no es valida'),
 
   ERROR_23020: new CustomError('StopShiftError', `StopShift`, 23020, 'No se puede detener el turno: el conductor no tiene un turno abierto'),
   ERROR_23021: new CustomError('StopShiftError', `StopShift`, 23021, 'No se puede detener el turno: todavía hay un servicio en curso'),

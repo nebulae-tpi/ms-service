@@ -6,7 +6,7 @@ const broker = require("../../tools/broker/BrokerFactory")();
 const DriverDA = require('../../data/DriverDA');
 const VehicleDA = require('../../data/VehicleDA');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
-
+ 
 /**
  * Singleton instance
  */
