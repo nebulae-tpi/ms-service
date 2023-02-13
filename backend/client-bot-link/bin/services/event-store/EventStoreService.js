@@ -127,6 +127,7 @@ class EventStoreService {
       ServiceCancelledByDriver: { fn: ServiceES.handleServiceCancelledByDriverEvents$, obj: ServiceES },
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperatorEvents$, obj: ServiceES },
       ServiceCancelledBySystem: { fn: ServiceES.handleServiceCancelledBySystemEvents$, obj: ServiceES },
+      ServicePickUpETAReported: { fn: ServiceES.handleServicePickUpETAReported$, obj: ServiceES },
     };
   }
 
@@ -141,6 +142,7 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByDriver" },
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" },
       { aggregateType: "Service", eventType: "ServiceCancelledBySystem" },
+      { aggregateType: "Service", eventType: "ServicePickUpETAReported" },
     ]
   }
 }
