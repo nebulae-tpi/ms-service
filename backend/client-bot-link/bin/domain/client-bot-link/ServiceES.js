@@ -38,8 +38,7 @@ class ServiceES {
       tap(service => {
         if (service.client.phone) {
           console.log("service ASSIGNED ===> ",serviceEvent.aid);
-          const minutes = this.millisToMinutesAndSeconds(service.pickUpETA - Date.now())
-          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`)
+          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`)
         }
       })
     );
