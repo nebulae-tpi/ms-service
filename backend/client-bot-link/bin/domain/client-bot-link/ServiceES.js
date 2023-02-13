@@ -50,7 +50,7 @@ class ServiceES {
         if (service.client.phone) {
           console.log("service ETA ===> ",serviceEvent.aid);
           const minutes = this.millisToMinutesAndSeconds(serviceEvent.data.eta - Date.now())
-          this.sendTextMessage(`El vehículo con placas ${service.vehicle.licensePlate} tiene un tiempo estimado de llegada : ${minutes}`, `57${service.client.phone}`)
+          this.sendTextMessage(`El vehículo con placas ${service.vehicle.licensePlate} tiene un tiempo estimado de llegada de ${minutes}`, `57${service.client.phone}`)
         }
       })
     );
@@ -59,7 +59,7 @@ class ServiceES {
   millisToMinutesAndSeconds(millis) {
     var minutes = Math.floor(millis / 60000);
     var seconds = ((millis % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+    return (minutes > 0 ? minutes + " minutos y" : "") + ((seconds < 10 ? '0' : '') + seconds) + " segundos";
   }
   
 
