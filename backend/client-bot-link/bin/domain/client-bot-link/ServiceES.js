@@ -37,6 +37,8 @@ class ServiceES {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
+          console.log("service.pickUpETA ===> ",service.pickUpETA);
+          console.log("Date.now() ===> ",Date.now());
           const minutes = this.millisToMinutesAndSeconds(service.pickUpETA - Date.now())
           this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}, Tiempo estimado de llegada : ${minutes}`, `57${service.client.phone}`)
         }
