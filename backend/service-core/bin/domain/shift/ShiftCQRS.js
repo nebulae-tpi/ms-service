@@ -90,7 +90,7 @@ class ShiftCQRS {
             console.log("versionIntValue ===> ", versionIntValue)
             if(versionIntValue <= parseInt(process.env.DRIVER_APP_MIN_VERSION || "1670")){
               throw ERROR_23017;
-            }
+            } 
             
           }else {
             throw ERROR_23017;
