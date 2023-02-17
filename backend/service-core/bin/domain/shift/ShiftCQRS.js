@@ -66,11 +66,35 @@ class ShiftCQRS {
       mergeMapTo(ShiftDA.findOpenShiftByVehiclePlate$(vehiclePlate).pipe(tap(shift => { if (shift) throw ERROR_23011; }))),  // Vehicle has an open shift verification
       tap(() => {
         if(vehiclePlate === "FQX351"){
-          // const versionValues = appVersion ? appVersion.split("-")[0].split(".") : [];
+          const versionValues = appVersion ? appVersion.split("-")[0].split(".") : [];
 
-          // if(versionValues.length > 0){
-
-          // }
+          if(versionValues.length > 0){
+            const versionIntValue = versionValues.reduce((acc,val, index) => {
+              let multiplier = 1
+              switch(index){
+                case 0:
+                  multiplier = 1000;
+                  break;
+                case 1: 
+                  multiplier = 100;
+                  break;
+                case 2: 
+                  multiplier = 10;
+                  break;
+                default:
+                  multiplier = 1
+                  break;
+              }
+              return acc + (multiplier * val);
+            },0);
+            console.log("versionIntValue ===> ", versionIntValue)
+            if(versionIntValue <= parseInt(process.env.DRIVER_APP_MIN_VERSION || "1670")){
+              throw ERROR_23017;
+            }
+            
+          }else {
+            throw ERROR_23017;
+          }
           // versionValues[0]
           // if (!appVersion || ) throw ERROR_23017       
         }
