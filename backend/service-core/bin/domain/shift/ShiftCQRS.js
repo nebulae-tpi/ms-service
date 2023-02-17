@@ -59,7 +59,6 @@ class ShiftCQRS {
     const appVersion = args.appVersion;
     const deviceIdentifier = args.deviceIdentifier ? args.deviceIdentifier :  'unknown'
     const { businessId, driverId } = authToken;
-    console.log("APP VERSION ===> ",  appVersion);
     //ShiftCQRS.log(`ShiftCQRS.startShift RQST: ${JSON.stringify({ vehiclePlate, driverId, businessId })}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
@@ -88,11 +87,13 @@ class ShiftCQRS {
               return acc + (multiplier * val);
             },0);
             console.log("versionIntValue ===> ", versionIntValue)
-            if(versionIntValue <= parseInt(process.env.DRIVER_APP_MIN_VERSION || "1670")){
+            if(versionIntValue < parseInt(process.env.DRIVER_APP_MIN_VERSION || "1670")){
+              console.log("SALE ERROR!!!!!!!!!!");
               throw ERROR_23017;
             } 
             
           }else {
+            console.log("SALE ERROR2!!!!!!!!!!");
             throw ERROR_23017;
           }
           // versionValues[0]
