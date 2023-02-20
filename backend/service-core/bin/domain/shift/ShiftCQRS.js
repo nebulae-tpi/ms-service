@@ -64,7 +64,6 @@ class ShiftCQRS {
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
       mergeMapTo(ShiftDA.findOpenShiftByVehiclePlate$(vehiclePlate).pipe(tap(shift => { if (shift) throw ERROR_23011; }))),  // Vehicle has an open shift verification
       tap(() => {
-        if(vehiclePlate === "FQX351"){
           const versionValues = appVersion ? appVersion.split("-")[0].split(".") : [];
 
           if(versionValues.length > 0){
@@ -98,7 +97,7 @@ class ShiftCQRS {
           }
           // versionValues[0]
           // if (!appVersion || ) throw ERROR_23017       
-        }
+        
       }),
       mergeMapTo(
         forkJoin(
