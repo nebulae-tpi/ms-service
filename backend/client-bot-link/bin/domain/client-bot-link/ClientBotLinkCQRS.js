@@ -80,7 +80,8 @@ class ClientBotLinkCQRS {
           tipType: client.satelliteInfo.tipType,
           phone: client.associatedClientPhoneNumber,
           tip: client.satelliteInfo.tip,
-          referrerDriverDocumentId: client.referrerDriverDocumentId,
+          referrerDriverDocumentId: client.satelliteInfo.referrerDriverDocumentId,
+          referrerDriverDocumentIds: client.satelliteInfo.referrerDriverDocumentIds,
           offerMinDistance: client.satelliteInfo.offerMinDistance,
           offerMaxDistance: client.satelliteInfo.offerMaxDistance
         },

@@ -15,7 +15,7 @@ const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLin
 
 const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS || "").split(',');
 
-const { ServiceDA, ShiftDA } = require('./data-access')
+const { ServiceDA, ShiftDA, ClientDA } = require('./data-access')
 
 /**
  * Singleton instance
@@ -56,6 +56,7 @@ class ServiceES {
         const minDistance = data.client.offerMinDistance || parseInt((data.offer || {}).offerMinDistance || process.env.SERVICE_OFFER_MIN_DISTANCE);
         const serviceId = aid;
         const referrerDriverDocumentId = data.client.referrerDriverDocumentId;
+        const referrerDriverDocumentIds = data.client.referrerDriverDocumentIds;
 
         return Observable.create(obs => {
             if ((data.offer || {}).offerBeta === "2") {
@@ -81,7 +82,7 @@ class ServiceES {
                 );
             }
             else {
-                this.imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer).subscribe(
+                this.imperativeServiceOfferAlgorithm$(serviceId, minDistance, maxDistance, referrerDriverDocumentId, data.offer, referrerDriverDocumentIds).subscribe(
                     (evt) => {
                         //console.log(`${dateFormat(new Date(), "isoDateTime")} imperativeServiceOfferAlgorithm(serviceId=${serviceId}) EVT: ${evt}`);
                     },
@@ -465,6 +466,9 @@ class ServiceES {
             { "driver": 1, "vehicle": 1 },
             limit
         ).toPromise();
+
+        let currentClient = await ClientDA.getClient$(service.client.id).toPromise();
+
         //ignores shifts that were already taken into account
         shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
         // filter shifts who its drivers have't required money to get the service offer.
@@ -493,12 +497,12 @@ class ServiceES {
         });
 
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
-
+        
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
-        if (service.client && service.client.referrerDriverDocumentId) {
-            const priorityShift = shifts.filter(sh => sh.driver.documentId === service.client.referrerDriverDocumentId)[0];
+        if (service.client && (currentClient.satelliteInfo.referrerDriverDocumentIds || currentClient.satelliteInfo.referrerDriverDocumentId)) {
+            const priorityShift = shifts.filter(sh => (sh.driver.documentId === currentClient.satelliteInfo.referrerDriverDocumentId) || currentClient.satelliteInfo.referrerDriverDocumentIds.includes(sh.driver.documentId));
             if (priorityShift) {
-                shifts = shifts.filter(s => s.driver.documentId !== priorityShift.driver.documentId);
+                shifts = shifts.filter(s => !priorityShift.some(p => p.driver.documentId === s.driver.documentId));
                 shifts.unshift({ ...priorityShift, referred: true });
                 obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
             }
