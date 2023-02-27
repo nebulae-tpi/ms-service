@@ -499,7 +499,8 @@ class ServiceES {
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
         
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
-        if (service.client && (currentClient.satelliteInfo.referrerDriverDocumentIds || currentClient.satelliteInfo.referrerDriverDocumentId)) {
+        console.log("CURRENT CLIENT ===> ", currentClient)
+        if (service.client && ((currentClient.satelliteInfo || {}).referrerDriverDocumentIds || (currentClient.satelliteInfo || {}).referrerDriverDocumentId)) {
             const priorityShift = shifts.filter(sh => (sh.driver.documentId === currentClient.satelliteInfo.referrerDriverDocumentId) || (currentClient.satelliteInfo.referrerDriverDocumentIds || []).includes(sh.driver.documentId));
             if (priorityShift) {
                 shifts = shifts.filter(s => !priorityShift.some(p => p.driver.documentId === s.driver.documentId));
