@@ -503,8 +503,13 @@ class ServiceES {
             const priorityShift = shifts.filter(sh => (sh.driver.documentId === currentClient.satelliteInfo.referrerDriverDocumentId) || (currentClient.satelliteInfo.referrerDriverDocumentIds || []).includes(sh.driver.documentId));
             if (priorityShift) {
                 shifts = shifts.filter(s => !priorityShift.some(p => p.driver.documentId === s.driver.documentId));
-                shifts.unshift({ ...priorityShift, referred: true });
-                obs.next(`referred found between candidates: ${JSON.stringify({ driver: priorityShift.driver.username, distance: priorityShift.dist.calculated, documentId: priorityShift.driver.documentId })} `);
+                for (let prioIndex = 0; prioIndex < priorityShift.length; prioIndex++) {
+                    const element = priorityShift[prioIndex];
+                    shifts.unshift({ ...element, referred: true });    
+                    obs.next(`referred found between candidates: ${JSON.stringify({ driver: element.driver.username, distance: element.dist.calculated, documentId: element.driver.documentId })} `);
+                }
+                
+                
             }
         }
         // filter all the trips that are closer than the minDistance threshold
