@@ -337,6 +337,8 @@ class ClientBotLinkCQRS {
       let airportCharCount = [...message.text.body].filter(c => "🛫🛬".includes(c)).length;
       const specialDoubleCharCount = [...message.text.body].filter(c => "❄️".includes(c)).length;
       const specialDoubleAirportCharCount = [...message.text.body].filter(c => "✈️".includes(c)).length;
+      console.log("specialDoubleAirportCharCount ===> ", specialDoubleAirportCharCount);
+      console.log("airportCharCount ===> ", airportCharCount);
       charCount = charCount + (specialDoubleCharCount / 2) + (specialDoubleAirportCharCount / 2);
       specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
       airportCharCount = airportCharCount + (specialDoubleAirportCharCount / 2);
