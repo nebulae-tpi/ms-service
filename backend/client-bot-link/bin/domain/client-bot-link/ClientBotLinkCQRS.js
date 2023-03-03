@@ -49,7 +49,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client,acEnabled) {
+  buildServiceRequestedEsEvent(client,acEnabled, airportTipEnabled) {
     console.log("acEnabled ==> ",acEnabled)
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
@@ -79,7 +79,7 @@ class ClientBotLinkCQRS {
           tipClientId: client.associatedClientId,
           tipType: client.satelliteInfo.tipType,
           phone: client.associatedClientPhoneNumber,
-          tip: client.satelliteInfo.tip,
+          tip: airportTipEnabled ? 5000 : client.satelliteInfo.tip,
           referrerDriverDocumentId: client.satelliteInfo.referrerDriverDocumentId,
           referrerDriverDocumentIds: client.satelliteInfo.referrerDriverDocumentIds,
           offerMinDistance: client.satelliteInfo.offerMinDistance,
@@ -268,17 +268,19 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId) {
+  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount) {
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
     const servicesToRequest = serviceToRqstCount;
     let specialServiceToRqstCountVal = specialServiceToRqstCount;
+    let airportCharCountVal = airportCharCount;
     const availableServices = availableServiceCount - servicesToRequest
     if (availableServices >= 0 && availableServices <= 5) {
       return range(1, servicesToRequest).pipe(
         mergeMap(() => {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled));
+          const airportTipEnabled = (airportCharCountVal--) > 0;
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled));
         }),
         toArray(),
         tap(() => {
@@ -330,17 +332,18 @@ class ClientBotLinkCQRS {
     let content;
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     if (((message || {}).text || {}).body) {
-      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊".includes(c)).length;
+      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊✈️🛫🛬".includes(c)).length;
       let specialCharCount = [...message.text.body].filter(c => "🥶⛄🧊".includes(c)).length;
+      let airportCharCount = [...message.text.body].filter(c => "✈️🛫🛬".includes(c)).length;
       const specialDoubleCharCount = [...message.text.body].filter(c => "❄️".includes(c)).length;
       charCount = charCount + (specialDoubleCharCount / 2);
       specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
       
       if (charCount > 0) {
-        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId);
+        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount);
       }
       else if (!isNaN(message.text.body)) {
-        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId);
+        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
