@@ -345,14 +345,9 @@ class ClientBotLinkCQRS {
       let emoRegex2 = new RegExp(emojiPattern2, "g");
       const specialDoubleCharCount = [...message.text.body.matchAll(emoRegex)].length;
       const specialDoubleAirportCharCount = [...message.text.body.matchAll(emoRegex2)].length;;
-      console.log("specialDoubleAirportCharCount ===> ", specialDoubleAirportCharCount);
-      console.log("prev charCount ===> ", charCount)
-      specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
-      airportCharCount = airportCharCount + (specialDoubleAirportCharCount / 2);
+      specialCharCount = specialCharCount + specialDoubleCharCount;
+      airportCharCount = airportCharCount + specialDoubleAirportCharCount;
       charCount = charCount + specialCharCount + airportCharCount;
-      console.log("specialCharCount ===> ", specialCharCount)
-      console.log("airportCharCount ===> ", airportCharCount);
-      console.log("charCount ===> ", charCount);
       
       if (charCount > 0) {
         return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount);
@@ -376,7 +371,7 @@ class ClientBotLinkCQRS {
                 text: "Info de servicios"
               }
             ]
-            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
+            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶 o para solicitar un servicio para el aeropuerto utilizar el emoji ✈️\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
           })
         )
       }
@@ -394,7 +389,7 @@ class ClientBotLinkCQRS {
             text: "Info de servicios"
           }
         ]
-        this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
+        this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶 o para solicitar un servicio para el aeropuerto utilizar el emoji ✈️\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
         return of({});
       }
       switch (interactiveResp) {
