@@ -335,13 +335,14 @@ class ClientBotLinkCQRS {
       let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊🛫🛬".includes(c)).length;
       let specialCharCount = [...message.text.body].filter(c => "🥶⛄🧊".includes(c)).length;
       let airportCharCount = [...message.text.body].filter(c => "🛫🛬".includes(c)).length;
-      const specialDoubleCharCount = [...message.text.body].filter(c => "❄️".includes(c)).length;
-      const specialDoubleAirportCharCount = [...message.text.body].filter(c => "✈️".includes(c)).length;
+      const specialDoubleCharCount = [...message.text.body.matchAll(new RegExp(String.raw`(?:❄️)`))].length;
+      const specialDoubleAirportCharCount = [...message.text.body.matchAll(new RegExp(String.raw`(?:✈️)`))].length;
       console.log("specialDoubleAirportCharCount ===> ", specialDoubleAirportCharCount);
-      
+      console.log("prev charCount ===> ", charCount)
       specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
       airportCharCount = airportCharCount + (specialDoubleAirportCharCount / 2);
       charCount = charCount + specialCharCount + airportCharCount;
+      console.log("specialCharCount ===> ", specialCharCount)
       console.log("airportCharCount ===> ", airportCharCount);
       console.log("charCount ===> ", charCount);
       
