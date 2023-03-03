@@ -332,20 +332,21 @@ class ClientBotLinkCQRS {
     let content;
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     if (((message || {}).text || {}).body) {
-      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊🛫🛬".includes(c)).length;
+      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘🥶⛄🧊✈️🛫🛬".includes(c)).length;
       let specialCharCount = [...message.text.body].filter(c => "🥶⛄🧊".includes(c)).length;
       let airportCharCount = [...message.text.body].filter(c => "🛫🛬".includes(c)).length;
       const specialDoubleCharCount = [...message.text.body].filter(c => "❄️".includes(c)).length;
       const specialDoubleAirportCharCount = [...message.text.body].filter(c => "✈️".includes(c)).length;
-      charCount = charCount + (specialDoubleAirportCharCount / 2);
+      charCount = charCount + (specialDoubleCharCount / 2) + (specialDoubleAirportCharCount / 2);
       specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
+      airportCharCount = airportCharCount + (specialDoubleAirportCharCount / 2);
       
       if (charCount > 0) {
         return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount);
       }
       else if (!isNaN(message.text.body)) {
         return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount);
-      } 
+      }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
       }
