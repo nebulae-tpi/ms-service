@@ -274,8 +274,12 @@ class ClientBotLinkCQRS {
     const servicesToRequest = serviceToRqstCount;
     let specialServiceToRqstCountVal = specialServiceToRqstCount;
     let airportCharCountVal = airportCharCount;
-    const availableServices = availableServiceCount - servicesToRequest
-    if (availableServices >= 0 && availableServices <= 5) {
+    const availableServices = availableServiceCount - servicesToRequest;
+    if((!(client || {}).location || {}).lng){
+      this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, conversationContent.waId)
+      return of({});
+    }
+    else if (availableServices >= 0 && availableServices <= 5) {
       return range(1, servicesToRequest).pipe(
         mergeMap(() => {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
