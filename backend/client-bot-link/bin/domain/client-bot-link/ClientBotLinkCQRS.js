@@ -338,10 +338,11 @@ class ClientBotLinkCQRS {
       const specialDoubleCharCount = [...message.text.body].filter(c => "❄️".includes(c)).length;
       const specialDoubleAirportCharCount = [...message.text.body].filter(c => "✈️".includes(c)).length;
       console.log("specialDoubleAirportCharCount ===> ", specialDoubleAirportCharCount);
-      console.log("airportCharCount ===> ", airportCharCount);
+      
       charCount = charCount + (specialDoubleCharCount / 2) + (specialDoubleAirportCharCount / 2);
       specialCharCount = specialCharCount + (specialDoubleCharCount / 2);
       airportCharCount = airportCharCount + (specialDoubleAirportCharCount / 2);
+      console.log("airportCharCount ===> ", airportCharCount);
       
       if (charCount > 0) {
         return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount);
