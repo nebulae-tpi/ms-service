@@ -336,12 +336,12 @@ class ClientBotLinkCQRS {
     let content;
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     if (((message || {}).text || {}).body) { 
-      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘⛄🧊🛫🛬".includes(c)).length;
-      let specialCharCount = [...message.text.body].filter(c => "⛄🧊".includes(c)).length;
-      let airportCharCount = [...message.text.body].filter(c => "🛫🛬".includes(c)).length;
-      const emojiPattern = String.raw`(?:❄️|🥶)`
+      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length;
+      let specialCharCount = 0;
+      let airportCharCount = 0;
+      const emojiPattern = String.raw`(?:❄️|🥶|⛄|🧊)`
       let emoRegex = new RegExp(emojiPattern, "g");
-      const emojiPattern2 = String.raw`(?:✈️)`
+      const emojiPattern2 = String.raw`(?:✈️|🛫|🛬)`
       let emoRegex2 = new RegExp(emojiPattern2, "g");
       const specialDoubleCharCount = [...message.text.body.matchAll(emoRegex)].length;
       const specialDoubleAirportCharCount = [...message.text.body.matchAll(emoRegex2)].length;;
