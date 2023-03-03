@@ -345,7 +345,7 @@ class ClientBotLinkCQRS {
       }
       else if (!isNaN(message.text.body)) {
         return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount);
-      }
+      } 
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
       }
