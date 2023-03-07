@@ -141,7 +141,11 @@ module.exports = {
           const businessOk = !variables.businessId ? true : payload.IOEService.businessId === variables.businessId;
           const operatorOk = !variables.operatorId ? true : payload.IOEService.request && payload.IOEService.request.ownerOperatorId === variables.operatorId;
           const channelFilter = (payload.IOEService.request && variables.channelsFilter && variables.channelsFilter.includes(payload.IOEService.request.sourceChannel) );
-          return businessOk && operatorOk && channelFilter;
+          let searchBar = true;
+          if(variables.searchBar && variables.searchBar !== ""){
+            searchBar = ((payload.IOEService.vehicle || {}).licencePlate || "").includes(variables.searchBar) || ((payload.IOEService.client || {}).fullname || "").includes(variables.searchBar);
+          }
+          return businessOk && operatorOk && channelFilter && searchBar;
         }
       )
     },

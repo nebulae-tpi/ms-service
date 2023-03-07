@@ -352,7 +352,7 @@ type Query{
 
 type Subscription {
   "IOE Services events"
-  IOEService(businessId: String, operatorId: String , statesFilter: [String], channelsFilter: [String]): IOEService
+  IOEService(businessId: String, operatorId: String , statesFilter: [String], channelsFilter: [String], searchBar: String): IOEService
   "IOE Shift events"
   IOEShift(businessId: String): IOEShift
 }

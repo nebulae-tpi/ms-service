@@ -118,6 +118,10 @@ class ServiceDA {
       query["state"] = { $in: filter.states};
     }
 
+    if(filter.sourceChannel) {
+      query["request.sourceChannel"] = filter.sourceChannel
+    }
+
     if (filter.initTimestamp && filter.endTimestamp) {
       query.timestamp = { $gte: filter.initTimestamp, $lt: filter.endTimestamp};
     }
