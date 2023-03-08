@@ -33,10 +33,10 @@ export const locale = {
         CLOSED: 'Cerrado'
       },
       CHANNELS_LBL: 'Canales',
+      SEARCH_BAR: 'Buscar por Placa/Cliente',
       CHANNELS: {
         OPERATORS: 'Operadores',
         CLIENTS: 'Clientes',
-        CHAT_SATELITE: 'Chat Satelite',
         IVR: 'IVR',
         SATELLITES: 'Satélites',
         WHATSAPP: 'Whatsapp',

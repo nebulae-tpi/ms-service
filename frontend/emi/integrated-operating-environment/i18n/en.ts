@@ -33,11 +33,11 @@ export const locale = {
         CLOSED: 'Closed'
       },
       CHANNELS_LBL: 'Channels',
+      SEARCH_BAR: 'Search by Plate/Client',
       CHANNELS: {
         OPERATORS: 'Operators',
         CLIENTS: 'Clients',
         IVR: 'IVR',
-        CHAT_SATELITE: 'Chat Satellite',
         SATELLITES: 'Satellites',
         WHATSAPP: 'Whatsapp',
         FACEBOOK_MSG: 'Facebook Messenger'

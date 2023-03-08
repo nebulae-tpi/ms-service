@@ -24,6 +24,11 @@
         <mat-icon>device_hub</mat-icon> <span>{{ 'TOOLBAR.CHANNELS_LBL' | translate }}</span>
     </button>
 
+    <input *ngIf="(selectedBusinessRef && selectedBusinessRef.id) && (userIsSupervisor || isBusinessOwner || isPlatformAdmin || isSysAdmin)" 
+    fxHide.xs 
+    matInput placeholder="{{ 'TOOLBAR.SEARCH_BAR' | translate }}" class="search-bar-input"
+     (input)="onSearchChange($event.target.value)"/>
+
     <button *ngIf="!(selectedBusinessRef && selectedBusinessRef.id)" fxFlex="100" mat-button>
         <mat-icon>warning</mat-icon> <span class="business-required pl-8">{{ 'WORKSTATION.BUSINESS_UNIT_REQUIRED' | translate }}</span>
     </button>
@@ -95,12 +100,6 @@
         <mat-icon>phone_iphone</mat-icon>
         <mat-checkbox (change)="updateChannelFilters($event, 'CLIENT', true)" [checked]="channelsFilter.includes('CLIENT')">
             {{ 'TOOLBAR.CHANNELS.CLIENTS' | translate }}
-        </mat-checkbox>
-    </button>
-    <button mat-menu-item (click)="$event.stopPropagation()">
-        <mat-icon>phone_iphone</mat-icon>
-        <mat-checkbox (change)="updateChannelFilters($event, 'CHAT_SATELITE', true)" [checked]="channelsFilter.includes('CHAT_SATELITE')">
-            {{ 'TOOLBAR.CHANNELS.CHAT_SATELITE' | translate }}
         </mat-checkbox>
     </button>
     <!-- <button mat-menu-item (click)="$event.stopPropagation()">

@@ -123,6 +123,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
   delayThreshold = 60000 * 5; // five minutes
   // selected filters to filter services
   channelsFilter: String[] = ['OPERATOR'];
+
+  searchBar: String;
   // selected state filters
   statesFilter: String[] = [];
   //last cancelled Service command
@@ -304,6 +306,11 @@ export class DatatableComponent implements OnInit, OnDestroy {
             this.channelsFilter = args[0];
             this.resetDataAndSubscriptions();
             break;
+          case OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SEARCHBAR_FILTER_CHANGED:
+            console.log("ARGS ===> ", args)
+            this.searchBar = args;
+            this.resetDataAndSubscriptionsSearchBar();
+            break;
 
           case OperatorWorkstationService.TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED:
             // console.log('TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED', args);
@@ -328,7 +335,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
     of(this.selectedBusinessId)
       .pipe(
         filter(selectedBusinessId => selectedBusinessId),
-        mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId, this.statesFilter, this.channelsFilter)),
+        mergeMap(() => this.operatorWorkstationService.listenIOEService$(this.selectedBusinessId, this.seeAllOperation ? null : this.userId, this.statesFilter, this.channelsFilter, this.searchBar )),
         map(subscription => subscription.data.IOEService),
         bufferTime(1000, 1000),
         takeUntil(this.ngUnsubscribe),
@@ -337,8 +344,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
       .subscribe(
         (services: any) => {
           services.forEach(s => {
-            if(s.state === "CANCELLED_OPERATOR" && (s.client || {}).clientId){
-              console.log("SERVICIO CANCELADO ====> ", {client: s.client.fullname, id: s.id})
+            if (s.state === "CANCELLED_OPERATOR" && (s.client || {}).clientId) {
+              console.log("SERVICIO CANCELADO ====> ", { client: s.client.fullname, id: s.id })
             }
           });
           this.appendData(services);
@@ -418,7 +425,9 @@ export class DatatableComponent implements OnInit, OnDestroy {
       }
     }
     //console.log(`evts:${services.length}, adds:${additions}, del:${deletions}, upd:${updates} uhm:${uhm}`);
-    this.totalData = this.totalRawData.map(s => this.convertServiceToTableFormat(s));
+    this.totalData = this.totalRawData
+    .map(s => this.convertServiceToTableFormat(s))
+    .filter(t => !this.searchBar || this.searchBar === "" || t.vehicle_plate.includes(this.searchBar) || t.client_name.includes(this.searchBar));;
     await this.recalculatePartialData();
   }
 
@@ -445,11 +454,17 @@ export class DatatableComponent implements OnInit, OnDestroy {
     let page = 0;
     while (moreDataAvailable) {
       console.log(`datatable.queryAllDataFromServer: nextPage=${page}`);
-      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId, page++, 100, monthsToAdd, undefined).toPromise();
+      const gqlResult = await this.operatorWorkstationService.queryServices$([], this.channelsFilter, this.seeAllOperation, this.selectedBusinessId, page++, 10, monthsToAdd, undefined).toPromise();
       if (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length > 0) {
-        data.push(...gqlResult.data.IOEServices);
+        const res = gqlResult.data.IOEServices
+        if(this.searchBar && this.searchBar !== ""){
+          data.push(...res.filter(s => (((s.vehicle || {}).licencePlate) || "").includes(this.searchBar) || (((s.client || {}).fullname) || "").includes(this.searchBar) ));
+        }
+        else {
+          data.push(...res);
+        }
       }
-      moreDataAvailable = (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length == 100);
+      moreDataAvailable = (gqlResult && gqlResult.data && gqlResult.data.IOEServices && gqlResult.data.IOEServices.length == 10);
     }
     console.log(`datatable.queryAllDataFromServer: totalCount=${data.length}`);
     return data;
@@ -789,10 +804,18 @@ export class DatatableComponent implements OnInit, OnDestroy {
   }
 
   async resetDataAndSubscriptions() {
-    console.log('=====resetDataAndSubscriptions====');
     this.ngUnsubscribeIOEServiceListener.next();
     await this.resetData();
     console.log(this.selectedBusinessId);
+    if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
+  }
+
+  async resetDataAndSubscriptionsSearchBar() {
+    this.ngUnsubscribeIOEServiceListener.next();
+    
+    this.totalData = this.totalData.filter(t => t.vehicle_plate.includes(this.searchBar) || t.client_name.includes(this.searchBar));
+    await this.recalculatePartialData();
+
     if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
   }
   //#endregion

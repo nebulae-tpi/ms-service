@@ -92,6 +92,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   // Subject to unsubscribe
   private ngUnsubscribe = new Subject();
+
+  private searchBarSubject = new Subject();
   // weather or not the inbox should be visible
   isInboxVisible = false;
   supervisorWatchinAllOperation = false;
@@ -137,6 +139,16 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.listenLayoutChanges();
     this.listenToolbarCommands();
     this.configureHotkeys();
+    this.searchBarSubject.pipe(
+      debounceTime(1000),
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe(searchVal => {
+      this.operatorWorkstationService.publishToolbarCommand({
+      code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_SEARCHBAR_FILTER_CHANGED,
+      args: searchVal
+      });
+    })
   }
 
 
@@ -487,8 +499,12 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       code: OperatorWorkstationService.TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED,
       args: [this.channelsFilter]
     });
- 
 
+
+  }
+
+  onSearchChange(textVal){
+    this.searchBarSubject.next(textVal)
   }
 
   //#endregion

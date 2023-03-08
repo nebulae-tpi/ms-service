@@ -35,6 +35,7 @@ export class OperatorWorkstationService {
   public static TOOLBAR_COMMAND_BUSINESS_UNIT_CHANGED = 1009;
   public static TOOLBAR_COMMAND_DATATABLE_CHANNELS_FILTER_CHANGED = 1010;
   public static TOOLBAR_COMMAND_DATATABLE_DUPLICATE_SERVICE= 1011;
+  public static TOOLBAR_COMMAND_DATATABLE_SEARCHBAR_FILTER_CHANGED = 1012;
 
   public static TOOLBAR_COMMAND_SERVICE_CANCEL = 2001;
   public static TOOLBAR_COMMAND_SERVICE_ASSIGN = 2002;
@@ -186,12 +187,12 @@ export class OperatorWorkstationService {
   /**
    * Event triggered when a business is created, updated or deleted.
    */
-  listenIOEService$(businessId, operatorId, statesFilter, channelsFilter): Observable<any> {
+  listenIOEService$(businessId, operatorId, statesFilter, channelsFilter, searchBar): Observable<any> {
     return this.gateway.apollo
       .subscribe({
         query: IOEServiceSubscription,
         variables: {
-          businessId, operatorId, statesFilter, channelsFilter
+          businessId, operatorId, statesFilter, channelsFilter, searchBar
         }
       });
   }
