@@ -87,7 +87,16 @@
             <mat-form-field>
               <input matInput placeholder="{{'SERVICE.SERVICE_FILTERS.LICENSE_PLATE' | translate}}" formControlName="vehicleLicensePlate"
                 id="vehicleLicensePlate" maxlength="20" />
-            </mat-form-field>            
+            </mat-form-field>   
+            
+            <mat-form-field fxFlex.gt-xs="50" fxFlex="100" fxLayout="column" class="pr-8 pl-8">
+              <mat-select name="channelVal" formControlName="channelVal" placeholder="{{'SERVICE.SERVICE_FILTERS.CHANNEL' | translate}}">
+                <mat-option *ngFor="let ch of channelList" [value]="ch">
+                  {{'SERVICE.SERVICE_FILTERS.CHANNEL_'+ch | translate}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          
 
             <!-- <mat-form-field>
                 <input
@@ -132,7 +141,6 @@
 
             </div>
           </form>
-
           <div class="p-24">
             <button fxFlex mat-raised-button mat-button class="mat-accent compose-dialog-button" aria-label="Filter" (click)="resetFilter()">
               {{ "SERVICE.SERVICE_FILTERS.RESET_FILTER" | translate }}

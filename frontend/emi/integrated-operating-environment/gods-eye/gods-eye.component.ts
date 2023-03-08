@@ -99,7 +99,7 @@ export class GodsEyeComponent implements OnInit, OnDestroy {
   screenCols: number;
   horizontalLayout: boolean;
   layoutType: number;
-  showStats = false;
+  showStats = true;
 
   selectedBusinessId: any;
   userIsSupervisor = false;

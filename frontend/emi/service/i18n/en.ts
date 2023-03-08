@@ -12,7 +12,12 @@ export const locale = {
         'PAYMENT_TYPE': 'Payment type',
         'STATE': 'State',
       },
-      SERVICE_FILTERS:{
+      SERVICE_FILTERS: {
+        CHANNEL_OPERATOR: 'Operator',
+        CHANNEL_CLIENT: 'Satellite',
+        CHANNEL_APP_CLIENT: 'App. Client',
+        CHANNEL_CHAT_SATELITE: 'Chat Bot',
+        CHANNEL: "Channel",
         'INIT_TIMESTAMP': 'Initial Date',
         'END_TIMESTAMP': 'Final Date',
         'CLIENT_USERNAME': 'Client Username',

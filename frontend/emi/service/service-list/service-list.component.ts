@@ -106,6 +106,12 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   tableSize: number;
   tablePage = 0;
   tableCount = 25;
+  channelList = ["OPERATOR", "CLIENT", "APP_CLIENT", "CHAT_SATELITE"]
+  foods = [
+    {value: 'steak-0', viewValue: 'Steak'},
+    {value: 'pizza-1', viewValue: 'Pizza'},
+    {value: 'tacos-2', viewValue: 'Tacos'},
+  ];
 
     // Columns to show in the table
     displayedColumns = [
@@ -144,6 +150,12 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     this.refreshTableSubscription();
     this.buildClientNameFilterCtrl();
     this.buildDriverNameFilterCtrl();
+
+    this.ServiceListservice
+      .getClientTest()
+      .subscribe(result => {
+        console.log("RESULT ===> ",result)
+      });
   }
 
   onInitDateChange() {
@@ -300,6 +312,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       driverDocumentId: [null],
       driverFullname: [null],
       vehicleLicensePlate: [null],
+      channelVal: [null],
       clientUsername: [null],
       clientFullname: [null],
       states: this.formBuilder.array([]),
@@ -372,6 +385,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
               driverDocumentId: filterValue.driverDocumentId,
               driverFullname: filterValue.driverFullname,
               vehicleLicensePlate: filterValue.vehicleLicensePlate,
+              channelVal: filterValue.channelVal,
               clientUsername: filterValue.clientUsername,
               clientFullname: filterValue.clientFullname,
               // states: filterValue.states ? filterValue.states.filter(control => control.active === true).map(control => control.name) : [],
@@ -422,7 +436,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
         // console.log('filterForm --> ', this.filterForm.getRawValue());
         const clientObj = this.clientNameFilterCtrl as any;
         const driverObj = this.driverNameFilterCtrl as any;
-        console.log("driverObj ===> ",typeof driverObj.value === "string" )
+        console.log("driverObj ===> ", filterValue )
         const filterInput = {
           businessId: selectedBusiness ? selectedBusiness.id : null,
           initTimestamp: filterValue.initTimestamp ? filterValue.initTimestamp.valueOf() : null,
@@ -430,6 +444,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
           driverDocumentId: filterValue.driverDocumentId,
           driverFullname: driverObj && (typeof driverObj.value === "string" || !driverObj.value) ? null : ((driverObj || {}).value || {}).name+ " "+((driverObj || {}).value || {}).lastname,
           vehicleLicensePlate: filterValue.vehicleLicensePlate,
+          sourceChannel: filterValue.channelVal,
           clientUsername: filterValue.clientUsername,
           clientFullname: (((clientObj || {}).value || {}).generalInfo || {}).name,
           states: filterValue.states.filter(control => control.active === true).map(control => control.name),

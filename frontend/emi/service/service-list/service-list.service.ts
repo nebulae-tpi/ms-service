@@ -11,7 +11,8 @@ import {
 } from '../gql/service';
 
 import {
-  ServiceClientSatellites
+  ServiceClientSatellites,
+  getClientsFiltered
 } from '../gql/Client';
 import {
   ServiceDrivers
@@ -89,8 +90,21 @@ export class ServiceListService {
       .query<any>({
         query: ServiceDrivers,
         variables: {
-          filterInput: {filterText: driverText, businessId},
+          filterInput: {name: driverText, businessId},
           paginationInput
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+  getClientTest(): Observable<any> {
+    const paginationInput = {page: 0, count: 5, sort: -1}
+    return this.gateway.apollo
+      .query<any>({
+        query: getClientsFiltered,
+        variables: {
+          filterInput: {},
+          paginationInput: {page: 0, count: 100, sort: -1}
         },
         errorPolicy: 'all'
       });
