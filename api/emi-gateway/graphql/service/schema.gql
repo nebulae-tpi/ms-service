@@ -218,6 +218,7 @@ input ServiceServiceFilterInput {
   states: [String]
   "Show closed services"
   showClosedServices: Boolean
+  sourceChannel: String
 }
 
 input ServiceServicePaginationInput {

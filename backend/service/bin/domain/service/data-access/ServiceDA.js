@@ -128,7 +128,7 @@ class ServiceDA {
 
     if(!filter.showClosedServices){
       query.closed = false;
-    }
+    } 
 
     console.log("QUERY ====> ", query);
 
