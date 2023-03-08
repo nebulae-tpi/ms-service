@@ -194,6 +194,10 @@ class ServiceDA {
     if(!filter.showClosedServices){
       query.closed = false;
     }    
+
+    if(filter.sourceChannel) {
+      query["request.sourceChannel"] = filter.sourceChannel
+    }
     
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
