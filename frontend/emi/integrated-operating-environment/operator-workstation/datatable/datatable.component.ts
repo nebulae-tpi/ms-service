@@ -813,7 +813,7 @@ export class DatatableComponent implements OnInit, OnDestroy {
   async resetDataAndSubscriptionsSearchBar() {
     this.ngUnsubscribeIOEServiceListener.next();
     
-    this.totalData = this.totalData.filter(t => t.vehicle_plate.includes(this.searchBar) || t.client_name.includes(this.searchBar));
+    this.totalData = this.totalData.filter(t => (t.vehicle_plate || "").toUpperCase().includes((this.searchBar || "").toUpperCase()) || (t.client_name || "").toUpperCase().includes((this.searchBar || "").toUpperCase()));
     await this.recalculatePartialData();
 
     if (this.selectedBusinessId) { this.subscribeIOEServicesListener(); }
