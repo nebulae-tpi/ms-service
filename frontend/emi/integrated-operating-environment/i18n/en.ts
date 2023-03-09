@@ -36,6 +36,7 @@ export const locale = {
       SEARCH_BAR: 'Search by Plate/Client',
       CHANNELS: {
         OPERATORS: 'Operators',
+        CHAT_SATELITE: 'Chat Satellite',
         CLIENTS: 'Clients',
         IVR: 'IVR',
         SATELLITES: 'Satellites',
