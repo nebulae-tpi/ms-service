@@ -624,7 +624,7 @@ class ClientBotLinkCQRS {
       })
 
       res.on('end', () => {
-        console.log("RESP  ===> ", JSON.parse(data))
+        console.log("RESP  ===> ", data)
       })
     })
       .on('error', err => {
