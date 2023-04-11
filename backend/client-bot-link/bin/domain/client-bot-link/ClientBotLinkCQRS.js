@@ -275,7 +275,7 @@ class ClientBotLinkCQRS {
     let specialServiceToRqstCountVal = specialServiceToRqstCount;
     let airportCharCountVal = airportCharCount;
     const availableServices = availableServiceCount - servicesToRequest;
-    if((!(client || {}).location || {}).lng){
+    if(!((client || {}).location || {}).lng){
       this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, conversationContent.waId)
       return of({});
     }
