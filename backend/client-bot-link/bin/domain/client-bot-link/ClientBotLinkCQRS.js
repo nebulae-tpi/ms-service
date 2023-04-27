@@ -268,7 +268,22 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount) {
+  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message) {
+
+
+    try {
+      if(this.messageIdCache == null) this.messageIdCache = [];
+      if(this.messageIdCache.includes(message.id)){
+        console.log('ClientBotLinkCQRS.requestService: FATAL, whatsapp tried to send the same message more than once from',message.from, 'and will be ignored',message.id);
+        return of({});
+      }
+      this.messageIdCache.push(message.id);
+      this.messageIdCache = this.messageIdCache.slice(-20);
+    } catch (error) {
+      console.error(error);
+    }
+    
+
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
     const servicesToRequest = serviceToRqstCount;
@@ -351,10 +366,10 @@ class ClientBotLinkCQRS {
       charCount = charCount + specialCharCount + airportCharCount;
       
       if (charCount > 0) {
-        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount);
+        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount,message);
       }
       else if (!isNaN(message.text.body)) {
-        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount);
+        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount,message);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
@@ -468,7 +483,7 @@ class ClientBotLinkCQRS {
           return ClientDA.getClient$(client.satelliteId).pipe(
             map(satelliteClient => ({ ...satelliteClient, associatedClientId: client._id, associatedClientPhoneNumber: phoneNumber })),
             mergeMap(c => {
-              console.log("CLIENT CONVERSATION ===> ", c);
+              console.log("CLIENT MESSAGE ===> ", JSON.stringify(message));
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
                 mergeMap(() => {
                   return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
