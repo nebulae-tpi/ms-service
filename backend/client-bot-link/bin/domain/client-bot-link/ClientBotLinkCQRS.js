@@ -275,8 +275,9 @@ class ClientBotLinkCQRS {
     let specialServiceToRqstCountVal = specialServiceToRqstCount;
     let airportCharCountVal = airportCharCount;
     const availableServices = availableServiceCount - servicesToRequest;
+    console.log("location ===> ",client);
     if(!((client || {}).location || {}).lng){
-      this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, conversationContent.waId)
+      this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, waId)
       return of({});
     }
     else if (availableServices >= 0 && availableServices <= 5) {
@@ -465,8 +466,8 @@ class ClientBotLinkCQRS {
       mergeMap(client => {
         if ((client || {})._id) {
           return ClientDA.getClient$(client.satelliteId).pipe(
-            mergeMap(satelliteClient => {
-              const c = { ...satelliteClient, associatedClientId: client._id, associatedClientPhoneNumber: phoneNumber }
+            map(satelliteClient => ({ ...satelliteClient, associatedClientId: client._id, associatedClientPhoneNumber: phoneNumber })),
+            mergeMap(c => {
               console.log("CLIENT CONVERSATION ===> ", c);
               return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
                 mergeMap(() => {
