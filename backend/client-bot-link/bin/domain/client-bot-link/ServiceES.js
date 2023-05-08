@@ -140,7 +140,7 @@ class ServiceES {
             })
           )
         }else {
-          return of(undefined)
+          return of([undefined, undefined])
         }
       }),
       tap(([client, service]) => {
