@@ -3,6 +3,7 @@
 const { tap, mergeMap, catchError, map, mapTo, groupBy, debounceTime, filter } = require('rxjs/operators');
 const broker = require("../../tools/broker/BrokerFactory")();
 const ServiceDA = require('./data-access/ServiceDA');
+const ClientDA = require('./data-access/ClientDA');
 const { forkJoin, of, interval, from, throwError, concat, Observable, Subject } = require('rxjs');
 const Crosscutting = require('../../tools/Crosscutting');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
@@ -131,19 +132,49 @@ class ServiceES {
  */
    handleServiceCancelledBySystemEvents$(serviceEvent) {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
-      tap(service => {
+      mergeMap(service => {
         if (service.client.phone) {
-          const buttons = [
-            {
-              id: "rqstServiceBtn",
-              text: "Continuar Busqueda"
-            },
-            {
-              id: "ignoreBtn",
-              text: "Cancelar Busqueda"
-            }
-          ]
-          this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttons, `57${service.client.phone}`);
+          return ClientDA.getClient$(service.client.id).pipe(
+            map(client => {
+              return [client, service];
+            })
+          )
+        }else {
+          return of(undefined)
+        }
+      }),
+      tap(([client, service]) => {
+        if(client){
+          if(client.satelliteInfo.offerOnlyVip || service.requestedFeatures.includes("VIP")){
+            const buttonsVip = [
+              {
+                id: "rqstServiceBtn",
+                text: "Continuar Busqueda con VIP"
+              },
+              {
+                id: "rqstServiceBtn",
+                text: "Continuar Busqueda sin VIP"
+              },
+              {
+                id: "ignoreBtn",
+                text: "Cancelar Busqueda"
+              }
+            ];
+            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti, recomendamos solicitar un servicio sin VIP`, `¿deseas continuar?`, buttonsVip, `57${client.generalInfo.phone}`);
+          }else {
+            const buttons = [
+              {
+                id: "rqstServiceBtn",
+                text: "Continuar Busqueda"
+              },
+              {
+                id: "ignoreBtn",
+                text: "Cancelar Busqueda"
+              }
+            ];
+            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttons, `57${client.generalInfo.phone}`);
+          }
+          
         }
       })
     );

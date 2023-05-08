@@ -15,6 +15,8 @@ const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_ID
 
 const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-access')
 
+const satelliteAirtportPrices = JSON.stringify(process.env.SATELLITE_AIRPORT_PRICES || "{PORTER_LODGE: 5000, HOTEL: 10000}")
+
 /**
  * Singleton instance
  */
@@ -49,7 +51,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client,acEnabled, airportTipEnabled) {
+  buildServiceRequestedEsEvent(client,acEnabled, airportTipEnabled, vipEnabled) {
     console.log("acEnabled ==> ",acEnabled)
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
@@ -79,7 +81,7 @@ class ClientBotLinkCQRS {
           tipClientId: client.associatedClientId,
           tipType: client.satelliteInfo.tipType,
           phone: client.associatedClientPhoneNumber,
-          tip: airportTipEnabled ? 5000 : client.satelliteInfo.tip,
+          tip: airportTipEnabled ? satelliteAirtportPrices[client.satelliteInfo.satelliteType || "PORTER_LODGE"] : client.satelliteInfo.tip,
           referrerDriverDocumentId: client.satelliteInfo.referrerDriverDocumentId,
           referrerDriverDocumentIds: client.satelliteInfo.referrerDriverDocumentIds,
           offerMinDistance: client.satelliteInfo.offerMinDistance,
@@ -88,7 +90,7 @@ class ClientBotLinkCQRS {
         _id,
         businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
         timestamp: Date.now(),
-        requestedFeatures: acEnabled ? ["AC"] :undefined,
+        requestedFeatures: (acEnabled || airportTipEnabled) ? ["AC"] : vipEnabled ? ["VIP"] : undefined,
 
         //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
         //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
@@ -268,7 +270,7 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message) {
+  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount) {
 
 
     try {
@@ -289,8 +291,8 @@ class ClientBotLinkCQRS {
     const servicesToRequest = serviceToRqstCount;
     let specialServiceToRqstCountVal = specialServiceToRqstCount;
     let airportCharCountVal = airportCharCount;
+    let vipCharCountVal = vipCharCount;
     const availableServices = availableServiceCount - servicesToRequest;
-    console.log("location ===> ",client);
     if(!((client || {}).location || {}).lng){
       this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, waId)
       return of({});
@@ -300,7 +302,8 @@ class ClientBotLinkCQRS {
         mergeMap(() => {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
           const airportTipEnabled = (airportCharCountVal--) > 0;
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled));
+          const vipEnabled = (vipCharCountVal--) > 0;
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipCharCount, vipEnabled));
         }),
         toArray(),
         tap(() => {
@@ -349,27 +352,31 @@ class ClientBotLinkCQRS {
   }
 
   continueConversation$(message, conversationContent, client, serviceCount) {
-    let content;
-    const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     if (((message || {}).text || {}).body) { 
       let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length;
       let specialCharCount = 0;
       let airportCharCount = 0;
+      let vipCharCount = message.text.body.toUpperCase().includes("VIP") ? 1 : 0;
       const emojiPattern = String.raw`(?:❄️|🥶|⛄|🧊)`
+      const vipEmojiPattern = String.raw`(?:❄️|👑)`;
+      let vipEmojiRegex = new RegExp(vipEmojiPattern, "g");
       let emoRegex = new RegExp(emojiPattern, "g");
       const emojiPattern2 = String.raw`(?:✈️|🛫|🛬)`
       let emoRegex2 = new RegExp(emojiPattern2, "g");
       const specialDoubleCharCount = [...message.text.body.matchAll(emoRegex)].length;
+      const specialVipCharCount = [...message.text.body.matchAll(vipEmojiRegex)].length;
       const specialDoubleAirportCharCount = [...message.text.body.matchAll(emoRegex2)].length;;
       specialCharCount = specialCharCount + specialDoubleCharCount;
       airportCharCount = airportCharCount + specialDoubleAirportCharCount;
-      charCount = charCount + specialCharCount + airportCharCount;
+      vipCharCount = vipCharCount + specialVipCharCount;
+      
+      charCount = charCount + specialCharCount + airportCharCount+vipCharCount;
       
       if (charCount > 0) {
-        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount,message);
+        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount,message, vipCharCount);
       }
       else if (!isNaN(message.text.body)) {
-        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount,message);
+        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount,message, vipCharCount);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
@@ -411,7 +418,7 @@ class ClientBotLinkCQRS {
       switch (interactiveResp) {
         case "rqstServiceBtn":
           if(((client || {}).location || {}).lng){
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId)
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId,0 , message)
           }else {
             return of({}).pipe(
               tap(() => {
