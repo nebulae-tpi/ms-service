@@ -149,11 +149,11 @@ class ServiceES {
             const buttonsVip = [
               {
                 id: "rqstServiceVipBtn",
-                text: "Continuar Busqueda con VIP"
+                text: "Continuar con VIP"
               },
               {
                 id: "rqstServiceBtn",
-                text: "Continuar Busqueda sin VIP"
+                text: "Continuar sin VIP"
               },
               {
                 id: "ignoreBtn",
