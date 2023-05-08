@@ -136,7 +136,6 @@ class ServiceES {
         if (service.client.phone) {
           return ClientDA.getClient$(service.client.tipClientId).pipe(
             map(client => {
-              console.log("CLIENT ===> ", client)
               return [client, service];
             })
           )
@@ -149,7 +148,7 @@ class ServiceES {
           if(client.satelliteInfo.offerOnlyVip || (service.requestedFeatures || []).includes("VIP")){
             const buttonsVip = [
               {
-                id: "rqstServiceBtn",
+                id: "rqstServiceVipBtn",
                 text: "Continuar Busqueda con VIP"
               },
               {
@@ -161,7 +160,8 @@ class ServiceES {
                 text: "Cancelar Busqueda"
               }
             ];
-            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti, recomendamos solicitar un servicio sin VIP`, `¿deseas continuar?`, buttonsVip, `57${client.generalInfo.phone}`);
+            
+            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttonsVip, `57${client.generalInfo.phone}`);
           }else {
             const buttons = [
               {
