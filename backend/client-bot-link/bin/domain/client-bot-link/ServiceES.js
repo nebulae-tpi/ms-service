@@ -136,6 +136,7 @@ class ServiceES {
         if (service.client.phone) {
           return ClientDA.getClient$(service.client.id).pipe(
             map(client => {
+              console.log("CLIENT ===> ", client)
               return [client, service];
             })
           )
