@@ -134,7 +134,7 @@ class ServiceES {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       mergeMap(service => {
         if (service.client.phone) {
-          return ClientDA.getClient$(service.client.id).pipe(
+          return ClientDA.getClient$(service.client.tipClientId).pipe(
             map(client => {
               console.log("CLIENT ===> ", client)
               return [client, service];
