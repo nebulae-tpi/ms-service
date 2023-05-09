@@ -150,6 +150,7 @@ class ClientBotLinkCQRS {
       })
     req.write(JSON.stringify(content))
     req.end();
+    console.log("ENVIA MENSAJE ===> ", text, ": ",waId)
   }
 
   sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId) {
