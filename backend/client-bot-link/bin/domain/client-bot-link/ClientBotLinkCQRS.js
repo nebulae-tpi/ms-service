@@ -355,7 +355,7 @@ class ClientBotLinkCQRS {
       let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length;
       let specialCharCount = 0;
       let airportCharCount = 0;
-      let vipCharCount = message.text.body.toUpperCase().includes("VIP") ? 1 : 0;
+      let vipCharCount = (message.text.body.toUpperCase().includes("VIP") || (client.satelliteInfo || {}).offerOnlyVip) ? 1 : 0;
       const emojiPattern = String.raw`(?:❄️|🥶|⛄|🧊)`
       const vipEmojiPattern = String.raw`(?:❄️|👑)`;
       let vipEmojiRegex = new RegExp(vipEmojiPattern, "g");
