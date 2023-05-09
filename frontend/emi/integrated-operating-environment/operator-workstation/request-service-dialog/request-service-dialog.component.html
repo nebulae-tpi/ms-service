@@ -59,6 +59,13 @@
                     <div fxFlex="100" fxLayout="row" fxLayoutAlign="end center">
                         <mat-button-toggle-group name="featureOptionsGroup" formControlName="featureOptionsGroup"
                             multiple="true">
+                            
+                            <mat-button-toggle  value="JUMPER_CABLES">
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('JUMPER_CABLES') }">electric_bolt</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle  value="VIP">
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('VIP') }">star_rate</mat-icon>
+                            </mat-button-toggle>
                             <mat-button-toggle  value="AC">
                                 <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('AC') }">ac_unit</mat-icon>
                             </mat-button-toggle>
@@ -177,6 +184,12 @@
                   <div fxFlex="100" fxLayout="row" fxLayoutAlign="end center">
                       <mat-button-toggle-group name="featureOptionsGroup" formControlName="featureOptionsGroup"
                           multiple="true">
+                          <mat-button-toggle  value="JUMPER_CABLES">
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('JUMPER_CABLES') }">electric_bolt</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle  value="VIP">
+                                <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('VIP') }">star_rate</mat-icon>
+                            </mat-button-toggle>
                           <mat-button-toggle  value="AC">
                               <mat-icon [ngClass]="{'icon_white': form.get('featureOptionsGroup').value.includes('AC') }">ac_unit</mat-icon>
                           </mat-button-toggle>

@@ -68,7 +68,7 @@ import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 import { RequestServiceDialogComponent } from '../request-service-dialog/request-service-dialog.component';
 import { OperatorWorkstationComponent } from '../operator-workstation.component';
 
-const REQUEST_SERVICE_DIALOG_MAX_DIMENSION = [400, 400];
+const REQUEST_SERVICE_DIALOG_MAX_DIMENSION = [500, 400];
 
 
 @Component({
