@@ -372,15 +372,13 @@ class ClientBotLinkCQRS {
       charCount = charCount + specialCharCount + airportCharCount+vipCharCount;
       
       if (charCount > 0) {
-        if((client.satelliteInfo || {}).offerOnlyVip){
-          ++charCount;
+        if((client.satelliteInfo || {}).offerOnlyVip && vipCharCount<1){
           ++vipCharCount;
         }
         return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount,message, vipCharCount);
       }
       else if (!isNaN(message.text.body)) {
-        if((client.satelliteInfo || {}).offerOnlyVip){
-          ++charCount;
+        if((client.satelliteInfo || {}).offerOnlyVip&& vipCharCount<1){
           ++vipCharCount;
         }
         return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount,message, vipCharCount);
