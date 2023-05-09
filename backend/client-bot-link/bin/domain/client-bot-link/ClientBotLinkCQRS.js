@@ -90,7 +90,7 @@ class ClientBotLinkCQRS {
         _id,
         businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
         timestamp: Date.now(),
-        requestedFeatures: (acEnabled || airportTipEnabled) ? ["AC"] : vipEnabled ? ["VIP"] : undefined,
+        requestedFeatures: (acEnabled ) ? ["AC"] : vipEnabled ? ["VIP"] : airportTipEnabled ? ["VIP", "AC"] : undefined,
 
         //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
         //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
