@@ -355,7 +355,7 @@ class ClientBotLinkCQRS {
       let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length;
       let specialCharCount = 0;
       let airportCharCount = 0;
-      let vipCharCount = (message.text.body.toUpperCase().includes("VIP") || (client.satelliteInfo || {}).offerOnlyVip) ? 1 : 0;
+      let vipCharCount = message.text.body.toUpperCase().includes("VIP") ? 1 : 0;
       const emojiPattern = String.raw`(?:❄️|🥶|⛄|🧊)`
       const vipEmojiPattern = String.raw`(?:❄️|👑)`;
       let vipEmojiRegex = new RegExp(vipEmojiPattern, "g");
@@ -372,9 +372,17 @@ class ClientBotLinkCQRS {
       charCount = charCount + specialCharCount + airportCharCount+vipCharCount;
       
       if (charCount > 0) {
+        if((client.satelliteInfo || {}).offerOnlyVip){
+          ++charCount;
+          ++vipCharCount;
+        }
         return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount,message, vipCharCount);
       }
       else if (!isNaN(message.text.body)) {
+        if((client.satelliteInfo || {}).offerOnlyVip){
+          ++charCount;
+          ++vipCharCount;
+        }
         return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount,message, vipCharCount);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
