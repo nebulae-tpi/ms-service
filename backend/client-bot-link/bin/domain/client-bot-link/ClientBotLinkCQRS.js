@@ -42,7 +42,7 @@ class ClientBotLinkCQRS {
           }, message)
         }),
         tap(message => {
-          this.markMessageAsRead(message);
+          //this.markMessageAsRead(message);
         })
       )
     } else {
@@ -146,7 +146,7 @@ class ClientBotLinkCQRS {
       })
     })
       .on('error', err => {
-        console.log('Error: ', err.message)
+        console.log('Error sendTextMessage: ', err.message)
       })
     req.write(JSON.stringify(content))
     req.end();
@@ -182,8 +182,6 @@ class ClientBotLinkCQRS {
       }
     }
 
-    console.log("CONTENT ===> ", JSON.stringify(content))
-
     const options = {
       protocol: 'https:',
       hostname: 'waba.360dialog.io',
@@ -206,7 +204,7 @@ class ClientBotLinkCQRS {
       })
     })
       .on('error', err => {
-        console.log('Error: ', err.message)
+        console.log('Error sendInteractiveListMessage: ', err.message)
       })
     req.write(JSON.stringify(content))
     req.end();
@@ -265,7 +263,7 @@ class ClientBotLinkCQRS {
       })
     })
       .on('error', err => {
-        console.log('Error: ', err.message)
+        console.log('Error sendInteractiveButtonMessage: ', err.message)
       })
     req.write(JSON.stringify(content))
     req.end();
@@ -662,7 +660,7 @@ class ClientBotLinkCQRS {
       })
     })
       .on('error', err => {
-        console.log('Error: ', err.message)
+        console.log('Error markMessageAsRead: ', err.message)
       })
     req.write(JSON.stringify(content))
     req.end()
