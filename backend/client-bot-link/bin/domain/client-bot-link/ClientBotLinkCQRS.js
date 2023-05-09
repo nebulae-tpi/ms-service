@@ -426,6 +426,16 @@ class ClientBotLinkCQRS {
               })
             )            
           }
+        case "rqstServiceVipBtn":
+            if(((client || {}).location || {}).lng){
+              return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId,0 , message, 1)
+            }else {
+              return of({}).pipe(
+                tap(() => {
+                  this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, conversationContent.waId)
+                })
+              )            
+          }
         case "infoServiceBtn":
           return this.infoService$(client._id, conversationContent.waId)
         case "CancelAllServiceBtn":
