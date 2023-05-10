@@ -15,7 +15,7 @@ const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_ID
 
 const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-access')
 
-const satelliteAirtportPrices = JSON.stringify(process.env.SATELLITE_AIRPORT_PRICES || "{PORTER_LODGE: 5000, HOTEL: 10000}")
+const satelliteAirtportPrices = JSON.parse('{"PORTER_LODGE":5000, "age":30, "HOTEL":10000}')
 
 /**
  * Singleton instance
@@ -52,7 +52,6 @@ class ClientBotLinkCQRS {
   }
 
   buildServiceRequestedEsEvent(client,acEnabled, airportTipEnabled, vipEnabled) {
-    console.log("acEnabled ==> ",acEnabled)
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -63,7 +62,6 @@ class ClientBotLinkCQRS {
     };
 
     const _id = Crosscutting.generateDateBasedUuid();
-    console.log("SERVICE ID ===> ", _id)
     const requestObj = {
       aggregateType: 'Service',
       aggregateId: _id,
@@ -112,6 +110,7 @@ class ClientBotLinkCQRS {
 
       }
     };
+    console.log("CLIENT TIP ", client.generalInfo.name, ": ",requestObj.data.client.tip)
     return new Event(requestObj);
   }
 
