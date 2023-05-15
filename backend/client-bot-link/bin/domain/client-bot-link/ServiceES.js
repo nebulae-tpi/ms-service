@@ -145,7 +145,7 @@ class ServiceES {
       }),
       tap(([client, service]) => {
         if(client){
-          if(client.satelliteInfo.offerOnlyVip || (service.requestedFeatures || []).includes("VIP")){
+          if((client.satelliteInfo || {}).offerOnlyVip || (service.requestedFeatures || []).includes("VIP")){
             const buttonsVip = [
               {
                 id: "rqstServiceVipBtn",
