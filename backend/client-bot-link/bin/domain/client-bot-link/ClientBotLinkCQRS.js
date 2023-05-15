@@ -51,7 +51,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client,acEnabled, airportTipEnabled, vipEnabled) {
+  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -88,7 +88,7 @@ class ClientBotLinkCQRS {
         _id,
         businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
         timestamp: Date.now(),
-        requestedFeatures: (acEnabled ) ? ["AC"] : vipEnabled ? ["VIP"] : airportTipEnabled ? ["VIP", "AC"] : undefined,
+        requestedFeatures: filters ? filters : (acEnabled) ? ["AC"] : vipEnabled ? ["VIP"] : airportTipEnabled ? ["VIP", "AC"] : undefined,
 
         //TODO: SE COMENTA DE MOMENTO EL COSTO DEL SERVICIO Y EL DESCUENTO DEL SERVICIO
         //fareDiscount: fareDiscount < 0.01 ? undefined : fareDiscount,
@@ -110,7 +110,7 @@ class ClientBotLinkCQRS {
 
       }
     };
-    console.log("CLIENT TIP ", client.generalInfo.name, ": ",requestObj.data.client.tip)
+    console.log("CLIENT TIP ", client.generalInfo.name, ": ", requestObj.data.client.tip)
     return new Event(requestObj);
   }
 
@@ -149,7 +149,7 @@ class ClientBotLinkCQRS {
       })
     req.write(JSON.stringify(content))
     req.end();
-    console.log("ENVIA MENSAJE ===> ", text, ": ",waId)
+    console.log("ENVIA MENSAJE ===> ", text, ": ", waId)
   }
 
   sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId) {
@@ -268,21 +268,100 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount) {
+  sendInteractiveCatalogMessage(headerText, bodyText, waId) {
+    const content = {
+      "recipient_type": "individual",
+      "to": waId,
+      "type": "interactive",
+      "interactive": {
+        "type": "product_list",
+        "header": {
+          "type": "text",
+          "text": headerText
+        },
+        "body": {
+          "text": bodyText
+        },
+        "footer": {
+          "text": ""
+        },
+        "action": {
+          "catalog_id": "6099177246837975",
+          "sections": [
+            {
+              "title": "Filtros",
+              "product_items": [
+                {
+                  "product_retailer_id": "AC"
+                },
+                {
+                  "product_retailer_id": "VIP"
+                },
+                {
+                  "product_retailer_id": "TRUNK"
+                },
+                {
+                  "product_retailer_id": "ROOF_RACK"
+                },
+                {
+                  "product_retailer_id": "JUMPER_CABLES"
+                },
+                {
+                  "product_retailer_id": "PETS"
+                },
+                {
+                  "product_retailer_id": "BIKE_RACK"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+    console.log("CONTENT ===> ", JSON.stringify(content));
+    const options = {
+      protocol: 'https:',
+      hostname: 'waba.360dialog.io',
+      path: '/v1/messages/',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': process.env.D360_API_KEY,
+      }
+    }
+    const req = https.request(options, res => {
+      let data = ''
+
+      res.on('data', chunk => {
+        data += chunk
+      })
+
+      res.on('end', () => {
+        //console.log(JSON.parse(data))
+      })
+    })
+      .on('error', err => {
+        console.log('Error sendInteractiveButtonMessage: ', err.message)
+      })
+    req.write(JSON.stringify(content))
+    req.end();
+  }
+
+  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount, filters) {
 
 
     try {
-      if(this.messageIdCache == null) this.messageIdCache = [];
-      if(this.messageIdCache.includes(message.id)){
-        console.log('ClientBotLinkCQRS.requestService: FATAL, whatsapp tried to send the same message more than once from',message.from, 'and will be ignored',message.id);
+      if (this.messageIdCache == null) this.messageIdCache = [];
+      if (this.messageIdCache.includes(message.id)) {
+        console.log('ClientBotLinkCQRS.requestService: FATAL, whatsapp tried to send the same message more than once from', message.from, 'and will be ignored', message.id);
         return of({});
-      } 
+      }
       this.messageIdCache.push(message.id);
       this.messageIdCache = this.messageIdCache.slice(-20);
     } catch (error) {
       console.error(error);
     }
-    
+
 
     const serviceLimit = parseInt(process.env.SATELLITE_SERVICE_LIMIT || "5");
     const availableServiceCount = serviceLimit - serviceCount;
@@ -291,7 +370,7 @@ class ClientBotLinkCQRS {
     let airportCharCountVal = airportCharCount;
     let vipCharCountVal = vipCharCount;
     const availableServices = availableServiceCount - servicesToRequest;
-    if(!((client || {}).location || {}).lng){
+    if (!((client || {}).location || {}).lng) {
       this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, waId)
       return of({});
     }
@@ -301,7 +380,7 @@ class ClientBotLinkCQRS {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
           const airportTipEnabled = (airportCharCountVal--) > 0;
           const vipEnabled = (vipCharCountVal--) > 0;
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipCharCount, vipEnabled));
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipCharCount, vipEnabled, filters));
         }),
         toArray(),
         tap(() => {
@@ -332,17 +411,31 @@ class ClientBotLinkCQRS {
           });
 
           if (listElements.length > 0) {
-            listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` })
+            listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` });
+            if(waId === "573155421851"){
+              listElements.push({ id: `RequestServiceWithFilters`, title: `Servicio con filtros` });
+            }
           }
-          this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", result.reduce((acc, val) => {
+          const aditionalTempText = `\n\nPara solicitar servicios con filtros por seleccionar la opción "Servicio con filtros"`;
+          this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", `${result.reduce((acc, val) => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
             const assignedData = val.state === "REQUESTED" ? "" : `Conductor: ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
             acc = `${acc}- Solicitado a las ${ddhh} ${assignedData}\n`
             return acc;
-          }, ""), "Cancelar Servicio", "Servicios", listElements, waId)
+          }, "")}${aditionalTempText}`, "Lista de Servicios", "Servicios", listElements, waId)
         } else {
-          this.sendTextMessage(`Actualmente no se tienen servicios activos`, waId)
+          if(waId === "573155421851"){
+            const buttons = [
+              {
+                id: "RequestServiceWithFilters",
+                text: "Servicio con filtros"
+              }
+            ]
+            this.sendInteractiveButtonMessage("Actualmente no se tienen servicios activos", `Para solicitar servicios con filtros por favor persionar el boton "Servicio con filtros"`, buttons, waId)
+          }else {
+            this.sendTextMessage(`Actualmente no se tienen servicios activos`, waId)
+          }
         }
       })
     )
@@ -350,7 +443,7 @@ class ClientBotLinkCQRS {
   }
 
   continueConversation$(message, conversationContent, client, serviceCount) {
-    if (((message || {}).text || {}).body) { 
+    if (((message || {}).text || {}).body) {
       let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length;
       let specialCharCount = 0;
       let airportCharCount = 0;
@@ -367,20 +460,20 @@ class ClientBotLinkCQRS {
       specialCharCount = specialCharCount + specialDoubleCharCount;
       airportCharCount = airportCharCount + specialDoubleAirportCharCount;
       vipCharCount = vipCharCount + specialVipCharCount;
-      
-      charCount = charCount + specialCharCount + airportCharCount+vipCharCount;
-      
+
+      charCount = charCount + specialCharCount + airportCharCount + vipCharCount;
+
       if (charCount > 0) {
-        if((client.satelliteInfo || {}).offerOnlyVip && vipCharCount<1){
+        if ((client.satelliteInfo || {}).offerOnlyVip && vipCharCount < 1) {
           ++vipCharCount;
         }
-        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount,message, vipCharCount);
+        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount);
       }
       else if (!isNaN(message.text.body)) {
-        if((client.satelliteInfo || {}).offerOnlyVip&& vipCharCount<1){
+        if ((client.satelliteInfo || {}).offerOnlyVip && vipCharCount < 1) {
           ++vipCharCount;
         }
-        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount,message, vipCharCount);
+        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount, message, vipCharCount);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
@@ -396,16 +489,27 @@ class ClientBotLinkCQRS {
               {
                 id: "infoServiceBtn",
                 text: "Info de servicios"
-              }
+              },
             ]
+            if(conversationContent.waId === "573155421851"){
+              buttons.push({
+                id: "RequestServiceWithFilters",
+                text: "Servicio con filtros"
+              })
+            }
             this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑 o para solicitar un servicio para el aeropuerto utilizar el emoji ✈️\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
           })
         )
       }
     }
+    else if (message.order) {
+      const filters = message.order.product_items.map(pi => pi.product_retailer_id);
+      console.log("FILTER ===> ", filters)
+      return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 0, filters);
+    }
     else {
       const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
-      if(!interactiveResp){
+      if (!interactiveResp) {
         const buttons = [
           {
             id: "rqstServiceBtn",
@@ -421,24 +525,24 @@ class ClientBotLinkCQRS {
       }
       switch (interactiveResp) {
         case "rqstServiceBtn":
-          if(((client || {}).location || {}).lng){
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId,0 , message)
-          }else {
+          if (((client || {}).location || {}).lng) {
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message)
+          } else {
             return of({}).pipe(
               tap(() => {
                 this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, conversationContent.waId)
               })
-            )            
+            )
           }
         case "rqstServiceVipBtn":
-            if(((client || {}).location || {}).lng){
-              return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId,0 , message, 1)
-            }else {
-              return of({}).pipe(
-                tap(() => {
-                  this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, conversationContent.waId)
-                })
-              )            
+          if (((client || {}).location || {}).lng) {
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 1)
+          } else {
+            return of({}).pipe(
+              tap(() => {
+                this.sendTextMessage(`El satelite no tiene la ubicación configurada, por favor comunicarse con soporte `, conversationContent.waId)
+              })
+            )
           }
         case "infoServiceBtn":
           return this.infoService$(client._id, conversationContent.waId)
@@ -453,17 +557,19 @@ class ClientBotLinkCQRS {
                 user: conversationContent.waId,
                 data: { reason: null, notes: "" }
               }))
-            }), 
+            }),
             toArray(),
             tap(res => {
-                console.log("RES ===> ", res);
-                if (res.length > 0) {
-                  this.sendTextMessage(`Todos los servicios pendientes han sido cancelados exitosamente`, conversationContent.waId)
-                } else {
-                  this.sendTextMessage(`Actualmente no hay servicios por cancelar`, conversationContent.waId)
-                }
-              })
+              console.log("RES ===> ", res);
+              if (res.length > 0) {
+                this.sendTextMessage(`Todos los servicios pendientes han sido cancelados exitosamente`, conversationContent.waId)
+              } else {
+                this.sendTextMessage(`Actualmente no hay servicios por cancelar`, conversationContent.waId)
+              }
+            })
           );
+        case "RequestServiceWithFilters":
+          this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
         default:
           if (interactiveResp.includes("CANCEL_")) {
             return ServiceDA.getService$(interactiveResp.replace("CANCEL_", "")).pipe(
