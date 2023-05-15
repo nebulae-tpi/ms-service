@@ -412,7 +412,7 @@ class ClientBotLinkCQRS {
 
           if (listElements.length > 0) {
             listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` });
-            if(waId === "573155421852"){
+            if(waId === "573155421851"){
               listElements.push({ id: `RequestServiceWithFilters`, title: `Servicio con filtros` });
             }
           }
@@ -425,7 +425,7 @@ class ClientBotLinkCQRS {
             return acc;
           }, "")}${aditionalTempText}`, "Lista de Servicios", "Servicios", listElements, waId)
         } else {
-          if(waId === "573155421852"){
+          if(waId === "573155421851"){
             const buttons = [
               {
                 id: "RequestServiceWithFilters",
@@ -491,7 +491,7 @@ class ClientBotLinkCQRS {
                 text: "Info de servicios"
               },
             ]
-            if(conversationContent.waId === "573155421852"){
+            if(conversationContent.waId === "573155421851"){
               buttons.push({
                 id: "RequestServiceWithFilters",
                 text: "Servicio con filtros"
