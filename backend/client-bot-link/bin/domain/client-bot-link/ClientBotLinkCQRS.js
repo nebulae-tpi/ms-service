@@ -407,16 +407,16 @@ class ClientBotLinkCQRS {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
             const assignedData = val.state === "REQUESTED" ? "" : `Conductor ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
-            return { id: `CANCEL_${val._id}`, title: `Hora ${ddhh}`, description: `${assignedData}` }
+            return { id: `CANCEL_${val._id}`, title: `Cancelar servicio ${ddhh}`, description: `${assignedData}` }
           });
 
           if (listElements.length > 0) {
             listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` });
             if(waId === "573155421851"){
-              listElements.push({ id: `RequestServiceWithFilters`, title: `Servicio con filtros` });
+              listElements.push({ id: `RequestServiceWithFilters`, title: `Solicitar con filtros` });
             }
           }
-          const aditionalTempText = `\n\nPara solicitar servicios con filtros por seleccionar la opción "Servicio con filtros"`;
+          const aditionalTempText = `\n\nPara solicitar servicios con filtros por favor seleccionar la opción "Servicio con filtros"`;
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", `${result.reduce((acc, val) => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
