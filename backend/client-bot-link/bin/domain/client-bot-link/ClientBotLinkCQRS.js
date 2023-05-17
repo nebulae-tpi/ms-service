@@ -111,7 +111,6 @@ class ClientBotLinkCQRS {
 
       }
     };
-    console.log("CLIENT TIP ", client.generalInfo.name, ": ", requestObj.data.client.tip)
     return new Event(requestObj);
   }
 
@@ -350,7 +349,6 @@ class ClientBotLinkCQRS {
 
   requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount, filters) {
 
-
     try {
       if (this.messageIdCache == null) this.messageIdCache = [];
       if (this.messageIdCache.includes(message.id)) {
@@ -381,7 +379,7 @@ class ClientBotLinkCQRS {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
           const airportTipEnabled = (airportCharCountVal--) > 0;
           const vipEnabled = (vipCharCountVal--) > 0;
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipCharCount, vipEnabled, filters));
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters));
         }),
         toArray(),
         tap(() => {
