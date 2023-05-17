@@ -411,9 +411,6 @@ class ClientBotLinkCQRS {
 
           if (listElements.length > 0) {
             listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` });
-            if(availableTestNumbers.includes(waId)){
-              listElements.push({ id: `RequestServiceWithFilters`, title: `Solicitar con filtros` });
-            }
           }
           const aditionalTempText = `\n\nPara solicitar servicios con filtros por favor seleccionar la opción "Servicio con filtros"`;
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", `${result.reduce((acc, val) => {
@@ -443,6 +440,10 @@ class ClientBotLinkCQRS {
 
   continueConversation$(message, conversationContent, client, serviceCount) {
     if (((message || {}).text || {}).body) {
+      if(message.text.body === "🧐"){
+        this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
+        return of({})
+      }
       let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length;
       let specialCharCount = 0;
       let airportCharCount = 0;
@@ -631,117 +632,6 @@ class ClientBotLinkCQRS {
       })
     )
 
-  }
-
-  assignAction(message, name) {
-    const content = {
-      "recipient_type": "individual",
-      "to": message.from,
-      "type": "interactive",
-    }
-
-    switch (((message.interactive || {}).list_reply || {}).title) {
-      case "Nueva Lista":
-        content.interactive = {
-          "type": "list",
-          "header": {
-            "type": "text",
-            "text": `Hola ${name}, Bienvenido al TX Bot`
-          },
-          "body": {
-            "text": "Nueva lista generada"
-          },
-          "footer": {
-            "text": ""
-          },
-          "action": {
-            "button": "menú",
-            "sections": [
-              {
-                "title": "Opciones Interactivas",
-                "rows": [
-                  {
-                    "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
-                    "title": "Nueva Lista"
-                  },
-                  {
-                    "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
-                    "title": "Nuevo Boton"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-        break;
-      case "Nuevo Boton":
-        content.interactive = {
-          "type": "button",
-          "header": {
-            "type": "text",
-            "text": "Ejemplo Boton Interactivo"
-          },
-          "body": {
-            "text": "Este es un ejemplo de boton interactivo"
-          },
-          "footer": {
-            "text": "pie de pagína"
-          },
-          "action": {
-            "buttons": [
-              {
-                "type": "reply",
-                "reply": {
-                  "id": "a3c3596f-6339-4cdd-870b-26b7957285cb",
-                  "title": "Boton 1"
-                }
-              },
-              {
-                "type": "reply",
-                "reply": {
-                  "id": "a4d5f308-e3b6-4b3a-b820-3699b47cbfb8",
-                  "title": "Boton 2"
-                }
-              }
-            ]
-          }
-        }
-        break;
-      default:
-        content.interactive = {
-          "type": "list",
-          "header": {
-            "type": "text",
-            "text": `Hola ${name}, Bienvenido al TX Bot`
-          },
-          "body": {
-            "text": "Este es un ejemplo de mensajes interactivos, por favor seleccione una opción de la lista presentada"
-          },
-          "footer": {
-            "text": ""
-          },
-          "action": {
-            "button": "menú",
-            "sections": [
-              {
-                "title": "Opciones Interactivas",
-                "rows": [
-                  {
-                    "id": "c337ed8f-63d5-4749-8919-7ae2d523b6cf",
-                    "title": "Nueva Lista"
-                  },
-                  {
-                    "id": "49139d97-0962-4f87-bfd9-a3d572db8e80",
-                    "title": "Nuevo Boton"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-        break;
-    }
-    return content;
   }
 
   markMessageAsRead(message) {
