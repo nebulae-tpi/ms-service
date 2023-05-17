@@ -318,7 +318,7 @@ class ClientBotLinkCQRS {
           ]
         }
       }
-    }
+    } 
     console.log("CONTENT ===> ", JSON.stringify(content));
     const options = {
       protocol: 'https:',
