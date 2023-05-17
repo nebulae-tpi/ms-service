@@ -289,7 +289,7 @@ class ClientBotLinkCQRS {
         "action": {
           "catalog_id": "6099177246837975",
           "sections": [
-            {
+            { 
               "title": "Filtros",
               "product_items": [
                 {
