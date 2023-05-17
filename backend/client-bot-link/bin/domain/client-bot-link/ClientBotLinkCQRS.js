@@ -16,6 +16,7 @@ const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_ID
 const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-access')
 
 const satelliteAirtportPrices = JSON.parse('{"PORTER_LODGE":5000, "age":30, "HOTEL":10000}')
+const availableTestNumbers = ["573155421851", "573015033132"]
 
 /**
  * Singleton instance
@@ -412,7 +413,7 @@ class ClientBotLinkCQRS {
 
           if (listElements.length > 0) {
             listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` });
-            if(waId === "573155421851"){
+            if(availableTestNumbers.includes(waId)){
               listElements.push({ id: `RequestServiceWithFilters`, title: `Solicitar con filtros` });
             }
           }
@@ -425,7 +426,7 @@ class ClientBotLinkCQRS {
             return acc;
           }, "")}${aditionalTempText}`, "Lista de Servicios", "Servicios", listElements, waId)
         } else {
-          if(waId === "573155421851"){
+          if(availableTestNumbers.includes(waId)){
             const buttons = [
               {
                 id: "RequestServiceWithFilters",
@@ -491,7 +492,7 @@ class ClientBotLinkCQRS {
                 text: "Info de servicios"
               },
             ]
-            if(conversationContent.waId === "573155421851"){
+            if(availableTestNumbers.includes(conversationContent.waId)){
               buttons.push({
                 id: "RequestServiceWithFilters",
                 text: "Servicio con filtros"
