@@ -16,7 +16,7 @@ const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_ID
 const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-access')
 
 const satelliteAirtportPrices = JSON.parse('{"PORTER_LODGE":5000, "age":30, "HOTEL":10000}')
-const availableTestNumbers = ["573155421851", "573015033132"]
+const availableTestNumbers = ["573155421851", "573015033132", "573013917663"]
 
 /**
  * Singleton instance
@@ -440,7 +440,7 @@ class ClientBotLinkCQRS {
 
   continueConversation$(message, conversationContent, client, serviceCount) {
     if (((message || {}).text || {}).body) {
-      if(message.text.body === "🧐"){
+      if(availableTestNumbers.includes(conversationContent.waId) && message.text.body === "🧐"){
         this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
         return of({})
       }
