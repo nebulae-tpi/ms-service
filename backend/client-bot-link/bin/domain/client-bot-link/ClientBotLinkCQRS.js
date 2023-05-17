@@ -414,10 +414,10 @@ class ClientBotLinkCQRS {
           if (listElements.length > 0) {
             listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` });
             if(availableTestNumbers.includes(waId)){
-              listElements.push({ id: `RequestServiceWithFilters`, title: `Solicitar con filtros` });
+              listElements.push({ id: `RequestServiceWithFilters`, title: `Solicitar personalizado` });
             }
           }
-          const aditionalTempText = `\n\nPara solicitar servicios con filtros por favor seleccionar la opción "Servicio con filtros"`;
+          const aditionalTempText = `\n\nPara solicitar servicios personalizados por favor seleccionar la opción "Servicio personalizados"`;
           this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", `${result.reduce((acc, val) => {
             const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
             const ddhh = dateFormat(currentDate, "HH:MM");
@@ -430,10 +430,10 @@ class ClientBotLinkCQRS {
             const buttons = [
               {
                 id: "RequestServiceWithFilters",
-                text: "Servicio con filtros"
+                text: "Servicio personalizado"
               }
             ]
-            this.sendInteractiveButtonMessage("Actualmente no se tienen servicios activos", `Para solicitar servicios con filtros por favor persionar el boton "Servicio con filtros"`, buttons, waId)
+            this.sendInteractiveButtonMessage("Actualmente no se tienen servicios activos", `Para solicitar servicios personalizados por favor persionar el boton "Servicio personalizado"`, buttons, waId)
           }else {
             this.sendTextMessage(`Actualmente no se tienen servicios activos`, waId)
           }
@@ -495,7 +495,7 @@ class ClientBotLinkCQRS {
             if(availableTestNumbers.includes(conversationContent.waId)){
               buttons.push({
                 id: "RequestServiceWithFilters",
-                text: "Servicio con filtros"
+                text: "Servicio personalizado"
               })
             }
             this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑 o para solicitar un servicio para el aeropuerto utilizar el emoji ✈️\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
@@ -570,7 +570,7 @@ class ClientBotLinkCQRS {
             })
           );
         case "RequestServiceWithFilters":
-          this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
+          this.sendInteractiveCatalogMessage(`Solicitar servicio personalizado`, `para solicitar un servicio personalizado por favor presionar el boton "Ver artículos"`, conversationContent.waId);
         default:
           if (interactiveResp.includes("CANCEL_")) {
             return ServiceDA.getService$(interactiveResp.replace("CANCEL_", "")).pipe(
