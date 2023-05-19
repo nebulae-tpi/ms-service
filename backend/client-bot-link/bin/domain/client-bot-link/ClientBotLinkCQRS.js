@@ -449,7 +449,7 @@ class ClientBotLinkCQRS {
       let airportCharCount = 0;
       let vipCharCount = message.text.body.toUpperCase().includes("VIP") ? 1 : 0;
       const emojiPattern = String.raw`(?:❄️|🥶|⛄|🧊)`
-      const vipEmojiPattern = String.raw`(?:❄️|👑)`;
+      const vipEmojiPattern = String.raw`(?:👑)`;
       let vipEmojiRegex = new RegExp(vipEmojiPattern, "g");
       let emoRegex = new RegExp(emojiPattern, "g");
       const emojiPattern2 = String.raw`(?:✈️|🛫|🛬)`
