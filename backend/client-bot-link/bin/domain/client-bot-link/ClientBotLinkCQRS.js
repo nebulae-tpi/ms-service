@@ -421,7 +421,6 @@ class ClientBotLinkCQRS {
             return acc;
           }, "")}${aditionalTempText}`, "Lista de Servicios", "Servicios", listElements, waId)
         } else {
-          if(availableTestNumbers.includes(waId)){
             const buttons = [
               {
                 id: "RequestServiceWithFilters",
@@ -429,9 +428,6 @@ class ClientBotLinkCQRS {
               }
             ]
             this.sendInteractiveButtonMessage("Actualmente no se tienen servicios activos", `Para solicitar servicios con filtros por favor persionar el boton "Servicio con filtros"`, buttons, waId)
-          }else {
-            this.sendTextMessage(`Actualmente no se tienen servicios activos`, waId)
-          }
         }
       })
     )
@@ -440,7 +436,7 @@ class ClientBotLinkCQRS {
 
   continueConversation$(message, conversationContent, client, serviceCount) {
     if (((message || {}).text || {}).body) {
-      if(availableTestNumbers.includes(conversationContent.waId) && message.text.body === "🧐"){
+      if(message.text.body === "🧐"){
         this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
         return of({})
       }
@@ -491,13 +487,11 @@ class ClientBotLinkCQRS {
                 text: "Info de servicios"
               },
             ]
-            if(availableTestNumbers.includes(conversationContent.waId)){
               buttons.push({
                 id: "RequestServiceWithFilters",
                 text: "Servicio con filtros"
               })
-            }
-            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑 o para solicitar un servicio para el aeropuerto utilizar el emoji ✈️\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
+            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
           })
         )
       }
@@ -520,7 +514,7 @@ class ClientBotLinkCQRS {
             text: "Info de servicios"
           }
         ]
-        this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑 o para solicitar un servicio para el aeropuerto utilizar el emoji ✈️\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
+        this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId)
         return of({});
       }
       switch (interactiveResp) {
