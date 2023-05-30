@@ -49,7 +49,7 @@ class ServiceES {
 
         //TODO: esto es una solucion temporal para la modificacion masiva de la distancia de oferta parta los satelites
         //ESTO SOBRESCRIBE LA DISTANCA CONFIGURADA EN EL SATELITE
-        if(data.client.tipClientId){
+        if (data.client.tipClientId) {
             maxDistance = parseInt(maxDistance || process.env.SERVICE_SATELLITE_OFFER_MAX_DISTANCE);
         }
 
@@ -486,18 +486,18 @@ class ServiceES {
 
             // console.log({ driverMainPocketAmount, clientTip, payPerServicePrice });
 
-            if(((service || {}).request || {}).sourceChannel === "APP_CLIENT"){
-                
+            if (((service || {}).request || {}).sourceChannel === "APP_CLIENT") {
+
                 return driverMainPocketAmount >= (clientTip + parseInt(process.env.APP_DRIVER_AGREEMENT) + payPerServicePrice);
-            }else {
+            } else {
                 return (clientTip + payPerServicePrice) > 0 ? driverMainPocketAmount >= (clientTip + payPerServicePrice) : true;
             }
-            
+
 
         });
 
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
-        
+
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
         if (currentClient && (((currentClient || {}).satelliteInfo || {}).referrerDriverDocumentIds || ((currentClient || {}).satelliteInfo || {}).referrerDriverDocumentId)) {
             const priorityShift = shifts.filter(sh => (sh.driver.documentId === currentClient.satelliteInfo.referrerDriverDocumentId) || (currentClient.satelliteInfo.referrerDriverDocumentIds || []).includes(sh.driver.documentId));
@@ -505,11 +505,11 @@ class ServiceES {
                 shifts = shifts.filter(s => !priorityShift.some(p => p.driver.documentId === s.driver.documentId));
                 for (let prioIndex = 0; prioIndex < priorityShift.length; prioIndex++) {
                     const element = priorityShift[prioIndex];
-                    shifts.unshift({ ...element, referred: true });    
+                    shifts.unshift({ ...element, referred: true });
                     obs.next(`referred found between candidates: ${JSON.stringify({ driver: element.driver.username, distance: element.dist.calculated, documentId: element.driver.documentId })} `);
                 }
-                
-                
+
+
             }
         }
         // filter all the trips that are closer than the minDistance threshold
@@ -571,8 +571,8 @@ class ServiceES {
             tripCost: service.tripCost,
             destinationCost: service.destinationCost,
             productCost: service.productCost
-        }; 
-        
+        };
+
         if (serviceOffer.pickUp.neighborhood && BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
             serviceOffer.pickUp.addressLine1 = '---';
             serviceOffer.pickUp.addressLine2 = '';
@@ -671,9 +671,9 @@ class ServiceES {
     payPlatformClientAgreement$({ businessId, client, driver, request }, timestamp) {
         return of({}).pipe(
             map(() => {
-                if((request || {}).sourceChannel !== "OPERATOR" || businessId === "b19c067e-57b4-468f-b970-d0101a31cacb"){
+                if ((request || {}).sourceChannel !== "OPERATOR" || businessId === "b19c067e-57b4-468f-b970-d0101a31cacb") {
                     return undefined;
-                }else if(!client.id || client.id === null){    
+                } else if (!client.id || client.id === null) {
                     return {
                         _id: Crosscutting.generateDateBasedUuid(),
                         businessId,
@@ -684,9 +684,9 @@ class ServiceES {
                         amount: parseInt(process.env.APP_DRIVER_AGREEMENT),
                         fromId: driver.id,
                         toId: businessId
-                    };                    
+                    };
                 }
-                }
+            }
             ),
             //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
             mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
@@ -707,14 +707,14 @@ class ServiceES {
     payAppClientAgreement$({ businessId, client, driver, request }, timestamp, aid, av) {
         return of({}).pipe(
             mergeMap(() => {
-                if((request || {}).sourceChannel !== "APP_CLIENT"){
+                if ((request || {}).sourceChannel !== "APP_CLIENT") {
                     return of(undefined);
-                }else if(client.referrerDriverCode && client.referrerDriverCode !== null){
+                } else if (client.referrerDriverCode && client.referrerDriverCode !== null) {
                     return DriverDA.getDriverByDriverCode$(parseInt(client.referrerDriverCode)).pipe(
                         map(referrerDriver => {
                             return {
                                 _id: Crosscutting.generateDateBasedUuid(),
-                                sourceEvent: {aid, av},
+                                sourceEvent: { aid, av },
                                 businessId,
                                 type: "MOVEMENT",
                                 // notes: mba.notes,
@@ -727,8 +727,8 @@ class ServiceES {
                                 referrerDriverId: (referrerDriver || {})._id
                             };
                         })
-                    );                    
-                }else {
+                    );
+                } else {
                     return of({
                         _id: Crosscutting.generateDateBasedUuid(),
                         businessId,
@@ -742,7 +742,7 @@ class ServiceES {
                         clientId: client.id
                     });
                 }
-                }
+            }
             ),
             //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
             mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
@@ -771,7 +771,7 @@ class ServiceES {
                 : ({
                     _id: Crosscutting.generateDateBasedUuid(),
                     businessId: businessId,
-                    sourceEvent: {aid, av},
+                    sourceEvent: { aid, av },
                     type: "MOVEMENT",
                     // notes: mba.notes,
                     concept: "CLIENT_AGREEMENT_PAYMENT",
@@ -807,7 +807,7 @@ class ServiceES {
                 if (subscriptionType == "PAY_PER_SERVICE") {
                     return ({
                         _id: Crosscutting.generateDateBasedUuid(),
-                        sourceEvent: {aid, av},
+                        sourceEvent: { aid, av },
                         businessId: businessId,
                         type: "MOVEMENT",
                         notes: `Turno: ${shiftId}; Servicio: ${dbService._id}`,
@@ -927,22 +927,57 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceCancelledByOperator$({ aid, data }) {
+    handleServiceCancelledByOperator$({ aid, data, av }) {
         console.log("LLEGA CANCELACIÓN AL DRIVER APP LINK =====> ", aid);
         //console.log(`ServiceES: handleServiceCancelledByOperator: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
             delay(300),
-            mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 })),
-            mergeMap(service =>
-                driverAppLinkBroker.sendServiceEventToDrivers$(
-                    service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }).pipe(
-                        mapTo(service)
+            mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "client": 1, "driver.id": 1, "businessId": 1 })),
+            mergeMap(service => {
+                
+                return forkJoin([
+                    driverAppLinkBroker.sendServiceEventToDrivers$(
+                        service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }),
+                    of({}).pipe(
+                        mergeMap(() => {
+                            if(service.client.tipType === "VIRTUAL_WALLET" && service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                                return eventSourcing.eventStore.emitEvent$(
+                                    new Event({
+                                        eventType: "WalletTransactionCommited",
+                                        eventTypeVersion: 1,
+                                        aggregateType: "Wallet",
+                                        aggregateId: service.client.tipClientId,
+                                        data: {
+                                            _id: Crosscutting.generateDateBasedUuid(),
+                                            businessId: service.businessId,
+                                            sourceEvent: { aid, av },
+                                            type: "MOVEMENT",
+                                            // notes: mba.notes,
+                                            concept: "CLIENT_AGREEMENT_PAYMENT_REVERTED",
+                                            timestamp: Date.now(),
+                                            amount: service.client.tip,
+                                            fromId: service.client.tipClientId,
+                                            toId: service.driver.id
+                                        },
+                                        user: "SYSTEM"
+                                    })
+                                )
+                            }else {
+                                return of({})
+                            }
+                            
+                        })
                     )
+
+                ]).pipe(
+                    mapTo(service)
+                )
+            }
             ),
             filter(service => service.driver && service.driver.username),
             mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
                 service.businessId, service.driver.username, 'ServiceCancelledByOperator', { ...data, _id: service._id, state: 'CANCELLED_OPERATOR' })),
-        );
+        ); 0
     }
 
     /**
