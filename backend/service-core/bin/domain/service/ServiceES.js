@@ -348,7 +348,7 @@ class ServiceES {
                                 sourceEvent: { aid, av },
                                 type: "MOVEMENT",
                                 // notes: mba.notes,
-                                concept: "CLIENT_AGREEMENT_PAYMENT_REVERTED",
+                                concept: "CLIENT_AGREEMENT_REFUND",
                                 timestamp: Date.now(),
                                 amount: service.client.tip,
                                 fromId: service.client.tipClientId,
