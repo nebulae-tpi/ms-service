@@ -947,7 +947,7 @@ class ServiceES {
                                         eventTypeVersion: 1,
                                         aggregateType: "Wallet",
                                         aggregateId: service.client.tipClientId,
-                                        data: {
+                                        data: { 
                                             _id: Crosscutting.generateDateBasedUuid(),
                                             businessId: service.businessId,
                                             sourceEvent: { aid, av },
