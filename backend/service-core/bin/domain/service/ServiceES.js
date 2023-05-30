@@ -330,10 +330,41 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceCancelledBySystem$({ aid, data, user }) {
+    handleServiceCancelledBySystem$({ aid, data, user, av }) {
         //console.log(`*** ServiceES: handleServiceCancelledBySystem: `, data); //DEBUG: DELETE LINE
         const { reason, notes } = data;
-        return this.handleCancellation$(aid, "CANCELLED_SYSTEM", reason, notes, undefined, Date.now(), user)
+        return ServiceDA.findById$(aid, { "driver.username": 1, "client": 1, "driver.id": 1, "businessId": 1 }).pipe(
+            mergeMap(service => {
+                if(service.client.tipType === "VIRTUAL_WALLET" && service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                    return eventSourcing.eventStore.emitEvent$(
+                        new Event({
+                            eventType: "WalletTransactionCommited",
+                            eventTypeVersion: 1,
+                            aggregateType: "Wallet",
+                            aggregateId: service.client.tipClientId,
+                            data: { 
+                                _id: Crosscutting.generateDateBasedUuid(),
+                                businessId: service.businessId,
+                                sourceEvent: { aid, av },
+                                type: "MOVEMENT",
+                                // notes: mba.notes,
+                                concept: "CLIENT_AGREEMENT_PAYMENT_REVERTED",
+                                timestamp: Date.now(),
+                                amount: service.client.tip,
+                                fromId: service.client.tipClientId,
+                                toId: service.driver.id
+                            },
+                            user: "SYSTEM"
+                        })
+                    )
+                }else {
+                    return of({})
+                }
+            }),
+            mergeMap(() => {
+                return this.handleCancellation$(aid, "CANCELLED_SYSTEM", reason, notes, undefined, Date.now(), user)
+            })
+        )
     }
 
     handleCancellation$(serviceId, cancelStateType, reason, notes, location, timestamp, user) {
