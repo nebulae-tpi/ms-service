@@ -335,7 +335,7 @@ class ServiceES {
         const { reason, notes } = data;
         return ServiceDA.findById$(aid, { "driver.username": 1, "client": 1, "driver.id": 1, "businessId": 1 }).pipe(
             mergeMap(service => {
-                if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id && service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id){
                     return eventSourcing.eventStore.emitEvent$(
                         new Event({
                             eventType: "WalletTransactionCommited",

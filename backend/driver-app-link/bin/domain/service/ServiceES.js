@@ -901,7 +901,7 @@ class ServiceES {
                         service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'CANCELLED_DRIVER' }),
                     of({}).pipe(
                         mergeMap(() => {
-                            if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id && service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                            if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id){
                                 return eventSourcing.eventStore.emitEvent$(
                                     new Event({
                                         eventType: "WalletTransactionCommited",
@@ -954,7 +954,7 @@ class ServiceES {
                         service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }),
                     of({}).pipe(
                         mergeMap(() => {
-                            if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id && service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                            if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id){
                                 return eventSourcing.eventStore.emitEvent$(
                                     new Event({
                                         eventType: "WalletTransactionCommited",
@@ -1011,7 +1011,7 @@ class ServiceES {
                         service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }),
                     of({}).pipe(
                         mergeMap(() => {
-                            if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id && service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab"){
+                            if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id){
                                 return eventSourcing.eventStore.emitEvent$(
                                     new Event({
                                         eventType: "WalletTransactionCommited",
