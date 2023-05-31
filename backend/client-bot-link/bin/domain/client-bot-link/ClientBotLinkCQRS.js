@@ -33,7 +33,7 @@ class ClientBotLinkCQRS {
 
   processMessageReceived$({ args }, authToken) {
     if (args.messages) {
-      const concacts = args.contacts;
+      console.log("ARGS ==> ", args)
       return from(args.messages).pipe(
         mergeMap(message => {
           return this.initConversation$(message.from, {
