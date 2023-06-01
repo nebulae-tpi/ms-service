@@ -1008,38 +1008,7 @@ class ServiceES {
                 
                 return forkJoin([
                     driverAppLinkBroker.sendServiceEventToDrivers$(
-                        service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id }),
-                    of({}).pipe(
-                        mergeMap(() => {
-                            if(service.client.tipType === "VIRTUAL_WALLET" && (service.driver || {}).id){
-                                return eventSourcing.eventStore.emitEvent$(
-                                    new Event({
-                                        eventType: "WalletTransactionCommited",
-                                        eventTypeVersion: 1,
-                                        aggregateType: "Wallet",
-                                        aggregateId: service.client.tipClientId,
-                                        data: { 
-                                            _id: Crosscutting.generateDateBasedUuid(),
-                                            businessId: service.businessId,
-                                            sourceEvent: { aid, av },
-                                            type: "MOVEMENT",
-                                            // notes: mba.notes,
-                                            concept: "CLIENT_AGREEMENT_REFUND",
-                                            timestamp: Date.now(),
-                                            amount: service.client.tip,
-                                            fromId: service.client.tipClientId,
-                                            toId: service.driver.id
-                                        },
-                                        user: "SYSTEM"
-                                    })
-                                )
-                            }else {
-                                return of({})
-                            }
-                            
-                        })
-                    )
-
+                        service.businessId, 'all', 'ServiceOfferWithdraw', { _id: service._id })
                 ]).pipe(
                     mapTo(service)
                 )

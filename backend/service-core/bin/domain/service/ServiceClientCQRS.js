@@ -14,7 +14,7 @@ const GraphqlResponseTools = require('../../tools/GraphqlResponseTools');
 const Crosscutting = require('../../tools/Crosscutting');
 const {
   CustomError,
-  DefaultError,
+  DefaultError, 
   PERMISSION_DENIED,
   ERROR_23100, ERROR_23101, ERROR_23102, ERROR_23103, ERROR_23104, ERROR_23105,
   ERROR_23200, ERROR_23201, ERROR_23202, ERROR_23203, ERROR_23204, ERROR_23205, ERROR_23206, ERROR_23207, ERROR_23208, ERROR_23209, ERROR_23210, ERROR_23211, ERROR_23212,
