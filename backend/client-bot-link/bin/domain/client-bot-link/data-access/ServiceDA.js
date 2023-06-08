@@ -80,14 +80,14 @@ class ServiceDA {
     );
   }
 
-  static markedAsCancelledAndReturnService$(filter) {
+  static markedAsCancelledAndReturnService$(filterQuery) {
     const query = {};
 
-    if (filter.clientId) {
-      query["client.id"] = filter.clientId;
+    if (filterQuery.clientId) {
+      query["client.id"] = filterQuery.clientId;
     }
-    if (filter.states && filter.states.length > 0) {
-      query["state"] = { $in: filter.states};
+    if (filterQuery.states && filterQuery.states.length > 0) {
+      query["state"] = { $in: filterQuery.states};
     }    
     
     const update = {
