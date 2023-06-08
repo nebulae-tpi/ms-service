@@ -147,7 +147,7 @@ class ServiceCQRS {
         mergeMap(request => ServiceDA.markedAsCancelledAndReturnService$(request.id, { _id: 1, businessId: 1, state: 1, closed: 1, cancelationTryTimestamp: 1 }).pipe(
           first(v => v, undefined), 
           tap(service =>{
-            if (service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab" && service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now() ) throw ERROR_23224;
+            if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
           }),
           map(service => ({ service, request })))
           ),

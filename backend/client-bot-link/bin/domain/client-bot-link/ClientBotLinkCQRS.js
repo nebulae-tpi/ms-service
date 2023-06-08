@@ -546,7 +546,7 @@ class ClientBotLinkCQRS {
         case "CancelAllServiceBtn":
           return ServiceDA.markedAsCancelledAndReturnService$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
             tap(service =>{
-              if (service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab" && service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now() ) throw ERROR_23224;
+              if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
             }),
             mergeMap(val => {
               return eventSourcing.eventStore.emitEvent$(new Event({
@@ -574,7 +574,7 @@ class ClientBotLinkCQRS {
           if (interactiveResp.includes("CANCEL_")) {
             return ServiceDA.markedAsCancelledAndReturnService$(interactiveResp.replace("CANCEL_", "")).pipe(
               tap(service =>{
-                if (service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab" && service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now() ) throw ERROR_23224;
+                if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
               }),
               mergeMap(val => {
                 

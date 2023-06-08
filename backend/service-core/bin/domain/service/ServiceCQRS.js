@@ -322,7 +322,7 @@ class ServiceCQRS {
       tap(request => this.validateServiceCancellationRequestInput(request)),
       mergeMap(request => ServiceDA.markedAsCancelledAndReturnService$(request.id, { _id: 1, state: 1, businessId: 1, closed: 1, cancelationTryTimestamp: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
       tap(({ service, request }) =>{
-        if (service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab" && service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now() ) throw ERROR_23224;
+        if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
       }),
       tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
       tap(({ service, request }) => { if (service.closed || ["ON_BOARD", "DONE", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER"].includes(service.state)) throw ERROR_23224; }),// service is already closed
