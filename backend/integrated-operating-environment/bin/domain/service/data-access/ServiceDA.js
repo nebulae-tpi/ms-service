@@ -34,6 +34,27 @@ class ServiceDA {
     );
   }
 
+  static markedAsCancelledAndReturnService$(_id, projection = undefined) {
+    const query = { _id };
+    
+    const update = {
+      $set: { cancelationTryTimestamp: Date.now() },
+    };
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
+        query,
+        update,
+        {
+          returnOriginal: true,
+          projection
+        }
+      )
+    ).pipe(
+      map(result => result.value),
+      filter(v => v)
+    );
+  }
+
   /**
   * Gets service by its _id.
   * @returns {Observable}

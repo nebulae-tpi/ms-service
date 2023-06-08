@@ -17,6 +17,9 @@ const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-a
 
 const satelliteAirtportPrices = JSON.parse('{"PORTER_LODGE":5000, "age":30, "HOTEL":10000}')
 const availableTestNumbers = ["573155421851", "573015033132", "573013917663"]
+const {
+  ERROR_23224
+} = require("../../tools/customError");
 
 /**
  * Singleton instance
@@ -541,7 +544,10 @@ class ClientBotLinkCQRS {
         case "infoServiceBtn":
           return this.infoService$(client._id, conversationContent.waId)
         case "CancelAllServiceBtn":
-          return ServiceDA.getServices$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+          return ServiceDA.markedAsCancelledAndReturnService$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+            tap(service =>{
+              if (service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab" && service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now() ) throw ERROR_23224;
+            }),
             mergeMap(val => {
               return eventSourcing.eventStore.emitEvent$(new Event({
                 aggregateType: 'Service',
@@ -566,8 +572,12 @@ class ClientBotLinkCQRS {
           this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
         default:
           if (interactiveResp.includes("CANCEL_")) {
-            return ServiceDA.getService$(interactiveResp.replace("CANCEL_", "")).pipe(
+            return ServiceDA.markedAsCancelledAndReturnService$(interactiveResp.replace("CANCEL_", "")).pipe(
+              tap(service =>{
+                if (service.businessId === "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab" && service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now() ) throw ERROR_23224;
+              }),
               mergeMap(val => {
+                
                 const STATES_TO_CLOSE_SERVICE = ["ON_BOARD", "DONE", "CANCELLED_DRIVER", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_SYSTEM"];
                 if (STATES_TO_CLOSE_SERVICE.includes(val.state)) {
                   this.sendTextMessage(`El servicio seleccionado ya se ha finalizado por lo que no se pudo realizar el proceso de cancelación`, conversationContent.waId)

@@ -80,6 +80,33 @@ class ServiceDA {
     );
   }
 
+  static markedAsCancelledAndReturnService$(filter) {
+    const query = {};
+
+    if (filter.clientId) {
+      query["client.id"] = filter.clientId;
+    }
+    if (filter.states && filter.states.length > 0) {
+      query["state"] = { $in: filter.states};
+    }    
+    
+    const update = {
+      $set: { cancelationTryTimestamp: Date.now() },
+    };
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(COLLECTION_NAME).findOneAndUpdate(
+        query,
+        update,
+        {
+          returnOriginal: true
+        }
+      )
+    ).pipe(
+      map(result => result.value),
+      filter(v => v)
+    );
+  }
+
 
   static setCancelStateAndReturnService$(_id, state,  timestamp, projection = undefined) {
     const update = {
