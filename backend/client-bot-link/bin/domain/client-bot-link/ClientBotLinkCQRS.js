@@ -544,7 +544,7 @@ class ClientBotLinkCQRS {
         case "infoServiceBtn":
           return this.infoService$(client._id, conversationContent.waId)
         case "CancelAllServiceBtn":
-          return ServiceDA.markedAsCancelledAndReturnService$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+          return ServiceDA.getServices$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
             tap(service =>{
               if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
             }),
@@ -572,7 +572,7 @@ class ClientBotLinkCQRS {
           this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
         default:
           if (interactiveResp.includes("CANCEL_")) {
-            return ServiceDA.markedAsCancelledAndReturnService$(interactiveResp.replace("CANCEL_", "")).pipe(
+            return ServiceDA.getServices$(interactiveResp.replace("CANCEL_", "")).pipe(
               tap(service =>{
                 if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
               }),

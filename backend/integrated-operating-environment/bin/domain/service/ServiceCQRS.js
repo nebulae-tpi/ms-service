@@ -148,7 +148,7 @@ class ServiceCQRS {
           first(v => v, undefined), 
           tap(service =>{
             if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
-          }),
+          }), 
           map(service => ({ service, request })))
           ),
         tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
