@@ -547,6 +547,11 @@ class ClientBotLinkCQRS {
           return ServiceDA.getServices$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
             tap(service =>{
               if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
+            }),
+            mergeMap(service=> {
+              return ServiceDA.markAsCancelled$(service._id).pipe(
+                mapTo(service)
+              )
             }), 
             mergeMap(val => { 
               return eventSourcing.eventStore.emitEvent$(new Event({

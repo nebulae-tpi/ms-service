@@ -102,6 +102,19 @@ class ServiceDA {
     );
   }
 
+  static markAsCancelled$(_id) {
+    const collection =  mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(COLLECTION_NAME);
+
+    return defer(() =>
+      collection.updateOne(
+        { _id: _id },
+        {
+          $set: { cancelationTryTimestamp: Date.now() },
+        }
+      )
+    );
+  }
+
 
   static setCancelStateAndReturnService$(_id, state,  timestamp, projection = undefined) {
     const update = {
