@@ -74,6 +74,16 @@ class ServiceDA {
     );
   }
 
+  static updateServiceTraveledDistance$(_id, onBoardTraveledDistance) {
+    const updateObj = { onBoardTraveledDistance }
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+        { _id },
+        { $set: {...updateObj} }
+      )
+    );
+  }
+
 
 }
 /**
