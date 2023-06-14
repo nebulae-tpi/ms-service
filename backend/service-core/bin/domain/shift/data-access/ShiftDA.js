@@ -208,11 +208,15 @@ class ShiftDA {
    * @param {string} _id 
    * @param {*} location 
    */
-  static updateShiftLocationAndGetOnlineFlag$(_id, location) {
+  static updateShiftLocationAndGetOnlineFlag$(_id, location, onBoardTraveledDistance) {
+    const updateObj = { lastReceivedComm: Date.now(), location }
+    if(onBoardTraveledDistance){
+      updateObj.onBoardTraveledDistance = onBoardTraveledDistance;
+    }
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        { $set: { lastReceivedComm: Date.now(), location } },
+        { $set: {...updateObj} },
         {
           projection: { online: 1, state: 1, driver:1, vehicle: 1 },
           upsert: false,

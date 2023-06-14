@@ -148,7 +148,7 @@ class ShiftES {
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
         //console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data, user })}`); //DEBUG: DELETE LINE
-        return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location).pipe(
+        return ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location, data.onBoardTraveledDistance).pipe(
             mergeMap(shift => iif(() => data.serviceId,
                 eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(data.serviceId, data.location, user)).pipe(mapTo(shift)),
                 of(shift).pipe(
