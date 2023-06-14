@@ -146,8 +146,11 @@ class ShiftES {
      */
     handleShiftLocationReported$({ aid, data, user }) {
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
- 
-        //console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data, user })}`); //DEBUG: DELETE LINE
+
+        if(aid === "8514ec1e-2dd7-46b7-8e27-69df6dfa9110-2306"){
+            console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data, user })}`); //DEBUG: DELETE LINE
+        }
+        
         return forkJoin([
             ShiftDA.updateShiftLocationAndGetOnlineFlag$(aid, data.location),
             of({}).pipe(
