@@ -103,7 +103,7 @@ class ShiftDAL {
         const location = { type: "Point", coordinates: [data.location.lng, data.location.lat] };
 
 
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId, authToken)).pipe(
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId, authToken, data.onBoardTraveledDistance)).pipe(
             mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data)}`)
         );
     }
@@ -116,7 +116,7 @@ class ShiftDAL {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    static buildShiftLocationReportedEsEvent(aid, location, serviceId, authToken) {
+    static buildShiftLocationReportedEsEvent(aid, location, serviceId, authToken, onBoardTraveledDistance) {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: aid,
@@ -125,7 +125,8 @@ class ShiftDAL {
             user: authToken.preferred_username,
             data: {
                 location,
-                serviceId
+                serviceId,
+                onBoardTraveledDistance
             },
             ephemeral: true,
         });
