@@ -500,7 +500,7 @@ class ClientBotLinkCQRS {
       }
     }
     else if (message.order) {
-      const filters = message.order.product_items.map(pi => pi.product_retailer_id);
+      const filters = message.order.product_items ? message.order.product_items.map(pi => pi.product_retailer_id) :  undefined;
       console.log("FILTER ===> ", filters)
       return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 0, filters);
     }
