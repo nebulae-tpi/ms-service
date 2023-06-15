@@ -161,7 +161,7 @@ class ShiftES {
                         return of({})
                     }
                 })
-            )
+            ) 
         ]).pipe(
             mergeMap(([shift]) => iif(() => data.serviceId,
                 eventSourcing.eventStore.emitEvent$(this.buildServiceLocationReportedEsEvent(data.serviceId, data.location, user)).pipe(mapTo(shift)),
