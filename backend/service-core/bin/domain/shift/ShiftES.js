@@ -147,7 +147,7 @@ class ShiftES {
     handleShiftLocationReported$({ aid, data, user }) {
         if (!aid) { console.log(`WARNING:   not aid detected`); return of({}) }
 
-        if(aid === "8514ec1e-2dd7-46b7-8e27-69df6dfa9110-2306"){
+        if(aid === "3cedb03f-a1a2-4bc6-bb91-2c3e7f4ae29d-2306"){
             console.log(`ShiftES.handleShiftLocationReported: ${JSON.stringify({ aid, data, user })}`); //DEBUG: DELETE LINE
         }
         
