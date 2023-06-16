@@ -52,7 +52,7 @@ module.exports = {
         mergeMap(response => getResponseFromBackEnd$(response))
       ).toPromise();
     },
-
+ 
     HistoricalDriverServices: (root, args, context, info) => {
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'HistoricalDriverServices', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
         switchMapTo(
