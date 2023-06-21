@@ -156,7 +156,6 @@ type Service {
    destinationCost: Int
    "Product cost"
    productCost: Int
-   onBoardTraveledDistance: Int
 }
 
 input ChatMessageInput {
