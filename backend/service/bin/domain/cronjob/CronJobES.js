@@ -6,7 +6,7 @@ const broker = require("../../tools/broker/BrokerFactory")();
 const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
-const { ShiftDA, ServiceDA } = require("./data-access");
+const { ShiftDA, ServiceDA, BusinessDA } = require("./data-access");
 const MongoDB = require("../../data/MongoDB").singleton();
 
 /**
@@ -82,14 +82,19 @@ class CronJobES {
    * Search the services that are on OnBoard state and emit an event for each service to complete it
    */
   checkServicesOnBoardToComplete$() {
-    return ServiceDA.findServicesOnboardToComplete$()
-      .pipe(
-        // tap(service => console.log("SERVICE TO COMPLETE => ", JSON.stringify(service))),
-        mergeMap(service => this.generateEventStoreEvent$("ServiceCompleted", 1, "Service", service._id, { timestamp : Date.now() }, "SYSTEM")),
-        mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
-        toArray(),
-        // tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE COMPLETED"))
-      )
+    return BusinessDA.findActiveBusiness$().pipe(
+      mergeMap(business => {
+        const serviceCompletedThreshold = business.attributes.find(attr => attr.key ==="AUTO_DONE_THRESHOLD") || "1800000"
+        return ServiceDA.findServicesOnboardToComplete$(business._id, parseInt(serviceCompletedThreshold))
+        .pipe(
+          // tap(service => console.log("SERVICE TO COMPLETE => ", JSON.stringify(service))),
+          mergeMap(service => this.generateEventStoreEvent$("ServiceCompleted", 1, "Service", service._id, { timestamp : Date.now() }, "SYSTEM")),
+          mergeMap(event => eventSourcing.eventStore.emitEvent$(event)),
+          toArray(),
+          // tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE COMPLETED"))
+        )
+      })
+    )
   }
 
   checkServicesToClose$() {

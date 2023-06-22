@@ -31,14 +31,13 @@ class ShiftDA {
     /**
    * Find services to complete
    */
-  static findServicesOnboardToComplete$(){
+  static findServicesOnboardToComplete$(businessId, serviceCompletedThreshold){
     const projection = { _id: 1, businessId: 1, state: 1, "vehicle.licensePlate": 1, "driver.documentId": 1, "client.id": 1 };
     const query = {
-      $and: [
-        { state: 'ON_BOARD' },
-        { closed: false },
-        { lastStateChangeTimestamp: { $lte: Date.now() - SERVICE_COMPLETED_THRESHOLD } }
-      ]
+      businessId,
+      state: 'ON_BOARD',
+      closed: false,
+      lastStateChangeTimestamp: { $lte: Date.now() - serviceCompletedThreshold }
     };
 
     const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
