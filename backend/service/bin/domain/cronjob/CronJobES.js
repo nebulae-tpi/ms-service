@@ -93,7 +93,8 @@ class CronJobES {
           toArray(),
           // tap(() => console.log("ALL SERVICES THAT MATCH WITH CONDITIONS WERE COMPLETED"))
         )
-      })
+      }),
+      toArray()
     )
   }
 
