@@ -105,7 +105,7 @@ class ShiftDAL {
         if(data._id === "3cedb03f-a1a2-4bc6-bb91-2c3e7f4ae29d-2306"){
             console.log("DATA LOCATION ===> ", JSON.stringify(data));
         }  
-        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId, authToken, data.onBoardTraveledDistance)).pipe(
+        return eventSourcing.eventStore.emitEvent$(ShiftDAL.buildShiftLocationReportedEsEvent(data._id, location, data.serviceId, authToken, data.onBoardTraveledDistance, data.taximeterTime)).pipe(
             mapTo(` - Sent ShiftLocationReported for shift._id=${data._id}: ${JSON.stringify(data)}`)
         );
     }
@@ -118,7 +118,7 @@ class ShiftDAL {
      * @param {*} shiftId 
      * @returns {Event}
      */
-    static buildShiftLocationReportedEsEvent(aid, location, serviceId, authToken, onBoardTraveledDistance) {
+    static buildShiftLocationReportedEsEvent(aid, location, serviceId, authToken, onBoardTraveledDistance, taximeterTime) {
         return new Event({
             aggregateType: 'Shift',
             aggregateId: aid,
@@ -128,7 +128,8 @@ class ShiftDAL {
             data: {
                 location,
                 serviceId,
-                onBoardTraveledDistance
+                onBoardTraveledDistance,
+                taximeterTime
             },
             ephemeral: true,
         });
