@@ -126,7 +126,10 @@ class Crosscutting{
           tip: service.tip,
           route: this.buildRouteArray(service.route ? service.route.coordinates: null),
           lastModificationTimestamp: service.lastModificationTimestamp,
-          client: service.client
+          client: service.client,
+          onBoardTraveledDistance: service.onBoardTraveledDistance,
+          taximeterTime: service.taximeterTime
+          
         };
     }
 
