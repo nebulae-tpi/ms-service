@@ -156,7 +156,7 @@ class ShiftES {
             of({}).pipe(
                 mergeMap(() => {
                     if(data.serviceId && data.onBoardTraveledDistance){
-                        return ServiceDA.updateServiceTraveledDistance$(data.serviceId, data.onBoardTraveledDistance)
+                        return ServiceDA.updateServiceTraveledDistance$(data.serviceId, data.onBoardTraveledDistance, data.taximeterTime)
                     }else {
                         return of({})
                     }
