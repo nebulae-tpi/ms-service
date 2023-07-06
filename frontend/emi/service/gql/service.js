@@ -8,6 +8,8 @@ export const ServiceServiceFieldsFragment = gql`
       shiftId
       timestamp
       requestedFeatures 
+      onBoardTraveledDistance
+      taximeterTime
       pickUp {
         marker {
           lat
@@ -100,6 +102,8 @@ export const ServiceService = gql`
       shiftId
       timestamp
       requestedFeatures 
+      onBoardTraveledDistance
+      taximeterTime
       pickUp {
         marker {
           lat

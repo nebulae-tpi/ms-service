@@ -17,7 +17,6 @@ export const locale = {
         CHANNEL_CLIENT: 'Satellite',
         CHANNEL_APP_CLIENT: 'App. Client',
         CHANNEL_CHAT_SATELITE: 'Chat Bot',
-        CHANNEL: "Channel",
         'INIT_TIMESTAMP': 'Initial Date',
         'END_TIMESTAMP': 'Final Date',
         'CLIENT_USERNAME': 'Client Username',

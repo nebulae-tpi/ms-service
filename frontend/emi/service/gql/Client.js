@@ -40,3 +40,9 @@ export const ServiceClientSatellites = gql`
     }
   }
 `;
+
+export const getClientsFiltered = gql`
+query ClientClients($filterInput: ClientClientFilterInput!, $paginationInput: ClientClientPaginationInput!) {
+  ClientClients(filterInput: $filterInput, paginationInput: $paginationInput)
+}
+`;
