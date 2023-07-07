@@ -63,7 +63,8 @@ class ShiftCQRS {
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(ShiftDA.findOpenShiftByDriver$(driverId).pipe(tap(shift => { if (shift) throw ERROR_23010; }))), // Driver has an open shift verification
       mergeMapTo(ShiftDA.findOpenShiftByVehiclePlate$(vehiclePlate).pipe(tap(shift => { if (shift) throw ERROR_23011; }))),  // Vehicle has an open shift verification
-      tap(() => {
+      mergeMapTo(BusinessDA.finOneBusiness$(businessId)),
+      tap(business => {
           const versionValues = appVersion ? appVersion.split("-")[0].split(".") : [];
 
           if(versionValues.length > 0){
@@ -85,8 +86,8 @@ class ShiftCQRS {
               }
               return acc + (multiplier * val);
             },0);
-            console.log("versionIntValue ===> ", versionIntValue)
-            if(versionIntValue < parseInt(process.env.DRIVER_APP_MIN_VERSION || "1670")){
+            const minVersion = parseInt(business.attributes["DRIVER_APP_MIN_VERSION"] || (process.env.DRIVER_APP_MIN_VERSION || "1670"));
+            if(versionIntValue >= minVersion){
               console.log("SALE ERROR!!!!!!!!!!");
               throw ERROR_23017;
             } 
