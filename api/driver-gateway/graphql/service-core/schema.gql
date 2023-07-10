@@ -157,6 +157,7 @@ type Service {
    "Product cost"
    productCost: Int
    onBoardTraveledDistance: Int
+   taximeterFare: Float
 }
 
 input ChatMessageInput {
