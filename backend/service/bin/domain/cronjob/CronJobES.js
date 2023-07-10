@@ -85,8 +85,6 @@ class CronJobES {
     return BusinessDA.findActiveBusiness$().pipe(
       mergeMap(business => { 
         const serviceCompletedThreshold = (business.attributes.find(attr => attr.key ==="AUTO_DONE_THRESHOLD") || {}).value || "1800000"
-        console.log("=========================================")
-        console.log("FOUND BUSINESS ===> ", {name: business.generalInfo.name, threshold:serviceCompletedThreshold })
         return ServiceDA.findServicesOnboardToComplete$(business._id, parseInt(serviceCompletedThreshold))
         .pipe(
           // tap(service => console.log("SERVICE TO COMPLETE => ", JSON.stringify(service))),
