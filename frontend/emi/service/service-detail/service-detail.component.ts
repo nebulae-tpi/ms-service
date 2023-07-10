@@ -111,14 +111,19 @@ export class ServiceDetailComponent implements OnInit, OnDestroy {
       const taximeterSecondsThreshold = attrs["TAXIMETER_SECONDS_THRESHOLD"] ? Number(attrs["TAXIMETER_SECONDS_THRESHOLD"]) : 1;
       const taximeterSecondsValue = attrs["TAXIMETER_SECONDS_VALUE"] ? Number(attrs["TAXIMETER_SECONDS_VALUE"]) : 1.75;
       const minimumFare = attrs["TAXIMETER_MIMIMUN_FARE"] ? Number(attrs["TAXIMETER_MIMIMUN_FARE"]) : 5000;
-      if(this.service.taximeterTime){
-        const tempSeconds = (this.service.taximeterTime/1000)/taximeterSecondsThreshold;
-        customFare = tempSeconds * taximeterSecondsValue;
+      if(this.service.taximeterFare){
+        customFare = this.service.taximeterFare;
+      }else {
+        if(this.service.taximeterTime){
+          const tempSeconds = (this.service.taximeterTime/1000)/taximeterSecondsThreshold;
+          customFare = tempSeconds * taximeterSecondsValue;
+        }
+        if(this.service.onBoardTraveledDistance){
+          const taximeterPoints = this.service.onBoardTraveledDistance/fareMeters;
+          customFare = customFare + taximeterStartValue+(taximeterPoints*FareValue)
+        }
       }
-      if(this.service.onBoardTraveledDistance){
-        const taximeterPoints = this.service.onBoardTraveledDistance/fareMeters;
-        customFare = customFare + taximeterStartValue+(taximeterPoints*FareValue)
-      }
+      
       console.log("CUSTOM FARE ===> ", customFare)
       if(customFare){
         this.service.fare = customFare > minimumFare ? Math.round(customFare) : minimumFare;

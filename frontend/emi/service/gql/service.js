@@ -10,6 +10,7 @@ export const ServiceServiceFieldsFragment = gql`
       requestedFeatures 
       onBoardTraveledDistance
       taximeterTime
+      taximeterFare
       pickUp {
         marker {
           lat
@@ -104,6 +105,7 @@ export const ServiceService = gql`
       requestedFeatures 
       onBoardTraveledDistance
       taximeterTime
+      taximeterFare
       pickUp {
         marker {
           lat
