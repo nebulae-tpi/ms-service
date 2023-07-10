@@ -31,7 +31,7 @@ class BusinessDA {
   static findActiveBusiness$() {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
 
-    const query = { active: true };
+    const query = { state: true };
 
     const cursor = collection
       .find(query)
