@@ -39,9 +39,10 @@ class ShiftDA {
       closed: false,
       lastStateChangeTimestamp: { $lte: Date.now() - serviceCompletedThreshold }
     };
-
+    console.log("QUERY ===>  ",query);
     const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
     const explorePastMonth = today.getDate() <= 1;
+
     return of(explorePastMonth)
       .pipe(
         mergeMap(searchInBeforeMonth => searchInBeforeMonth
