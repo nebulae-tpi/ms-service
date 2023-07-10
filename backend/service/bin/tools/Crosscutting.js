@@ -102,12 +102,6 @@ class Crosscutting{
      * @param Object service
      */
     static formatServiceToGraphQLSchema(service) {
-      console.log("TAXIMETER DATA ===> "+ JSON.stringify(
-        {
-          onBoardTraveledDistance: service.onBoardTraveledDistance,
-            taximeterTime: service.taximeterTime
-        }
-      ))
         return {
           _id: service._id,
           businessId: service.businessId,
