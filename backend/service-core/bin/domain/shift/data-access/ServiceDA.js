@@ -74,9 +74,9 @@ class ServiceDA {
     );
   }
 
-  static updateServiceTraveledDistance$(_id, onBoardTraveledDistance, taximeterTime) {
-    console.log("TEST PERSIST => ", {_id, onBoardTraveledDistance, taximeterTime})
-    const updateObj = { onBoardTraveledDistance, taximeterTime }
+  static updateServiceTraveledDistance$(_id, onBoardTraveledDistance, taximeterTime, taximeterFare) {
+    console.log("TEST PERSIST => ", {_id, onBoardTraveledDistance, taximeterTime, taximeterFare})
+    const updateObj = { onBoardTraveledDistance, taximeterTime, taximeterFare }
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },

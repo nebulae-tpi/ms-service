@@ -128,7 +128,8 @@ class Crosscutting{
           lastModificationTimestamp: service.lastModificationTimestamp,
           client: service.client,
           onBoardTraveledDistance: service.onBoardTraveledDistance,
-          taximeterTime: service.taximeterTime
+          taximeterTime: service.taximeterTime,
+          taximeterFare: service.taximeterFare
           
         };
     }
