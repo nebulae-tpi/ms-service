@@ -172,12 +172,23 @@ class ServiceDAL {
      * @param {*} ServiceDropOffETAReported
      */
     handleServiceCompleted$({ data, authToken }) {
-        const { _id, timestamp, location } = data;
+        const { _id, timestamp, location, taximeterFare } = data;
         //console.log(`ServiceDAL: handleServiceClientPickedUp: ${JSON.stringify(data)} `); //DEBUG: DELETE LINE
         return ServiceDA.findById$(_id, { "_id": 1, state: 1 }).pipe(
             first(s => s, undefined),
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
             tap((service) => { if (service.state !== 'ON_BOARD') throw ERROR_23230; }),// Service state not allowed
+            mergeMap(service => {
+                if(taximeterFare){
+                    return ServiceDA.updateTaximeterFare$(_id, taximeterFare).pipe(
+                        mapTo(service)
+                    )
+                }
+                else {
+                    return of(service)
+                }
+                
+            }),
             mergeMap(service => eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                 'Service',
                 _id,

@@ -37,6 +37,15 @@ class ServiceDA {
     ).pipe(filter(val => val));
   }
 
+  static updateTaximeterFare$(_id, taximeterFare) {
+    const update = { $set: {taximeterFare} };
+    return defer(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+        { _id },
+        update
+      )
+    );
+  }
   static addShiftToActiveOffers$(_id, shiftId, distance, referred = false, driverId = "", driverUsername = "", licensePlate = "") {
     const update = { $set: {} };
     update["$set"][`offer.shifts.${shiftId}`] = { active: true, offerTs: Date.now(), distance, referred, driverId, driverUsername, licensePlate };

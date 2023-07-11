@@ -66,7 +66,6 @@ class ShiftCQRS {
       mergeMapTo(BusinessDA.finOneBusiness$(businessId)),
       tap(business => {
           const versionValues = appVersion ? appVersion.split("-")[0].split(".") : [];
-
           if(versionValues.length > 0){
             const versionIntValue = versionValues.reduce((acc,val, index) => {
               let multiplier = 1
@@ -87,6 +86,7 @@ class ShiftCQRS {
               return acc + (multiplier * val);
             },0);
             const minVersion = parseInt(business.attributes["DRIVER_APP_MIN_VERSION"] || (process.env.DRIVER_APP_MIN_VERSION || "1670"));
+            console.log("DATA VERSION ===> ", {businessId, versionIntValue, minVersion})
             if(versionIntValue < minVersion){
               console.log("SALE ERROR!!!!!!!!!!");
               throw ERROR_23017;
