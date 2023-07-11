@@ -86,7 +86,7 @@ class ShiftCQRS {
               return acc + (multiplier * val);
             },0);
             const minVersion = parseInt(business.attributes["DRIVER_APP_MIN_VERSION"] || (process.env.DRIVER_APP_MIN_VERSION || "1670"));
-            console.log("DATA VERSION ===> ", {businessId, versionIntValue, minVersion})
+            console.log("DATA VERSION ===> ", {attrs: business.attributes, obtainedVersion:business.attributes["DRIVER_APP_MIN_VERSION"] })
             if(versionIntValue < minVersion){
               console.log("SALE ERROR!!!!!!!!!!");
               throw ERROR_23017;
