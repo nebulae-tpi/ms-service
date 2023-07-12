@@ -154,6 +154,14 @@ class GraphQlService {
       "clientgateway.graphql.mutation.ClientBotLinkMessageReceived": {
         fn: ClientBotLinkCQRS.processMessageReceived$,
         obj: ClientBotLinkCQRS
+      },
+      "clientgateway.graphql.mutation.ClientBotFreeDriverLinkMessageReceived": {
+        fn: ClientBotLinkCQRS.processFreeDriverMessageReceived$,
+        obj: ClientBotLinkCQRS
+      },
+      "clientgateway.graphql.mutation.ClientBotTxPlusLinkMessageReceived": {
+        fn: ClientBotLinkCQRS.processTxPlusMessageReceived$,
+        obj: ClientBotLinkCQRS
       } 
     };
   }

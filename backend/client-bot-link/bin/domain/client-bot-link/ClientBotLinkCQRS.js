@@ -43,7 +43,7 @@ class ClientBotLinkCQRS {
             waId: message.from,
             timestamp: message.timestamp,
             client: {},
-          }, message)
+          }, message, "75cafa6d-0f27-44be-aa27-c2c82807742d")
         }),
         tap(message => {
           //this.markMessageAsRead(message);
@@ -55,7 +55,47 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters) {
+  processFreeDriverMessageReceived$({ args }, authToken) {
+    if (args.messages) {
+      return from(args.messages).pipe(
+        mergeMap(message => {
+          return this.initConversation$(message.from, {
+            waId: message.from,
+            timestamp: message.timestamp,
+            client: {},
+          }, message, "2af56175-227e-40e7-97ab-84e8fa9e12ce")
+        }),
+        tap(message => {
+          //this.markMessageAsRead(message);
+        })
+      )
+    } else {
+      return of("IGNORED")
+    }
+
+  }
+
+  processTxPlusMessageReceived$({ args }, authToken) {
+    if (args.messages) {
+      return from(args.messages).pipe(
+        mergeMap(message => {
+          return this.initConversation$(message.from, {
+            waId: message.from,
+            timestamp: message.timestamp,
+            client: {},
+          }, message, "75cafa6d-0f27-44be-aa27-c2c82807742d")
+        }),
+        tap(message => {
+          //this.markMessageAsRead(message);
+        })
+      )
+    } else {
+      return of("IGNORED")
+    }
+
+  }
+
+  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -77,7 +117,7 @@ class ClientBotLinkCQRS {
         dropOff: undefined,
         client: {
           id: client._id,
-          businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
+          businessId: businessId,
           username: "N/A",
           fullname: client.generalInfo.name,
           tipClientId: client.associatedClientId,
@@ -90,7 +130,7 @@ class ClientBotLinkCQRS {
           offerMaxDistance: client.satelliteInfo.offerMaxDistance
         },
         _id,
-        businessId: "75cafa6d-0f27-44be-aa27-c2c82807742d",
+        businessId: businessId,
         timestamp: Date.now(),
         requestedFeatures: filters ? filters : (acEnabled) ? ["AC"] : vipEnabled ? ["VIP"] : airportTipEnabled ? ["VIP", "AC"] : undefined,
 
@@ -350,7 +390,7 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount, filters) {
+  requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount, filters, businessId) {
 
     try {
       if (this.messageIdCache == null) this.messageIdCache = [];
@@ -382,7 +422,7 @@ class ClientBotLinkCQRS {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
           const airportTipEnabled = (airportCharCountVal--) > 0;
           const vipEnabled = (vipCharCountVal--) > 0;
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters));
+          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId));
         }),
         toArray(),
         tap(() => {
@@ -437,7 +477,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  continueConversation$(message, conversationContent, client, serviceCount) {
+  continueConversation$(message, conversationContent, client, serviceCount, businessId) {
     if (((message || {}).text || {}).body) {
       if(message.text.body === "🧐"){
         this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId);
@@ -466,13 +506,13 @@ class ClientBotLinkCQRS {
         if ((client.satelliteInfo || {}).offerOnlyVip && vipCharCount < 1) {
           ++vipCharCount;
         }
-        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount);
+        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
       }
       else if (!isNaN(message.text.body)) {
         if ((client.satelliteInfo || {}).offerOnlyVip && vipCharCount < 1) {
           ++vipCharCount;
         }
-        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount, message, vipCharCount);
+        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId)
@@ -502,7 +542,7 @@ class ClientBotLinkCQRS {
     else if (message.order) {
       const filters = message.order.product_items ? message.order.product_items.map(pi => pi.product_retailer_id) :  undefined;
       console.log("FILTER ===> ", filters)
-      return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 0, filters);
+      return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 0, filters, businessId);
     }
     else {
       const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
@@ -523,7 +563,7 @@ class ClientBotLinkCQRS {
       switch (interactiveResp) {
         case "rqstServiceBtn":
           if (((client || {}).location || {}).lng) {
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message)
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, undefined, businessId)
           } else {
             return of({}).pipe(
               tap(() => {
@@ -533,7 +573,7 @@ class ClientBotLinkCQRS {
           }
         case "rqstServiceVipBtn":
           if (((client || {}).location || {}).lng) {
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 1)
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 1,undefined, businessId)
           } else {
             return of({}).pipe(
               tap(() => {
@@ -611,9 +651,9 @@ class ClientBotLinkCQRS {
     }
   }
 
-  initConversation$(id, conversationContent, message) {
+  initConversation$(id, conversationContent, message, businessId) {
     const phoneNumber = conversationContent.waId.replace("57", "");
-    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, { satelliteId: 1 })).pipe(
+    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, businessId, { satelliteId: 1 })).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
           return ClientDA.getClient$(client.satelliteId).pipe(
@@ -624,7 +664,7 @@ class ClientBotLinkCQRS {
                 mergeMap(() => {
                   return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
                     mergeMap(serviceCount => {
-                      return this.continueConversation$(message, conversationContent, c, serviceCount);
+                      return this.continueConversation$(message, conversationContent, c, serviceCount, businessId);
                     })
                   )
                 })
