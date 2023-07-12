@@ -653,7 +653,7 @@ class ClientBotLinkCQRS {
 
   initConversation$(id, conversationContent, message, businessId) {
     const phoneNumber = conversationContent.waId.replace("57", "");
-    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber, businessId, { satelliteId: 1 })).pipe(
+    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber), businessId, { satelliteId: 1 }).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
           return ClientDA.getClient$(client.satelliteId).pipe(
