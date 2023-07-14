@@ -61,6 +61,7 @@ class ClientBotLinkCQRS {
   }
 
   processFreeDriverMessageReceived$({ args }, authToken) {
+    console.log("LLEGA MENSAJE FREE DRIVER")
     if (args.messages) {
       return from(args.messages).pipe(
         mergeMap(message => {
@@ -658,6 +659,7 @@ class ClientBotLinkCQRS {
 
   initConversation$(id, conversationContent, message, businessId) {
     const phoneNumber = conversationContent.waId.replace("57", "");
+    console.log("LLEGA MENSAJE ===> ", businessId)
     return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber), businessId, { satelliteId: 1 }).pipe(
       mergeMap(client => {
         if ((client || {})._id) {

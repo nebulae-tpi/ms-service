@@ -141,6 +141,10 @@ class GraphQlService {
       {
         aggregateType: "ClientBotLink",
         messageType: "clientgateway.graphql.mutation.ClientBotLinkMessageReceived"
+      },
+      {
+        aggregateType: "ClientBotLink",
+        messageType: "clientgateway.graphql.mutation.ClientBotFreeDriverLinkMessageReceived"
       }
     ];
   }
