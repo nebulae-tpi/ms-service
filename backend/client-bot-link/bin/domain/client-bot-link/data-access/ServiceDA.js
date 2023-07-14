@@ -65,7 +65,10 @@ class ServiceDA {
     }
     if (filter.states && filter.states.length > 0) {
       query["state"] = { $in: filter.states};
-    }    
+    }   
+    if(filter.businessId) {
+      query.businessId = filter.businessId;
+    }
     
     const initDate = new Date(Date.now());
     console.log("QUERY COUNT ====> ", query);

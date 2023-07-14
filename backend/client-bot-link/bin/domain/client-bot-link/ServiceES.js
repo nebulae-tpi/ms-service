@@ -9,6 +9,11 @@ const Crosscutting = require('../../tools/Crosscutting');
 const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const https = require('https');
 const dateFormat = require('dateformat');
+const businessIdVsD360APIKey = {
+  "75cafa6d-0f27-44be-aa27-c2c82807742d": process.env.D360_API_KEY,
+  "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": process.env.D360_API_KEY,
+  "2af56175-227e-40e7-97ab-84e8fa9e12ce": process.env.D360_API_KEY_FREE_DRIVER
+}
 
 /**
  * Singleton instance
@@ -39,7 +44,7 @@ class ServiceES {
       tap(service => {
         if (service.client.phone) {
           console.log("service ASSIGNED ===> ",serviceEvent.aid);
-          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`)
+          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`, service.businessId)
         }
       })
     );
@@ -51,7 +56,7 @@ class ServiceES {
         if (service.client.phone) {
           console.log("service ETA ===> ",serviceEvent.aid);
           const minutes = this.millisToMinutesAndSeconds(serviceEvent.data.eta - Date.now())
-          this.sendTextMessage(`El vehículo con placas ${service.vehicle.licensePlate} tiene un tiempo estimado de llegada de ${minutes}`, `57${service.client.phone}`)
+          this.sendTextMessage(`El vehículo con placas ${service.vehicle.licensePlate} tiene un tiempo estimado de llegada de ${minutes}`, `57${service.client.phone}`, service.businessId)
         }
       })
     );
@@ -87,7 +92,7 @@ class ServiceES {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
-          this.sendTextMessage(`ha llegado ${service.driver.fullname} a  la dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`)
+          this.sendTextMessage(`ha llegado ${service.driver.fullname} a  la dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`, service.businessId)
         }
       })
     );
@@ -104,7 +109,7 @@ class ServiceES {
           const currentDate = new Date(new Date(service.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
           const ddhh = dateFormat(currentDate, "HH:MM");
           const cancelledDriverState = service.stateChanges.find(s => s.state === "CANCELLED_DRIVER");
-          this.sendTextMessage(`El conductor ha cancelado el servicio solicitado a las ${ddhh}, razon: ${cancelledDriverState ? cancelReasons[cancelledDriverState.reason] : "Desconocido"}`, `57${service.client.phone}`)
+          this.sendTextMessage(`El conductor ha cancelado el servicio solicitado a las ${ddhh}, razon: ${cancelledDriverState ? cancelReasons[cancelledDriverState.reason] : "Desconocido"}`, `57${service.client.phone}`, service.businessId)
         }
       })
     );
@@ -120,7 +125,7 @@ class ServiceES {
         if (service.client.phone) {
           const currentDate = new Date(new Date(service.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
           const ddhh = dateFormat(currentDate, "HH:MM");
-          this.sendTextMessage(`El operador ha cancelado el servicio solicitado a las ${ddhh}`, `57${service.client.phone}`)
+          this.sendTextMessage(`El operador ha cancelado el servicio solicitado a las ${ddhh}`, `57${service.client.phone}`, service.businessId)
         }
       })
     );
@@ -161,7 +166,7 @@ class ServiceES {
               }
             ];
             
-            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttonsVip, `57${client.generalInfo.phone}`);
+            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttonsVip, `57${client.generalInfo.phone}`, service.businessId);
           }else {
             const buttons = [
               {
@@ -173,7 +178,7 @@ class ServiceES {
                 text: "Cancelar Busqueda"
               }
             ];
-            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttons, `57${client.generalInfo.phone}`);
+            this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttons, `57${client.generalInfo.phone}`, service.businessId);
           }
           
         }
@@ -182,7 +187,7 @@ class ServiceES {
   }
 
 
-  sendInteractiveButtonMessage(headerText, bodyText, buttons, waId) {
+  sendInteractiveButtonMessage(headerText, bodyText, buttons, waId, businessId) {
     const content = {
       "recipient_type": "individual",
       "to": waId,
@@ -220,7 +225,7 @@ class ServiceES {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': process.env.D360_API_KEY,
+        'D360-API-KEY': businessIdVsD360APIKey[businessId]
       }
     }
     const req = https.request(options, res => {
@@ -241,7 +246,7 @@ class ServiceES {
     req.end();
   }
 
-  sendTextMessage(text, waId) {
+  sendTextMessage(text, waId, businessId) {
     const content = {
       "recipient_type": "individual",
       "to": waId,
@@ -257,7 +262,7 @@ class ServiceES {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': process.env.D360_API_KEY,
+        'D360-API-KEY': businessIdVsD360APIKey[businessId]
       }
     }
     const req = https.request(options, res => {
