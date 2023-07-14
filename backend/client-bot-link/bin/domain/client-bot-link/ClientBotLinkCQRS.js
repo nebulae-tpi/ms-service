@@ -563,7 +563,7 @@ class ClientBotLinkCQRS {
       switch (interactiveResp) {
         case "rqstServiceBtn":
           if (((client || {}).location || {}).lng) {
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, undefined, businessId)
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, undefined,undefined, businessId)
           } else {
             return of({}).pipe(
               tap(() => {
