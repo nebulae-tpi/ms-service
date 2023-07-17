@@ -18,9 +18,36 @@ const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-a
 const satelliteAirtportPrices = JSON.parse('{"PORTER_LODGE":5000, "age":30, "HOTEL":10000}')
 const availableTestNumbers = ["573155421851", "573015033132", "573013917663"]
 const businessIdVsD360APIKey = {
-  "75cafa6d-0f27-44be-aa27-c2c82807742d": process.env.D360_API_KEY,
-  "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": process.env.D360_API_KEY,
-  "2af56175-227e-40e7-97ab-84e8fa9e12ce": process.env.D360_API_KEY_FREE_DRIVER
+  "75cafa6d-0f27-44be-aa27-c2c82807742d": {
+    D360_KEY: process.env.D360_API_KEY,
+    registerTxt: `Hola, Bienvenido al TX BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de TX Plus para realizar el proceso de registro`,
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
+    availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
+    availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
+    availableRqstVipEmojis: "(?:👑)",
+    availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
+    availableRqstFilterEmojis: "🧐"
+  },
+  "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": {
+    D360_KEY: process.env.D360_API_KEY,
+    registerTxt: `Hola, Bienvenido al TX BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de TX Plus para realizar el proceso de registro`,
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
+    availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
+    availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
+    availableRqstVipEmojis: "(?:👑)",
+    availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
+    availableRqstFilterEmojis: "🧐"
+  },
+  "2af56175-227e-40e7-97ab-84e8fa9e12ce": {
+    D360_KEY: process.env.D360_API_KEY_FREE_DRIVER,
+    registerTxt: `Hola, Bienvenido al Free BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de Free Driver para realizar el proceso de registro`,
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚘. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
+    availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚜🚙🚘",
+    availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
+    availableRqstVipEmojis: "(?:👑)",
+    availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
+    availableRqstFilterEmojis: "🧐"
+  }
 }
 const {
   ERROR_23224
@@ -179,7 +206,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId],
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].key,
       }
     }
     const req = https.request(options, res => {
@@ -237,7 +264,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId]
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].key
       }
     }
     const req = https.request(options, res => {
@@ -296,7 +323,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId]
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].key
       }
     }
     const req = https.request(options, res => {
@@ -375,7 +402,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId],
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].key,
       }
     }
     const req = https.request(options, res => {
@@ -485,19 +512,19 @@ class ClientBotLinkCQRS {
 
   continueConversation$(message, conversationContent, client, serviceCount, businessId) {
     if (((message || {}).text || {}).body) {
-      if(message.text.body === "🧐"){
+      if(message.text.body === businessIdVsD360APIKey[businessId].availableRqstFilterEmojis){
         this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId, businessId);
         return of({})
       }
-      let charCount = [...message.text.body].filter(c => "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘".includes(c)).length;
+      let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
       let specialCharCount = 0;
       let airportCharCount = 0;
       let vipCharCount = message.text.body.toUpperCase().includes("VIP") ? 1 : 0;
-      const emojiPattern = String.raw`(?:❄️|🥶|⛄|🧊)`
-      const vipEmojiPattern = String.raw`(?:👑)`;
+      const emojiPattern = String.raw`${businessIdVsD360APIKey[businessId].availableRqstSpecialEmojis}`
+      const vipEmojiPattern = String.raw`${businessIdVsD360APIKey[businessId].availableRqstVipEmojis}`;
       let vipEmojiRegex = new RegExp(vipEmojiPattern, "g");
       let emoRegex = new RegExp(emojiPattern, "g");
-      const emojiPattern2 = String.raw`(?:✈️|🛫|🛬)`
+      const emojiPattern2 = String.raw`${businessIdVsD360APIKey[businessId].availableRqstAirportEmojis}`
       let emoRegex2 = new RegExp(emojiPattern2, "g");
       const specialDoubleCharCount = [...message.text.body.matchAll(emoRegex)].length;
       const specialVipCharCount = [...message.text.body.matchAll(vipEmojiRegex)].length;
@@ -540,7 +567,7 @@ class ClientBotLinkCQRS {
                 id: "RequestServiceWithFilters",
                 text: "Servicio con filtros"
               })
-            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones", buttons, conversationContent.waId, businessId)
+            this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", businessIdVsD360APIKey[businessId].menu, buttons, conversationContent.waId, businessId)
           })
         )
       }
@@ -681,7 +708,7 @@ class ClientBotLinkCQRS {
         } else {
           return of({}).pipe(
             tap(() => {
-              this.sendTextMessage(`Hola, Bienvenido al TX BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de TX Plus para realizar el proceso de registro`, conversationContent.waId, businessId)
+              this.sendTextMessage(businessIdVsD360APIKey[businessId].registerTxt, conversationContent.waId, businessId)
             })
           )
         }
@@ -701,7 +728,7 @@ class ClientBotLinkCQRS {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY':  businessIdVsD360APIKey[businessId]
+        'D360-API-KEY':  businessIdVsD360APIKey[businessId].key
       }
     }
     const req = https.request(options, res => {
