@@ -206,7 +206,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId].key,
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY,
       }
     }
     const req = https.request(options, res => {
@@ -264,7 +264,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId].key
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY
       }
     }
     const req = https.request(options, res => {
@@ -323,7 +323,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId].key
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY
       }
     }
     const req = https.request(options, res => {
@@ -402,7 +402,7 @@ class ClientBotLinkCQRS {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId].key,
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY,
       }
     }
     const req = https.request(options, res => {
