@@ -40,10 +40,16 @@ class ServiceDA {
   static updateTaximeterFare$(_id, taximeterFare) {
     const update = { $set: {taximeterFare} };
     return defer(
-      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
+      () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
-        update
+        update,
+        {
+          upsert: false,
+          returnOriginal: false
+        }
       )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
     );
   }
   static addShiftToActiveOffers$(_id, shiftId, distance, referred = false, driverId = "", driverUsername = "", licensePlate = "") {

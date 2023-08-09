@@ -13,7 +13,7 @@ const jsonwebtoken = require("jsonwebtoken");
 const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
 const { ERROR_23003, ERROR_23223, ERROR_23230 } = require('../../tools/customError');
 
-const { ServiceDA } = require('./data-access');
+const { ServiceDA, BusinessDA } = require('./data-access');
 
 /**
  * Singleton instance
@@ -179,8 +179,38 @@ class ServiceDAL {
             tap((service) => { if (!service) throw ERROR_23223; }),// service does not exists
             tap((service) => { if (service.state !== 'ON_BOARD') throw ERROR_23230; }),// Service state not allowed
             mergeMap(service => {
+                return BusinessDA.getBusiness$(service.businessId).pipe(
+                    map(business => {
+                        return [service, business]
+                    })
+                )
+            }),
+            mergeMap(([service, business]) => {
+                const driverTaximeterAgreement = Number(business.attributes.find(a => a.key === "DRIVER_TAXIMETER_AGREEMENT") || "0");
                 if(taximeterFare){
                     return ServiceDA.updateTaximeterFare$(_id, taximeterFare).pipe(
+                        mergeMap(service => {
+                            if(isNaN(driverTaximeterAgreement) || driverTaximeterAgreement <= 0 || driverTaximeterAgreement > 1){
+                                return of({})
+                            }
+                            const amount = taximeterFare * driverTaximeterAgreement
+                            return eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
+                                'Wallet',
+                                authToken.driverId,
+                                'WalletTransactionCommited',
+                                {
+                                    _id: Crosscutting.generateDateBasedUuid(),
+                                    businessId: service.businessId,
+                                    type: "MOVEMENT",
+                                    // notes: mba.notes,
+                                    concept: "DRIVER_TAXIMETER_AGREEMENT",
+                                    timestamp: timestamp || Date.now(),
+                                    amount: Math.round(amount),
+                                    fromId: service.driver.id,
+                                    toId: service.businessId
+                                },
+                                authToken))
+                        }),
                         mapTo(service)
                     )
                 }

@@ -15,7 +15,7 @@ const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLin
 
 const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS || "").split(',');
 
-const { ServiceDA, ShiftDA, ClientDA } = require('./data-access')
+const { ServiceDA, ShiftDA, ClientDA, BusinessDA } = require('./data-access')
 
 /**
  * Singleton instance
@@ -468,6 +468,8 @@ class ServiceES {
         ).toPromise();
 
         let currentClient = await ClientDA.getClient$(service.client.id).toPromise();
+        let currentBusiness = await BusinessDA.getBusiness$(service.businessId).toPromise();
+        
 
         //ignores shifts that were already taken into account
         shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
@@ -477,9 +479,9 @@ class ServiceES {
 
             const tipType = service.client.tipType; // === "VIRTUAL_WALLET"
             const driverMainPocketAmount = ((shift.driver.wallet || {}).pockets || {}).main || 0;
-
+            const minWalletOfferValue = parseInt(currentBusiness.attributes.find(a => a.key === "minWalletOfferValue") || "0");
             const clientTip = (tipType === "VIRTUAL_WALLET")
-                ? service.client.tip || 0 : 0;
+                ? Math.max((service.client.tip || 0), minWalletOfferValue) : 0;
 
             const payPerServicePrice = (shift.subscriptionType == "PAY_PER_SERVICE")
                 ? shift.payPerServicePrice || 0 : 0;
@@ -890,7 +892,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCancelledByDriver$({ aid, data }) {
-        //console.log(`ServiceES: handleServiceCancelledByDriver: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        console.log(`ServiceES: handleServiceCancelledByDriver: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
             delay(300),
             mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "client": 1, "driver.id": 1, "businessId": 1 })),
