@@ -891,7 +891,7 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceCancelledByDriver$({ aid, data }) {
+    handleServiceCancelledByDriver$({ aid, data, av }) {
         console.log(`ServiceES: handleServiceCancelledByDriver: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
             delay(300),
