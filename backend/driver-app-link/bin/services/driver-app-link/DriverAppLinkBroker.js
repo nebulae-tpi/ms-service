@@ -103,7 +103,6 @@ class DriverAppLinkBroker {
      */
     sendServiceEventToDrivers$(businessId, driverUserName, eventType, event) {
         const topic = `${businessId}/driver-app/service/${driverUserName}`;
-        console.log("CANCEL TOPIC ===> ", topic)
         return this.publish$(topic, eventType, event);
     }
 
