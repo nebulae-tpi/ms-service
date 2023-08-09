@@ -893,12 +893,12 @@ class ServiceES {
      */
     handleServiceCancelledByDriver$({ aid, data }) {
         console.log(`ServiceES: handleServiceCancelledByDriver: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
-        console.log("CANCEL TOPIC ===> ",  `${service.businessId}/driver-app/service/${service.driver.username}`)
         return of({}).pipe(
             delay(300),
             mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "client": 1, "driver.id": 1, "businessId": 1 })),
             filter(service => service.driver && service.driver.username),
             mergeMap(service => {
+                console.log("CANCEL TOPIC ===> ",  `${service.businessId}/driver-app/service/${service.driver.username}`)
                 return forkJoin([
                     driverAppLinkBroker.sendServiceEventToDrivers$(
                         service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'CANCELLED_DRIVER' }),
