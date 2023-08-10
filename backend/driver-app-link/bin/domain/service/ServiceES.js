@@ -477,9 +477,15 @@ class ServiceES {
 
         let currentClient = await ClientDA.getClient$(service.client.id).toPromise();
         
-
+        if(currentBusiness._id === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
+            console.log("SHIFTS BEFORE FILTER ===> ",shifts)
+        }
         //ignores shifts that were already taken into account
         shifts = shifts.filter(s => !(shiftIdsToIgnore || []).includes(s._id));
+        if(currentBusiness._id === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
+            console.log("SHIFTS AFTER FILTER ===> ",shifts)
+        }
+
         // filter shifts who its drivers have't required money to get the service offer.
         // tip for client and PayPerService are evaluated 
         shifts = shifts.filter(shift => {
