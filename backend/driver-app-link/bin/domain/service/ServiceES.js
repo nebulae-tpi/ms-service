@@ -483,9 +483,8 @@ class ServiceES {
         //ignores shifts that were already taken into account
         shifts = shifts.filter(s => !(shiftIdsToIgnore || []).includes(s._id));
         if(currentBusiness._id === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
-            console.log("SHIFTS BEFORE FILTER ===> ",shifts.map(s => s.driver.fullname))
+            console.log("SHIFTS AFTER FILTER 1 ===> ",shifts.map(s => s.driver.fullname))
         }
-
         // filter shifts who its drivers have't required money to get the service offer.
         // tip for client and PayPerService are evaluated 
         shifts = shifts.filter(shift => {
@@ -510,7 +509,9 @@ class ServiceES {
 
 
         });
-
+        if(currentBusiness._id === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
+            console.log("SHIFTS AFTER FILTER 2 ===> ",shifts.map(s => s.driver.fullname))
+        }
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
@@ -531,6 +532,9 @@ class ServiceES {
         shifts = shifts.filter(s => {
             return s.referred || (s.dist.calculated > service.offer.params.minDistance)
         });
+        if(currentBusiness._id === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
+            console.log("SHIFTS AFTER FILTER 3 ===> ",shifts.map(s => s.driver.fullname))
+        }
         obs.next(`filterd shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
         return shifts;
     }
