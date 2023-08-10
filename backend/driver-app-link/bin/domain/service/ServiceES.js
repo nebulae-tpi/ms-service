@@ -929,6 +929,8 @@ class ServiceES {
                                     },
                                     user: "SYSTEM"
                                 })
+                            ).pipe(
+                                mapTo(service)
                             )
                         }else {
                             return of(service)
