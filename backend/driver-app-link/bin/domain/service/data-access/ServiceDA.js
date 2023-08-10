@@ -88,13 +88,13 @@ class ServiceDA {
   }
 
   static findCancelledServicesById$(serviceId, driverId, timestamp) {
-    const initDate = new Date(new Date(timestamp).toLocaleString("en-US", { timeZone: "America/Bogota" }));
-    const endDate = new Date(new Date(timestamp).toLocaleString("en-US", { timeZone: "America/Bogota" }));
-    initDate.setHours(5);
+    const initDate = new Date(timestamp);
+    const endDate = new Date(timestamp);
+    initDate.setHours(0);
     initDate.setMinutes(0);
-    endDate.setHours(18);
+    endDate.setHours(23);
     endDate.setMinutes(59);
-    console.log("INIT TS ===> ", initDate.getTime());
+    console.log("INIT TS1 ===> ", initDate.getTime());
     console.log("END TS ===> ", endDate.getTime());
     const collection =  mongoDB.getHistoricalDbByYYMM(serviceId.split('-').pop()).collection(CollectionName);
 
