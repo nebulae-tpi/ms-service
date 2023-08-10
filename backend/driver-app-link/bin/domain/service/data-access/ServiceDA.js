@@ -98,7 +98,7 @@ class ServiceDA {
     console.log("END TS ===> ", endDate.getTime());
     const collection =  mongoDB.getHistoricalDbByYYMM(serviceId.split('-').pop()).collection(CollectionName);
 
-    const query = {state:"CANCELLED_DRIVER", "driver.id": driverId, lastModificationTimestamp: {$gte: initDate.getTime(), $lte: (endDate + 18000000)}};
+    const query = {state:"CANCELLED_DRIVER", "driver.id": driverId, lastModificationTimestamp: {$gte: initDate.getTime(), $lte: (endDate.getTime() + 18000000)}};
     console.log('QUERY DRIVER', query);
     return collection.count(query);;
   }
