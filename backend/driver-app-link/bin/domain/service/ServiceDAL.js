@@ -193,7 +193,7 @@ class ServiceDAL {
                             if(isNaN(driverTaximeterAgreement) || driverTaximeterAgreement <= 0 || driverTaximeterAgreement > 1){
                                 return of({})
                             }
-                            const amount = (taximeterFare - service.client.tip) * driverTaximeterAgreement
+                            const amount = (taximeterFare - (service.client.tip || 0)) * driverTaximeterAgreement
                             return eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                                 'Wallet',
                                 authToken.driverId,
