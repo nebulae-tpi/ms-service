@@ -899,7 +899,7 @@ class ServiceES {
             filter(service => service.driver && service.driver.username),
             mergeMap(service => {
                 return forkJoin([
-                    ServiceDA.findCancelledServicesById$(service.driver.id, service.lastModificationTimestamp),
+                    ServiceDA.findCancelledServicesById$(aid, service.driver.id, service.lastModificationTimestamp),
                     BusinessDA.getBusiness$(service.businessId)
                 ]).pipe(
                     mergeMap(([serviceCount, business]) => {
