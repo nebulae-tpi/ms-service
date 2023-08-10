@@ -87,6 +87,22 @@ class ServiceDA {
     );
   }
 
+  static findCancelledServicesById$(driverId, timestamp) {
+    const initDate = new Date(new Date(timestamp).toLocaleString("en-US", { timeZone: "America/Bogota" }));
+    const endDate = new Date(new Date(timestamp).toLocaleString("en-US", { timeZone: "America/Bogota" }));
+    initDate.setHours(0);
+    initDate.setMinutes(0);
+    endDate.setHours(23);
+    endDate.setMinutes(59);
+    console.log("INIT TS ===> ", initDate.getTime());
+    console.log("END TS ===> ", endDate.getTime());
+    const collection =  mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName);
+
+    const query = {state:"CANCELLED_DRIVER", "driver.id": driverId, lastModificationTimestamp: {$gte: initDate.getTime(), $lte: endDate}};
+    // console.log('QUERY DRIVER', query);
+    return collection.count(query);;
+  }
+
 
 }
 /**

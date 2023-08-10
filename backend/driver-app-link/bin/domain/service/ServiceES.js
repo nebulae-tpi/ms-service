@@ -898,7 +898,43 @@ class ServiceES {
             mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "client": 1, "driver.id": 1, "businessId": 1 })),
             filter(service => service.driver && service.driver.username),
             mergeMap(service => {
-                console.log("CANCEL TOPIC ===> ",  `${service.businessId}/driver-app/service/${service.driver.username}`)
+                return forkJoin([
+                    ServiceDA.findCancelledServicesById$(service.driver.id, service.lastModificationTimestamp),
+                    BusinessDA.getBusiness$(service.businessId)
+                ]).pipe(
+                    mergeMap(([serviceCount, business]) => {
+                        console.log("SERVICE COUNT ===> ", serviceCount);
+                        const serviceCancelledByDriverToPenalizeCount = Number(business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_COUNT") || "0");
+                        const serviceCancelledByDriverToPenalizeAmount = Number(business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_AMOUNT") || "0");
+                        if(serviceCancelledByDriverToPenalizeCount > 0 && serviceCount >= serviceCancelledByDriverToPenalizeCount && serviceCancelledByDriverToPenalizeAmount > 0){
+                            return eventSourcing.eventStore.emitEvent$(
+                                new Event({
+                                    eventType: "WalletTransactionCommited",
+                                    eventTypeVersion: 1,
+                                    aggregateType: "Wallet",
+                                    aggregateId: service.driver.id,
+                                    data: { 
+                                        _id: Crosscutting.generateDateBasedUuid(),
+                                        businessId: service.businessId,
+                                        sourceEvent: { aid, av },
+                                        type: "MOVEMENT",
+                                        // notes: mba.notes,
+                                        concept: "PENALIZATION_FOR_CANCELLATION",
+                                        timestamp: Date.now(),
+                                        amount: serviceCancelledByDriverToPenalizeAmount,
+                                        fromId: service.driver.id,
+                                        toId: service.businessId
+                                    },
+                                    user: "SYSTEM"
+                                })
+                            )
+                        }else {
+                            return of(service)
+                        }
+                    })
+                )
+            }),
+            mergeMap((service) => {
                 return forkJoin([
                     driverAppLinkBroker.sendServiceEventToDrivers$(
                         service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'CANCELLED_DRIVER' }),
