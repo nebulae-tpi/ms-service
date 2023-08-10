@@ -459,7 +459,7 @@ class ServiceES {
         let shiftIdsToIgnore = Object.keys(service.offer.shifts);
         if((currentBusiness.attributes.find(a => a.key === "ENABLE_RESEND_SERVICE_OFFER") || {}).value ){
             shiftIdsToIgnore = undefined;
-        }
+        } 
         if(currentBusiness._id === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
             console.log("ENABLE_RESEND_SERVICE_OFFER ===> " + (currentBusiness.attributes.find(a => a.key === "ENABLE_RESEND_SERVICE_OFFER") || {}).value)
             console.log("shiftIdsToIgnore ===> ", shiftIdsToIgnore)
