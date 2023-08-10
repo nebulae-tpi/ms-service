@@ -111,7 +111,7 @@ class ServiceES {
 
             let service = await this.findServiceAndSetOfferParams(serviceId, minDistance, maxDistance, offerTotalSpan, offerSearchSpan, offerShiftSpan, obs);
             //console.log('imperativeServiceOfferAlgorithm: service: ',JSON.stringify(service));
-
+            let currentBusiness = await BusinessDA.getBusiness$(service.businessId).toPromise();
             let needToOffer = service.state === 'REQUESTED' && Date.now() < offerTotalThreshold;
             let needToBeCancelledBySystem = true;
             const previouslySelectedShifts = [];
@@ -120,7 +120,7 @@ class ServiceES {
             while (needToOffer) {
 
                 //find available shifts
-                let shifts = await this.findShiftCandidates(service, obs);
+                let shifts = await this.findShiftCandidates(service, obs, undefined, currentBusiness);
 
                 // threshold defining the total time span of this offer
                 const offerSearchThreshold = offerSearchSpan + Date.now();
@@ -454,13 +454,17 @@ class ServiceES {
      * @param {*} service 
      * @returns shifts array
      */
-    async findShiftCandidates(service, obs, limit) {
+    async findShiftCandidates(service, obs, limit, currentBusiness) {
         //find available shifts
+        let shiftIdsToIgnore = Object.keys(service.offer.shifts);
+        if((currentBusiness.attributes.find(a => a.key === "ENABLE_RESEND_SERVICE_OFFER") || {}).value ){
+            shiftIdsToIgnore = undefined;
+        }
         let shifts = await ShiftDA.findServiceOfferCandidates$(
             service.businessId,
             service.pickUp.marker || service.pickUp.polygon,
             service.requestedFeatures,
-            Object.keys(service.offer.shifts),
+            shiftIdsToIgnore,
             service.offer.params.maxDistance,
             0,//min distance form mongo is always zero
             { "driver": 1, "vehicle": 1 },
@@ -468,7 +472,6 @@ class ServiceES {
         ).toPromise();
 
         let currentClient = await ClientDA.getClient$(service.client.id).toPromise();
-        let currentBusiness = await BusinessDA.getBusiness$(service.businessId).toPromise();
         
 
         //ignores shifts that were already taken into account
