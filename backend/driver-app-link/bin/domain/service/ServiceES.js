@@ -479,7 +479,7 @@ class ServiceES {
         
 
         //ignores shifts that were already taken into account
-        shifts = shifts.filter(s => !Object.keys(service.offer.shifts).includes(s._id));
+        shifts = shifts.filter(s => !shiftIdsToIgnore.includes(s._id));
         // filter shifts who its drivers have't required money to get the service offer.
         // tip for client and PayPerService are evaluated 
         shifts = shifts.filter(shift => {
