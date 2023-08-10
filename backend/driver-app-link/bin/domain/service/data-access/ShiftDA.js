@@ -40,7 +40,9 @@ class ShiftDA {
     if(ignoredIds && ignoredIds.length> 0){
       query[`$and`] = ignoredIds;
     }
-
+    if(businessId === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
+      console.log("QUERY ===> ", query)
+    }
     const aggregateQuery = [
       {
         $geoNear: {
