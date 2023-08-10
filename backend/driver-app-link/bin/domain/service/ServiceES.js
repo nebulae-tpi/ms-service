@@ -479,7 +479,7 @@ class ServiceES {
 
             const tipType = service.client.tipType; // === "VIRTUAL_WALLET"
             const driverMainPocketAmount = ((shift.driver.wallet || {}).pockets || {}).main || 0;
-            const minWalletOfferValue = parseInt(currentBusiness.attributes.find(a => a.key === "minWalletOfferValue") || "0");
+            const minWalletOfferValue = parseInt((currentBusiness.attributes.find(a => a.key === "minWalletOfferValue") || {}).value || "0");
             const clientTip = (tipType === "VIRTUAL_WALLET")
                 ? Math.max((service.client.tip || 0), minWalletOfferValue) : 0;
 
@@ -904,8 +904,8 @@ class ServiceES {
                 ]).pipe(
                     mergeMap(([serviceCount, business]) => {
                         console.log("SERVICE COUNT ===> ", serviceCount);
-                        const serviceCancelledByDriverToPenalizeCount = Number(business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_COUNT") || "0");
-                        const serviceCancelledByDriverToPenalizeAmount = Number(business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_AMOUNT") || "0");
+                        const serviceCancelledByDriverToPenalizeCount = Number((business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_COUNT") || {}).value || "0");
+                        const serviceCancelledByDriverToPenalizeAmount = Number((business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_AMOUNT") || {}).value || "0");
                         console.log("serviceCancelledByDriverToPenalizeCount ===> ", serviceCancelledByDriverToPenalizeCount);
                         console.log("serviceCancelledByDriverToPenalizeAmount ===> ", serviceCancelledByDriverToPenalizeAmount);
                         if(serviceCancelledByDriverToPenalizeCount > 0 && serviceCount >= serviceCancelledByDriverToPenalizeCount && serviceCancelledByDriverToPenalizeAmount > 0){

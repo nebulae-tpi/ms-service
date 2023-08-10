@@ -186,7 +186,7 @@ class ServiceDAL {
                 )
             }),
             mergeMap(([service, business]) => {
-                const driverTaximeterAgreement = Number(business.attributes.find(a => a.key === "DRIVER_TAXIMETER_AGREEMENT") || "0");
+                const driverTaximeterAgreement = Number((business.attributes.find(a => a.key === "DRIVER_TAXIMETER_AGREEMENT") || {}).value || "0");
                 if(taximeterFare){
                     return ServiceDA.updateTaximeterFare$(_id, taximeterFare).pipe(
                         mergeMap(service => {
