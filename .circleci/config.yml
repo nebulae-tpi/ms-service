@@ -290,7 +290,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/driver-app-link/
             export DOCKERHUB_IMAGE=service.backend.driverapplink
-            export DOCKERHUB_TAG=2.10.108.3  # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER
+            export DOCKERHUB_TAG=2.10.108.4  # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER
             gitChanged backend/driver-app-link || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/driver-app-link/
             gitChanged backend/driver-app-link || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/driver-app-link || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG

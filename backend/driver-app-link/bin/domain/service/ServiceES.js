@@ -904,6 +904,8 @@ class ServiceES {
                 ]).pipe(
                     mergeMap(([serviceCount, business]) => {
                         console.log("SERVICE COUNT ===> ", serviceCount);
+                        console.log("serviceCancelledByDriverToPenalizeCount ===> ", serviceCancelledByDriverToPenalizeCount);
+                        console.log("serviceCancelledByDriverToPenalizeAmount ===> ", serviceCancelledByDriverToPenalizeAmount);
                         const serviceCancelledByDriverToPenalizeCount = Number(business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_COUNT") || "0");
                         const serviceCancelledByDriverToPenalizeAmount = Number(business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_AMOUNT") || "0");
                         if(serviceCancelledByDriverToPenalizeCount > 0 && serviceCount >= serviceCancelledByDriverToPenalizeCount && serviceCancelledByDriverToPenalizeAmount > 0){
