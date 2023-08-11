@@ -188,12 +188,12 @@ class ServiceDAL {
             mergeMap(([service, business]) => {
                 const driverTaximeterAgreement = Number((business.attributes.find(a => a.key === "DRIVER_TAXIMETER_AGREEMENT") || {}).value || "0");
                 if(taximeterFare){
-                    return ServiceDA.updateTaximeterFare$(_id, taximeterFare).pipe(
+                    const amount = (taximeterFare - (service.client.tip || 0)) * driverTaximeterAgreement;
+                    return ServiceDA.updateTaximeterFare$(_id, taximeterFare, amount).pipe(
                         mergeMap(service => {
                             if(isNaN(driverTaximeterAgreement) || driverTaximeterAgreement <= 0 || driverTaximeterAgreement > 1){
                                 return of({})
                             }
-                            const amount = (taximeterFare - (service.client.tip || 0)) * driverTaximeterAgreement
                             return eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                                 'Wallet',
                                 authToken.driverId,

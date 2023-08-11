@@ -1,7 +1,7 @@
 'use strict'
 
 
-const { of, timer, forkJoin, Observable, iif, from, empty } = require("rxjs");
+const { of, timer, forkJoin, Observable, iif, from, empty, merge } = require("rxjs");
 const { toArray, mergeMap, map, tap, filter, delay, mapTo, switchMap } = require('rxjs/operators');
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
@@ -460,10 +460,6 @@ class ServiceES {
         if((currentBusiness.attributes.find(a => a.key === "ENABLE_RESEND_SERVICE_OFFER") || {}).value ){
             shiftIdsToIgnore = undefined;
         } 
-        if(currentBusiness._id === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
-            console.log("ENABLE_RESEND_SERVICE_OFFER ===> " + (currentBusiness.attributes.find(a => a.key === "ENABLE_RESEND_SERVICE_OFFER") || {}).value)
-            console.log("shiftIdsToIgnore ===> ", shiftIdsToIgnore)
-        }
         let shifts = await ShiftDA.findServiceOfferCandidates$(
             service.businessId,
             service.pickUp.marker || service.pickUp.polygon,
@@ -920,35 +916,37 @@ class ServiceES {
                     BusinessDA.getBusiness$(service.businessId)
                 ]).pipe(
                     mergeMap(([serviceCount, business]) => {
-                        console.log("SERVICE COUNT ===> ", serviceCount);
                         const serviceCancelledByDriverToPenalizeCount = Number((business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_COUNT") || {}).value || "0");
                         const serviceCancelledByDriverToPenalizeAmount = Number((business.attributes.find(a => a.key === "SERVICE_CANCELLED_BY_DRIVER_TO_PENALIZE_AMOUNT") || {}).value || "0");
-                        console.log("serviceCancelledByDriverToPenalizeCount ===> ", serviceCancelledByDriverToPenalizeCount);
-                        console.log("serviceCancelledByDriverToPenalizeAmount ===> ", serviceCancelledByDriverToPenalizeAmount);
                         if(serviceCancelledByDriverToPenalizeCount > 0 && serviceCount >= serviceCancelledByDriverToPenalizeCount && serviceCancelledByDriverToPenalizeAmount > 0){
-                            return eventSourcing.eventStore.emitEvent$(
-                                new Event({
-                                    eventType: "WalletTransactionCommited",
-                                    eventTypeVersion: 1,
-                                    aggregateType: "Wallet",
-                                    aggregateId: service.driver.id,
-                                    data: { 
-                                        _id: Crosscutting.generateDateBasedUuid(),
-                                        businessId: service.businessId,
-                                        sourceEvent: { aid, av },
-                                        type: "MOVEMENT",
-                                        // notes: mba.notes,
-                                        concept: "PENALIZATION_FOR_CANCELLATION",
-                                        timestamp: Date.now(),
-                                        amount: serviceCancelledByDriverToPenalizeAmount,
-                                        fromId: service.driver.id,
-                                        toId: service.businessId
-                                    },
-                                    user: "SYSTEM"
+                            return ServiceDA.updatePenalizationForCancellation$(service._id ,serviceCancelledByDriverToPenalizeAmount).pipe(
+                                mergeMap(() => {
+                                    return eventSourcing.eventStore.emitEvent$(
+                                        new Event({
+                                            eventType: "WalletTransactionCommited",
+                                            eventTypeVersion: 1,
+                                            aggregateType: "Wallet",
+                                            aggregateId: service.driver.id,
+                                            data: { 
+                                                _id: Crosscutting.generateDateBasedUuid(),
+                                                businessId: service.businessId,
+                                                sourceEvent: { aid, av },
+                                                type: "MOVEMENT",
+                                                // notes: mba.notes,
+                                                concept: "PENALIZATION_FOR_CANCELLATION",
+                                                timestamp: Date.now(),
+                                                amount: serviceCancelledByDriverToPenalizeAmount,
+                                                fromId: service.driver.id,
+                                                toId: service.businessId
+                                            },
+                                            user: "SYSTEM"
+                                        })
+                                    ).pipe(
+                                        mapTo(service)
+                                    )
                                 })
-                            ).pipe(
-                                mapTo(service)
                             )
+                            
                         }else {
                             return of(service)
                         }
