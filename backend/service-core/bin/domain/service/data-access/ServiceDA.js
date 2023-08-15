@@ -193,9 +193,9 @@ class ServiceDA {
    * set cancel state
    * @returns {Observable}
    */
-  static setCancelStateAndReturnService$(_id, state, location, reason, notes, timestamp, projection = undefined) {
+  static setCancelStateAndReturnService$(_id, state, location, reason, notes, timestamp, projection = undefined, user) {
     const update = {
-      $set: { state, lastModificationTimestamp: timestamp, lastStateChangeTimestamp: Date.now() },
+      $set: { state, lastModificationTimestamp: timestamp, lastStateChangeTimestamp: Date.now(), cancelUsername: user },
       $push: {
         "stateChanges": { state, timestamp, location, reason, notes },
       }

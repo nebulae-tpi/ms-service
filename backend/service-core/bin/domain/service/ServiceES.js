@@ -369,7 +369,7 @@ class ServiceES {
 
     handleCancellation$(serviceId, cancelStateType, reason, notes, location, timestamp, user) {
         //console.log(`*** ServiceES: handleCancellation: `, serviceId, cancelStateType, timestamp); //DEBUG: DELETE LINE
-        return ServiceDA.setCancelStateAndReturnService$(serviceId, cancelStateType, location, reason, notes, timestamp, { shiftId: 1 }).pipe(
+        return ServiceDA.setCancelStateAndReturnService$(serviceId, cancelStateType, location, reason, notes, timestamp, { shiftId: 1 }, user).pipe(
             tap(service => this.queueAndGroupServiceEvent({ _id: serviceId })),
             filter(({ shiftId }) => shiftId),
             mergeMap(({ shiftId }) => ShiftDA.findById$(shiftId, { "driver.blocks": 1, "vehicle.blocks": 1 })),
