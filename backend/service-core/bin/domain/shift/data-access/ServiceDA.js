@@ -69,7 +69,7 @@ class ServiceDA {
           $set: { location, lastModificationTimestamp: Date.now() },
           $push: { "route.coordinates": location.coordinates }
         },
-        { upsert: false }
+        { upsert: false,writeConcern: { w: 1 } }
       )
     );
   }

@@ -146,7 +146,7 @@ class ShiftDA {
       .updateOne(
         { _id: shift._id },
         { $set: { ...shift } },
-        { upsert: true }
+        { upsert: true, writeConcern: { w: 1 } }
       ));
   }
 
@@ -166,7 +166,8 @@ class ShiftDA {
         {
           projection: { online: 1 },
           upsert: false,
-          returnOriginal: true
+          returnOriginal: true,
+          writeConcern: { w: 1 }
         }
       )
     ).pipe(map(result => result && result.value ? result.value : undefined));
@@ -182,7 +183,7 @@ class ShiftDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
         { $set: { online }, $push: { onlineChanges: { online, timestamp: Date.now() } } },
-        { upsert: false }
+        { upsert: false, writeConcern: { w: 1 } }
       )
     );
   }
@@ -197,7 +198,7 @@ class ShiftDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
         { $set: { location } },
-        { upsert: false }
+        { upsert: false, writeConcern: { w: 1 } }
       )
     );
   }
@@ -217,7 +218,8 @@ class ShiftDA {
         {
           projection: { online: 1, state: 1, driver:1, vehicle: 1 },
           upsert: false,
-          returnOriginal: true
+          returnOriginal: true,
+          writeConcern: { w: 1 }
         }
       )
     ).pipe(map(result => result && result.value ? result.value : undefined));
@@ -238,7 +240,7 @@ class ShiftDA {
           $push: { stateChanges: { state, timestamp: Date.now() } },
           $unset: { location: "" }
         },
-        { upsert: false }
+        { upsert: false, writeConcern: { w: 1 } }
       )
     );
   }
@@ -259,7 +261,8 @@ class ShiftDA {
         {
           projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username": 1, "businessId": 1 },
           upsert: false,
-          returnOriginal: false
+          returnOriginal: false,
+          writeConcern: { w: 1 }
         }
       )).pipe(map(result => result && result.value ? result.value : undefined));
   }
@@ -279,7 +282,8 @@ class ShiftDA {
         {
           projection: { "vehicle.blocks": 1, "driver.blocks": 1, "state": 1, "driver.username": 1, "businessId": 1 },
           upsert: false,
-          returnOriginal: false
+          returnOriginal: false,
+          writeConcern: { w: 1 }
         }
       )).pipe(map(result => result && result.value ? result.value : undefined));
   }

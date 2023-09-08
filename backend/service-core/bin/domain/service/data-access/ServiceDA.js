@@ -46,7 +46,8 @@ class ServiceDA {
         update,
         {
           returnOriginal: true,
-          projection
+          projection,
+          writeConcern: { w: 1 }
         }
       )
     ).pipe(

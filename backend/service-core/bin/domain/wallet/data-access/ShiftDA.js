@@ -50,7 +50,7 @@ class ShiftDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
         { $set: { 'driver.wallet': wallet } },
-        { upsert: false }
+        { upsert: false, writeConcern: { w: 1 } }
       )
     );
   }

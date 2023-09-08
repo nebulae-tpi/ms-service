@@ -57,7 +57,7 @@ class ShiftDA {
     const query = { _id};
     const update = {$set: {shiftOnAcceptServiceProcess: 0}}
     return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
-      .update(query, update));
+      .update(query, update, { writeConcern: { w: 1 } }));
   }
 
   /**

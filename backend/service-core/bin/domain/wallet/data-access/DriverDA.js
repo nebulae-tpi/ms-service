@@ -23,7 +23,7 @@ class DriverDA {
   
   static updateDriverWallet$(driverId, wallet){
     const collection = mongoDB.db.collection(CollectionName);
-    return defer(() => collection.updateOne({_id: driverId}, {$set: { wallet: wallet } }) )
+    return defer(() => collection.updateOne({_id: driverId}, {$set: { wallet: wallet } }, {writeConcern: { w: 1 }}) )
   }
 
 }

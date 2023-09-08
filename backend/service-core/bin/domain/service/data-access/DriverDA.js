@@ -27,7 +27,8 @@ class DriverDA {
       { _id },
       {
         $set: { driverCode }
-      }
+      },
+      { writeConcern: { w: 1 } }
     ))
   }
 
