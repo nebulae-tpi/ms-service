@@ -16,7 +16,7 @@ const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_ID
 const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-access')
 
 const satelliteAirtportPrices = JSON.parse('{"PORTER_LODGE":5000, "age":30, "HOTEL":10000}')
-const availableTestNumbers = ["573155421851", "573015033132", "573013917663"]
+const availableTestNumbers = ["573155421851", "573015033132", "573013917663", "3138404790"]
 const businessIdVsD360APIKey = {
   "75cafa6d-0f27-44be-aa27-c2c82807742d": {
     D360_KEY: process.env.D360_API_KEY,
@@ -68,6 +68,7 @@ class ClientBotLinkCQRS {
 
   processMessageReceived$({ args }, authToken) {
     if (args.messages) {
+      businessIdVsD360APIKey["75cafa6d-0f27-44be-aa27-c2c82807742d"].D360_KEY = process.env.D360_API_KEY;
       console.log("ARGS ==> ", JSON.stringify(args))
       return from(args.messages).pipe(
         mergeMap(message => {
@@ -110,6 +111,27 @@ class ClientBotLinkCQRS {
 
   processTxPlusMessageReceived$({ args }, authToken) {
     if (args.messages) {
+      return from(args.messages).pipe(
+        mergeMap(message => {
+          return this.initConversation$(message.from, {
+            waId: message.from,
+            timestamp: message.timestamp,
+            client: {},
+          }, message, "75cafa6d-0f27-44be-aa27-c2c82807742d")
+        }),
+        tap(message => {
+          //this.markMessageAsRead(message, businessId);
+        })
+      )
+    } else {
+      return of("IGNORED")
+    }
+
+  }
+
+  processNewTxPlusMessageReceived$({ args }, authToken) {
+    if (args.messages) {
+      businessIdVsD360APIKey["75cafa6d-0f27-44be-aa27-c2c82807742d"].D360_KEY = process.env.D360_NEW_API_KEY;
       return from(args.messages).pipe(
         mergeMap(message => {
           return this.initConversation$(message.from, {

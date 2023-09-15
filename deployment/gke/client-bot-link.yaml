@@ -13,7 +13,7 @@ spec:
         app: client-bot-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.clientbotlink:1.1.92 # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link 
+      - image: DOCKERHUB/service.backend.clientbotlink:1.1.93 # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link # client-bot-link 
         name: client-bot-link
         volumeMounts:
         - name: google-application-credentials
@@ -34,6 +34,8 @@ spec:
           value: MONGO
         - name: D360_API_KEY
           value: 03xMYkDmbGYOgohcbDUk6pRFAK
+        - name: D360_NEW_API_KEY
+          value: uMPEp1xYwrghXooqC3rJftUGAK
         - name: D360_API_KEY_FREE_DRIVER
           value: afl6YArShzyd33x6jjcWwvXAAK
         - name: EVENT_STORE_STORE_URL

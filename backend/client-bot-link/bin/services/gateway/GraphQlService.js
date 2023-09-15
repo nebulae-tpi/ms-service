@@ -145,6 +145,10 @@ class GraphQlService {
       {
         aggregateType: "ClientBotLink",
         messageType: "clientgateway.graphql.mutation.ClientBotFreeDriverLinkMessageReceived"
+      },
+      {
+        aggregateType: "ClientBotLink",
+        messageType: "clientgateway.graphql.mutation.ClientBotNewTxPlusLinkMessageReceived"
       }
     ];
   }
@@ -165,6 +169,10 @@ class GraphQlService {
       },
       "clientgateway.graphql.mutation.ClientBotTxPlusLinkMessageReceived": {
         fn: ClientBotLinkCQRS.processTxPlusMessageReceived$,
+        obj: ClientBotLinkCQRS
+      },
+      "clientgateway.graphql.mutation.ClientBotNewTxPlusLinkMessageReceived": {
+        fn: ClientBotLinkCQRS.processNewTxPlusMessageReceived$,
         obj: ClientBotLinkCQRS
       } 
     };
