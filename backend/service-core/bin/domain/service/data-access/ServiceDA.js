@@ -63,7 +63,7 @@ class ServiceDA {
    */
   static insertService$(service) {
     return defer(() => mongoDB.getHistoricalDbByYYMM(service._id.split('-').pop()).collection(CollectionName)
-      .insertOne(service));
+      .insertOne(service, { writeConcern: { w: 1 } }));
   }
 
 
@@ -80,7 +80,7 @@ class ServiceDA {
         {
           $setOnInsert: { ...service }
         },
-        { upsert: true }
+        { upsert: true, writeConcern: { w: 1 } }
       )
     );
   }
@@ -115,7 +115,7 @@ class ServiceDA {
           $set: { location, lastModificationTimestamp: Date.now() },
           $push: (!location || !location.coordinates) ? undefined : { "route.coordinates": location.coordinates }
         },
-        { upsert: false }
+        { upsert: false, writeConcern: { w: 1 } }
       )
     );
   }
@@ -132,7 +132,7 @@ class ServiceDA {
         {
           $set: { pickUpETA, lastModificationTimestamp: Date.now() }
         },
-        { upsert: false }
+        { upsert: false, writeConcern: { w: 1 } }
       )
     );
   }
@@ -159,7 +159,7 @@ class ServiceDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
         update,
-        { upsert: false }
+        { upsert: false, writeConcern: { w: 1 } }
       )
     );
   }
@@ -182,7 +182,7 @@ class ServiceDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
         update,
-        { upsert: false, projection }
+        { upsert: false, projection, writeConcern: { w: 1 } }
       )
     ).pipe(
       map(result => result.value),
@@ -208,7 +208,7 @@ class ServiceDA {
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOneAndUpdate(
         { _id },
         update,
-        { upsert: false, projection }
+        { upsert: false, projection, writeConcern: { w: 1 } }
       )
     ).pipe(
       map(result => result.value),
@@ -262,6 +262,7 @@ class ServiceDA {
           projection,
           upsert: false,
           returnOriginal: false,
+          writeConcern: { w: 1 }
         }
       )).pipe(
         map(result => result.value),
@@ -306,6 +307,7 @@ class ServiceDA {
         update,
         {
           upsert: false,
+          writeConcern: { w: 1 }
         }
       ));
   }
@@ -414,6 +416,9 @@ class ServiceDA {
       {
         $set: { closed: true, lastModificationTimestamp: Date.now() },
         $unset: { location: "" }
+      },
+      {
+        writeConcern: { w: 1 }
       }
     ));
   }

@@ -80,7 +80,8 @@ class ServiceDA {
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).updateOne(
         { _id },
-        { $set: {...updateObj} }
+        { $set: {...updateObj} },
+        {writeConcern: { w: 1 }}
       )
     );
   }
