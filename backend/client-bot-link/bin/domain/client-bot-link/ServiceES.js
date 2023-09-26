@@ -284,7 +284,7 @@ class ServiceES {
     req.write(JSON.stringify(content))
     req.end();
     if(businessId === "75cafa6d-0f27-44be-aa27-c2c82807742d"){
-
+      this.sendTextMessageToNewNumber(text, waId);
     }
   }
 
