@@ -283,6 +283,48 @@ class ServiceES {
     console.log("CONTENT ASSIGNED ===> ", JSON.stringify(content))
     req.write(JSON.stringify(content))
     req.end();
+    if(businessId === "75cafa6d-0f27-44be-aa27-c2c82807742d"){
+
+    }
+  }
+
+  sendTextMessageToNewNumber(text, waId) {
+    const content = {
+      "recipient_type": "individual",
+      "to": waId,
+      "type": "text",
+      "text": {
+        "body": text
+      }
+    }
+    const options = {
+      protocol: 'https:',
+      hostname: 'waba.360dialog.io',
+      path: '/v1/messages/',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': "uMPEp1xYwrghXooqC3rJftUGAK"
+      }
+    }
+    const req = https.request(options, res => {
+      let data = ''
+
+      res.on('data', chunk => {
+        data += chunk
+      })
+
+      res.on('end', () => {
+        //console.log(JSON.parse(data))
+      })
+    })
+      .on('error', err => {
+        console.log('Error: ', err.message)
+      });
+
+    console.log("CONTENT ASSIGNED ===> ", JSON.stringify(content))
+    req.write(JSON.stringify(content))
+    req.end();
   }
 
 
