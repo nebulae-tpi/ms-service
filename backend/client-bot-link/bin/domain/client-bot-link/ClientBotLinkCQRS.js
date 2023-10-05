@@ -2,7 +2,7 @@
 
 
 const { of, timer, forkJoin, Observable, iif, from, empty, defer, range } = require("rxjs");
-const { toArray, mergeMap, map, tap, filter, delay, mapTo, switchMap } = require('rxjs/operators');
+const { toArray, mergeMap, map, tap, filter, delay, mapTo, switchMap, catchError } = require('rxjs/operators');
 const dateFormat = require('dateformat');
 const uuidv4 = require("uuid/v4");
 const https = require('https');
@@ -766,7 +766,10 @@ class ClientBotLinkCQRS {
                   return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
                     mergeMap(serviceCount => {
                       return this.continueConversation$(message, conversationContent, c, serviceCount, businessId);
-                    })
+                    }),
+                    catchError(err =>
+                      of("Error proccesing conversation data")
+                    )
                   )
                 })
               )
