@@ -69,17 +69,13 @@ class ClientBotLinkCQRS {
   processMessageReceived$({ args }, authToken) {
     if (args.messages) {
       businessIdVsD360APIKey["75cafa6d-0f27-44be-aa27-c2c82807742d"].D360_KEY = process.env.D360_API_KEY;
-      console.log("ARGS ==> ", JSON.stringify(args))
       return from(args.messages).pipe(
-        mergeMap(message => {
-          return this.initConversation$(message.from, {
-            waId: message.from,
-            timestamp: message.timestamp,
-            client: {},
-          }, message, "75cafa6d-0f27-44be-aa27-c2c82807742d")
+        tap(message => {
+          const text = "El número del ChatBot se ha reemplazado por el contacto que se va compartir a continuación.\n\nA partir de este momento todas las solicitudes realizadas por este número *no se van a procesar*, por favor realizarlas en el contacto compartido a continuación\n\nNos excusamos por los inconvenientes generados."
+          this.sendTextMessage(text, message.from, "75cafa6d-0f27-44be-aa27-c2c82807742d")
         }),
         tap(message => {
-          //this.markMessageAsRead(message);
+          this.sendContact(message.from, "75cafa6d-0f27-44be-aa27-c2c82807742d")
         })
       )
     } else {
@@ -248,6 +244,55 @@ class ClientBotLinkCQRS {
     req.write(JSON.stringify(content))
     req.end();
     console.log("ENVIA MENSAJE ===> ", text, ": ", waId)
+  }
+
+  sendContact(waId, businessId) {
+    const content = {
+      "to": waId,
+      "type": "contacts",
+      "contacts": [
+        {
+          "name": {
+            "first_name": "TX Plus",
+            "formatted_name": "TX BOT",
+            "last_name": "BOT"
+          },
+          "phones": [
+            {
+              "phone": "+57 (313) 840-4790",
+              "type": "WORK",
+              "wa_id": "573138404790"
+            }
+          ]
+        }
+      ]
+    }
+    const options = {
+      protocol: 'https:',
+      hostname: 'waba.360dialog.io',
+      path: '/v1/messages/',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY,
+      }
+    }
+    const req = https.request(options, res => {
+      let data = ''
+
+      res.on('data', chunk => {
+        data += chunk
+      })
+
+      res.on('end', () => {
+        //console.log(JSON.parse(data))
+      })
+    })
+      .on('error', err => {
+        console.log('Error sendTextMessage: ', err.message)
+      })
+    req.write(JSON.stringify(content))
+    req.end();
   }
 
   sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId, businessId) {
@@ -519,13 +564,13 @@ class ClientBotLinkCQRS {
             return acc;
           }, "")}${aditionalTempText}`, "Lista de Servicios", "Servicios", listElements, waId, businessId)
         } else {
-            const buttons = [
-              {
-                id: "RequestServiceWithFilters",
-                text: "Servicio con filtros"
-              }
-            ]
-            this.sendInteractiveButtonMessage("Actualmente no se tienen servicios activos", `Para solicitar servicios con filtros por favor persionar el boton "Servicio con filtros"`, buttons, waId, businessId)
+          const buttons = [
+            {
+              id: "RequestServiceWithFilters",
+              text: "Servicio con filtros"
+            }
+          ]
+          this.sendInteractiveButtonMessage("Actualmente no se tienen servicios activos", `Para solicitar servicios con filtros por favor persionar el boton "Servicio con filtros"`, buttons, waId, businessId)
         }
       })
     )
@@ -534,7 +579,7 @@ class ClientBotLinkCQRS {
 
   continueConversation$(message, conversationContent, client, serviceCount, businessId) {
     if (((message || {}).text || {}).body) {
-      if(message.text.body === businessIdVsD360APIKey[businessId].availableRqstFilterEmojis){
+      if (message.text.body === businessIdVsD360APIKey[businessId].availableRqstFilterEmojis) {
         this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId, businessId);
         return of({})
       }
@@ -585,17 +630,17 @@ class ClientBotLinkCQRS {
                 text: "Info de servicios"
               },
             ]
-              buttons.push({
-                id: "RequestServiceWithFilters",
-                text: "Servicio con filtros"
-              })
+            buttons.push({
+              id: "RequestServiceWithFilters",
+              text: "Servicio con filtros"
+            })
             this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", businessIdVsD360APIKey[businessId].menu, buttons, conversationContent.waId, businessId)
           })
         )
       }
     }
     else if (message.order) {
-      const filters = message.order.product_items ? message.order.product_items.map(pi => pi.product_retailer_id) :  undefined;
+      const filters = message.order.product_items ? message.order.product_items.map(pi => pi.product_retailer_id) : undefined;
       console.log("FILTER ===> ", filters)
       return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 0, filters, businessId);
     }
@@ -618,7 +663,7 @@ class ClientBotLinkCQRS {
       switch (interactiveResp) {
         case "rqstServiceBtn":
           if (((client || {}).location || {}).lng) {
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, undefined,undefined, businessId)
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, undefined, undefined, businessId)
           } else {
             return of({}).pipe(
               tap(() => {
@@ -628,7 +673,7 @@ class ClientBotLinkCQRS {
           }
         case "rqstServiceVipBtn":
           if (((client || {}).location || {}).lng) {
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 1,undefined, businessId)
+            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 1, undefined, businessId)
           } else {
             return of({}).pipe(
               tap(() => {
@@ -640,15 +685,15 @@ class ClientBotLinkCQRS {
           return this.infoService$(client._id, conversationContent.waId, businessId)
         case "CancelAllServiceBtn":
           return ServiceDA.getServices$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
-            tap(service =>{
-              if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
+            tap(service => {
+              if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()) throw ERROR_23224;
             }),
-            mergeMap(service=> {
+            mergeMap(service => {
               return ServiceDA.markAsCancelled$(service._id).pipe(
                 mapTo(service)
               )
-            }), 
-            mergeMap(val => { 
+            }),
+            mergeMap(val => {
               return eventSourcing.eventStore.emitEvent$(new Event({
                 aggregateType: 'Service',
                 aggregateId: val._id,
@@ -673,11 +718,11 @@ class ClientBotLinkCQRS {
         default:
           if (interactiveResp.includes("CANCEL_")) {
             return ServiceDA.markedAsCancelledAndReturnService$(interactiveResp.replace("CANCEL_", "")).pipe(
-              tap(service =>{
-                if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()  ) throw ERROR_23224;
+              tap(service => {
+                if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()) throw ERROR_23224;
               }),
               mergeMap(val => {
-                
+
                 const STATES_TO_CLOSE_SERVICE = ["ON_BOARD", "DONE", "CANCELLED_DRIVER", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_SYSTEM"];
                 if (STATES_TO_CLOSE_SERVICE.includes(val.state)) {
                   this.sendTextMessage(`El servicio seleccionado ya se ha finalizado por lo que no se pudo realizar el proceso de cancelación`, conversationContent.waId, businessId)
@@ -750,7 +795,7 @@ class ClientBotLinkCQRS {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY':  businessIdVsD360APIKey[businessId].key
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].key
       }
     }
     const req = https.request(options, res => {

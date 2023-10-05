@@ -10,8 +10,8 @@ const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const https = require('https');
 const dateFormat = require('dateformat');
 const businessIdVsD360APIKey = {
-  "75cafa6d-0f27-44be-aa27-c2c82807742d": process.env.D360_API_KEY,
-  "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": process.env.D360_API_KEY,
+  "75cafa6d-0f27-44be-aa27-c2c82807742d": process.env.D360_NEW_API_KEY,
+  "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": process.env.D360_NEW_API_KEY,
   "2af56175-227e-40e7-97ab-84e8fa9e12ce": process.env.D360_API_KEY_FREE_DRIVER
 }
 
@@ -263,48 +263,6 @@ class ServiceES {
       headers: {
         'Content-Type': 'application/json',
         'D360-API-KEY': businessIdVsD360APIKey[businessId]
-      }
-    }
-    const req = https.request(options, res => {
-      let data = ''
-
-      res.on('data', chunk => {
-        data += chunk
-      })
-
-      res.on('end', () => {
-        //console.log(JSON.parse(data))
-      })
-    })
-      .on('error', err => {
-        console.log('Error: ', err.message)
-      });
-
-    console.log("CONTENT ASSIGNED ===> ", JSON.stringify(content))
-    req.write(JSON.stringify(content))
-    req.end();
-    if(businessId === "75cafa6d-0f27-44be-aa27-c2c82807742d"){
-      this.sendTextMessageToNewNumber(text, waId);
-    }
-  }
-
-  sendTextMessageToNewNumber(text, waId) {
-    const content = {
-      "recipient_type": "individual",
-      "to": waId,
-      "type": "text",
-      "text": {
-        "body": text
-      }
-    }
-    const options = {
-      protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'D360-API-KEY': "uMPEp1xYwrghXooqC3rJftUGAK"
       }
     }
     const req = https.request(options, res => {
