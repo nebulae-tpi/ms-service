@@ -13,7 +13,7 @@ let instance;
 class BusinessES {
   constructor() {
   }
-
+ 
    /**
      * updates the business general info on the materialized view according to the received data from the event store.
      * @param {*} businessGeneralInfoUpdatedEvent business general info updated event
