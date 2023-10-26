@@ -10,7 +10,6 @@ const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
 const DriverDA = require('./data/DriverDA');
 const VehicleDA = require('./data/VehicleDA');
-const ServiceDA = require('./domain/service/data-access/ServiceDA');
 const ClientDA = require('./domain/client/data-access/ClientDA');
 const graphQlService = require('./services/emi-gateway/GraphQlService')();
 const { concat, forkJoin } = require('rxjs');
@@ -18,6 +17,7 @@ const shift = require('./domain/shift');
 const Cronjob = require('./domain/cronjob');
 const Wallet = require('./domain/cronjob');
 const Business = require("./domain/business");
+const Service = require("./domain/service");
 
 
 
@@ -30,8 +30,8 @@ const start = () => {
         forkJoin(
             DriverDA.start$(),
             VehicleDA.start$(),
-            ServiceDA.start$(),
             ClientDA.start$(),
+            Service.start$,
             Wallet.start$,
             shift.start$,
             Cronjob.start$,

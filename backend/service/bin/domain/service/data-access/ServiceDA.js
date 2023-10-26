@@ -130,7 +130,6 @@ class ServiceDA {
       query.closed = false;
     } 
 
-    console.log("QUERY ====> ", query);
 
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);

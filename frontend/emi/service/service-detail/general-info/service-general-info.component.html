@@ -172,7 +172,7 @@
                 <thead>
                     <tr>
                         <th>{{'SERVICE.DETAILS.CLIENT_FULLNAME' | translate}}</th>
-                        <th>{{'SERVICE.DETAILS.CLIENT_USERNAME' | translate}}</th>
+                        <th>{{'SERVICE.DETAILS.CLIENT_PHONE_NUMBER' | translate}}</th>
                         <th>{{'SERVICE.DETAILS.CLIENT_TIP_TYPE' | translate}}</th>
                         <th>{{'SERVICE.DETAILS.CLIENT_TIP' | translate}}</th>
                     </tr>
@@ -183,7 +183,7 @@
                           <span class="text-truncate">{{service.client.fullname}}</span>
                         </td>
                         <td>
-                          <span class="text-truncate">{{service.client.username}}</span>
+                          <a class="text-truncate" target="_blank" href="{{'https://wa.me/'+service.client.phoneNumber}}">{{service.client.phoneNumber}}</a>
                         </td>
                         <td>
                           <span class="text-truncate">{{service.client.tipType ? ("SERVICE.DETAILS.TIP_TYPES."+service.client.tipType  | translate): ''}}</span>

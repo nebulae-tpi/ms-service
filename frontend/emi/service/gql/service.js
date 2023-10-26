@@ -83,6 +83,7 @@ export const ServiceServiceFieldsFragment = gql`
         fullname
         tip
         tipType
+        phoneNumber
       }
       tip      
       route {
@@ -178,6 +179,7 @@ export const ServiceService = gql`
         fullname
         tip
         tipType
+        phoneNumber
       }
       tip      
       route {
@@ -370,6 +372,7 @@ export const ServiceServiceUpdatedSubscription = gql`
         fullname
         tip
         tipType
+        phoneNumber
       }
       tip      
       route {

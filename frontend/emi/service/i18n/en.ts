@@ -2,6 +2,7 @@ export const locale = {
   lang: 'en',
   data: {
     'SERVICE': {
+      SERVICE_FILTERS_CHANNEL: "Canal",
       HEADER_TITLE: 'SERVICES',
       DETAIL_HEADER_NAME: 'Service detail',
       SERVICE_TABLE_LIST:{
@@ -13,6 +14,8 @@ export const locale = {
         'STATE': 'State',
       },
       SERVICE_FILTERS: {
+        CHANNEL: "Canal",
+        'CLIENT_PHONE_NUMBER': "Phone Number",
         CHANNEL_OPERATOR: 'Operator',
         CHANNEL_CLIENT: 'Satellite',
         CHANNEL_APP_CLIENT: 'App. Client',

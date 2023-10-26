@@ -5,6 +5,7 @@ const { of, interval, from } = require("rxjs");
 const Event = require("@nebulae/event-store").Event;
 const eventSourcing = require("../../tools/EventSourcing")();
 const ServiceDA = require('./data-access/ServiceDA');
+const ClientDA = require('./data-access/ClientDA');
 const broker = require("../../tools/broker/BrokerFactory")();
 const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
 const GraphqlResponseTools = require('../../tools/GraphqlResponseTools');
@@ -47,6 +48,18 @@ class ServiceCQRS {
         //If an user does not have the role to get the Service from other business, the query must be filtered with the businessId of the user
         const businessId = !isPlatformAdmin? (authToken.businessId || ''): null;
         return ServiceDA.getService$(args.id, businessId)
+      }),
+      mergeMap(service => {
+        if(service.client){
+          console.log("Consulta client ===> ", service.client.tipClientId || service.client.id)
+          return ClientDA.getClient$(service.client.tipClientId || service.client.id).pipe(
+            map(client => {
+              return {...service, client: {...service.client, phoneNumber: (client.generalInfo || {}).phone}}
+            })
+          )
+        }else {
+          return of(service)
+        }
       }),
       map(service => Crosscutting.formatServiceToGraphQLSchema(service)),
       mergeMap(rawResponse => {
