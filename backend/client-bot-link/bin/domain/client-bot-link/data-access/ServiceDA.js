@@ -46,7 +46,7 @@ class ServiceDA {
       query["state"] = { $in: filter.states};
     }    
     
-    const initDate = new Date(new Date(timestamp).toLocaleString("es-CO", { timeZone: "America/Bogota" }));
+    const initDate = new Date(new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }));
     console.log("QUERY COUNT ====> ", query);
     return of(initDate)
     .pipe(
@@ -70,7 +70,7 @@ class ServiceDA {
       query.businessId = filter.businessId;
     }
     
-    const initDate = new Date(new Date(timestamp).toLocaleString("es-CO", { timeZone: "America/Bogota" }));
+    const initDate = new Date(new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" }));
     console.log("QUERY COUNT ====> ", query);
     return of(initDate)
     .pipe(
