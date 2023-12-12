@@ -176,7 +176,7 @@ class ClientBotLinkCQRS {
           fullname: client.generalInfo.name,
           tipClientId: client.associatedClientId,
           tipType: client.satelliteInfo.tipType,
-          phone: client.associatedClientPhoneNumber,
+          phone: (client.associatedClientPhoneNumber || (client.generalInfo || {}).phone),
           tip: airportTipEnabled ? satelliteAirtportPrices[client.satelliteInfo.satelliteType || "PORTER_LODGE"] : (client.satelliteInfo || {}).tip,
           referrerDriverDocumentId: (client.satelliteInfo || {} ).referrerDriverDocumentId,
           referrerDriverDocumentIds: (client.satelliteInfo || {} ).referrerDriverDocumentIds,
