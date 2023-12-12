@@ -17,10 +17,13 @@ const { BusinessDA, BotConversationDA, ClientDA, ServiceDA } = require('./data-a
 
 const satelliteAirtportPrices = JSON.parse('{"PORTER_LODGE":5000, "age":30, "HOTEL":10000}')
 const availableTestNumbers = ["573155421851", "573015033132", "573013917663", "3138404790"]
+let registerUserList = {};
+const requestClientCache = {};
 const businessIdVsD360APIKey = {
   "75cafa6d-0f27-44be-aa27-c2c82807742d": {
     D360_KEY: process.env.D360_API_KEY,
-    registerTxt: `Hola, Bienvenido al TX BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de TX Plus para realizar el proceso de registro`,
+    registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para solicitar un servicio con aire acondicionado presionar el boton "Solicitar con aire"\n- Para listar los servicios actualmente activos puedes enviar el caracter "?" o presionar el boton "Servicios activos"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
     menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
@@ -174,11 +177,11 @@ class ClientBotLinkCQRS {
           tipClientId: client.associatedClientId,
           tipType: client.satelliteInfo.tipType,
           phone: client.associatedClientPhoneNumber,
-          tip: airportTipEnabled ? satelliteAirtportPrices[client.satelliteInfo.satelliteType || "PORTER_LODGE"] : client.satelliteInfo.tip,
-          referrerDriverDocumentId: client.satelliteInfo.referrerDriverDocumentId,
-          referrerDriverDocumentIds: client.satelliteInfo.referrerDriverDocumentIds,
-          offerMinDistance: client.satelliteInfo.offerMinDistance,
-          offerMaxDistance: client.satelliteInfo.offerMaxDistance
+          tip: airportTipEnabled ? satelliteAirtportPrices[client.satelliteInfo.satelliteType || "PORTER_LODGE"] : (client.satelliteInfo || {}).tip,
+          referrerDriverDocumentId: (client.satelliteInfo || {} ).referrerDriverDocumentId,
+          referrerDriverDocumentIds: (client.satelliteInfo || {} ).referrerDriverDocumentIds,
+          offerMinDistance: (client.satelliteInfo || {} ).offerMinDistance,
+          offerMaxDistance: (client.satelliteInfo || {} ).offerMaxDistance
         },
         _id,
         businessId: businessId,
@@ -295,6 +298,55 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
+  sendHelpContact(waId, businessId) {
+    const content = {
+      "to": waId,
+      "type": "contacts",
+      "contacts": [
+        {
+          "name": {
+            "first_name": "TX Plus",
+            "formatted_name": "TxSoporte",
+            "last_name": "Soporte"
+          },
+          "phones": [
+            {
+              "phone": "+57 (300) 198-1247",
+              "type": "WORK",
+              "wa_id": "573001981247"
+            }
+          ]
+        }
+      ]
+    }
+    const options = {
+      protocol: 'https:',
+      hostname: 'waba.360dialog.io',
+      path: '/v1/messages/',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY,
+      }
+    }
+    const req = https.request(options, res => {
+      let data = ''
+
+      res.on('data', chunk => {
+        data += chunk
+      })
+
+      res.on('end', () => {
+        //console.log(JSON.parse(data))
+      })
+    })
+      .on('error', err => {
+        console.log('Error sendTextMessage: ', err.message)
+      })
+    req.write(JSON.stringify(content))
+    req.end();
+  }
+
   sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId, businessId) {
     const content = {
       "recipient_type": "individual",
@@ -352,17 +404,13 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  sendInteractiveButtonMessage(headerText, bodyText, buttons, waId, businessId) {
+  sendInteractiveButtonMessage(headerText, bodyText, buttons, waId, businessId, withHeaderText = true) {
     const content = {
       "recipient_type": "individual",
       "to": waId,
       "type": "interactive",
       "interactive": {
         "type": "button",
-        "header": {
-          "type": "text",
-          "text": headerText
-        },
         "body": {
           "text": bodyText
         },
@@ -380,6 +428,12 @@ class ClientBotLinkCQRS {
             }
           })
         }
+      }
+    }
+    if (withHeaderText) {
+      content.interactive.header = {
+        "type": "text",
+        "text": headerText
       }
     }
     console.log("CONTENT ===> ", JSON.stringify(content));
@@ -490,6 +544,37 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
+  requestServiceWithoutSatellite$(client, currentRequestService, waId, message,  businessId) {
+    try {
+      if (this.messageIdCache == null) this.messageIdCache = [];
+      if (this.messageIdCache.includes(message.id)) {
+        console.log('ClientBotLinkCQRS.requestService: FATAL, whatsapp tried to send the same message more than once from', message.from, 'and will be ignored', message.id);
+        return of({});
+      }
+      this.messageIdCache.push(message.id);
+      this.messageIdCache = this.messageIdCache.slice(-20);
+    } catch (error) {
+      console.error(error);
+    }
+    client.generalInfo.addressLine1 = currentRequestService.address;
+    client.generalInfo.addressLine2 = currentRequestService.reference
+    client.location = currentRequestService.location;
+    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId)).pipe(
+      mergeMap(() => {
+        if(!((client.lastServices) || []).some(l => l.address == currentRequestService.address)){
+          return ClientDA.appendLastRequestedService$(client._id, {...currentRequestService, id: uuidv4()});
+        }
+        else {
+          return of({})
+        }
+      }),
+      tap(() => {
+        this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId)
+        currentRequestService = undefined;
+      })
+    )
+  }
+
   requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount, filters, businessId) {
 
     try {
@@ -540,6 +625,37 @@ class ClientBotLinkCQRS {
     }
   }
 
+  infoServiceWithoutFilter$(clientId, waId, businessId) {
+    return ServiceDA.getServices$({ clientId: clientId, states: ["REQUESTED", "ASSIGNED", "ARRIVED"], businessId }).pipe(
+      toArray(),
+      tap(result => {
+        if (result.length > 0) {
+          const listElements = result.map(val => {
+            const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+            const ddhh = dateFormat(currentDate, "HH:MM");
+            const assignedData = val.state === "REQUESTED" ? "" : `Conductor ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
+            return { id: `CANCEL_${val._id}`, title: `Cancelar servicio ${ddhh}`, description: `${assignedData}` }
+          });
+
+          if (listElements.length > 0) {
+            listElements.push({ id: `CancelAllServiceBtn`, title: `Cancelar Todos` });
+          }
+          const aditionalTempText = ``;
+          this.sendInteractiveListMessage("Tienes el/los siguiente(s) servicios activos con nosotros", `${result.reduce((acc, val) => {
+            const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+            const ddhh = dateFormat(currentDate, "HH:MM");
+            const assignedData = val.state === "REQUESTED" ? "" : `Conductor: ${val.driver.fullname}, Placas: ${val.vehicle.licensePlate}`
+            acc = `${acc}- Solicitado a las ${ddhh} ${assignedData}\n`
+            return acc;
+          }, "")}${aditionalTempText}`, "Lista de Servicios", "Servicios", listElements, waId, businessId)
+        } else {
+          this.sendTextMessage("Actualmente no se tienen servicios activos", waId, businessId)
+        }
+      })
+    )
+
+  }
+
   infoService$(clientId, waId, businessId) {
     return ServiceDA.getServices$({ clientId: clientId, states: ["REQUESTED", "ASSIGNED", "ARRIVED"], businessId }).pipe(
       toArray(),
@@ -575,6 +691,187 @@ class ClientBotLinkCQRS {
       })
     )
 
+  }
+
+
+  continueConversationWithoutSatellite$(message, conversationContent, client, businessId) {
+    let currentRequestService = requestClientCache[client._id];
+    const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
+    const textResp = ((message || {}).text || {}).body;
+    const sharedLocation = ((message || {}).location || {});
+    const buttonsCancel = [
+      {
+        id: "cancelLastRequestedBtn",
+        text: "Cancelar solicitud"
+      }
+    ];
+
+    const buttonsRequest = [
+      {
+        id: "cancelLastRequestedBtn",
+        text: "Cancelar solicitud"
+      },
+      {
+        id: "listLastServiceBtn",
+        text: "Últimos solicitados"
+      }
+    ]
+
+    const initialMenu = [
+      {
+        id: "rqstServiceACBtn",
+        text: "Solicitar con aire"
+      },
+      {
+        id: "listCurrentServices",
+        text: "Servicios activos"
+      },
+      {
+        id: "helpBtn",
+        text: "Ayuda"
+      }
+      
+    ]
+    if (textResp != null) {
+      if (currentRequestService == null) {
+        if(textResp == "?"){
+          return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
+        }
+        let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
+        if (charCount > 0) {
+          currentRequestService = {
+            step: "REQUEST_REFERENCE",
+            timestamp: Date.now()
+          }
+          this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
+          requestClientCache[client._id] = currentRequestService;
+          return of({});
+        }
+      }
+      switch ((currentRequestService || {}).step) {
+        case "REQUEST_REFERENCE":
+          this.sendInteractiveButtonMessage(null, `Por favor escribe una referencia`, buttonsCancel, conversationContent.waId, businessId, false);
+          currentRequestService.step = "REQUEST_LOCATION";
+          currentRequestService.address = textResp;
+          break;
+        case "REQUEST_LOCATION":
+          this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
+          currentRequestService.step = "LOCATION_SHARED";
+          currentRequestService.reference = textResp;
+          break;
+        default:
+          this.sendInteractiveButtonMessage(`Hola ${client.generalInfo.name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, initialMenu, conversationContent.waId, businessId);
+          break;
+      }
+
+    } else if (interactiveResp) {
+      if (currentRequestService != null && interactiveResp != "cancelLastRequestedBtn") {
+
+        this.sendInteractiveButtonMessage(null, `En este momento estas realizando una solicitu de servicio, si deseas realizar otra acción primero debes cancelar la solicitud actual`, buttonsCancel, conversationContent.waId, businessId);
+      }
+      switch (interactiveResp) {
+        case "rqstServiceACBtn":
+          currentRequestService = requestClientCache[client._id] || {};
+          currentRequestService.step = "REQUEST_REFERENCE";
+          currentRequestService.timestamp = Date.now();
+          currentRequestService.filters = {AC: true};
+          this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
+          break;
+        case "helpBtn":
+          const text = "A continuación se comparte el contacto de soporte de TxPlus"
+          this.sendTextMessage(text, conversationContent.waId, "75cafa6d-0f27-44be-aa27-c2c82807742d")
+          this.sendHelpContact(conversationContent.waId, "75cafa6d-0f27-44be-aa27-c2c82807742d")
+          break;
+        case "listCurrentServices":
+          return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
+        case "listLastServiceBtn":
+          if (((client || {}).lastServices)) {
+            const listElements = (client || {}).lastServices.map(val => {
+              const address = val.address.length > 24 ? val.address.substring(0, 21) + "..." : val.address;
+              const reference = val.reference > 72 ? val.reference.substring(0, 69) + "..." : val.reference
+              return { id: `REQUEST_${val.id}`, title: `${address}`, description: `${reference}` }
+            });
+            this.sendInteractiveListMessage("Los últimos servicios solicitados son los siguientes", `${(client || {}).lastServices.reduce((acc, val) => {
+              acc = `${acc}- ${val.address}\n`
+              return acc;
+            }, "")}`, "Lista de Servicios", "Servicios", listElements, conversationContent.waId, businessId)
+            break;
+          } else {
+            return of({}).pipe(
+              tap(() => {
+                this.sendTextMessage(`No se han encontrado servicios solicitados recientemente`, conversationContent.waId, businessId)
+              })
+            )
+          }
+        case "cancelLastRequestedBtn":
+          currentRequestService = undefined;
+          this.sendTextMessage(`La solicitud de servicio ha sido cancelada`, conversationContent.waId, businessId)
+          break;
+        default:
+          if (interactiveResp.includes("CANCEL_")) {
+            return ServiceDA.markedAsCancelledAndReturnService$(interactiveResp.replace("CANCEL_", "")).pipe(
+              tap(service => {
+                if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()) throw ERROR_23224;
+              }),
+              mergeMap(val => {
+
+                const STATES_TO_CLOSE_SERVICE = ["ON_BOARD", "DONE", "CANCELLED_DRIVER", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_SYSTEM"];
+                if (STATES_TO_CLOSE_SERVICE.includes(val.state)) {
+                  this.sendTextMessage(`El servicio seleccionado ya se ha finalizado por lo que no se pudo realizar el proceso de cancelación`, conversationContent.waId, businessId)
+                  return of({})
+                }
+                else {
+                  const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                  const ddhh = dateFormat(currentDate, "HH:MM");
+                  this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId, businessId)
+                  return eventSourcing.eventStore.emitEvent$(new Event({
+                    aggregateType: 'Service',
+                    aggregateId: val._id,
+                    eventType: "ServiceCancelledByClient",
+                    eventTypeVersion: 1,
+                    user: conversationContent.waId,
+                    data: { reason: null, notes: "" }
+                  }))
+                }
+
+              })
+            );
+          } else if(interactiveResp.includes("REQUEST_")){
+            const selectedServiceInfo =  client.lastServices.find(l => l.id == interactiveResp.replace("REQUEST_", ""));
+            return this.requestServiceWithoutSatellite$(client, selectedServiceInfo, conversationContent.waId, message, businessId).pipe(
+              tap(() => {
+                requestClientCache[client._id] = undefined;
+              })
+            );
+          }
+           else {
+            return of({});
+          }
+      }
+    }
+    else if (sharedLocation) {
+      if ((currentRequestService || {}).step == "LOCATION_SHARED") {
+        currentRequestService.location = {
+          lat: message.location.latitude,
+          lng: message.location.longitude,
+        }
+        return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
+          tap(() => {
+            requestClientCache[client._id] = currentRequestService
+          })
+        );
+
+      } else if ((currentRequestService || {}).step == "REQUEST_REFERENCE") {
+        this.sendTextMessage(`Para continuar con la solicitud debes enviar una direccíon`, conversationContent.waId, businessId)
+      }
+      else if ((currentRequestService || {}).step == "REQUEST_LOCATION") {
+        this.sendTextMessage(`Para continuar con la solicitud debes enviar una referencia`, conversationContent.waId, businessId)
+      } else {
+        this.sendInteractiveButtonMessage(`Hola ${client.generalInfo.name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, initialMenu, conversationContent.waId, businessId);
+      }
+    }
+    requestClientCache[client._id] = currentRequestService;
+    return of({})
   }
 
   continueConversation$(message, conversationContent, client, serviceCount, businessId) {
@@ -752,35 +1049,134 @@ class ClientBotLinkCQRS {
   }
 
   initConversation$(id, conversationContent, message, businessId) {
+    const keys = Object.keys(registerUserList);
+    for (let index = 0; index < keys.length; index++) {
+      const element = keys[index];
+      if (!(registerUserList[element] || {}).timestamp || (registerUserList[element] || {}).timestamp + (60000 * 5) < Date.now()) {
+        delete registerUserList[element]
+      }
+    }
     const phoneNumber = conversationContent.waId.replace("57", "");
-    console.log("LLEGA MENSAJE ===> ", businessId)
-    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber), businessId, { satelliteId: 1 }).pipe(
+    return ClientDA.getClientByPhoneNumber$(parseInt(phoneNumber), businessId).pipe(
       mergeMap(client => {
         if ((client || {})._id) {
-          return ClientDA.getClient$(client.satelliteId).pipe(
-            map(satelliteClient => ({ ...satelliteClient, associatedClientId: client._id, associatedClientPhoneNumber: phoneNumber })),
-            mergeMap(c => {
-              console.log("CLIENT MESSAGE ===> ", JSON.stringify(message));
-              return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
-                mergeMap(() => {
-                  return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
-                    mergeMap(serviceCount => {
-                      return this.continueConversation$(message, conversationContent, c, serviceCount, businessId);
-                    }),
-                    catchError(err =>
-                      of("Error proccesing conversation data")
+          if (client.satelliteId) {
+            return ClientDA.getClient$(client.satelliteId).pipe(
+              map(satelliteClient => ({ ...satelliteClient, associatedClientId: client._id, associatedClientPhoneNumber: phoneNumber })),
+              mergeMap(c => {
+                return BotConversationDA.createConversation$(id, { ...conversationContent, client: c }).pipe(
+                  mergeMap(() => {
+                    return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+                      mergeMap(serviceCount => {
+                        return this.continueConversation$(message, conversationContent, c, serviceCount, businessId);
+                      }),
+                      catchError(err =>
+                        of("Error proccesing conversation data")
+                      )
                     )
+                  })
+                )
+              })
+            )
+          } else {
+            return BotConversationDA.createConversation$(id, { ...conversationContent, client }).pipe(
+              mergeMap(() => {
+                return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
+                  mergeMap(serviceCount => {
+                    return this.continueConversationWithoutSatellite$(message, conversationContent, client, businessId, true);
+                  }),
+                  catchError(err => {
+                    console.log("ERROR ===> ", err)
+                    return of("Error proccesing conversation data")
+                  }
                   )
-                })
-              )
-            })
-          )
+                )
+              })
+            )
+          }
+
         } else {
-          return of({}).pipe(
-            tap(() => {
-              this.sendTextMessage(businessIdVsD360APIKey[businessId].registerTxt, conversationContent.waId, businessId)
-            })
-          )
+          console.log("REGISTRA NUEVO USUARIO ===> ", registerUserList[phoneNumber])
+          if (!registerUserList[phoneNumber]) {
+            return of({}).pipe(
+              tap(() => {
+                registerUserList[phoneNumber] = { timestamp: Date.now() }
+                this.sendTextMessage(businessIdVsD360APIKey[businessId].registerTxt, conversationContent.waId, businessId)
+              })
+            )
+          }
+          else {
+            const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
+            if (!interactiveResp) {
+              registerUserList[phoneNumber].name = message.text.body;
+              const buttons = [
+                {
+                  id: "confirmBtn",
+                  text: "Confirmar"
+                },
+                {
+                  id: "changeBtn",
+                  text: "Cambiar"
+                }
+              ]
+              this.sendInteractiveButtonMessage(`${message.text.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
+            } else {
+              switch (interactiveResp) {
+                case "confirmBtn":
+                  const buttons = [
+                    {
+                      id: "rqstServiceACBtn",
+                      text: "Solicitar con aire"
+                    },
+                    {
+                      id: "listCurrentServices",
+                      text: "Servicios activos"
+                    },
+                    {
+                      id: "helpBtn",
+                      text: "Ayuda"
+                    }
+                  ]
+                  const newClient = {
+                    generalInfo: {
+                      name: registerUserList[phoneNumber].name,
+                      phone: parseInt(phoneNumber)
+                    },
+                    state: true,
+                    businessId: businessId
+                  };
+                  newClient._id = uuidv4();
+                  newClient.creatorUser = 'SYSTEM';
+                  newClient.creationTimestamp = new Date().getTime();
+                  newClient.modifierUser = 'SYSTEM';
+                  newClient.modificationTimestamp = new Date().getTime();
+                  newClient.satelliteInfo = {
+                    "tip": 0,
+                    "tipType": "CASH"
+                  };
+                  return eventSourcing.eventStore.emitEvent$(
+                    new Event({
+                      eventType: "ClientCreated",
+                      eventTypeVersion: 1,
+                      aggregateType: "Client",
+                      aggregateId: newClient._id,
+                      data: newClient,
+                      user: "SYSTEM"
+                    })).pipe(
+                    tap(() => {
+                      this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
+                      registerUserList[phoneNumber] = undefined;
+                    })
+                  );
+                  break;
+                case "changeBtn":
+                  this.sendTextMessage("¿Cual es tu nombre?", conversationContent.waId, businessId)
+                  break;
+              }
+            }
+            return of({})
+          }
+
         }
       })
     )

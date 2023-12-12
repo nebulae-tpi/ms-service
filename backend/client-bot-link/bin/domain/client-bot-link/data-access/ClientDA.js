@@ -22,15 +22,41 @@ class ClientDA {
     });
   }
 
-    /**
-   * Gets a client satellite by the client id
-   */
-  static getClientByPhoneNumber$(waId, businessId, projection) {
+  /**
+ * Creates a new Client
+ * @param {*} client client to create
+ */
+  static createClient$(client) {
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection.insertOne(client));
+  }
+
+  static appendLastRequestedService$(id, newService) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    return defer(() =>
+      collection.updateOne(
+        { _id: id },
+        {
+          $push: {
+            lastServices: { $each: [newService], $slice: -5 }
+          }
+        },
+        {
+          upsert: true
+        }
+      )
+    );
+  }
+  /**
+ * Gets a client satellite by the client id
+ */
+  static getClientByPhoneNumber$(waId, businessId, projection = {}) {
     const collection = mongoDB.db.collection(CollectionName);
     const query = {
       "generalInfo.phone": waId
     };
-    if(businessId){
+    if (businessId) {
       query.businessId = businessId;
     }
     return defer(() => collection.findOne(query, projection));
