@@ -23,7 +23,7 @@ const businessIdVsD360APIKey = {
   "75cafa6d-0f27-44be-aa27-c2c82807742d": {
     D360_KEY: process.env.D360_API_KEY,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
-    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para solicitar un servicio con aire acondicionado presionar el boton "Solicitar con aire"\n- Para listar los servicios actualmente activos puedes enviar el caracter "?" o presionar el boton "Servicios activos"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para solicitar un servicio con aire acondicionado presionar el boton "Solicitar con aire"\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
     menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
@@ -724,7 +724,7 @@ class ClientBotLinkCQRS {
       },
       {
         id: "listCurrentServices",
-        text: "Servicios activos"
+        text: "Cancelar servicio"
       },
       {
         id: "helpBtn",
@@ -1130,7 +1130,7 @@ class ClientBotLinkCQRS {
                     },
                     {
                       id: "listCurrentServices",
-                      text: "Servicios activos"
+                      text: "Cancelar servicio"
                     },
                     {
                       id: "helpBtn",
