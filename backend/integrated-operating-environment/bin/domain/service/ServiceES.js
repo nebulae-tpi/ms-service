@@ -58,6 +58,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceLocationReported$(evt) {
+        return of({})
         return this.transmitEventToFrontEnd$(evt);
     }
 

@@ -68,6 +68,7 @@ class ShiftES {
 
 
     transmitEventToFrontEnd$(shiftEvent) {
+        return of({});
         return of(shiftEvent).pipe(
             delay(1000),
             mergeMap(evt => ShiftDA.findById$(evt.aid)),
