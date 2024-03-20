@@ -80,6 +80,7 @@ class ShiftES {
                     instance.shiftUpdateCache.list.push(ioeShift)
                     return of({});
                 }else {
+                    console.log("ACTUALIZA SHIFTS ===> ", instance.shiftUpdateCache.list.length)
                     return broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEShiftList`, instance.shiftUpdateCache.list).pipe(
                         tap(() => {
                             instance.shiftUpdateCache.timestamp = Date.now();
