@@ -176,7 +176,7 @@ class ServiceES {
             }), 
             mergeMap(ioeService => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEService`, ioeService))
         );
-    }
+    } 
 
     formatServiceToGraphqlIOEService(service) {
         const marker = (!service || !service.pickUp || !service.pickUp.marker) ? undefined : { lng: service.pickUp.marker.coordinates[0], lat: service.pickUp.marker.coordinates[1] };

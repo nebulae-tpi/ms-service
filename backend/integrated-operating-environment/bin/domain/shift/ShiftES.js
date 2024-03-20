@@ -70,7 +70,6 @@ class ShiftES {
 
 
     transmitEventToFrontEnd$(shiftEvent) {
-        return of({});
         return of(shiftEvent).pipe(
             mergeMap(evt => ShiftDA.findById$(evt.aid)),
             //tap(s => { if(!s){console.log(`shiftEvent of undefined shift: ${JSON.stringify(shiftEvent)}`)} }),
