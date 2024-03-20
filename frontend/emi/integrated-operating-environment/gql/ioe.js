@@ -207,3 +207,29 @@ export const IOEShiftSubscription = gql`
     }
   }
 `;
+
+export const IOEShiftListSubscription = gql`
+  subscription($businessId: String){
+    IOEShiftList(businessId: $businessId){
+      id,
+      businessId,
+      timestamp,            
+      state,        
+      online,
+      lastReceivedComm,
+      driver{ 
+      fullname, 
+      documentId, 
+      id,
+      username,
+      wallet {
+        pockets{
+          main, bonus
+        }
+      }
+      },
+      vehicle{ id, licensePlate,features, brand,line, model },
+      location{ lat, lng, timestamp },
+    }
+  }
+`;

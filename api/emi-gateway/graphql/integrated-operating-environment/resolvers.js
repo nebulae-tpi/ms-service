@@ -158,6 +158,16 @@ module.exports = {
           return !variables.businessId ? true : payload.IOEShift.businessId === variables.businessId;
         }
       )
+    },
+    IOEShiftList: {
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          return pubsub.asyncIterator("IOEShiftList");
+        },
+        (payload, variables, context, info) => {
+          return !variables.businessId ? true : (payload.IOEShiftList[0]).businessId === variables.businessId;
+        }
+      )
     }
   }
 
@@ -186,6 +196,15 @@ const eventDescriptors = [
       //console.log(`Event of type  ${descriptor.backendEventName} HERE!!!!`);
     },// OPTIONAL, only use if needed
   },
+  {
+    backendEventName: 'IOEShiftList',
+    gqlSubscriptionName: 'IOEShiftList',
+    dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
+    onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
+    onEvent: (evt, descriptor) => {
+      //console.log(`Event of type  ${JSON.stringify(evt)} HERE!!!!`);
+    },// OPTIONAL, only use if needed
+  }
 ];
 
 

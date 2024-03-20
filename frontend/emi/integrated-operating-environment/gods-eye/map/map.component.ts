@@ -147,7 +147,8 @@ export class MapComponent implements OnInit, OnDestroy {
     this.listenBusinessChanges();
     //await this.resetData();
     this.subscribeIOEServicesListener();
-    this.subscribeIOEShiftsListener();
+    //this.subscribeIOEShiftsListener();
+    this.subscribeIOEShiftListListener();
     this.registerTimer();
   }
 
@@ -324,6 +325,33 @@ export class MapComponent implements OnInit, OnDestroy {
       );
   }
 
+  subscribeIOEShiftListListener() {
+    if (!this.selectedBusinessId) {
+      return;
+    }
+    this.godsEyeService.listenIOEShiftList$(this.selectedBusinessId)
+      .pipe(
+        tap(() => console.log("LLEGA LISTA ===> ")),
+        filter(() => this.resetSemaphore === 0),
+        filter(v => v),
+        map(subscription => subscription.data.IOEShiftList),
+        mergeMap(shiftList => {
+          return from(shiftList)
+        }),
+        takeUntil(this.ngUnsubscribe),
+        takeUntil(this.ngUnsubscribeIOEShiftListener)
+      )
+      .subscribe(
+        (shift: any) => {
+         this.applyHotUpdate(shift);
+        },
+        (error) => console.error(`MapComponent.subscribeIOEShiftsListener: Error => ${error}`),
+        () => {
+          //console.log(`MapComponent.subscribeIOEShiftsListener: Completed`);
+        },
+      );
+  }
+
   /**
    * Register a second by second timer available for multiple maintenance tasks
    */
@@ -383,7 +411,8 @@ export class MapComponent implements OnInit, OnDestroy {
     this.ngUnsubscribeIOEShiftListener.next();
     await this.resetData();
     this.subscribeIOEServicesListener();
-    this.subscribeIOEShiftsListener();
+    //this.subscribeIOEShiftsListener();
+    this.subscribeIOEShiftListListener();
     this.resetSemaphore = 0;
   }
 

@@ -7,7 +7,7 @@ import { GatewayService } from '../../../../api/gateway.service';
 import * as moment from 'moment';
 import {
   IOEServices, IOEServiceSubscription,
-  IOEShifts, IOEShiftSubscription,
+  IOEShifts, IOEShiftSubscription, IOEShiftListSubscription
 } from '../gql/ioe.js';
 
 
@@ -161,6 +161,19 @@ export class GodsEyeService {
     return this.gateway.apollo
       .subscribe({
         query: IOEShiftSubscription,
+        variables: {
+          businessId
+        }
+      });
+  }
+
+  /**
+   * Event triggered when a business is created, updated or deleted.
+   */
+  listenIOEShiftList$(businessId): Observable<any> {
+    return this.gateway.apollo
+      .subscribe({
+        query: IOEShiftListSubscription,
         variables: {
           businessId
         }

@@ -17,10 +17,12 @@ const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
  * Singleton instance
  */
 let instance;
+const GOD_EYE_UPDATE_THRESHOLD = parseInt(process.env.GOD_EYE_UPDATE_THRESHOLD || "20000")
 
 class ShiftES {
 
     constructor() {
+        this.shiftUpdateCache = {timestamp: Date.now(), list: []}
     }
     
     handleShiftStarted$(evt) {
@@ -70,13 +72,31 @@ class ShiftES {
     transmitEventToFrontEnd$(shiftEvent) {
         return of({});
         return of(shiftEvent).pipe(
-            delay(1000),
             mergeMap(evt => ShiftDA.findById$(evt.aid)),
-            tap(s => { if(!s){console.log(`shiftEvent of undefined shift: ${JSON.stringify(shiftEvent)}`)} }),
+            //tap(s => { if(!s){console.log(`shiftEvent of undefined shift: ${JSON.stringify(shiftEvent)}`)} }),
             filter(s => s),
             map(shift => this.formatShiftToGraphqlIOEShift(shift)),
-            mergeMap(ioeShift => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEShift`, ioeShift))
+            mergeMap(ioeShift => {
+                if((instance.shiftUpdateCache.timestamp+GOD_EYE_UPDATE_THRESHOLD) > Date.now()){
+                    instance.shiftUpdateCache.list.push(ioeShift)
+                    return of({});
+                }else {
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEShiftList`, instance.shiftUpdateCache.list).pipe(
+                        tap(() => {
+                            instance.shiftUpdateCache.timestamp = Date.now();
+                            instance.shiftUpdateCache.list = [];
+                        })
+                    )
+                }
+            })
         );
+        // return of(shiftEvent).pipe(
+        //     mergeMap(evt => ShiftDA.findById$(evt.aid)),
+        //     tap(s => { if(!s){console.log(`shiftEvent of undefined shift: ${JSON.stringify(shiftEvent)}`)} }),
+        //     filter(s => s),
+        //     map(shift => this.formatShiftToGraphqlIOEShift(shift)),
+        //     mergeMap(ioeShift => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEShift`, ioeShift))
+        // );
     }
 
     formatShiftToGraphqlIOEShift(shift) {

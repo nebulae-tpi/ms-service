@@ -163,10 +163,6 @@ class ServiceES {
 
 
     transmitEventToFrontEnd$(serviceEvent) {
-        if(serviceEvent.et === "ServiceCancelledByOperator"){
-            console.log("LLEGA EVENTO DE CANCELACIÓN ===> ", serviceEvent)
-        }
-        
         return of(serviceEvent).pipe(
             delay(1000),
             mergeMap(evt => ServiceDA.findById$(evt.aid)),

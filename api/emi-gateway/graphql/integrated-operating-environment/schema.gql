@@ -355,6 +355,7 @@ type Subscription {
   IOEService(businessId: String, operatorId: String , statesFilter: [String], channelsFilter: [String], searchBar: String): IOEService
   "IOE Shift events"
   IOEShift(businessId: String): IOEShift
+  IOEShiftList(businessId: String): [IOEShift]
 }
 
 
