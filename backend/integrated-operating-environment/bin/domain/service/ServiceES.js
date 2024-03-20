@@ -173,7 +173,7 @@ class ServiceES {
                 }
                 const formatedData = this.formatServiceToGraphqlIOEService(service);
                 return formatedData;
-            }),
+            }), 
             mergeMap(ioeService => broker.send$(MATERIALIZED_VIEW_TOPIC, `IOEService`, ioeService))
         );
     }
