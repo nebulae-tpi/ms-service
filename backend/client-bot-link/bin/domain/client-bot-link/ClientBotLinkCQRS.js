@@ -123,7 +123,6 @@ class ClientBotLinkCQRS {
   }
 
   processTxBogotaMessageReceived$({ args }, authToken) {
-    console.log("LLEGA MENSAJE Bogota: ", JSON.stringify(args))
     if (args.messages) {
       return from(args.messages).pipe(
         mergeMap(message => {
@@ -820,8 +819,8 @@ class ClientBotLinkCQRS {
           break;
         case "helpBtn":
           const text = "A continuación se comparte el contacto de soporte de TxPlus"
-          this.sendTextMessage(text, conversationContent.waId, "75cafa6d-0f27-44be-aa27-c2c82807742d")
-          this.sendHelpContact(conversationContent.waId, "75cafa6d-0f27-44be-aa27-c2c82807742d")
+          this.sendTextMessage(text, conversationContent.waId, businessId)
+          this.sendHelpContact(conversationContent.waId, businessId)
           break;
         case "listCurrentServices":
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
