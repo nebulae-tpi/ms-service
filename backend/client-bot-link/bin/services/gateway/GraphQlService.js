@@ -149,7 +149,12 @@ class GraphQlService {
       {
         aggregateType: "ClientBotLink",
         messageType: "clientgateway.graphql.mutation.ClientBotNewTxPlusLinkMessageReceived"
-      }
+      },
+      {
+        aggregateType: "ClientBotLink",
+        messageType: "clientgateway.graphql.mutation.ClientBotTxPlusBogotaLinkMessageReceived"
+      },
+      
     ];
   }
 
@@ -173,6 +178,10 @@ class GraphQlService {
       },
       "clientgateway.graphql.mutation.ClientBotNewTxPlusLinkMessageReceived": {
         fn: ClientBotLinkCQRS.processNewTxPlusMessageReceived$,
+        obj: ClientBotLinkCQRS
+      },
+      "clientgateway.graphql.mutation.ClientBotTxPlusBogotaLinkMessageReceived": {
+        fn: ClientBotLinkCQRS.processTxBogotaMessageReceived$,
         obj: ClientBotLinkCQRS
       } 
     };

@@ -31,6 +31,19 @@ const businessIdVsD360APIKey = {
     availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
     availableRqstFilterEmojis: "🧐"
   },
+  "7d95f8ef-4c54-466a-8af9-6dd197dd920a": {
+    D360_KEY: process.env.D360_API_KEY_TX_BOGOTA,
+    registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para solicitar un servicio con aire acondicionado presionar el boton "Solicitar con aire"\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
+    availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
+    availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
+    availableRqstVipEmojis: "(?:👑)",
+    availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
+    availableRqstFilterEmojis: "🧐",
+    hostname: "waba-v2.360dialog.io",
+    path: "/messages"
+  },
   "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": {
     D360_KEY: process.env.D360_API_KEY,
     registerTxt: `Hola, Bienvenido al TX BOT\nActualmente el número de telefono no está habilitado para utilizar el chat, por favor comunicarse con soporte de TX Plus para realizar el proceso de registro`,
@@ -55,6 +68,7 @@ const businessIdVsD360APIKey = {
 const {
   ERROR_23224
 } = require("../../tools/customError");
+const { hostname } = require("os");
 
 /**
  * Singleton instance
@@ -97,6 +111,27 @@ class ClientBotLinkCQRS {
             timestamp: message.timestamp,
             client: {},
           }, message, "2af56175-227e-40e7-97ab-84e8fa9e12ce")
+        }),
+        tap(message => {
+          //this.markMessageAsRead(message);
+        })
+      )
+    } else {
+      return of("IGNORED")
+    }
+
+  }
+
+  processTxBogotaMessageReceived$({ args }, authToken) {
+    console.log("LLEGA MENSAJE Bogota")
+    if (args.messages) {
+      return from(args.messages).pipe(
+        mergeMap(message => {
+          return this.initConversation$(message.from, {
+            waId: message.from,
+            timestamp: message.timestamp,
+            client: {},
+          }, message, "7d95f8ef-4c54-466a-8af9-6dd197dd920a")
         }),
         tap(message => {
           //this.markMessageAsRead(message);
@@ -213,6 +248,7 @@ class ClientBotLinkCQRS {
 
   sendTextMessage(text, waId, businessId) {
     const content = {
+      "messaging_product": "whatsapp",
       "recipient_type": "individual",
       "to": waId,
       "type": "text",
@@ -222,14 +258,15 @@ class ClientBotLinkCQRS {
     }
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY,
       }
     }
+    console.log("options==> ", businessIdVsD360APIKey[businessId])
     const req = https.request(options, res => {
       let data = ''
 
@@ -238,7 +275,7 @@ class ClientBotLinkCQRS {
       })
 
       res.on('end', () => {
-        //console.log(JSON.parse(data))
+        console.log(JSON.parse(data))
       })
     })
       .on('error', err => {
@@ -252,6 +289,7 @@ class ClientBotLinkCQRS {
   sendContact(waId, businessId) {
     const content = {
       "to": waId,
+      "messaging_product": "whatsapp",
       "type": "contacts",
       "contacts": [
         {
@@ -272,8 +310,8 @@ class ClientBotLinkCQRS {
     }
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -301,6 +339,7 @@ class ClientBotLinkCQRS {
   sendHelpContact(waId, businessId) {
     const content = {
       "to": waId,
+      "messaging_product": "whatsapp",
       "type": "contacts",
       "contacts": [
         {
@@ -321,8 +360,8 @@ class ClientBotLinkCQRS {
     }
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -350,6 +389,7 @@ class ClientBotLinkCQRS {
   sendInteractiveListMessage(headerText, bodyText, listButton, listTitle, list, waId, businessId) {
     const content = {
       "recipient_type": "individual",
+      "messaging_product": "whatsapp",
       "to": waId,
       "type": "interactive",
       "interactive": {
@@ -378,8 +418,8 @@ class ClientBotLinkCQRS {
 
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -408,6 +448,7 @@ class ClientBotLinkCQRS {
     const content = {
       "recipient_type": "individual",
       "to": waId,
+      "messaging_product": "whatsapp",
       "type": "interactive",
       "interactive": {
         "type": "button",
@@ -439,8 +480,8 @@ class ClientBotLinkCQRS {
     console.log("CONTENT ===> ", JSON.stringify(content));
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -469,6 +510,7 @@ class ClientBotLinkCQRS {
     const content = {
       "recipient_type": "individual",
       "to": waId,
+      "messaging_product": "whatsapp",
       "type": "interactive",
       "interactive": {
         "type": "product_list",
@@ -518,8 +560,8 @@ class ClientBotLinkCQRS {
     console.log("CONTENT ===> ", JSON.stringify(content));
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1189,8 +1231,8 @@ class ClientBotLinkCQRS {
     }
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: `/v1/messages/${message.id}`,
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path+"/"+message.id || ('/v1/messages/'+"/"+message.id),
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
