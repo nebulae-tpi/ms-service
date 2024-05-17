@@ -123,7 +123,7 @@ class ClientBotLinkCQRS {
   }
 
   processTxBogotaMessageReceived$({ args }, authToken) {
-    console.log("LLEGA MENSAJE Bogota")
+    console.log("LLEGA MENSAJE Bogota: ", JSON.stringify(args))
     if (args.messages) {
       return from(args.messages).pipe(
         mergeMap(message => {
@@ -266,7 +266,6 @@ class ClientBotLinkCQRS {
         'D360-API-KEY': businessIdVsD360APIKey[businessId].D360_KEY,
       }
     }
-    console.log("options==> ", businessIdVsD360APIKey[businessId])
     const req = https.request(options, res => {
       let data = ''
 
