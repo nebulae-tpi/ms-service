@@ -606,7 +606,7 @@ class ClientBotLinkCQRS {
       polygon: undefined,
     };
 
-    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_CLIENT", dropOff)).pipe(
+    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_SATELITE", dropOff)).pipe(
       mergeMap(() => {
         if(!((client.lastServices) || []).some(l => l.address == currentRequestService.address)){
           return ClientDA.appendLastRequestedService$(client._id, {...currentRequestService, id: uuidv4()});

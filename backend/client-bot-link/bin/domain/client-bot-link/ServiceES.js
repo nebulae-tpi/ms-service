@@ -12,7 +12,8 @@ const dateFormat = require('dateformat');
 const businessIdVsD360APIKey = {
   "75cafa6d-0f27-44be-aa27-c2c82807742d": process.env.D360_NEW_API_KEY,
   "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": process.env.D360_NEW_API_KEY,
-  "2af56175-227e-40e7-97ab-84e8fa9e12ce": process.env.D360_API_KEY_FREE_DRIVER
+  "2af56175-227e-40e7-97ab-84e8fa9e12ce": process.env.D360_API_KEY_FREE_DRIVER,
+  "7d95f8ef-4c54-466a-8af9-6dd197dd920a": process.env.D360_API_KEY_TX_BOGOTA
 }
 
 /**
@@ -46,6 +47,18 @@ class ServiceES {
           console.log("service ASSIGNED ===> ",serviceEvent.aid);
           this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`, service.businessId)
         }
+      })
+    );
+  }
+
+  handleServiceCompletedEvents$(serviceEvent) {
+    console.log("serviceEvent: ", JSON.stringify(serviceEvent));
+    return ServiceDA.getService$(serviceEvent.aid).pipe(
+      tap(service => {
+        // if (service.client.phone) {
+        //   console.log("service ASSIGNED ===> ",serviceEvent.aid);
+        //   this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`, service.businessId)
+        // }
       })
     );
   }
