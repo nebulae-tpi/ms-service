@@ -55,12 +55,11 @@ class ServiceES {
   }
 
   handleServiceCompletedEvents$(serviceEvent) {
-    console.log("serviceEvent: ", JSON.stringify(serviceEvent));
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
-        console.log("taximeterFare ==> ", service.taximeterFare)
-        if (service.client.phone && service.taximeterFare) {
-          this.sendTextMessage(`Se ha finalizado tu servicio el valor total a pagar es ${this.formatToCurrency(service.taximeterFare)}`, `57${service.client.phone}`, service.businessId)
+        const taximeterFare = (serviceEvent.data || {}).taximeterFare
+        if (service.client.phone && taximeterFare) {
+          this.sendTextMessage(`Se ha finalizado tu servicio el valor total a pagar es ${this.formatToCurrency(taximeterFare)}`, `57${service.client.phone}`, service.businessId)
         }
       })
     );
@@ -206,6 +205,7 @@ class ServiceES {
   sendInteractiveButtonMessage(headerText, bodyText, buttons, waId, businessId) {
     const content = {
       "recipient_type": "individual",
+      "messaging_product": "whatsapp",
       "to": waId,
       "type": "interactive",
       "interactive": {
@@ -265,6 +265,7 @@ class ServiceES {
   sendTextMessage(text, waId, businessId) {
     const content = {
       "recipient_type": "individual",
+      "messaging_product": "whatsapp",
       "to": waId,
       "type": "text",
       "text": {

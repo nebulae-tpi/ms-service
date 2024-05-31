@@ -224,6 +224,7 @@ class ServiceDAL {
                 _id,
                 'ServiceCompleted',
                 {
+                    taximeterFare,
                     location: { type: 'Point', coordinates: [location.lng, location.lat] },
                     timestamp: timestamp || Date.now()
                 },
