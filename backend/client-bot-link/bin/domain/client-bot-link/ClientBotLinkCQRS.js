@@ -617,7 +617,7 @@ class ClientBotLinkCQRS {
       }),
       tap(() => {
         this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId)
-        currentRequestService = undefined;
+        requestClientCache[client._id] = null;
       })
     )
   }
