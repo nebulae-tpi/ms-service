@@ -11,7 +11,7 @@ module.exports = {
   /**
    * Data-Access start workflow
    */
-  start$: concat(BusinessDA.start$(), BotConversationDA.start$(), ClientDA.start$(), ServiceDA.start$()),
+  start$: concat(BotConversationDA.start$(), ClientDA.start$(), ServiceDA.start$(), BusinessDA.start$()),
   /**
    * @returns {BusinessDA}
    */

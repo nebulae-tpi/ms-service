@@ -10,7 +10,6 @@ class BotConversationDA {
 
   static start$(mongoDbInstance) {
     return Observable.create(observer => {
-      console.log("CREA DA!!!!!!!!!!!!!!")
       if (mongoDbInstance) {
         mongoDB = mongoDbInstance;
         observer.next("using given mongo instance");
@@ -22,6 +21,14 @@ class BotConversationDA {
     });
   }
 
+  static getById$(businessId, projection = {}) {
+    const collection = mongoDB.db.collection("Business");
+    const query = {
+      "_id": businessId
+    };
+    return defer(() => collection.findOne(query, projection));
+  }
+  
   static getBotConversation$(waId) {
     const collection = mongoDB.db.collection(CollectionName);
     console.log("QUERY ===> ", { 'waId': waId})

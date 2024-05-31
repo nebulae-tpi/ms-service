@@ -10,6 +10,7 @@ const broker = require("../../tools/broker/BrokerFactory")();
 const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
+const http = require('https');
 
 const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS || "").split(',');
 
@@ -183,7 +184,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId) {
+  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId, sourceChannel = "CHAT_SATELITE", dropOff) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -201,8 +202,8 @@ class ClientBotLinkCQRS {
       eventTypeVersion: 1,
       user: "SYSTEM",
       data: {
+        dropOff,
         pickUp,
-        dropOff: undefined,
         client: {
           id: client._id,
           businessId: businessId,
@@ -236,7 +237,7 @@ class ClientBotLinkCQRS {
         lastModificationTimestamp: Date.now(),
         closed: false,
         request: {
-          sourceChannel: "CHAT_SATELITE",
+          sourceChannel,
           destChannel: "DRIVER_APP"
         }
 
@@ -599,7 +600,13 @@ class ClientBotLinkCQRS {
     client.generalInfo.addressLine1 = currentRequestService.address;
     client.generalInfo.addressLine2 = currentRequestService.reference
     client.location = currentRequestService.location;
-    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId)).pipe(
+    const dropOff = !currentRequestService.destinationLocation ? undefined : {
+      addressLine1: currentRequestService.destinationAddress,
+      marker: { type: "Point", coordinates: [currentRequestService.destinationLocation.lng, currentRequestService.destinationLocation.lat] },
+      polygon: undefined,
+    };
+
+    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_CLIENT", dropOff)).pipe(
       mergeMap(() => {
         if(!((client.lastServices) || []).some(l => l.address == currentRequestService.address)){
           return ClientDA.appendLastRequestedService$(client._id, {...currentRequestService, id: uuidv4()});
@@ -733,6 +740,309 @@ class ClientBotLinkCQRS {
 
   }
 
+
+  getDayOfWeek(date) {
+    const day = date.getDay();
+    return day === 0 ? 1 : day + 1;
+  }
+
+  getMinuteOfDay(date) {
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      return hours * 60 + minutes;
+  }
+  startGetRequest(hostname, path) {
+    const options = {
+      hostname,
+      path,
+      method: 'GET',
+    };
+  
+    return new Promise((resolve, reject) => {
+      const req = http.request(options, (res) => {
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          let errorBody = [];
+          res.on('data', (chunk) => errorBody.push(chunk));
+          res.on('end', () => {
+            const errorResponse = Buffer.concat(errorBody).toString();
+            reject(new Error(`Error HTTP: ${res.statusCode} - ${errorResponse}`));
+          });
+        }
+  
+        let body = [];
+        res.on('data', (chunk) => body.push(chunk));
+        res.on('end', () => {
+          const resBody = Buffer.concat(body).toString();
+          resolve(JSON.parse(resBody));  
+        });
+      });
+  
+      req.on('error', (e) => {
+        reject(e);
+      });
+      req.end();
+    });
+  }
+
+  formatToCurrency(value, locale = 'en-US', currency = 'COP', symbol = "$") {
+    return (new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(value)).replace(currency, symbol);
+}
+
+  continueConversationBogotaCLient$(message, conversationContent, client, businessId) {
+    let currentRequestService = requestClientCache[client._id];
+    const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
+    const textResp = ((message || {}).text || {}).body;
+    const sharedLocation = ((message || {}).location || {});
+    const buttonsCancel = [
+      {
+        id: "cancelLastRequestedBtn",
+        text: "Cancelar solicitud"
+      }
+    ];
+
+    const buttonsRequest = [
+      {
+        id: "cancelLastRequestedBtn",
+        text: "Cancelar solicitud"
+      },
+      {
+        id: "listLastServiceBtn",
+        text: "Últimos solicitados"
+      }
+    ]
+
+    const initialMenu = [
+      {
+        id: "rqstServiceACBtn",
+        text: "Solicitar con aire"
+      },
+      {
+        id: "listCurrentServices",
+        text: "Cancelar servicio"
+      },
+      {
+        id: "helpBtn",
+        text: "Ayuda"
+      }
+      
+    ]
+    if (textResp != null) {
+      if (currentRequestService == null) {
+        if(textResp == "?"){
+          return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
+        }
+        let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
+        if (charCount > 0) {
+          currentRequestService = {
+            step: "REQUEST_REFERENCE",
+            timestamp: Date.now()
+          }
+          this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
+          requestClientCache[client._id] = currentRequestService;
+          return of({});
+        }
+      }
+      switch ((currentRequestService || {}).step) {
+        case "REQUEST_REFERENCE":
+          this.sendInteractiveButtonMessage(null, `Por favor escribe una referencia`, buttonsCancel, conversationContent.waId, businessId, false);
+          currentRequestService.step = "REQUEST_LOCATION";
+          currentRequestService.address = textResp;
+          break;
+        case "REQUEST_LOCATION":
+          this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
+          currentRequestService.step = "LOCATION_SHARED";
+          currentRequestService.reference = textResp;
+          break;
+        case "APROX_FARE_SHARED":
+          currentRequestService.destinationAddress = textResp;
+          return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
+            tap(() => {
+              requestClientCache[client._id] = currentRequestService
+            })
+          )  
+
+        default:
+          this.sendInteractiveButtonMessage(`Hola ${client.generalInfo.name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, initialMenu, conversationContent.waId, businessId);
+          break;
+      }
+
+    } else if (interactiveResp) {
+      if (currentRequestService != null && (interactiveResp != "cancelLastRequestedBtn" || interactiveResp != "requestWithoutDestinationBtn")) {
+
+        this.sendInteractiveButtonMessage(null, `En este momento estas realizando una solicitu de servicio, si deseas realizar otra acción primero debes cancelar la solicitud actual`, buttonsCancel, conversationContent.waId, businessId);
+      }
+      switch (interactiveResp) {
+        case "rqstServiceACBtn":
+          currentRequestService = requestClientCache[client._id] || {};
+          currentRequestService.step = "REQUEST_REFERENCE";
+          currentRequestService.timestamp = Date.now();
+          currentRequestService.filters = {AC: true};
+          this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
+          break;
+        case "requestWithoutDestinationBtn":
+        case "requestWithDestinationBtn":
+          return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
+          tap(() => {
+            requestClientCache[client._id] = currentRequestService
+          })
+          );
+        case "helpBtn":
+          const text = "A continuación se comparte el contacto de soporte de TxPlus"
+          this.sendTextMessage(text, conversationContent.waId, businessId)
+          this.sendHelpContact(conversationContent.waId, businessId)
+          break;
+        case "listCurrentServices":
+          return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
+        case "listLastServiceBtn":
+          if (((client || {}).lastServices)) {
+            const listElements = (client || {}).lastServices.map(val => {
+              const address = val.address.length > 24 ? val.address.substring(0, 21) + "..." : val.address;
+              const reference = val.reference > 72 ? val.reference.substring(0, 69) + "..." : val.reference
+              return { id: `REQUEST_${val.id}`, title: `${address}`, description: `${reference}` }
+            });
+            this.sendInteractiveListMessage("Los últimos servicios solicitados son los siguientes", `${(client || {}).lastServices.reduce((acc, val) => {
+              acc = `${acc}- ${val.address}\n`
+              return acc;
+            }, "")}`, "Lista de Servicios", "Servicios", listElements, conversationContent.waId, businessId)
+            break;
+          } else {
+            return of({}).pipe(
+              tap(() => {
+                this.sendTextMessage(`No se han encontrado servicios solicitados recientemente`, conversationContent.waId, businessId)
+              })
+            )
+          }
+        case "cancelLastRequestedBtn":
+          currentRequestService = undefined;
+          this.sendTextMessage(`La solicitud de servicio ha sido cancelada`, conversationContent.waId, businessId)
+          break;
+        default:
+          if (interactiveResp.includes("CANCEL_")) {
+            return ServiceDA.markedAsCancelledAndReturnService$(interactiveResp.replace("CANCEL_", "")).pipe(
+              tap(service => {
+                if (service.cancelationTryTimestamp && (service.cancelationTryTimestamp + 60000) > Date.now()) throw ERROR_23224;
+              }),
+              mergeMap(val => {
+
+                const STATES_TO_CLOSE_SERVICE = ["ON_BOARD", "DONE", "CANCELLED_DRIVER", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_SYSTEM"];
+                if (STATES_TO_CLOSE_SERVICE.includes(val.state)) {
+                  this.sendTextMessage(`El servicio seleccionado ya se ha finalizado por lo que no se pudo realizar el proceso de cancelación`, conversationContent.waId, businessId)
+                  return of({})
+                }
+                else {
+                  const currentDate = new Date(new Date(val.timestamp).toLocaleString(undefined, { timeZone: 'America/Bogota' }));
+                  const ddhh = dateFormat(currentDate, "HH:MM");
+                  this.sendTextMessage(`El servicio creado a las ${ddhh} ha sido cancelado`, conversationContent.waId, businessId)
+                  return eventSourcing.eventStore.emitEvent$(new Event({
+                    aggregateType: 'Service',
+                    aggregateId: val._id,
+                    eventType: "ServiceCancelledByClient",
+                    eventTypeVersion: 1,
+                    user: conversationContent.waId,
+                    data: { reason: null, notes: "" }
+                  }))
+                }
+
+              })
+            );
+          } else if(interactiveResp.includes("REQUEST_")){
+            const selectedServiceInfo =  client.lastServices.find(l => l.id == interactiveResp.replace("REQUEST_", ""));
+            return this.requestServiceWithoutSatellite$(client, selectedServiceInfo, conversationContent.waId, message, businessId).pipe(
+              tap(() => {
+                requestClientCache[client._id] = undefined;
+              })
+            );
+          }
+           else {
+            return of({});
+          }
+      }
+    }
+    else if (sharedLocation) {
+      if ((currentRequestService || {}).step == "LOCATION_SHARED") {
+        currentRequestService.location = {
+          lat: message.location.latitude,
+          lng: message.location.longitude,
+        }
+        currentRequestService.step = "DESTINATION_REQUESTED";
+        const buttonsFare = [
+          {
+            id: "requestWithoutDestinationBtn",
+            text: "Solicitar Servicio"
+          }
+        ];
+        this.sendInteractiveButtonMessage("Calcular Tarifa", `Si lo deseas, puedes compartirnos la ubicación de tu destino para calcular el valor aproximado de tu tarifa (presiona '📎' o '+', selecciona la opción 'ubicación' y envía la ubicación de tu destino). También puedes presionar el botón 'Solicitar Servicio' para enviar la solicitud sin destino.`, buttonsFare, conversationContent.waId, businessId);
+        
+
+      }else if((currentRequestService || {}).step == "DESTINATION_REQUESTED") {
+        currentRequestService.destinationLocation = {
+          lat: message.location.latitude,
+          lng: message.location.longitude,
+        }
+        currentRequestService.step = "APROX_FARE_SHARED";
+        const buttonsFare = [
+          {
+            id: "cancelLastRequestedBtn",
+            text: "Cancelar Solicitud"
+          }
+        ];
+        const clientLocation = currentRequestService.location.lat + "," + currentRequestService.location.lng;
+        const destinationLocation = currentRequestService.destinationLocation.lat + "," + currentRequestService.destinationLocation.lng;
+        return from(this.startGetRequest("router.hereapi.com", "/v8/routes?transportMode=car&origin="+clientLocation+"&destination="+destinationLocation+"&return=summary&apiKey=BT6ow5B0qGZVq5KPXk_XTaGcLLK2NcVgbtGydP4CJ78")).pipe(
+          mergeMap(result => {
+            return BotConversationDA.getById$(businessId, {attributes: 1}).pipe(
+              tap(business => {
+                console.log(JSON.stringify(result))
+                const summary = (((result?.routes || [{}])[0].sections || [{}])[0] || {})?.summary;
+                const attrObj = business.attributes.reduce((acc, val) => {
+                  acc[val.key] = val?.value;     
+                  return acc;            
+                }, {});
+
+                console.log("attrObj ===> ",  JSON.stringify(attrObj))
+                const specialFareList = attrObj["TAXIMETER_SPECIAL_FARE"] ? JSON.parse(attrObj["TAXIMETER_SPECIAL_FARE"]) : undefined;
+                
+                const taximeterPoints = summary.length/Number.parseFloat(attrObj["FARE_METERS"]);
+                const totalMeterFare = taximeterPoints * Number.parseFloat(attrObj["FARE_VALUE"]);
+                const secondsValue = summary.duration * Number.parseFloat(attrObj["TAXIMETER_SECONDS_VALUE"]);
+                const startValue = Number.parseInt(attrObj["TAXIMETER_START_VALUE"]);
+                const currentMinutes = this.getMinuteOfDay(new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bogota" })));
+                const currentDay = this.getDayOfWeek(new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bogota" })));
+                const selectedSpecialFare = specialFareList.find(fare => ((fare.days || []).includes(currentDay) && (fare.timeRange || []).some(range => {
+                  const timeRange = range.split("-");
+                  currentMinutes > Number.parseInt(timeRange[0]) && currentDay < Number.parseInt(timeRange[1])
+                })));
+                const sundayCharge = Number.parseInt(selectedSpecialFare?.sundayCharge || "0");
+                const minimunFare = Number.parseInt(attrObj["TAXIMETER_MIMIMUN_FARE"]) + sundayCharge;
+                const totalFare = Math.round(Math.max((startValue + totalMeterFare + sundayCharge), minimunFare));
+                this.sendInteractiveButtonMessage("El valor aproximado de tu servicio es", `Entre ${this.formatToCurrency(totalFare)} y ${this.formatToCurrency(Math.round(totalFare + (totalFare*0.45)))}. Para solicitar el servicio, compartenos la dirección o una referencia de tu destino. Si deseas cancelar la solicitud, presiona el botón 'Cancelar Servicio'.`, buttonsFare, conversationContent.waId, businessId);
+              })
+            )
+          }),
+          catchError(e => {
+            console.log("Error HERE API ===> ", e)
+            return of({})
+          })
+        );
+        
+        // return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
+        //   tap(() => {
+        //     requestClientCache[client._id] = currentRequestService
+        //   })
+        // );
+
+      }else if ((currentRequestService || {}).step == "REQUEST_REFERENCE") {
+        this.sendTextMessage(`Para continuar con la solicitud debes enviar una direccíon`, conversationContent.waId, businessId)
+      }
+      else if ((currentRequestService || {}).step == "REQUEST_LOCATION") {
+        this.sendTextMessage(`Para continuar con la solicitud debes enviar una referencia`, conversationContent.waId, businessId)
+      } else {
+        this.sendInteractiveButtonMessage(`Hola ${client.generalInfo.name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, initialMenu, conversationContent.waId, businessId);
+      }
+    }
+    requestClientCache[client._id] = currentRequestService;
+    return of({})
+  }
 
   continueConversationWithoutSatellite$(message, conversationContent, client, businessId) {
     let currentRequestService = requestClientCache[client._id];
@@ -1123,7 +1433,12 @@ class ClientBotLinkCQRS {
               mergeMap(() => {
                 return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
                   mergeMap(serviceCount => {
-                    return this.continueConversationWithoutSatellite$(message, conversationContent, client, businessId, true);
+                    if(businessId === "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+                      return this.continueConversationBogotaCLient$(message, conversationContent, client, businessId, true);
+                    }else {
+                      return this.continueConversationWithoutSatellite$(message, conversationContent, client, businessId, true);
+                    }
+                    
                   }),
                   catchError(err => {
                     console.log("ERROR ===> ", err)
