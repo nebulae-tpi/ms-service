@@ -10,10 +10,10 @@ const MATERIALIZED_VIEW_TOPIC = "emi-gateway-materialized-view-updates";
 const https = require('https');
 const dateFormat = require('dateformat');
 const businessIdVsD360APIKey = {
-  "75cafa6d-0f27-44be-aa27-c2c82807742d": process.env.D360_NEW_API_KEY,
-  "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": process.env.D360_NEW_API_KEY,
-  "2af56175-227e-40e7-97ab-84e8fa9e12ce": process.env.D360_API_KEY_FREE_DRIVER,
-  "7d95f8ef-4c54-466a-8af9-6dd197dd920a": process.env.D360_API_KEY_TX_BOGOTA
+  "75cafa6d-0f27-44be-aa27-c2c82807742d": {key: process.env.D360_NEW_API_KEY},
+  "bf2807e4-e97f-43eb-b15d-09c2aff8b2ab": {key: process.env.D360_NEW_API_KEY},
+  "2af56175-227e-40e7-97ab-84e8fa9e12ce": {key: process.env.D360_API_KEY_FREE_DRIVER},
+  "7d95f8ef-4c54-466a-8af9-6dd197dd920a": {key: process.env.D360_API_KEY_TX_BOGOTA, hostname: "waba-v2.360dialog.io", path: "/messages"}
 }
 
 /**
@@ -236,12 +236,12 @@ class ServiceES {
     console.log("CONTENT ===> ", JSON.stringify(content));
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId]
+        'D360-API-KEY': (businessIdVsD360APIKey[businessId]).key
       }
     }
     const req = https.request(options, res => {
@@ -274,12 +274,12 @@ class ServiceES {
     }
     const options = {
       protocol: 'https:',
-      hostname: 'waba.360dialog.io',
-      path: '/v1/messages/',
+      hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
+      path: businessIdVsD360APIKey[businessId].path || '/v1/messages/',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'D360-API-KEY': businessIdVsD360APIKey[businessId]
+        'D360-API-KEY': (businessIdVsD360APIKey[businessId]).key
       }
     }
     const req = https.request(options, res => {
