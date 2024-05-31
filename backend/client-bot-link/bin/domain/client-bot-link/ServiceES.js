@@ -50,15 +50,18 @@ class ServiceES {
       })
     );
   }
+  formatToCurrency(value, locale = 'en-US', currency = 'COP', symbol = "$") {
+    return (new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(value)).replace(currency, symbol);
+  }
 
   handleServiceCompletedEvents$(serviceEvent) {
     console.log("serviceEvent: ", JSON.stringify(serviceEvent));
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
-        // if (service.client.phone) {
-        //   console.log("service ASSIGNED ===> ",serviceEvent.aid);
-        //   this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`, service.businessId)
-        // }
+        console.log("taximeterFare ==> ", service.taximeterFare)
+        if (service.client.phone && service.taximeterFare) {
+          this.sendTextMessage(`Se ha finalizado tu servicio el valor total a pagar es ${this.formatToCurrency(service.taximeterFare)}`, `57${service.client.phone}`, service.businessId)
+        }
       })
     );
   }
