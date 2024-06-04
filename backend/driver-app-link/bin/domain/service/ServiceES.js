@@ -903,7 +903,7 @@ class ServiceES {
                     } else {
                         return of({
                             _id: Crosscutting.generateDateBasedUuid(),
-                            businessId,
+                            businessId: service.businessId,
                             type: "MOVEMENT",
                             // notes: mba.notes,
                             concept: "APP_DRIVER_AGREEMENT_PAYMENT",
