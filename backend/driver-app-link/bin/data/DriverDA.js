@@ -24,11 +24,12 @@ class DriverDA {
   /**
    * Gets a driver by its id and business(Optional).
    */
-  static getDriverByDriverCode$(driverCode) {
+  static getDriverByDriverCode$(driverCode, businessId) {
     const collection = mongoDB.db.collection(COLLECTION_NAME);
 
     const query = {
-      driverCode    
+      driverCode,
+      businessId
     };
 
     return defer(() => collection.findOne(query));

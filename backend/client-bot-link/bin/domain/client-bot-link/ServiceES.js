@@ -80,7 +80,7 @@ class ServiceES {
   millisToMinutesAndSeconds(millis) {
     var minutes = Math.floor(millis / 60000);
     var seconds = ((millis % 60000) / 1000).toFixed(0);
-    return (minutes > 0 ? minutes + " minutos y" : "") + ((seconds < 10 ? '0' : '') + seconds) + " segundos";
+    return (minutes > 0 ? minutes + " minutos y " : "") + ((seconds < 10 ? '0' : '') + seconds) + " segundos";
   }
   
 

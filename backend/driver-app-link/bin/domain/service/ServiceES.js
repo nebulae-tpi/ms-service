@@ -711,7 +711,7 @@ class ServiceES {
                 if ((request || {}).sourceChannel !== "APP_CLIENT") {
                     return of(undefined);
                 } else if (client.referrerDriverCode && client.referrerDriverCode !== null) {
-                    return DriverDA.getDriverByDriverCode$(parseInt(client.referrerDriverCode)).pipe(
+                    return DriverDA.getDriverByDriverCode$(parseInt(client.referrerDriverCode), businessId).pipe(
                         map(referrerDriver => {
                             return {
                                 _id: Crosscutting.generateDateBasedUuid(),
@@ -872,14 +872,53 @@ class ServiceES {
      * @param {Event} evt 
      * @returns {Observable}
      */
-    handleServiceCompleted$({ aid, data }) {
+    handleServiceCompleted$({ aid, data, timestamp }) {
         //console.log(`ServiceES: handleServiceCompleted: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
             delay(300),
-            mergeMap(() => ServiceDA.findById$(aid, { "driver.username": 1, "businessId": 1 })),
+            mergeMap(() => ServiceDA.findById$(aid, { "driver": 1, "businessId": 1, "taximeterFare": 1, "client": 1 })),
             filter(service => service.driver && service.driver.username),
-            mergeMap(service => driverAppLinkBroker.sendServiceEventToDrivers$(
-                service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })),
+            mergeMap(service => {
+                if(service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+                    console.log("Se completa con taximetro: ", service.taximeterFare);
+                    if (service.client.referrerDriverCode && service.client.referrerDriverCode !== null) {
+                        return DriverDA.getDriverByDriverCode$(parseInt(service.client.referrerDriverCode), service.businessId).pipe(
+                            map(referrerDriver => {
+                                return {
+                                    _id: Crosscutting.generateDateBasedUuid(),
+                                    sourceEvent: { aid, av },
+                                    businessId: service.businessId,
+                                    type: "MOVEMENT",
+                                    // notes: mba.notes,
+                                    concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                                    timestamp: timestamp || Date.now(),
+                                    amount: Math.min((service.taximeterFare*0.1), 2000),
+                                    fromId: service.driver.id,
+                                    toId: service.businessId,
+                                    clientId: service.client.id,
+                                    referrerDriverId: (referrerDriver || {})._id
+                                };
+                            })
+                        );
+                    } else {
+                        return of({
+                            _id: Crosscutting.generateDateBasedUuid(),
+                            businessId,
+                            type: "MOVEMENT",
+                            // notes: mba.notes,
+                            concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                            timestamp: timestamp || Date.now(),
+                            amount: Math.min((service.taximeterFare*0.1), 2000),
+                            fromId: service.driver.id,
+                            toId: service.businessId,
+                            clientId: service.client.id
+                        });
+                    }
+                }else {
+                    return driverAppLinkBroker.sendServiceEventToDrivers$(
+                        service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
+                }
+            }),
         );
     }
 

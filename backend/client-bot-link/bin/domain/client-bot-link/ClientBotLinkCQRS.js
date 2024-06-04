@@ -184,7 +184,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId, sourceChannel = "CHAT_SATELITE", dropOff) {
+  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId, sourceChannel = "CHAT_SATELITE", dropOff, verificationCode) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -193,7 +193,7 @@ class ClientBotLinkCQRS {
       neighborhood: client.generalInfo.neighborhood,
       zone: client.generalInfo.zone
     };
-
+    console.log("verificationCode ===> ", verificationCode)
     const _id = Crosscutting.generateDateBasedUuid();
     const requestObj = {
       aggregateType: 'Service',
@@ -202,6 +202,7 @@ class ClientBotLinkCQRS {
       eventTypeVersion: 1,
       user: "SYSTEM",
       data: {
+        verificationCode,
         dropOff,
         pickUp,
         client: {
@@ -606,7 +607,7 @@ class ClientBotLinkCQRS {
       polygon: undefined,
     };
 
-    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_SATELITE", dropOff)).pipe(
+    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_CLIENT", dropOff, currentRequestService.verificationCode)).pipe(
       mergeMap(() => {
         if(!((client.lastServices) || []).some(l => l.address == currentRequestService.address)){
           return ClientDA.appendLastRequestedService$(client._id, {...currentRequestService, id: uuidv4()});
@@ -617,7 +618,7 @@ class ClientBotLinkCQRS {
       }),
       tap(() => {
         this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId)
-        requestClientCache[client._id] = null;
+        currentRequestService = undefined;
       })
     )
   }
@@ -790,6 +791,7 @@ class ClientBotLinkCQRS {
 
   continueConversationBogotaCLient$(message, conversationContent, client, businessId) {
     let currentRequestService = requestClientCache[client._id];
+    console.log("currentRequest ===> ", requestClientCache);
     const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
     const textResp = ((message || {}).text || {}).body;
     const sharedLocation = ((message || {}).location || {});
@@ -837,6 +839,12 @@ class ClientBotLinkCQRS {
             step: "REQUEST_REFERENCE",
             timestamp: Date.now()
           }
+          if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+            const min = 1000;
+              const max = 9999;
+              const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+              currentRequestService.verificationCode = Math.abs(randomNumber)+"";
+          }
           this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
           requestClientCache[client._id] = currentRequestService;
           return of({});
@@ -857,9 +865,9 @@ class ClientBotLinkCQRS {
           currentRequestService.destinationAddress = textResp;
           return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
             tap(() => {
-              requestClientCache[client._id] = currentRequestService
+              requestClientCache[client._id] = undefined;
             })
-          )  
+          )
 
         default:
           this.sendInteractiveButtonMessage(`Hola ${client.generalInfo.name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, initialMenu, conversationContent.waId, businessId);
@@ -883,7 +891,7 @@ class ClientBotLinkCQRS {
         case "requestWithDestinationBtn":
           return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
           tap(() => {
-            requestClientCache[client._id] = currentRequestService
+            requestClientCache[client._id] = undefined;
           })
           );
         case "helpBtn":
@@ -988,7 +996,7 @@ class ClientBotLinkCQRS {
         ];
         const clientLocation = currentRequestService.location.lat + "," + currentRequestService.location.lng;
         const destinationLocation = currentRequestService.destinationLocation.lat + "," + currentRequestService.destinationLocation.lng;
-        return from(this.startGetRequest("router.hereapi.com", "/v8/routes?transportMode=car&origin="+clientLocation+"&destination="+destinationLocation+"&return=summary&apiKey=BT6ow5B0qGZVq5KPXk_XTaGcLLK2NcVgbtGydP4CJ78")).pipe(
+        return from(this.startGetRequest("router.hereapi.com", "/v8/routes?transportMode=car&origin="+clientLocation+"&destination="+destinationLocation+"&return=summary&apiKey="+process.env.HERE_API_KEY)).pipe(
           mergeMap(result => {
             return BotConversationDA.getById$(businessId, {attributes: 1}).pipe(
               tap(business => {
@@ -1207,7 +1215,7 @@ class ClientBotLinkCQRS {
         }
         return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
           tap(() => {
-            requestClientCache[client._id] = currentRequestService
+            requestClientCache[client._id] = undefined;
           })
         );
 
