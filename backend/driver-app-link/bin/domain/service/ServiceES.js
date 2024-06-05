@@ -531,7 +531,8 @@ class ServiceES {
             dropOff: { ...service.dropOff, location: undefined },
             dropOffSpecialType: service.dropOffSpecialType,
             expirationTime: offerTotalThreshold,
-            tripCost: service.tripCost
+            tripCost: service.tripCost,
+            paymentType: service.paymentType
         };
         if (serviceOffer.pickUp.neighborhood && BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
             serviceOffer.pickUp.addressLine1 = '---';
@@ -571,7 +572,8 @@ class ServiceES {
             expirationTime: offerTotalThreshold,
             tripCost: service.tripCost,
             destinationCost: service.destinationCost,
-            productCost: service.productCost
+            productCost: service.productCost,
+            paymentType: service.paymentType
         };
 
         if (serviceOffer.pickUp.neighborhood && BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS.includes(businessId)) {
