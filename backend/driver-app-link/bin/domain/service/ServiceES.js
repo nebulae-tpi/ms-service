@@ -898,6 +898,10 @@ class ServiceES {
                                     clientId: service.client.id,
                                     referrerDriverId: (referrerDriver || {})._id
                                 };
+                            }),
+                            mergeMap(()=> {
+                                return driverAppLinkBroker.sendServiceEventToDrivers$(
+                                    service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
                             })
                         );
                     } else {
@@ -912,7 +916,12 @@ class ServiceES {
                             fromId: service.driver.id,
                             toId: service.businessId,
                             clientId: service.client.id
-                        });
+                        }).pipe(
+                            mergeMap(()=> {
+                                return driverAppLinkBroker.sendServiceEventToDrivers$(
+                                    service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
+                            })
+                        );
                     }
                 }else {
                     return driverAppLinkBroker.sendServiceEventToDrivers$(
