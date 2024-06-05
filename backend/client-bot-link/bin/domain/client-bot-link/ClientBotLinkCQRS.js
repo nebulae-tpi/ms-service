@@ -184,7 +184,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId, sourceChannel = "CHAT_SATELITE", dropOff, verificationCode) {
+  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId, sourceChannel = "CHAT_SATELITE", dropOff, currentRequestService) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -193,7 +193,6 @@ class ClientBotLinkCQRS {
       neighborhood: client.generalInfo.neighborhood,
       zone: client.generalInfo.zone
     };
-    console.log("verificationCode ===> ", verificationCode)
     const _id = Crosscutting.generateDateBasedUuid();
     const requestObj = {
       aggregateType: 'Service',
@@ -202,7 +201,8 @@ class ClientBotLinkCQRS {
       eventTypeVersion: 1,
       user: "SYSTEM",
       data: {
-        verificationCode,
+        verificationCode: (currentRequestService || {}).verificationCode,
+        paymentType: (currentRequestService || {}).paymentType || "CASH",
         dropOff,
         pickUp,
         client: {
@@ -607,7 +607,7 @@ class ClientBotLinkCQRS {
       polygon: undefined,
     };
 
-    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_CLIENT", dropOff, currentRequestService.verificationCode)).pipe(
+    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_CLIENT", dropOff, currentRequestService)).pipe(
       mergeMap(() => {
         if(!((client.lastServices) || []).some(l => l.address == currentRequestService.address)){
           return ClientDA.appendLastRequestedService$(client._id, {...currentRequestService, id: uuidv4()});
@@ -858,14 +858,35 @@ class ClientBotLinkCQRS {
       switch ((currentRequestService || {}).step) {
         case "REQUEST_REFERENCE":
           this.sendInteractiveButtonMessage(null, `Por favor escribe una referencia`, buttonsCancel, conversationContent.waId, businessId, false);
-          currentRequestService.step = "REQUEST_LOCATION";
+          currentRequestService.step = "REQUEST_PAYMENT_TYPE";
           currentRequestService.address = textResp;
           break;
-        case "REQUEST_LOCATION":
-          this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
-          currentRequestService.step = "LOCATION_SHARED";
+        case "REQUEST_PAYMENT_TYPE":
+          //const listElements = [{ id: `CASH`, title: `Efectivo`, description: `` }, { id: `CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` }];
+          const buttonsPaymentType = [
+            {
+              id: "PAYMENT_CASH",
+              text: "Efectivo"
+            },
+            {
+              id: "PAYMENT_CREDIT_CARD",
+              text: "Tarjeta de crédito"
+            },
+            {
+              id: "cancelLastRequestedBtn",
+              text: "Cancelar solicitud"
+            }
+          ]
+          this.sendInteractiveButtonMessage(null, `Por favor selecciona el método de pago`, buttonsPaymentType, conversationContent.waId, businessId, false);
+          currentRequestService.step = "REQUEST_LOCATION";
           currentRequestService.reference = textResp;
           break;
+          
+        // case "REQUEST_LOCATION":
+        //   this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
+        //   currentRequestService.step = "LOCATION_SHARED";
+        //   currentRequestService.reference = textResp;
+        //   break;
         case "APROX_FARE_SHARED":
           currentRequestService.destinationAddress = textResp;
           return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
@@ -965,6 +986,13 @@ class ClientBotLinkCQRS {
                 requestClientCache[client._id] = undefined;
               })
             );
+          }
+          else if(interactiveResp.includes("PAYMENT_")){
+          
+          this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
+          currentRequestService.paymentType = interactiveResp.replace("PAYMENT_", "")
+          currentRequestService.step = "LOCATION_SHARED";
+          currentRequestService.reference = textResp;
           }
            else {
             return of({});
