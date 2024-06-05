@@ -127,7 +127,7 @@ class ClientBotLinkCQRS {
     if (args.messages) {
       return from(args.messages).pipe(
         mergeMap(message => {
-          return this.initConversation$(message.from, {
+          return this.initConversationBogota$(message.from, {
             waId: message.from,
             timestamp: message.timestamp,
             client: {},
@@ -1624,14 +1624,63 @@ class ClientBotLinkCQRS {
                     })
                   );
                 case "confirmBtn":
-                  const referedCodeButtons = [
-                    {
-                      id: "registerBtn",
-                      text: "Finalizar Registro"
-                    },
-                  ];
-                  registerUserList[phoneNumber].referedCodeRequested = true;
-                  this.sendInteractiveButtonMessage(`Código de Referido`, `Si tienes un codigo de referido de conductor ingresalo por favor, en caso contrario presiona el boton 'Finalizar Registro'`, referedCodeButtons, conversationContent.waId, businessId)
+                  if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+                    const referedCodeButtons = [
+                      {
+                        id: "registerBtn",
+                        text: "Finalizar Registro"
+                      },
+                    ];
+                    registerUserList[phoneNumber].referedCodeRequested = true;
+                    this.sendInteractiveButtonMessage(`Código de Referido`, `Si tienes un codigo de referido de conductor ingresalo por favor, en caso contrario presiona el boton 'Finalizar Registro'`, referedCodeButtons, conversationContent.waId, businessId)
+                  }else {
+                    const buttons = [
+                      {
+                        id: "rqstServiceACBtn",
+                        text: "Solicitar con aire"
+                      },
+                      {
+                        id: "listCurrentServices",
+                        text: "Cancelar servicio"
+                      },
+                      {
+                        id: "helpBtn",
+                        text: "Ayuda"
+                      }
+                    ]
+                    const newClient = {
+                      generalInfo: {
+                        name: registerUserList[phoneNumber].name,
+                        phone: parseInt(phoneNumber)
+                      },
+                      state: true,
+                      businessId: businessId
+                    };
+                    newClient._id = uuidv4();
+                    newClient.creatorUser = 'SYSTEM';
+                    newClient.creationTimestamp = new Date().getTime();
+                    newClient.modifierUser = 'SYSTEM';
+                    newClient.modificationTimestamp = new Date().getTime();
+                    newClient.satelliteInfo = {
+                      "tip": 0,
+                      "tipType": "CASH"
+                    };
+                    return eventSourcing.eventStore.emitEvent$(
+                      new Event({
+                        eventType: "ClientCreated",
+                        eventTypeVersion: 1,
+                        aggregateType: "Client",
+                        aggregateId: newClient._id,
+                        data: newClient,
+                        user: "SYSTEM"
+                      })).pipe(
+                      tap(() => {
+                        this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
+                        registerUserList[phoneNumber] = undefined;
+                      })
+                    );
+                  }
+                  
                   break;
                 case "changeBtn":
                   this.sendTextMessage("¿Cual es tu nombre?", conversationContent.waId, businessId)
