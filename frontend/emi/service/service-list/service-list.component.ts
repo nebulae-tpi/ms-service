@@ -106,7 +106,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   tableSize: number;
   tablePage = 0;
   tableCount = 25;
-  channelList = ["OPERATOR", "CLIENT", "APP_CLIENT", "CHAT_SATELITE"]
+  channelList = ["OPERATOR", "CLIENT", "APP_CLIENT", "CHAT_SATELITE", "CHAT_CLIENT"]
   foods = [
     {value: 'steak-0', viewValue: 'Steak'},
     {value: 'pizza-1', viewValue: 'Pizza'},

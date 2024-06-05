@@ -117,7 +117,7 @@ export class MapComponent implements OnInit, OnDestroy {
   seeAllOperation = false;
   // map of service vs bouncing shifts array
   bouncingShifts = {};
-  channelFilter = ["OPERATOR", "CLIENT", "CHAT_SATELITE"];
+  channelFilter = ["OPERATOR", "CLIENT", "CHAT_SATELITE", "CHAT_CLIENT"];
   stateFilter = ["REQUESTED", "ASSIGNED", "ARRIVED", "ON_BOARD", "CANCELLED_CLIENT", "CANCELLED_OPERATOR", "CANCELLED_DRIVER", "CANCELLED_SYSTEM", "DONE"];
 
   @Input('selectedBusinessId') selectedBusinessId: any;

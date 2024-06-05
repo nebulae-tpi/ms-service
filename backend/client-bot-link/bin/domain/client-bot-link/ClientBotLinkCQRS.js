@@ -35,7 +35,7 @@ const businessIdVsD360APIKey = {
   "7d95f8ef-4c54-466a-8af9-6dd197dd920a": {
     D360_KEY: process.env.D360_API_KEY_TX_BOGOTA,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
-    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para solicitar un servicio con aire acondicionado presionar el boton "Solicitar con aire"\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
     menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
@@ -275,7 +275,8 @@ class ClientBotLinkCQRS {
       })
 
       res.on('end', () => {
-        console.log(JSON.parse(data))
+        console.log(data)
+        //console.log(JSON.parse(data))
       })
     })
       .on('error', err => {
@@ -819,10 +820,6 @@ class ClientBotLinkCQRS {
     ]
 
     const initialMenu = [
-      {
-        id: "rqstServiceACBtn",
-        text: "Solicitar con aire"
-      },
       {
         id: "listCurrentServices",
         text: "Cancelar servicio"
@@ -1504,21 +1501,83 @@ class ClientBotLinkCQRS {
           else {
             const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
             if (!interactiveResp) {
-              registerUserList[phoneNumber].name = message.text.body;
-              const buttons = [
-                {
-                  id: "confirmBtn",
-                  text: "Confirmar"
-                },
-                {
-                  id: "changeBtn",
-                  text: "Cambiar"
-                }
-              ]
-              this.sendInteractiveButtonMessage(`${message.text.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
+              if(registerUserList[phoneNumber].referedCodeRequested){
+                const buttons = [
+                  {
+                    id: "rqstServiceACBtn",
+                    text: "Solicitar con aire"
+                  },
+                  {
+                    id: "listCurrentServices",
+                    text: "Cancelar servicio"
+                  },
+                  {
+                    id: "helpBtn",
+                    text: "Ayuda"
+                  }
+                ]
+                const newClient = {
+                  generalInfo: {
+                    name: registerUserList[phoneNumber].name,
+                    phone: parseInt(phoneNumber)
+                  },
+                  state: true,
+                  businessId: businessId
+                };
+                newClient._id = uuidv4();
+                newClient.creatorUser = 'SYSTEM';
+                newClient.creationTimestamp = new Date().getTime();
+                newClient.modifierUser = 'SYSTEM';
+                newClient.modificationTimestamp = new Date().getTime();
+                newClient.satelliteInfo = {
+                  "tip": 0,
+                  "tipType": "CASH"
+                };
+                return eventSourcing.eventStore.emitEvent$(
+                  new Event({
+                    eventType: "ClientCreated",
+                    eventTypeVersion: 1,
+                    aggregateType: "Client",
+                    aggregateId: newClient._id,
+                    data: newClient,
+                    user: "SYSTEM"
+                  })).pipe(
+                    mergeMap(() => {
+                      return eventSourcing.eventStore.emitEvent$(
+                        new Event({
+                          eventType: "DriverAssociatedToClient",
+                          eventTypeVersion: 1,
+                          aggregateType: "Client",
+                          aggregateId: newClient._id,
+                          data: {
+                            referrerDriverCode: message.text.body
+                          },
+                          user: "Chat BOT"
+                        }))
+                    }),
+                  tap(() => {
+                    this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
+                    registerUserList[phoneNumber] = undefined;
+                  })
+                )
+              }else {
+                registerUserList[phoneNumber].name = message.text.body;
+                const buttons = [
+                  {
+                    id: "confirmBtn",
+                    text: "Confirmar"
+                  },
+                  {
+                    id: "changeBtn",
+                    text: "Cambiar"
+                  }
+                ]
+                this.sendInteractiveButtonMessage(`${message.text.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
+              }
+              
             } else {
               switch (interactiveResp) {
-                case "confirmBtn":
+                case "registerBtn":
                   const buttons = [
                     {
                       id: "rqstServiceACBtn",
@@ -1564,6 +1623,15 @@ class ClientBotLinkCQRS {
                       registerUserList[phoneNumber] = undefined;
                     })
                   );
+                case "confirmBtn":
+                  const referedCodeButtons = [
+                    {
+                      id: "registerBtn",
+                      text: "Finalizar Registro"
+                    },
+                  ];
+                  registerUserList[phoneNumber].referedCodeRequested = true;
+                  this.sendInteractiveButtonMessage(`Código de Referido`, `Si tienes un codigo de referido de conductor ingresalo por favor, en caso contrario presiona el boton 'Finalizar Registro'`, referedCodeButtons, conversationContent.waId, businessId)
                   break;
                 case "changeBtn":
                   this.sendTextMessage("¿Cual es tu nombre?", conversationContent.waId, businessId)
