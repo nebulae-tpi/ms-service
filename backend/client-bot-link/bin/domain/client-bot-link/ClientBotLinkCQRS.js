@@ -617,7 +617,12 @@ class ClientBotLinkCQRS {
         }
       }),
       tap(() => {
-        this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId)
+        
+        if(currentRequestService.verificationCode){
+          this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado. Tu código de verificación de servicio es: ${currentRequestService.verificationCode}`, waId, businessId);
+        }else {
+          this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId);
+        }
         currentRequestService = undefined;
       })
     )
