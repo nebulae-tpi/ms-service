@@ -127,7 +127,7 @@ class ClientBotLinkCQRS {
     if (args.messages) {
       return from(args.messages).pipe(
         mergeMap(message => {
-          return this.initConversationBogota$(message.from, {
+          return this.initConversation$(message.from, {
             waId: message.from,
             timestamp: message.timestamp,
             client: {},
