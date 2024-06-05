@@ -806,7 +806,7 @@ class ServiceES {
                 if (shift == null || (shift.payPerServicePrice || 0) < 1) return null;
                 const { payPerServicePrice, subscriptionType } = shift;
                 if (subscriptionType == "PAY_PER_SERVICE") {
-                    return ({
+                    return ({ 
                         _id: Crosscutting.generateDateBasedUuid(),
                         sourceEvent: { aid, av },
                         businessId: businessId,

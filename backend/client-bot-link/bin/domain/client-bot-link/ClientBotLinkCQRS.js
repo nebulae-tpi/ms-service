@@ -592,7 +592,7 @@ class ClientBotLinkCQRS {
       if (this.messageIdCache.includes(message.id)) {
         console.log('ClientBotLinkCQRS.requestService: FATAL, whatsapp tried to send the same message more than once from', message.from, 'and will be ignored', message.id);
         return of({});
-      }
+      } 
       this.messageIdCache.push(message.id);
       this.messageIdCache = this.messageIdCache.slice(-20);
     } catch (error) {
