@@ -214,10 +214,10 @@ class ClientBotLinkCQRS {
           tipType: client.satelliteInfo.tipType,
           phone: (client.associatedClientPhoneNumber || (client.generalInfo || {}).phone),
           tip: airportTipEnabled ? satelliteAirtportPrices[client.satelliteInfo.satelliteType || "PORTER_LODGE"] : (client.satelliteInfo || {}).tip,
-          referrerDriverDocumentId: (client.satelliteInfo || {} ).referrerDriverDocumentId,
-          referrerDriverDocumentIds: (client.satelliteInfo || {} ).referrerDriverDocumentIds,
-          offerMinDistance: (client.satelliteInfo || {} ).offerMinDistance,
-          offerMaxDistance: (client.satelliteInfo || {} ).offerMaxDistance
+          referrerDriverDocumentId: (client.satelliteInfo || {}).referrerDriverDocumentId,
+          referrerDriverDocumentIds: (client.satelliteInfo || {}).referrerDriverDocumentIds,
+          offerMinDistance: (client.satelliteInfo || {}).offerMinDistance,
+          offerMaxDistance: (client.satelliteInfo || {}).offerMaxDistance
         },
         _id,
         businessId: businessId,
@@ -587,13 +587,20 @@ class ClientBotLinkCQRS {
     req.end();
   }
 
-  requestServiceWithoutSatellite$(client, currentRequestService, waId, message,  businessId) {
+  requestServiceWithoutSatellite$(client, currentRequestService, waId, message, businessId) {
+    if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+      const min = 1000;
+      const max = 9999;
+      const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      currentRequestService.verificationCode = Math.abs(randomNumber) + "";
+    }
+    
     try {
       if (this.messageIdCache == null) this.messageIdCache = [];
       if (this.messageIdCache.includes(message.id)) {
         console.log('ClientBotLinkCQRS.requestService: FATAL, whatsapp tried to send the same message more than once from', message.from, 'and will be ignored', message.id);
         return of({});
-      } 
+      }
       this.messageIdCache.push(message.id);
       this.messageIdCache = this.messageIdCache.slice(-20);
     } catch (error) {
@@ -610,18 +617,18 @@ class ClientBotLinkCQRS {
 
     return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_CLIENT", dropOff, currentRequestService)).pipe(
       mergeMap(() => {
-        if(!((client.lastServices) || []).some(l => l.address == currentRequestService.address)){
-          return ClientDA.appendLastRequestedService$(client._id, {...currentRequestService, id: uuidv4()});
+        if (!((client.lastServices) || []).some(l => l.address == currentRequestService.address)) {
+          return ClientDA.appendLastRequestedService$(client._id, { ...currentRequestService, id: uuidv4() });
         }
         else {
           return of({})
         }
       }),
       tap(() => {
-        
-        if(currentRequestService.verificationCode){
+
+        if (currentRequestService.verificationCode) {
           this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado. Tu código de verificación de servicio es: ${currentRequestService.verificationCode}`, waId, businessId);
-        }else {
+        } else {
           this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId);
         }
         currentRequestService = undefined;
@@ -754,9 +761,9 @@ class ClientBotLinkCQRS {
   }
 
   getMinuteOfDay(date) {
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-      return hours * 60 + minutes;
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    return hours * 60 + minutes;
   }
   startGetRequest(hostname, path) {
     const options = {
@@ -764,7 +771,7 @@ class ClientBotLinkCQRS {
       path,
       method: 'GET',
     };
-  
+
     return new Promise((resolve, reject) => {
       const req = http.request(options, (res) => {
         if (res.statusCode < 200 || res.statusCode >= 300) {
@@ -775,15 +782,15 @@ class ClientBotLinkCQRS {
             reject(new Error(`Error HTTP: ${res.statusCode} - ${errorResponse}`));
           });
         }
-  
+
         let body = [];
         res.on('data', (chunk) => body.push(chunk));
         res.on('end', () => {
           const resBody = Buffer.concat(body).toString();
-          resolve(JSON.parse(resBody));  
+          resolve(JSON.parse(resBody));
         });
       });
-  
+
       req.on('error', (e) => {
         reject(e);
       });
@@ -793,7 +800,7 @@ class ClientBotLinkCQRS {
 
   formatToCurrency(value, locale = 'en-US', currency = 'COP', symbol = "$") {
     return (new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(value)).replace(currency, symbol);
-}
+  }
 
   continueConversationBogotaCLient$(message, conversationContent, client, businessId) {
     let currentRequestService = requestClientCache[client._id];
@@ -828,11 +835,11 @@ class ClientBotLinkCQRS {
         id: "helpBtn",
         text: "Ayuda"
       }
-      
+
     ]
     if (textResp != null) {
       if (currentRequestService == null) {
-        if(textResp == "?"){
+        if (textResp == "?") {
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
         }
         let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
@@ -841,12 +848,7 @@ class ClientBotLinkCQRS {
             step: "REQUEST_REFERENCE",
             timestamp: Date.now()
           }
-          if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
-            const min = 1000;
-              const max = 9999;
-              const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-              currentRequestService.verificationCode = Math.abs(randomNumber)+"";
-          }
+
           this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
           requestClientCache[client._id] = currentRequestService;
           return of({});
@@ -878,7 +880,7 @@ class ClientBotLinkCQRS {
           currentRequestService.step = "REQUEST_LOCATION";
           currentRequestService.reference = textResp;
           break;
-          
+
         // case "REQUEST_LOCATION":
         //   this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
         //   currentRequestService.step = "LOCATION_SHARED";
@@ -907,15 +909,15 @@ class ClientBotLinkCQRS {
           currentRequestService = requestClientCache[client._id] || {};
           currentRequestService.step = "REQUEST_REFERENCE";
           currentRequestService.timestamp = Date.now();
-          currentRequestService.filters = {AC: true};
+          currentRequestService.filters = { AC: true };
           this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
           break;
         case "requestWithoutDestinationBtn":
         case "requestWithDestinationBtn":
           return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
-          tap(() => {
-            requestClientCache[client._id] = undefined;
-          })
+            tap(() => {
+              requestClientCache[client._id] = undefined;
+            })
           );
         case "helpBtn":
           const text = "A continuación se comparte el contacto de soporte de TxPlus"
@@ -976,22 +978,22 @@ class ClientBotLinkCQRS {
 
               })
             );
-          } else if(interactiveResp.includes("REQUEST_")){
-            const selectedServiceInfo =  client.lastServices.find(l => l.id == interactiveResp.replace("REQUEST_", ""));
+          } else if (interactiveResp.includes("REQUEST_")) {
+            const selectedServiceInfo = client.lastServices.find(l => l.id == interactiveResp.replace("REQUEST_", ""));
             return this.requestServiceWithoutSatellite$(client, selectedServiceInfo, conversationContent.waId, message, businessId).pipe(
               tap(() => {
                 requestClientCache[client._id] = undefined;
               })
             );
           }
-          else if(interactiveResp.includes("PAYMENT_")){
-          
-          this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
-          currentRequestService.paymentType = interactiveResp.replace("PAYMENT_", "")
-          currentRequestService.step = "LOCATION_SHARED";
-          currentRequestService.reference = textResp;
+          else if (interactiveResp.includes("PAYMENT_")) {
+
+            this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
+            currentRequestService.paymentType = interactiveResp.replace("PAYMENT_", "")
+            currentRequestService.step = "LOCATION_SHARED";
+            currentRequestService.reference = textResp;
           }
-           else {
+          else {
             return of({});
           }
       }
@@ -1010,9 +1012,9 @@ class ClientBotLinkCQRS {
           }
         ];
         this.sendInteractiveButtonMessage("Calcular Tarifa", `Si lo deseas, puedes compartirnos la ubicación de tu destino para calcular el valor aproximado de tu tarifa (presiona '📎' o '+', selecciona la opción 'ubicación' y envía la ubicación de tu destino). También puedes presionar el botón 'Solicitar Servicio' para enviar la solicitud sin destino.`, buttonsFare, conversationContent.waId, businessId);
-        
 
-      }else if((currentRequestService || {}).step == "DESTINATION_REQUESTED") {
+
+      } else if ((currentRequestService || {}).step == "DESTINATION_REQUESTED") {
         currentRequestService.destinationLocation = {
           lat: message.location.latitude,
           lng: message.location.longitude,
@@ -1026,21 +1028,21 @@ class ClientBotLinkCQRS {
         ];
         const clientLocation = currentRequestService.location.lat + "," + currentRequestService.location.lng;
         const destinationLocation = currentRequestService.destinationLocation.lat + "," + currentRequestService.destinationLocation.lng;
-        return from(this.startGetRequest("router.hereapi.com", "/v8/routes?transportMode=car&origin="+clientLocation+"&destination="+destinationLocation+"&return=summary&apiKey="+process.env.HERE_API_KEY)).pipe(
+        return from(this.startGetRequest("router.hereapi.com", "/v8/routes?transportMode=car&origin=" + clientLocation + "&destination=" + destinationLocation + "&return=summary&apiKey=" + process.env.HERE_API_KEY)).pipe(
           mergeMap(result => {
-            return BotConversationDA.getById$(businessId, {attributes: 1}).pipe(
+            return BotConversationDA.getById$(businessId, { attributes: 1 }).pipe(
               tap(business => {
                 console.log(JSON.stringify(result))
                 const summary = (((result?.routes || [{}])[0].sections || [{}])[0] || {})?.summary;
                 const attrObj = business.attributes.reduce((acc, val) => {
-                  acc[val.key] = val?.value;     
-                  return acc;            
+                  acc[val.key] = val?.value;
+                  return acc;
                 }, {});
 
-                console.log("attrObj ===> ",  JSON.stringify(attrObj))
+                console.log("attrObj ===> ", JSON.stringify(attrObj))
                 const specialFareList = attrObj["TAXIMETER_SPECIAL_FARE"] ? JSON.parse(attrObj["TAXIMETER_SPECIAL_FARE"]) : undefined;
-                
-                const taximeterPoints = summary.length/Number.parseFloat(attrObj["FARE_METERS"]);
+
+                const taximeterPoints = summary.length / Number.parseFloat(attrObj["FARE_METERS"]);
                 const totalMeterFare = taximeterPoints * Number.parseFloat(attrObj["FARE_VALUE"]);
                 const secondsValue = summary.duration * Number.parseFloat(attrObj["TAXIMETER_SECONDS_VALUE"]);
                 const startValue = Number.parseInt(attrObj["TAXIMETER_START_VALUE"]);
@@ -1053,7 +1055,7 @@ class ClientBotLinkCQRS {
                 const sundayCharge = Number.parseInt(selectedSpecialFare?.sundayCharge || "0");
                 const minimunFare = Number.parseInt(attrObj["TAXIMETER_MIMIMUN_FARE"]) + sundayCharge;
                 const totalFare = Math.round(Math.max((startValue + totalMeterFare + sundayCharge), minimunFare));
-                this.sendInteractiveButtonMessage("El valor aproximado de tu servicio es", `Entre ${this.formatToCurrency(totalFare)} y ${this.formatToCurrency(Math.round(totalFare + (totalFare*0.45)))}. Para solicitar el servicio, compartenos la dirección o una referencia de tu destino. Si deseas cancelar la solicitud, presiona el botón 'Cancelar Servicio'.`, buttonsFare, conversationContent.waId, businessId);
+                this.sendInteractiveButtonMessage("El valor aproximado de tu servicio es", `Entre ${this.formatToCurrency(totalFare)} y ${this.formatToCurrency(Math.round(totalFare + (totalFare * 0.45)))}. Para solicitar el servicio, compartenos la dirección o una referencia de tu destino. Si deseas cancelar la solicitud, presiona el botón 'Cancelar Servicio'.`, buttonsFare, conversationContent.waId, businessId);
               })
             )
           }),
@@ -1062,14 +1064,14 @@ class ClientBotLinkCQRS {
             return of({})
           })
         );
-        
+
         // return this.requestServiceWithoutSatellite$(client, currentRequestService, conversationContent.waId, message, businessId).pipe(
         //   tap(() => {
         //     requestClientCache[client._id] = currentRequestService
         //   })
         // );
 
-      }else if ((currentRequestService || {}).step == "REQUEST_REFERENCE") {
+      } else if ((currentRequestService || {}).step == "REQUEST_REFERENCE") {
         this.sendTextMessage(`Para continuar con la solicitud debes enviar una direccíon`, conversationContent.waId, businessId)
       }
       else if ((currentRequestService || {}).step == "REQUEST_LOCATION") {
@@ -1118,11 +1120,11 @@ class ClientBotLinkCQRS {
         id: "helpBtn",
         text: "Ayuda"
       }
-      
+
     ]
     if (textResp != null) {
       if (currentRequestService == null) {
-        if(textResp == "?"){
+        if (textResp == "?") {
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
         }
         let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
@@ -1162,7 +1164,7 @@ class ClientBotLinkCQRS {
           currentRequestService = requestClientCache[client._id] || {};
           currentRequestService.step = "REQUEST_REFERENCE";
           currentRequestService.timestamp = Date.now();
-          currentRequestService.filters = {AC: true};
+          currentRequestService.filters = { AC: true };
           this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
           break;
         case "helpBtn":
@@ -1224,15 +1226,15 @@ class ClientBotLinkCQRS {
 
               })
             );
-          } else if(interactiveResp.includes("REQUEST_")){
-            const selectedServiceInfo =  client.lastServices.find(l => l.id == interactiveResp.replace("REQUEST_", ""));
+          } else if (interactiveResp.includes("REQUEST_")) {
+            const selectedServiceInfo = client.lastServices.find(l => l.id == interactiveResp.replace("REQUEST_", ""));
             return this.requestServiceWithoutSatellite$(client, selectedServiceInfo, conversationContent.waId, message, businessId).pipe(
               tap(() => {
                 requestClientCache[client._id] = undefined;
               })
             );
           }
-           else {
+          else {
             return of({});
           }
       }
@@ -1471,12 +1473,12 @@ class ClientBotLinkCQRS {
               mergeMap(() => {
                 return ServiceDA.getServiceSize$({ clientId: client._id, states: ["REQUESTED", "ASSIGNED", "ARRIVED"] }).pipe(
                   mergeMap(serviceCount => {
-                    if(businessId === "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+                    if (businessId === "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
                       return this.continueConversationBogotaCLient$(message, conversationContent, client, businessId, true);
-                    }else {
+                    } else {
                       return this.continueConversationWithoutSatellite$(message, conversationContent, client, businessId, true);
                     }
-                    
+
                   }),
                   catchError(err => {
                     console.log("ERROR ===> ", err)
@@ -1501,12 +1503,8 @@ class ClientBotLinkCQRS {
           else {
             const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
             if (!interactiveResp) {
-              if(registerUserList[phoneNumber].referedCodeRequested){
+              if (registerUserList[phoneNumber].referedCodeRequested) {
                 const buttons = [
-                  {
-                    id: "rqstServiceACBtn",
-                    text: "Solicitar con aire"
-                  },
                   {
                     id: "listCurrentServices",
                     text: "Cancelar servicio"
@@ -1515,7 +1513,13 @@ class ClientBotLinkCQRS {
                     id: "helpBtn",
                     text: "Ayuda"
                   }
-                ]
+                ];
+                if (businessId != "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
+                  buttons.push({
+                    id: "rqstServiceACBtn",
+                    text: "Solicitar con aire"
+                  })
+                }
                 const newClient = {
                   generalInfo: {
                     name: registerUserList[phoneNumber].name,
@@ -1555,12 +1559,12 @@ class ClientBotLinkCQRS {
                           user: "Chat BOT"
                         }))
                     }),
-                  tap(() => {
-                    this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
-                    registerUserList[phoneNumber] = undefined;
-                  })
-                )
-              }else {
+                    tap(() => {
+                      this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
+                      registerUserList[phoneNumber] = undefined;
+                    })
+                  )
+              } else {
                 registerUserList[phoneNumber].name = message.text.body;
                 const buttons = [
                   {
@@ -1574,7 +1578,7 @@ class ClientBotLinkCQRS {
                 ]
                 this.sendInteractiveButtonMessage(`${message.text.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
               }
-              
+
             } else {
               switch (interactiveResp) {
                 case "registerBtn":
@@ -1618,13 +1622,13 @@ class ClientBotLinkCQRS {
                       data: newClient,
                       user: "SYSTEM"
                     })).pipe(
-                    tap(() => {
-                      this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
-                      registerUserList[phoneNumber] = undefined;
-                    })
-                  );
+                      tap(() => {
+                        this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
+                        registerUserList[phoneNumber] = undefined;
+                      })
+                    );
                 case "confirmBtn":
-                  if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+                  if (businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
                     const referedCodeButtons = [
                       {
                         id: "registerBtn",
@@ -1633,7 +1637,7 @@ class ClientBotLinkCQRS {
                     ];
                     registerUserList[phoneNumber].referedCodeRequested = true;
                     this.sendInteractiveButtonMessage(`Código de Referido`, `Si tienes un codigo de referido de conductor ingresalo por favor, en caso contrario presiona el boton 'Finalizar Registro'`, referedCodeButtons, conversationContent.waId, businessId)
-                  }else {
+                  } else {
                     const buttons = [
                       {
                         id: "rqstServiceACBtn",
@@ -1674,13 +1678,13 @@ class ClientBotLinkCQRS {
                         data: newClient,
                         user: "SYSTEM"
                       })).pipe(
-                      tap(() => {
-                        this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
-                        registerUserList[phoneNumber] = undefined;
-                      })
-                    );
+                        tap(() => {
+                          this.sendInteractiveButtonMessage(`Hola ${registerUserList[phoneNumber].name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, buttons, conversationContent.waId, businessId);
+                          registerUserList[phoneNumber] = undefined;
+                        })
+                      );
                   }
-                  
+
                   break;
                 case "changeBtn":
                   this.sendTextMessage("¿Cual es tu nombre?", conversationContent.waId, businessId)
@@ -1703,7 +1707,7 @@ class ClientBotLinkCQRS {
     const options = {
       protocol: 'https:',
       hostname: businessIdVsD360APIKey[businessId].hostname || 'waba.360dialog.io',
-      path: businessIdVsD360APIKey[businessId].path+"/"+message.id || ('/v1/messages/'+"/"+message.id),
+      path: businessIdVsD360APIKey[businessId].path + "/" + message.id || ('/v1/messages/' + "/" + message.id),
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
