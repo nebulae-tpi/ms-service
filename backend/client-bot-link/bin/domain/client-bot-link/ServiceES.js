@@ -58,7 +58,7 @@ class ServiceES {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         const taximeterFare = (serviceEvent.data || {}).taximeterFare
-        if (service.client.phone && taximeterFare) {
+        if (service.client.phone && taximeterFare && service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
           this.sendTextMessage(`Se ha finalizado tu servicio el valor total a pagar es ${this.formatToCurrency(taximeterFare)}`, `57${service.client.phone}`, service.businessId)
         }
       })
@@ -69,7 +69,6 @@ class ServiceES {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
-          console.log("service ETA ===> ",serviceEvent.aid);
           const minutes = this.millisToMinutesAndSeconds(serviceEvent.data.eta - Date.now())
           this.sendTextMessage(`El vehículo con placas ${service.vehicle.licensePlate} tiene un tiempo estimado de llegada de ${minutes}`, `57${service.client.phone}`, service.businessId)
         }
