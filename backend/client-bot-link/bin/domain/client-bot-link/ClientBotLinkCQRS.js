@@ -30,7 +30,9 @@ const businessIdVsD360APIKey = {
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
     availableRqstVipEmojis: "(?:👑)",
     availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
-    availableRqstFilterEmojis: "🧐"
+    availableRqstFilterEmojis: "🧐",
+    hostname: "waba-v2.360dialog.io",
+    path: "/messages"
   },
   "7d95f8ef-4c54-466a-8af9-6dd197dd920a": {
     D360_KEY: process.env.D360_API_KEY_TX_BOGOTA,
