@@ -177,6 +177,26 @@ class ClientBotLinkCQRS {
     }
 
   }
+  
+  processTxPlusVillavicencioMessageReceived$({ args }, authToken) {
+    if (args.messages) {
+      return from(args.messages).pipe(
+        mergeMap(message => {
+          return this.initConversation$(message.from, {
+            waId: message.from,
+            timestamp: message.timestamp,
+            client: {},
+          }, message, "ec600f7f-1b57-4c47-af77-c6750a8649bd")
+        }),
+        tap(message => {
+          //this.markMessageAsRead(message, businessId);
+        })
+      )
+    } else {
+      return of("IGNORED")
+    }
+
+  }
 
   processNewTxPlusMessageReceived$({ args }, authToken) {
     if (args.messages) {

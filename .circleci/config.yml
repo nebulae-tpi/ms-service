@@ -345,7 +345,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/client-bot-link/
             export DOCKERHUB_IMAGE=service.backend.clientbotlink
-            export DOCKERHUB_TAG=1.2.20  # client-bot-link
+            export DOCKERHUB_TAG=1.2.21  # client-bot-link
             gitChanged backend/client-bot-link || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/client-bot-link/
             gitChanged backend/client-bot-link || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/client-bot-link || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
