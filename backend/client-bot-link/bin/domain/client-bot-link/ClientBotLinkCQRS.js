@@ -66,7 +66,7 @@ const businessIdVsD360APIKey = {
     availableRqstVipEmojis: "(?:👑)",
     availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
     availableRqstFilterEmojis: "🧐"
-  },
+  }, 
   "ec600f7f-1b57-4c47-af77-c6750a8649bd": {
     D360_KEY: process.env.DIALOG_API_KEY_VILLAVICENCIO,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
