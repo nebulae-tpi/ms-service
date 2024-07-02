@@ -66,6 +66,19 @@ const businessIdVsD360APIKey = {
     availableRqstVipEmojis: "(?:👑)",
     availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
     availableRqstFilterEmojis: "🧐"
+  },
+  "ec600f7f-1b57-4c47-af77-c6750a8649bd": {
+    D360_KEY: process.env.DIALOG_API_KEY_VILLAVICENCIO,
+    registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
+    availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
+    availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
+    availableRqstVipEmojis: "(?:👑)",
+    availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
+    availableRqstFilterEmojis: "🧐",
+    hostname: "waba-v2.360dialog.io",
+    path: "/messages"
   }
 }
 const {
