@@ -29,6 +29,18 @@ class DriverDA {
     return defer(() => collection.findOne(query));
   }
 
+  static associateDriverCode$(_id, code){
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(() => collection
+      .updateOne(
+        { _id },
+        {
+          $set: { referredCode: code }
+        }
+      )
+    );
+  }
+
 }
 /**
  * @returns {DriverDA}

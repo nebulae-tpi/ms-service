@@ -234,7 +234,12 @@ class GraphQlService {
       {
         aggregateType: "Driver",
         messageType: "drivergateway.graphql.query.DriverAssignedVehicles"
-      },     
+      },   
+      {
+        aggregateType: "Driver",
+        messageType: "drivergateway.graphql.mutation.AssociateDriver"
+      },   
+
 
       //SERVICE
       {
@@ -302,6 +307,10 @@ class GraphQlService {
       },
       "drivergateway.graphql.mutation.startShift": {
         fn: ShiftCQRS.startShift$,
+        obj: ShiftCQRS
+      },
+      "drivergateway.graphql.mutation.AssociateDriver": {
+        fn: ShiftCQRS.associateDriver$,
         obj: ShiftCQRS
       },
       "drivergateway.graphql.mutation.setShiftState": {

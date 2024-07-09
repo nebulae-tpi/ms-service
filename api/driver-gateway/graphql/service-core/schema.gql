@@ -207,6 +207,10 @@ type Mutation {
       state: String
    ): CommandAck @requireAuth
 
+   associateDriver(
+      driverCode: String
+   ): CommandAck @requireAuth
+
    "Accept a service offer"
    acceptServiceOffer(
       "Shift id"

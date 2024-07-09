@@ -81,6 +81,15 @@ module.exports = {
       ).toPromise();
     },
 
+    associateDriver: (root, args, context, info) => {
+      return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'associateDriver', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(
+        switchMapTo(
+          broker.forwardAndGetReply$("Driver", "drivergateway.graphql.mutation.AssociateDriver", { root, args, jwt: context.encodedToken }, 2000)
+        ),
+        mergeMap(response => getResponseFromBackEnd$(response))
+      ).toPromise();
+    },
+
     setShiftState: (root, args, context, info) => {
       console.log("setShiftState ==> ", {...args});
       return RoleValidator.checkPermissions$(context.authToken.realm_access.roles, 'ms-service', 'setShiftState', USERS_PERMISSION_DENIED_ERROR_CODE, 'Permission denied', ['DRIVER']).pipe(

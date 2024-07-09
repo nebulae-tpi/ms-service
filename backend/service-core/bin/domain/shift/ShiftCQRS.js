@@ -51,6 +51,36 @@ class ShiftCQRS {
     );
   }
 
+  associateDriver$({ root, args, jwt }, authToken) {    
+    const referrerDriverCode = args.driverCode;
+    return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
+      //Validate the data
+      mergeMap(roles => DriverDA.associateDriverCode$(authToken.driverId)),
+      mergeMap(() => {
+        if (authToken.driverId) {
+          return eventSourcing.eventStore.emitEvent$(
+            new Event({
+              eventType: "DriverAssociatedToDriver",
+              eventTypeVersion: 1,
+              aggregateType: "Driver",
+              aggregateId: authToken.driverId,
+              data: {
+                referrerDriverCode
+              },
+              user: authToken.preferred_username
+            })).pipe(
+              mapTo({_id: authToken.driverId, referrerDriverCode, updated: true})
+            )
+        }else {
+          throw new CustomError('Missing client ID in token', 'associateDriverToClient$', CLIENT_ID_MISSING.code, CLIENT_ID_MISSING.description); 
+        }
+      }
+      ),
+      mergeMap(() => GraphqlResponseTools.buildSuccessResponse$({accepted: true})),
+      catchError(err => GraphqlResponseTools.handleError$(err))
+    );
+  }
+
   /**  
    * Starts a new shift for a driver
    */
