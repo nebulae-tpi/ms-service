@@ -312,7 +312,7 @@ class GraphQlService {
       "drivergateway.graphql.mutation.AssociateDriver": {
         fn: ShiftCQRS.associateDriver$,
         obj: ShiftCQRS
-      },
+      }, 
       "drivergateway.graphql.mutation.setShiftState": {
         fn: ShiftCQRS.setShiftState$,
         obj: ShiftCQRS
