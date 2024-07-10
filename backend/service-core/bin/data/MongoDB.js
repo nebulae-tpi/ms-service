@@ -71,7 +71,7 @@ class MongoDB {
    */
   getHistoricalDb(date = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), monthsToAdd = 0) {
     if (monthsToAdd != 0) {
-      date.add(monthsToAdd).month();
+      date.setMonth(date.getMonth() - monthsToAdd);
     }
     const historicalDbName = `historical_${dateFormat(date, "yymm")}`;
     if (!this.historicalDbs[historicalDbName]) {

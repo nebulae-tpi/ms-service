@@ -231,7 +231,7 @@ class ServiceClientCQRS {
     // ServiceClientCQRS.log(`ServiceCQRS.requestServices RQST: ${JSON.stringify(args)}`); //DEBUG: DELETE LINE
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ServiceCQRS", "partialPaymentService", PERMISSION_DENIED, ["CLIENT"])
       .pipe(
-        mergeMap(() => ServiceDA.findById$(serviceId, { _id: 1, client: 1, driver: 1 })),
+        mergeMap(() => ServiceDA.findLastServiceByClientId$(authToken.clientId, { _id: 1, client: 1, driver: 1 })),
         map(service => {
           return {
             _id: Crosscutting.generateDateBasedUuid(),

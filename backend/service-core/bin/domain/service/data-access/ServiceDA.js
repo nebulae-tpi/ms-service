@@ -29,9 +29,34 @@ class ServiceDA {
    */
   static findById$(_id, projection = undefined) {
     const query = { _id };
+    return defer(() => mongoDB.extractAllFromMongoCursor$(
+      mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
+      .find(query, { projection })
+    ))
+  }
 
-    return defer(() => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName)
-      .findOne(query, { projection }));
+  static findLastServiceByClientId$(clientId, projection = undefined) {
+    const query = { "client.id": clientId };
+    const currentTimestamp = Date.now();
+    return defer(() => mongoDB.extractAllFromMongoCursor$(
+      mongoDB.getHistoricalDb(currentTimestamp).collection(CollectionName)
+      .find(query, { projection })
+      .sort({timestamp: -1})
+      .limit(1)
+    )).pipe(
+      mergeMap(result => {
+        if((result || {})._id != null){
+          return of(result);
+        }else {
+          return defer(() => mongoDB.extractAllFromMongoCursor$(
+            mongoDB.getHistoricalDb(currentTimestamp, 1).collection(CollectionName)
+            .find(query, { projection })
+            .sort({timestamp: -1})
+            .limit(1)
+          ))
+        }
+      })
+    )
   }
 
   static markedAsCancelledAndReturnService$(_id, projection = undefined) {
