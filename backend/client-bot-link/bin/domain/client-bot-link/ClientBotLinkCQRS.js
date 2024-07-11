@@ -1602,7 +1602,7 @@ class ClientBotLinkCQRS {
                     })
                   )
               } else {
-                registerUserList[phoneNumber].name = message.text.body;
+                registerUserList[phoneNumber].name = message?.text?.body;
                 const buttons = [
                   {
                     id: "confirmBtn",
