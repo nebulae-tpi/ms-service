@@ -53,6 +53,7 @@ class ShiftCQRS {
 
   associateDriver$({ root, args, jwt }, authToken) {    
     const referrerDriverCode = args.driverCode;
+    console.log("referrerDriverCode ===> ", referrerDriverCode);
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.ShiftCQRS", "startShift", PERMISSION_DENIED, ["DRIVER"]).pipe(
       //Validate the data
       mergeMap(roles => DriverDA.associateDriverCode$(authToken.driverId, referrerDriverCode)),
