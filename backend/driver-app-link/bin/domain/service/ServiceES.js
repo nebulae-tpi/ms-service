@@ -878,7 +878,7 @@ class ServiceES {
                         console.log("ENCUENTRA Y PREPARA ENVIO DE MOVIMIENTO");
                         const tx = {
                             _id: Crosscutting.generateDateBasedUuid(),
-                            sourceEvent: { aid, av },
+                            sourceEvent: { aid },
                             businessId,
                             type: "MOVEMENT",
                             // notes: mba.notes,
