@@ -5,7 +5,7 @@ let mongoDB = undefined;
 const CollectionName = "Service";
 const { CustomError } = require("../../../tools/customError");
 const { of, Observable, defer, forkJoin, from, range } = require("rxjs");
-const { map, mergeMap, first, filter } = require("rxjs/operators");
+const { map, mergeMap, first, filter, tap } = require("rxjs/operators");
 
 class ServiceDA {
 
@@ -29,12 +29,15 @@ class ServiceDA {
    * @param {*} projection 
    */
   static findById$(_id, projection = undefined) {
+    console.log("CONSULTA por ID ===> ", _id);
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOne(
         { _id },
         projection
       )
-    ).pipe(filter(val => val));
+    ).pipe(
+      filter(val => val)
+    );
   }
 
   static updateTaximeterFare$(_id, taximeterFare, driverTaximeterAgreement) {

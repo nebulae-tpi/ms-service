@@ -864,7 +864,7 @@ class ServiceES {
      * @returns {Observable}
      */
     handleServiceCompleted$({ aid, data, timestamp }) {
-        //console.log(`ServiceES: handleServiceCompleted: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
+        console.log(`ServiceES: handleServiceCompleted: ${JSON.stringify({ _id: aid, ...data })} `); //DEBUG: DELETE LINE
         return of({}).pipe(
             delay(300),
             mergeMap(() => ServiceDA.findById$(aid, { "driver": 1, "businessId": 1, "taximeterFare": 1, "client": 1 })),
@@ -873,34 +873,38 @@ class ServiceES {
                 if(service.driver.referredCode != null){
                     console.log("referredCode ==> ", service.driver.referredCode);
                     const amount = Math.min((service.taximeterFare*0.1), 2000);
-                    return DriverDA.getDriverByDriverCode$(parseInt(service.driver.referredCode)).pipe(
+                    return DriverDA.getDriverByDriverCode$(parseInt(service.driver.referredCode), service.businessId).pipe(
                        mergeMap(referrerDriver => {
-                        console.log("ENCUENTRA Y PREPARA ENVIO DE MOVIMIENTO");
-                        const tx = {
-                            _id: Crosscutting.generateDateBasedUuid(),
-                            sourceEvent: { aid },
-                            businessId,
-                            type: "MOVEMENT",
-                            // notes: mba.notes,
-                            concept: "APP_DRIVER_AGREEMENT_PAYMENT",
-                            timestamp: timestamp || Date.now(),
-                            amount: amount*0.04,
-                            driverToDriver: true,
-                            fromId: service.driver.id,
-                            toId: referrerDriver._id,
-                            //clientId: referrerDriver._id,
-                            referrerDriverId: (referrerDriver || {})._id
+                        if((referrerDriver || {})._id != null){
+                            const tx = {
+                                _id: Crosscutting.generateDateBasedUuid(),
+                                sourceEvent: { aid },
+                                businessId: service.businessId,
+                                type: "MOVEMENT",
+                                // notes: mba.notes,
+                                concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                                timestamp: timestamp || Date.now(),
+                                amount: amount*0.04,
+                                driverToDriver: true,
+                                fromId: service.driver.id,
+                                toId: referrerDriver._id,
+                                //clientId: referrerDriver._id,
+                                referrerDriverId: (referrerDriver || {})._id
+                            }
+                            return eventSourcing.eventStore.emitEvent$(
+                                new Event({
+                                    eventType: "WalletTransactionCommited",
+                                    eventTypeVersion: 1,
+                                    aggregateType: "Wallet",
+                                    aggregateId: service.driver.id,
+                                    data: tx,
+                                    user: "SYSTEM"
+                                })
+                            );
+                        }else {
+                            return of({})        
                         }
-                        return eventSourcing.eventStore.emitEvent$(
-                            new Event({
-                                eventType: "WalletTransactionCommited",
-                                eventTypeVersion: 1,
-                                aggregateType: "Wallet",
-                                aggregateId: service.driver.id,
-                                data: tx,
-                                user: "SYSTEM"
-                            })
-                        )
+                        
                        }),
                        mapTo(service)
                     );
