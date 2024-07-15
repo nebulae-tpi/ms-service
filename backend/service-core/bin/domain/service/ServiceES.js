@@ -130,7 +130,8 @@ class ServiceES {
             mergeMap(() => {
                 return DriverDA.findById$(driver.id).pipe(
                     mergeMap(serviceDriver => {
-                        return ServiceDA.assignReferredDriverToService$(driver.id, serviceDriver.referredCode)
+                        if(serviceDriver)
+                        return ServiceDA.assignReferredDriverToService$(aid, serviceDriver.referredCode)
                     })
                 )
             }),
