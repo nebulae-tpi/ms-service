@@ -9,7 +9,7 @@ const Crosscutting = require('../../tools/Crosscutting');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 
-const { ServiceDA, ShiftDA, ClientDA } = require('./data-access');
+const { ServiceDA, ShiftDA, ClientDA, DriverDA } = require('./data-access');
 const CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC = "client-gateway-materialized-view-updates";
 
 /**
@@ -127,6 +127,13 @@ class ServiceES {
             //IF CQRS DID NOT PERSIST THE DATA, THEN WE ASSIGN THE DRIVER WITHIN THE SERVICE AND THEN SEND THE BUSY STATE TO THE SHIFT
             ServiceDA.assignServiceNoRules$(aid, shiftId, driver, vehicle)
         ).pipe(
+            mergeMap(() => {
+                return DriverDA.findById$(driver.id).pipe(
+                    mergeMap(serviceDriver => {
+                        return ServiceDA.assignReferredDriverToService$(driver.id, serviceDriver.referredCode)
+                    })
+                )
+            }),
             tap(() => this.queueAndGroupServiceEvent({ _id: aid })),
             mergeMap(persistResult =>
                 eventSourcing.eventStore.emitEvent$(

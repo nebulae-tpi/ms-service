@@ -163,6 +163,17 @@ class ServiceDA {
   }
 
 
+  static assignReferredDriverToService$(_id, referredCode) {
+    const collection = mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName);
+    return defer(() => collection.updateOne(
+      { _id },
+      {
+        $set: { 
+            "driver.referredCode": referredCode
+         },
+      }
+    ));
+  }
 
 
 
