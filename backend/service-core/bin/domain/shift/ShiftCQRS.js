@@ -253,7 +253,8 @@ class ShiftCQRS {
           pockets: driver.wallet.pockets,
           businessId: driver.wallet.businessId
         },
-        "driverCode": driver.driverCode
+        "driverCode": driver.driverCode,
+        "referredCode": driver.referredCode
       },
       "vehicle": {
         "id": vehicle._id,
@@ -337,6 +338,7 @@ class ShiftCQRS {
           businessId: shift.driver.wallet.businessId
         },
         driverCode: shift.driver.driverCode,
+        referredCode: shift.driver.referredCode,
         active: true
       },
       vehicle: {

@@ -748,17 +748,6 @@ class ServiceES {
             }
             ),
             //   tap(tx => console.log("TRANSACTION ==> ", {tx})),
-            mergeMap(tx => !tx ? of({}) : eventSourcing.eventStore.emitEvent$(
-                new Event({
-                    eventType: "WalletTransactionCommited",
-                    eventTypeVersion: 1,
-                    aggregateType: "Wallet",
-                    aggregateId: driver.id,
-                    data: tx,
-                    user: "SYSTEM"
-                })
-            )
-            )
         );
     }
 
@@ -884,6 +873,7 @@ class ServiceES {
                 if(service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
                     console.log("Se completa con taximetro: ", service.taximeterFare);
                     if (service.client.referrerDriverCode && service.client.referrerDriverCode !== null) {
+                        const amount = Math.min((service.taximeterFare*0.1), 2000);
                         return DriverDA.getDriverByDriverCode$(parseInt(service.client.referrerDriverCode), service.businessId).pipe(
                             mergeMap(referrerDriver => {
                                 return eventSourcing.eventStore.emitEvent$(
@@ -899,7 +889,7 @@ class ServiceES {
                                             // notes: mba.notes,
                                             concept: "APP_DRIVER_AGREEMENT_PAYMENT",
                                             timestamp: timestamp || Date.now(),
-                                            amount: Math.min((service.taximeterFare*0.1), 2000),
+                                            amount: service.driver.referredCode != null ? amount - (amount*0.04) : amount,
                                             fromId: service.driver.id,
                                             toId: service.businessId,
                                             clientId: service.client.id,
@@ -908,6 +898,42 @@ class ServiceES {
                                         user: "SYSTEM"
                                     })
                                 )
+                            }),
+                            mergeMap(() => {
+                                if(service.driver.referredCode != null){
+                                    const amount = Math.min((service.taximeterFare*0.1), 2000);
+                                    return DriverDA.getDriverByDriverCode$(parseInt(service.driver.referredCode)).pipe(
+                                       mergeMap(referrerDriver => {
+                                        const tx = {
+                                            _id: Crosscutting.generateDateBasedUuid(),
+                                            sourceEvent: { aid, av },
+                                            businessId,
+                                            type: "MOVEMENT",
+                                            // notes: mba.notes,
+                                            concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                                            timestamp: timestamp || Date.now(),
+                                            amount: amount*0.04,
+                                            driverToDriver: true,
+                                            fromId: service.driver.id,
+                                            toId: businessId,
+                                            clientId: referrerDriver._id,
+                                            referrerDriverId: (referrerDriver || {})._id
+                                        }
+                                        return eventSourcing.eventStore.emitEvent$(
+                                            new Event({
+                                                eventType: "WalletTransactionCommited",
+                                                eventTypeVersion: 1,
+                                                aggregateType: "Wallet",
+                                                aggregateId: service.driver.id,
+                                                data: tx,
+                                                user: "SYSTEM"
+                                            })
+                                        )
+                                       }) 
+                                    );
+                                }else {
+                                    return of({})
+                                }
                             }),
                             mergeMap(()=> {
                                 return driverAppLinkBroker.sendServiceEventToDrivers$(
