@@ -870,6 +870,45 @@ class ServiceES {
             mergeMap(() => ServiceDA.findById$(aid, { "driver": 1, "businessId": 1, "taximeterFare": 1, "client": 1 })),
             filter(service => service.driver && service.driver.username),
             mergeMap(service => {
+                if(service.driver.referredCode != null){
+                    console.log("referredCode ==> ", service.driver.referredCode);
+                    const amount = Math.min((service.taximeterFare*0.1), 2000);
+                    return DriverDA.getDriverByDriverCode$(parseInt(service.driver.referredCode)).pipe(
+                       mergeMap(referrerDriver => {
+                        console.log("ENCUENTRA Y PREPARA ENVIO DE MOVIMIENTO");
+                        const tx = {
+                            _id: Crosscutting.generateDateBasedUuid(),
+                            sourceEvent: { aid, av },
+                            businessId,
+                            type: "MOVEMENT",
+                            // notes: mba.notes,
+                            concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                            timestamp: timestamp || Date.now(),
+                            amount: amount*0.04,
+                            driverToDriver: true,
+                            fromId: service.driver.id,
+                            toId: referrerDriver._id,
+                            //clientId: referrerDriver._id,
+                            referrerDriverId: (referrerDriver || {})._id
+                        }
+                        return eventSourcing.eventStore.emitEvent$(
+                            new Event({
+                                eventType: "WalletTransactionCommited",
+                                eventTypeVersion: 1,
+                                aggregateType: "Wallet",
+                                aggregateId: service.driver.id,
+                                data: tx,
+                                user: "SYSTEM"
+                            })
+                        )
+                       }),
+                       mapTo(service)
+                    );
+                }else {
+                    return of(service)
+                }
+            }),
+            mergeMap(service => {
                 if(service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
                     console.log("Se completa con taximetro: ", service.taximeterFare);
                     if (service.client.referrerDriverCode && service.client.referrerDriverCode !== null) {
@@ -898,44 +937,6 @@ class ServiceES {
                                         user: "SYSTEM"
                                     })
                                 )
-                            }),
-                            mergeMap(() => {
-                                if(service.driver.referredCode != null){
-                                    console.log("referredCode ==> ", service.driver.referredCode);
-                                    const amount = Math.min((service.taximeterFare*0.1), 2000);
-                                    return DriverDA.getDriverByDriverCode$(parseInt(service.driver.referredCode)).pipe(
-                                       mergeMap(referrerDriver => {
-                                        console.log("ENCUENTRA Y PREPARA ENVIO DE MOVIMIENTO");
-                                        const tx = {
-                                            _id: Crosscutting.generateDateBasedUuid(),
-                                            sourceEvent: { aid, av },
-                                            businessId,
-                                            type: "MOVEMENT",
-                                            // notes: mba.notes,
-                                            concept: "APP_DRIVER_AGREEMENT_PAYMENT",
-                                            timestamp: timestamp || Date.now(),
-                                            amount: amount*0.04,
-                                            driverToDriver: true,
-                                            fromId: service.driver.id,
-                                            toId: referrerDriver._id,
-                                            //clientId: referrerDriver._id,
-                                            referrerDriverId: (referrerDriver || {})._id
-                                        }
-                                        return eventSourcing.eventStore.emitEvent$(
-                                            new Event({
-                                                eventType: "WalletTransactionCommited",
-                                                eventTypeVersion: 1,
-                                                aggregateType: "Wallet",
-                                                aggregateId: service.driver.id,
-                                                data: tx,
-                                                user: "SYSTEM"
-                                            })
-                                        )
-                                       }) 
-                                    );
-                                }else {
-                                    return of({})
-                                }
                             }),
                             mergeMap(()=> {
                                 return driverAppLinkBroker.sendServiceEventToDrivers$(
