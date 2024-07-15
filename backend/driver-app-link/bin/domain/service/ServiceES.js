@@ -901,9 +901,11 @@ class ServiceES {
                             }),
                             mergeMap(() => {
                                 if(service.driver.referredCode != null){
+                                    console.log("referredCode ==> ", service.driver.referredCode);
                                     const amount = Math.min((service.taximeterFare*0.1), 2000);
                                     return DriverDA.getDriverByDriverCode$(parseInt(service.driver.referredCode)).pipe(
                                        mergeMap(referrerDriver => {
+                                        console.log("ENCUENTRA Y PREPARA ENVIO DE MOVIMIENTO");
                                         const tx = {
                                             _id: Crosscutting.generateDateBasedUuid(),
                                             sourceEvent: { aid, av },
