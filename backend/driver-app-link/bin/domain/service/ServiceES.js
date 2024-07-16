@@ -884,7 +884,7 @@ class ServiceES {
                                 // notes: mba.notes,
                                 concept: "APP_DRIVER_AGREEMENT_PAYMENT",
                                 timestamp: timestamp || Date.now(),
-                                amount: amount*0.04,
+                                amount: amount*0.004,
                                 driverToDriver: true,
                                 fromId: service.driver.id,
                                 toId: referrerDriver._id,
@@ -914,9 +914,8 @@ class ServiceES {
             }),
             mergeMap(service => {
                 if(service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
-                    console.log("Se completa con taximetro: ", service.taximeterFare);
+                    const amount = Math.min((service.taximeterFare*0.1), 2000);
                     if (service.client.referrerDriverCode && service.client.referrerDriverCode !== null) {
-                        const amount = Math.min((service.taximeterFare*0.1), 2000);
                         return DriverDA.getDriverByDriverCode$(parseInt(service.client.referrerDriverCode), service.businessId).pipe(
                             mergeMap(referrerDriver => {
                                 return eventSourcing.eventStore.emitEvent$(
@@ -932,7 +931,7 @@ class ServiceES {
                                             // notes: mba.notes,
                                             concept: "APP_DRIVER_AGREEMENT_PAYMENT",
                                             timestamp: timestamp || Date.now(),
-                                            amount: service.driver.referredCode != null ? amount - (amount*0.04) : amount,
+                                            amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
                                             fromId: service.driver.id,
                                             toId: service.businessId,
                                             clientId: service.client.id,
@@ -961,7 +960,7 @@ class ServiceES {
                                     // notes: mba.notes,
                                     concept: "APP_DRIVER_AGREEMENT_PAYMENT",
                                     timestamp: timestamp || Date.now(),
-                                    amount: Math.min((service.taximeterFare*0.1), 2000),
+                                    amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
                                     fromId: service.driver.id,
                                     toId: service.businessId,
                                     clientId: service.client.id

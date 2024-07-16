@@ -29,7 +29,6 @@ class ServiceDA {
    * @param {*} projection 
    */
   static findById$(_id, projection = undefined) {
-    console.log("CONSULTA por ID ===> ", _id);
     return defer(
       () => mongoDB.getHistoricalDbByYYMM(_id.split('-').pop()).collection(CollectionName).findOne(
         { _id },
