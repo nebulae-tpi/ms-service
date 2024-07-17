@@ -1090,7 +1090,8 @@ class ClientBotLinkCQRS {
                 const sundayCharge = Number.parseInt(selectedSpecialFare?.sundayCharge || "0");
                 const minimunFare = Number.parseInt(attrObj["TAXIMETER_MIMIMUN_FARE"]) + sundayCharge;
                 const totalFare = Math.round(Math.max((startValue + totalMeterFare + sundayCharge), minimunFare));
-                this.sendInteractiveButtonMessage("El valor aproximado de tu servicio es", `Entre ${this.formatToCurrency(totalFare)} y ${this.formatToCurrency(Math.round(totalFare + (totalFare * 0.45)))}. Para solicitar el servicio, compartenos la dirección o una referencia de tu destino. Si deseas cancelar la solicitud, presiona el botón 'Cancelar Servicio'.`, buttonsFare, conversationContent.waId, businessId);
+                this.sendTextMessage(`El valor aproximado de tu servicio es entre ${this.formatToCurrency(totalFare)} y ${this.formatToCurrency(Math.round(totalFare + (totalFare * 0.45)))}. *Por favor compartenos la dirección o una referencia de tu destino.*`, conversationContent.waId, businessId);
+                //this.sendInteractiveButtonMessage("El valor aproximado de tu servicio es", `Entre ${this.formatToCurrency(totalFare)} y ${this.formatToCurrency(Math.round(totalFare + (totalFare * 0.45)))}. *Por favor compartenos la dirección o una referencia de tu destino.* 'Cancelar Servicio'.`, buttonsFare, conversationContent.waId, businessId);
               })
             )
           }),
