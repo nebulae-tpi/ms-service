@@ -37,7 +37,7 @@ const businessIdVsD360APIKey = {
   "7d95f8ef-4c54-466a-8af9-6dd197dd920a": {
     D360_KEY: process.env.D360_API_KEY_TX_BOGOTA,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
-    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"\n- Para ver el saldo actual en billetera utiliza el siguiente emoji: 💵`,
     menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
@@ -869,6 +869,10 @@ class ClientBotLinkCQRS {
       {
         id: "helpBtn",
         text: "Ayuda"
+      },
+      {
+        id: "getWalletBtn",
+        text: "Consultar Saldo en Billetera"
       }
 
     ]
@@ -959,6 +963,13 @@ class ClientBotLinkCQRS {
           this.sendTextMessage(text, conversationContent.waId, businessId)
           this.sendHelpContact(conversationContent.waId, businessId)
           break;
+        // case "getWalletBtn":
+        //   return of({}).pipe(
+        //     tap(client => {
+        //       console.log(client);
+        //       this.sendTextMessage(`El saldo en billetera es: `, conversationContent.waId, businessId)
+        //     })
+        //   );
         case "listCurrentServices":
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
         case "listLastServiceBtn":
