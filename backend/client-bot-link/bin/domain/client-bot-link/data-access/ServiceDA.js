@@ -95,6 +95,7 @@ class ServiceDA {
         query,
         update,
         {
+          writeConcern: { w: 1 },
           returnOriginal: true
         }
       )
@@ -112,6 +113,9 @@ class ServiceDA {
         { _id: _id },
         {
           $set: { cancelationTryTimestamp: Date.now() },
+        },
+        {
+          writeConcern: { w: 1 },
         }
       )
     );

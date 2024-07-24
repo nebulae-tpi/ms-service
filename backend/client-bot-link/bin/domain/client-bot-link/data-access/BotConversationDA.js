@@ -47,6 +47,7 @@ class BotConversationDA {
           }
         },
         {
+          writeConcern: { w: 1 },
           upsert: true
         }
       )
@@ -63,6 +64,7 @@ class BotConversationDA {
           $set: conversation
         },
         {
+          writeConcern: { w: 1 },
           upsert: true
         }
       )

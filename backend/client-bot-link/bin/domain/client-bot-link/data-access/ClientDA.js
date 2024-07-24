@@ -43,6 +43,7 @@ class ClientDA {
           }
         },
         {
+          writeConcern: { w: 1 },
           upsert: true
         }
       )

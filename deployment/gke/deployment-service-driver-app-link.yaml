@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.driverapplink:2.10.121 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: DOCKERHUB/service.backend.driverapplink:2.10.122 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -91,7 +91,7 @@ spec:
              key: DRIVER_APP_MQTT_SERVER_PASSWORD
         # SERVICE OFFER SPANS CONFIG
         - name: SERVICE_OFFER_MAX_DISTANCE_MIN
-          value: "1200"
+          value: "2000"
         - name: SERVICE_SATELLITE_OFFER_MAX_DISTANCE
           value: "1500"  
         - name: SERVICE_OFFER_MAX_DISTANCE

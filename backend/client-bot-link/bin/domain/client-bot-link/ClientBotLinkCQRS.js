@@ -834,7 +834,12 @@ class ClientBotLinkCQRS {
   }
 
   formatToCurrency(value, locale = 'en-US', currency = 'COP', symbol = "$") {
-    return (new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(value)).replace(currency, symbol);
+    return (new Intl.NumberFormat(locale, { 
+      style: 'currency', 
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value)).replace(currency, symbol);
   }
 
   continueConversationBogotaCLient$(message, conversationContent, client, businessId) {
@@ -872,7 +877,7 @@ class ClientBotLinkCQRS {
       },
       {
         id: "getWalletBtn",
-        text: "Consultar Saldo en Billetera"
+        text: "Consultar Saldo"
       }
 
     ]
@@ -882,6 +887,8 @@ class ClientBotLinkCQRS {
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
         }
         let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
+
+        let walletEmoji = [...message.text.body].some(t => ["💵", "💴", "💶", "💷", "💸", "💰"]);
         if (charCount > 0) {
           currentRequestService = {
             step: "REQUEST_REFERENCE",
@@ -890,6 +897,11 @@ class ClientBotLinkCQRS {
 
           this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
           requestClientCache[client._id] = currentRequestService;
+          return of({});
+        }
+
+        if(walletEmoji > 0){
+          this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId);
           return of({});
         }
       }
@@ -963,13 +975,9 @@ class ClientBotLinkCQRS {
           this.sendTextMessage(text, conversationContent.waId, businessId)
           this.sendHelpContact(conversationContent.waId, businessId)
           break;
-        // case "getWalletBtn":
-        //   return of({}).pipe(
-        //     tap(client => {
-        //       console.log(client);
-        //       this.sendTextMessage(`El saldo en billetera es: `, conversationContent.waId, businessId)
-        //     })
-        //   );
+        case "getWalletBtn":
+          this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId)
+          return of({});
         case "listCurrentServices":
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
         case "listLastServiceBtn":
