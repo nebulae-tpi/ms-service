@@ -81,12 +81,6 @@ class ServiceES {
           return of({})
         }
         
-      }),
-      tap(service => {
-        const taximeterFare = (serviceEvent.data || {}).taximeterFare;
-        if (service.client.phone && taximeterFare && service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
-          this.sendTextMessage(`Se ha finalizado tu servicio el valor total a pagar es ${this.formatToCurrency(taximeterFare)}`, `57${service.client.phone}`, service.businessId)
-        }
       })
     );
   }
