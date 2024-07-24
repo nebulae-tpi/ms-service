@@ -58,10 +58,11 @@ class ServiceES {
   handleServiceCompletedEvents$(serviceEvent) {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       mergeMap(service => {
+        const taximeterFare = (serviceEvent.data || {}).taximeterFare;
         if (service.client.phone && taximeterFare && service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
           return ClientDA.getClient$(service.client.id).pipe(
             tap(client => {
-              const taximeterFare = (serviceEvent.data || {}).taximeterFare;
+              
               if(client._id =="ba3c3420-72c7-49af-8674-f36ae9ee6c61"){
                 const buttons = [
                   { 
