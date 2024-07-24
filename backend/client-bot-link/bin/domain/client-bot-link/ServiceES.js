@@ -64,7 +64,7 @@ class ServiceES {
               const taximeterFare = (serviceEvent.data || {}).taximeterFare;
               if(client._id =="ba3c3420-72c7-49af-8674-f36ae9ee6c61"){
                 const buttons = [
-                  {
+                  { 
                     id: "payWithWalletBtn",
                     text: "Pagar con billetera"
                   }
