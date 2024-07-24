@@ -888,7 +888,7 @@ class ClientBotLinkCQRS {
         }
         let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
 
-        let walletEmoji = [...message.text.body].some(t => ["💵", "💴", "💶", "💷", "💸", "💰"]);
+        let walletEmoji = [...message.text.body].some(t => (["💵", "💴", "💶", "💷", "💸", "💰"]).includes(t));
         if (charCount > 0) {
           currentRequestService = {
             step: "REQUEST_REFERENCE",
