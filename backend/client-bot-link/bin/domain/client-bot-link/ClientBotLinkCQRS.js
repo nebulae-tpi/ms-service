@@ -223,7 +223,8 @@ class ClientBotLinkCQRS {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
-      addressLine2: client.generalInfo.addressLine2,
+      //addressLine2: client.generalInfo.addressLine2,
+      neighborhood: client.generalInfo.neighborhood,
       city: client.generalInfo.city,
       neighborhood: client.generalInfo.neighborhood,
       zone: client.generalInfo.zone

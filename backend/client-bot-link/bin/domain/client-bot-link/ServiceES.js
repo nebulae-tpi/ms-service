@@ -65,7 +65,7 @@ class ServiceES {
               if(client?.wallet?.pockets?.main > taximeterFare){
                 const buttons = [
                   { 
-                    id: `payWithWalletBtn-${service.id}`,
+                    id: `payWithWalletBtn-${service._id}`,
                     text: "Pagar con billetera"
                   }
                 ];
