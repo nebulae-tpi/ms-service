@@ -907,7 +907,7 @@ class ClientBotLinkCQRS {
       }
       switch ((currentRequestService || {}).step) {
         case "REQUEST_REFERENCE":
-          this.sendInteractiveButtonMessage(null, `Por favor escribe una referencia`, buttonsCancel, conversationContent.waId, businessId, false);
+          this.sendInteractiveButtonMessage(null, `Por favor escribe el barrio`, buttonsCancel, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_PAYMENT_TYPE";
           currentRequestService.address = textResp;
           break;
