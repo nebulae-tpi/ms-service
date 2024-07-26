@@ -1271,7 +1271,7 @@ class ClientBotLinkCQRS {
           break;
         case "listCurrentServices":
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
-        case "listLastServiceBtn":
+        case "listLastServiceBtn": 
           if (((client || {}).lastServices)) {
             const listElements = (client || {}).lastServices.map(val => {
               const address = val.address.length > 24 ? val.address.substring(0, 21) + "..." : val.address;
