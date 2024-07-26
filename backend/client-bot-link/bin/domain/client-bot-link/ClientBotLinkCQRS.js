@@ -118,7 +118,6 @@ class ClientBotLinkCQRS {
   }
 
   processFreeDriverMessageReceived$({ args }, authToken) {
-    console.log("LLEGA MENSAJE FREE DRIVER")
     if (args.messages) {
       return from(args.messages).pipe(
         mergeMap(message => {
@@ -228,10 +227,6 @@ class ClientBotLinkCQRS {
       neighborhood: client.generalInfo.neighborhood,
       zone: client.generalInfo.zone
     };
-    if(client.generalInfo.neighborhood){
-      console.log("PICKUP ===> ", pickUp)
-    }
-    console.log("BARRIO ==> ", client.generalInfo.neighborhood);
     const _id = Crosscutting.generateDateBasedUuid();
     const requestObj = {
       aggregateType: 'Service',
@@ -647,7 +642,6 @@ class ClientBotLinkCQRS {
     }
     client.generalInfo.addressLine1 = currentRequestService.address;
     client.generalInfo.neighborhood = currentRequestService.reference
-    console.log("BARRIO ==> ", client.generalInfo.neighborhood);
     client.location = currentRequestService.location;
     const dropOff = !currentRequestService.destinationLocation ? undefined : {
       addressLine1: currentRequestService.destinationAddress,
@@ -987,7 +981,7 @@ class ClientBotLinkCQRS {
                 // notes: mba.notes,
                 concept: "APP_CLIENT_PARTIAL_PAYMENT",
                 timestamp: Date.now(),
-                amount: taximeterFare,
+                amount: service.taximeterFare,
                 fromId: service.service.client.id,
                 toId: service.driver.id
               };
@@ -1092,7 +1086,7 @@ class ClientBotLinkCQRS {
             this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
             currentRequestService.paymentType = interactiveResp.replace("PAYMENT_", "")
             currentRequestService.step = "LOCATION_SHARED";
-            currentRequestService.reference = textResp;
+            //currentRequestService.reference = textResp;
           }
           else {
             return of({});
@@ -1133,14 +1127,14 @@ class ClientBotLinkCQRS {
           mergeMap(result => {
             return BotConversationDA.getById$(businessId, { attributes: 1 }).pipe(
               tap(business => {
-                console.log(JSON.stringify(result))
+                //console.log(JSON.stringify(result))
                 const summary = (((result?.routes || [{}])[0].sections || [{}])[0] || {})?.summary;
                 const attrObj = business.attributes.reduce((acc, val) => {
                   acc[val.key] = val?.value;
                   return acc;
                 }, {});
 
-                console.log("attrObj ===> ", JSON.stringify(attrObj))
+                //console.log("attrObj ===> ", JSON.stringify(attrObj))
                 const specialFareList = attrObj["TAXIMETER_SPECIAL_FARE"] ? JSON.parse(attrObj["TAXIMETER_SPECIAL_FARE"]) : undefined;
 
                 const taximeterPoints = summary.length / Number.parseFloat(attrObj["FARE_METERS"]);
