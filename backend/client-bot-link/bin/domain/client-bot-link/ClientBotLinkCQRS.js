@@ -642,7 +642,7 @@ class ClientBotLinkCQRS {
       console.error(error);
     }
     client.generalInfo.addressLine1 = currentRequestService.address;
-    client.generalInfo.addressLine2 = currentRequestService.reference
+    client.generalInfo.neighborhood = currentRequestService.reference
     client.location = currentRequestService.location;
     const dropOff = !currentRequestService.destinationLocation ? undefined : {
       addressLine1: currentRequestService.destinationAddress,
@@ -972,6 +972,7 @@ class ClientBotLinkCQRS {
             })
           );
         case "payWithWalletBtn": 
+        
           return ServiceDA.getService$(interactiveResp.split("-")[1]).pipe(
             mergeMap(service => {
               const movement = {
@@ -993,7 +994,21 @@ class ClientBotLinkCQRS {
                   aggregateId: uuidv4(),
                   data: movement,
                   user: "SYSTEM"
-                })
+                }).pipe(
+                  tap(() => {
+                    this.sendTextMessage("Pago realizado exitosamente", conversationContent.waId, businessId)    
+                  }),
+                  catchError(() =>{
+                    const buttons = [
+                      { 
+                        id: `payWithWalletBtn-${service.id}`,
+                        text: "Pagar con billetera"
+                      }
+                    ];
+                    this.sendInteractiveButtonMessage(`Error`, `Hubo un error al momento de procesar el pago, por favor intentalo nuevamente`, buttons, conversationContent.waId, businessId);
+                    return of({});
+                    })
+                )
               );
             })
           )
@@ -1157,7 +1172,7 @@ class ClientBotLinkCQRS {
         this.sendTextMessage(`Para continuar con la solicitud debes enviar una direccíon`, conversationContent.waId, businessId)
       }
       else if ((currentRequestService || {}).step == "REQUEST_LOCATION") {
-        this.sendTextMessage(`Para continuar con la solicitud debes enviar una referencia`, conversationContent.waId, businessId)
+        this.sendTextMessage(`Para continuar con la solicitud debes enviar el barrio`, conversationContent.waId, businessId)
       } else {
         this.sendInteractiveButtonMessage(`Hola ${client.generalInfo.name} ¿en que podemos servirte?`, businessIdVsD360APIKey[businessId].clientMenu, initialMenu, conversationContent.waId, businessId);
       }
@@ -1222,7 +1237,7 @@ class ClientBotLinkCQRS {
       }
       switch ((currentRequestService || {}).step) {
         case "REQUEST_REFERENCE":
-          this.sendInteractiveButtonMessage(null, `Por favor escribe una referencia`, buttonsCancel, conversationContent.waId, businessId, false);
+          this.sendInteractiveButtonMessage(null, `Por favor escribe el barrio`, buttonsCancel, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_LOCATION";
           currentRequestService.address = textResp;
           break;

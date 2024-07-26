@@ -62,11 +62,10 @@ class ServiceES {
         if (service.client.phone && taximeterFare && service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
           return ClientDA.getClient$(service.client.id).pipe(
             tap(client => {
-              
               if(client?.wallet?.pockets?.main > taximeterFare){
                 const buttons = [
                   { 
-                    id: "payWithWalletBtn",
+                    id: `payWithWalletBtn-${service.id}`,
                     text: "Pagar con billetera"
                   }
                 ];
