@@ -954,7 +954,7 @@ class ClientBotLinkCQRS {
 
         this.sendInteractiveButtonMessage(null, `En este momento estas realizando una solicitu de servicio, si deseas realizar otra acción primero debes cancelar la solicitud actual`, buttonsCancel, conversationContent.waId, businessId);
       }
-      const btnId = (interactiveResp.split("-")[0])
+      const btnId = (interactiveResp.split("_")[0])
       switch (btnId) {
         case "rqstServiceACBtn":
           currentRequestService = requestClientCache[client._id] || {};
@@ -971,8 +971,8 @@ class ClientBotLinkCQRS {
             })
           );
         case "payWithWalletBtn": 
-        
-          return ServiceDA.getService$(interactiveResp.split("-")[1]).pipe(
+          
+          return ServiceDA.getService$(interactiveResp.split("_")[1]).pipe(
             mergeMap(service => {
               const movement = {
                 _id: Crosscutting.generateDateBasedUuid(),
