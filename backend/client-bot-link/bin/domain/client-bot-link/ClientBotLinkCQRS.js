@@ -982,7 +982,7 @@ class ClientBotLinkCQRS {
                 concept: "APP_CLIENT_PARTIAL_PAYMENT",
                 timestamp: Date.now(),
                 amount: service.taximeterFare,
-                fromId: service.service.client.id,
+                fromId: service.client.id,
                 toId: service.driver.id
               };
               return eventSourcing.eventStore.emitEvent$(
