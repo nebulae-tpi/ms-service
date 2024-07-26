@@ -224,11 +224,14 @@ class ClientBotLinkCQRS {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
       //addressLine2: client.generalInfo.addressLine2,
-      neighborhood: client.generalInfo.neighborhood,
       city: client.generalInfo.city,
       neighborhood: client.generalInfo.neighborhood,
       zone: client.generalInfo.zone
     };
+    if(client.generalInfo.neighborhood){
+      console.log("PICKUP ===> ", pickUp)
+    }
+    console.log("BARRIO ==> ", client.generalInfo.neighborhood);
     const _id = Crosscutting.generateDateBasedUuid();
     const requestObj = {
       aggregateType: 'Service',
@@ -644,6 +647,7 @@ class ClientBotLinkCQRS {
     }
     client.generalInfo.addressLine1 = currentRequestService.address;
     client.generalInfo.neighborhood = currentRequestService.reference
+    console.log("BARRIO ==> ", client.generalInfo.neighborhood);
     client.location = currentRequestService.location;
     const dropOff = !currentRequestService.destinationLocation ? undefined : {
       addressLine1: currentRequestService.destinationAddress,
@@ -978,7 +982,7 @@ class ClientBotLinkCQRS {
             mergeMap(service => {
               const movement = {
                 _id: Crosscutting.generateDateBasedUuid(),
-                businessId: authToken.businessId,
+                businessId: businessId,
                 type: "MOVEMENT",
                 // notes: mba.notes,
                 concept: "APP_CLIENT_PARTIAL_PAYMENT",
