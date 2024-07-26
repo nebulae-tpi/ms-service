@@ -63,14 +63,14 @@ class ServiceES {
           return ClientDA.getClient$(service.client.id).pipe(
             tap(client => {
               
-              if(client._id =="ba3c3420-72c7-49af-8674-f36ae9ee6c61"){
+              if(client?.wallet?.pockets?.main > taximeterFare){
                 const buttons = [
                   { 
                     id: "payWithWalletBtn",
                     text: "Pagar con billetera"
                   }
                 ];
-                this.sendInteractiveButtonMessage(`Se ha finalizado tu servicio`, `El valor total a pagar es ${this.formatToCurrency(taximeterFare)}. Tienes el saldo suficiente en billetera virtual para pagar el servicio, ¿Deseas pagar el servicio con tu billetera virtual?`, buttons, `57${service.client.phone}`, service.businessId);
+                this.sendInteractiveButtonMessage(`Se ha finalizado tu servicio`, `El valor total a pagar es ${this.formatToCurrency(taximeterFare)}. Tienes saldo suficiente en billetera virtual para pagar el servicio, ¿Deseas pagar el servicio con tu billetera virtual?`, buttons, `57${service.client.phone}`, service.businessId);
               }
               else{
                 this.sendTextMessage(`Se ha finalizado tu servicio el valor total a pagar es ${this.formatToCurrency(taximeterFare)}`, `57${service.client.phone}`, service.businessId); 

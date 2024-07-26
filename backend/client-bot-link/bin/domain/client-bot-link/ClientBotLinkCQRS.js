@@ -955,7 +955,8 @@ class ClientBotLinkCQRS {
 
         this.sendInteractiveButtonMessage(null, `En este momento estas realizando una solicitu de servicio, si deseas realizar otra acción primero debes cancelar la solicitud actual`, buttonsCancel, conversationContent.waId, businessId);
       }
-      switch (interactiveResp) {
+      const btnId = (interactiveResp.split("-")[0])
+      switch (btnId) {
         case "rqstServiceACBtn":
           currentRequestService = requestClientCache[client._id] || {};
           currentRequestService.step = "REQUEST_REFERENCE";
@@ -970,6 +971,32 @@ class ClientBotLinkCQRS {
               requestClientCache[client._id] = undefined;
             })
           );
+        case "payWithWalletBtn": 
+          return ServiceDA.getService$(interactiveResp.split("-")[1]).pipe(
+            mergeMap(service => {
+              const movement = {
+                _id: Crosscutting.generateDateBasedUuid(),
+                businessId: authToken.businessId,
+                type: "MOVEMENT",
+                // notes: mba.notes,
+                concept: "APP_CLIENT_PARTIAL_PAYMENT",
+                timestamp: Date.now(),
+                amount: taximeterFare,
+                fromId: service.service.client.id,
+                toId: service.driver.id
+              };
+              return eventSourcing.eventStore.emitEvent$(
+                new Event({
+                  eventType: "WalletTransactionCommited",
+                  eventTypeVersion: 1,
+                  aggregateType: "Wallet",
+                  aggregateId: uuidv4(),
+                  data: movement,
+                  user: "SYSTEM"
+                })
+              );
+            })
+          )
         case "helpBtn":
           const text = "A continuación se comparte el contacto de soporte de TxPlus"
           this.sendTextMessage(text, conversationContent.waId, businessId)

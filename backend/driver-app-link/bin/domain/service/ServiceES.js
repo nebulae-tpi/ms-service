@@ -726,7 +726,7 @@ class ServiceES {
                                 amount: parseInt(process.env.APP_DRIVER_AGREEMENT),
                                 fromId: driver.id,
                                 toId: businessId,
-                                clientId: client.id,
+                                //clientId: client.id,
                                 referrerDriverId: (referrerDriver || {})._id
                             };
                         })
@@ -742,7 +742,7 @@ class ServiceES {
                         amount: parseInt(process.env.APP_DRIVER_AGREEMENT),
                         fromId: driver.id,
                         toId: businessId,
-                        clientId: client.id
+                        //clientId: client.id
                     });
                 }
             }
@@ -934,7 +934,7 @@ class ServiceES {
                                             amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
                                             fromId: service.driver.id,
                                             toId: service.businessId,
-                                            clientId: service.client.id,
+                                            //clientId: service.client.id,
                                             referrerDriverId: (referrerDriver || {})._id
                                         },
                                         user: "SYSTEM"
@@ -963,7 +963,7 @@ class ServiceES {
                                     amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
                                     fromId: service.driver.id,
                                     toId: service.businessId,
-                                    clientId: service.client.id
+                                    //clientId: service.client.id
                                 },
                                 user: "SYSTEM"
                             })
