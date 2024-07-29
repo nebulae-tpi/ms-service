@@ -993,21 +993,21 @@ class ClientBotLinkCQRS {
                   aggregateId: uuidv4(),
                   data: movement,
                   user: "SYSTEM"
-                }).pipe(
-                  tap(() => {
-                    this.sendTextMessage("Pago realizado exitosamente", conversationContent.waId, businessId)    
-                  }),
-                  catchError(() =>{
-                    const buttons = [
-                      { 
-                        id: `payWithWalletBtn-${service.id}`,
-                        text: "Pagar con billetera"
-                      }
-                    ];
-                    this.sendInteractiveButtonMessage(`Error`, `Hubo un error al momento de procesar el pago, por favor intentalo nuevamente`, buttons, conversationContent.waId, businessId);
-                    return of({});
-                    })
-                )
+                })
+              ).pipe(
+                tap(() => {
+                  this.sendTextMessage("Pago realizado exitosamente", conversationContent.waId, businessId)    
+                }),
+                catchError(() =>{
+                  const buttons = [
+                    { 
+                      id: `payWithWalletBtn-${service.id}`,
+                      text: "Pagar con billetera"
+                    }
+                  ];
+                  this.sendInteractiveButtonMessage(`Error`, `Hubo un error al momento de procesar el pago, por favor intentalo nuevamente`, buttons, conversationContent.waId, businessId);
+                  return of({});
+                  })
               );
             })
           )
@@ -1600,7 +1600,7 @@ class ClientBotLinkCQRS {
           }
           else {
             const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
-            if (!interactiveResp) {
+            if (!interactiveResp && message?.text?.body) {
               if (registerUserList[phoneNumber].referedCodeRequested) {
                 const buttons = [
                   {
@@ -1674,10 +1674,10 @@ class ClientBotLinkCQRS {
                     text: "Cambiar"
                   }
                 ]
-                this.sendInteractiveButtonMessage(`${message.text.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
+                this.sendInteractiveButtonMessage(`${message?.text?.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
               }
 
-            } else {
+            } else if(interactiveResp) {
               switch (interactiveResp) {
                 case "registerBtn":
                   const buttons = [
