@@ -1676,7 +1676,7 @@ class ClientBotLinkCQRS {
                 ]
                 this.sendInteractiveButtonMessage(`${message?.text?.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
               }
-
+ 
             } else if(interactiveResp) {
               switch (interactiveResp) {
                 case "registerBtn":
