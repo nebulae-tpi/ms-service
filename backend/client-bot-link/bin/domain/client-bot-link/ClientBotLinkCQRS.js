@@ -38,7 +38,7 @@ const businessIdVsD360APIKey = {
     D360_KEY: process.env.D360_API_KEY_TX_BOGOTA,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
     clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"\n- Para ver el saldo actual en billetera utiliza el siguiente emoji: 💵\n- Para registrar o cambiar el código de referido utiliza el siguiente emoji: 🔢`,
-    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones\n- Para ver el saldo actual en billetera utiliza el siguiente emoji: 💵",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
     availableRqstVipEmojis: "(?:👑)",
@@ -71,7 +71,7 @@ const businessIdVsD360APIKey = {
     D360_KEY: process.env.DIALOG_API_KEY_VILLAVICENCIO,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
     clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"\n- Para registrar o cambiar el código de referido utiliza el siguiente emoji: 🔢`,
-    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones\n- Para ver el saldo actual en billetera utiliza el siguiente emoji: 💵",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
     availableRqstVipEmojis: "(?:👑)",
@@ -845,7 +845,6 @@ class ClientBotLinkCQRS {
   continueConversationBogotaCLient$(message, conversationContent, client, businessId) {
     let currentRequestService = requestClientCache[client._id];
     const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
-    console.log("interactiveResp ===> ", interactiveResp);
     const textResp = ((message || {}).text || {}).body;
     const sharedLocation = ((message || {}).location || {});
     const buttonsCancel = [
@@ -1446,6 +1445,11 @@ class ClientBotLinkCQRS {
       if (message.text.body === businessIdVsD360APIKey[businessId].availableRqstFilterEmojis) {
         this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId, businessId);
         return of({})
+      }
+      let walletEmoji = [...message.text.body].some(t => (["💵", "💴", "💶", "💷", "💸", "💰"]).includes(t));
+      if(walletEmoji > 0){
+        this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId);
+        return of({});
       }
       let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
       let specialCharCount = 0;
