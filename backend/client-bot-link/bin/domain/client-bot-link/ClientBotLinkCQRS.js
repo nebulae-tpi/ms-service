@@ -70,7 +70,7 @@ const businessIdVsD360APIKey = {
   "ec600f7f-1b57-4c47-af77-c6750a8649bd": {
     D360_KEY: process.env.DIALOG_API_KEY_VILLAVICENCIO,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
-    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"\n- Para registrar o cambiar el código de referido utiliza el siguiente emoji: 🔢`,
     menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
@@ -1490,14 +1490,17 @@ class ClientBotLinkCQRS {
                 text: "Solicitar 1 servicio"
               },
               {
-                id: "infoServiceBtn",
-                text: "Info de servicios"
-              },
+                id: "RequestServiceWithFilters",
+                text: "Servicio con filtros"
+              }
             ]
-            buttons.push({
-              id: "RequestServiceWithFilters",
-              text: "Servicio con filtros"
-            })
+            if(businessId == "ec600f7f-1b57-4c47-af77-c6750a8649bd" || businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+              buttons.push({
+                id: "getClientCodeBtn",
+                text: "Código asociación"
+              });
+            }
+            
             this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", businessIdVsD360APIKey[businessId].menu, buttons, conversationContent.waId, businessId)
           })
         )
@@ -1525,6 +1528,22 @@ class ClientBotLinkCQRS {
         return of({});
       }
       switch (interactiveResp) {
+        case "getClientCodeBtn":
+          if(client.clientCode){
+            this.sendTextMessage(`Su código de asociación es ${client.clientCode}`, conversationContent.waId, businessId);
+            break;
+          }else {
+            return eventSourcing.eventStore.emitEvent$(
+              new Event({
+                eventType: "ClientCodeRequested",
+                eventTypeVersion: 1,
+                aggregateType: "Client",
+                aggregateId: client._id,
+                data: {},
+                user: "SYSTEM"
+              })
+            );
+          }
         case "rqstServiceBtn":
           if (((client || {}).location || {}).lng) {
             return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, undefined, undefined, businessId)
