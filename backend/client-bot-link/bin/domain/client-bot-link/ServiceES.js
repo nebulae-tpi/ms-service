@@ -93,7 +93,15 @@ class ServiceES {
         }
       })
     );
-}
+  }
+
+  handleClientCodeRegistered$(clientCodeEvent) {
+    return ClientDA.registerClientCode$(clientCodeEvent.aid, clientCodeEvent.data.clientCode).pipe(
+      tap(client => {
+        this.sendTextMessage(`Su código de asociación es ${clientCodeEvent.data.clientCode}`, `57${client.generalInfo.phone}`, client.businessId); 
+      })
+    );
+  }
 
   millisToMinutesAndSeconds(millis) {
     var minutes = Math.floor(millis / 60000);

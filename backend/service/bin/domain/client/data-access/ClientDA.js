@@ -137,6 +137,13 @@ class ClientDA {
     );
   }
 
+  static addClientCode$(userId, clientCode){
+    const collection = mongoDB.db.collection(CollectionName);    
+    const query = { _id: userId};
+    return defer(() => collection.updateOne(query, { $set: { "clientCode": clientCode } }) )
+  }
+
+
   static addDriverCode$(id, referrerDriverCode) {
     const collection = mongoDB.db.collection(CollectionName);
     

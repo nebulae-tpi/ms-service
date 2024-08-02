@@ -37,7 +37,7 @@ const businessIdVsD360APIKey = {
   "7d95f8ef-4c54-466a-8af9-6dd197dd920a": {
     D360_KEY: process.env.D360_API_KEY_TX_BOGOTA,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
-    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"\n- Para ver el saldo actual en billetera utiliza el siguiente emoji: 💵`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"\n- Para ver el saldo actual en billetera utiliza el siguiente emoji: 💵\n- Para registrar o cambiar el código de referido utiliza el siguiente emoji: 🔢`,
     menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones",
     availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
     availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
@@ -85,6 +85,7 @@ const {
   ERROR_23224
 } = require("../../tools/customError");
 const { hostname } = require("os");
+const DriverDA = require("./data-access/DriverDA");
 
 /**
  * Singleton instance
@@ -843,8 +844,8 @@ class ClientBotLinkCQRS {
 
   continueConversationBogotaCLient$(message, conversationContent, client, businessId) {
     let currentRequestService = requestClientCache[client._id];
-    console.log("currentRequest ===> ", requestClientCache);
     const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
+    console.log("interactiveResp ===> ", interactiveResp);
     const textResp = ((message || {}).text || {}).body;
     const sharedLocation = ((message || {}).location || {});
     const buttonsCancel = [
@@ -875,8 +876,8 @@ class ClientBotLinkCQRS {
         text: "Ayuda"
       },
       {
-        id: "getWalletBtn",
-        text: "Consultar Saldo"
+        id: "getClientCodeBtn",
+        text: "Código asociación"
       }
 
     ]
@@ -888,6 +889,9 @@ class ClientBotLinkCQRS {
         let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
 
         let walletEmoji = [...message.text.body].some(t => (["💵", "💴", "💶", "💷", "💸", "💰"]).includes(t));
+
+        let referredCode = [...message.text.body].some(t => (["🔢"]).includes(t));
+
         if (charCount > 0) {
           currentRequestService = {
             step: "REQUEST_REFERENCE",
@@ -903,8 +907,68 @@ class ClientBotLinkCQRS {
           this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId);
           return of({});
         }
+
+        if(referredCode > 0) {
+          this.sendTextMessage(`Por favor ingresa el código de referido que le compartió el conductor o el cliente`, conversationContent.waId, businessId);
+          requestClientCache[client._id] = {
+            step: "REQUEST_REFERRED_CODE",
+            timestamp: Date.now()
+          };
+          return of({});
+        }
       }
       switch ((currentRequestService || {}).step) {
+        case "REQUEST_REFERRED_CODE":
+          requestClientCache[client._id] = undefined;
+          // return eventSourcing.eventStore.emitEvent$(
+          //   new Event({
+          //     eventType: "ClientCodeRequested",
+          //     eventTypeVersion: 1,
+          //     aggregateType: "Client",
+          //     aggregateId: client._id,
+          //     data: {},
+          //     user: "SYSTEM"
+          //   })
+          // );
+          if(textResp == null || textResp == ""){
+            this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
+            return of({});
+          }
+          return forkJoin([
+            ClientDA.getClientByReferredCode$(textResp.toUpperCase()),
+            DriverDA.getDriverByReferredCode$(parseInt(textResp))
+          ]).pipe(
+            mergeMap(([referredClient, referredDriver]) => {
+              if(referredClient?.clientCode == client.clientCode && client.clientCode != null){
+                this.sendTextMessage(`El código de referido no puede ser tu código`, conversationContent.waId, businessId);
+              }
+              else if(referredClient?._id || referredDriver?._id){
+                this.sendTextMessage(`Se ha registrado exitosamente el código de referido`, conversationContent.waId, businessId)
+                return ClientDA.registerReferredCode$(client._id, referredClient?.clientCode || referredDriver?.driverCode).pipe(
+                  mergeMap(() => {
+                    return eventSourcing.eventStore.emitEvent$(
+                      new Event({
+                        eventType: "DriverAssociatedToClient",
+                        eventTypeVersion: 1,
+                        aggregateType: "Client",
+                        aggregateId: client._id,
+                        data: {
+                          referrerDriverCode: referredClient?.clientCode || referredDriver?.driverCode
+                        },
+                        user: "SYSTEM"
+                      }))
+                  })
+                );
+                
+              }else {
+                this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
+              }
+              return of({})
+              
+            })
+          )
+          
+          break;
         case "REQUEST_REFERENCE":
           this.sendInteractiveButtonMessage(null, `Por favor escribe el barrio`, buttonsCancel, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_PAYMENT_TYPE";
@@ -1016,6 +1080,23 @@ class ClientBotLinkCQRS {
           this.sendTextMessage(text, conversationContent.waId, businessId)
           this.sendHelpContact(conversationContent.waId, businessId)
           break;
+        case "getClientCodeBtn":
+          if(client.clientCode){
+            this.sendTextMessage(`Su código de asociación es ${client.clientCode}`, conversationContent.waId, businessId);
+            break;
+          }else {
+            return eventSourcing.eventStore.emitEvent$(
+              new Event({
+                eventType: "ClientCodeRequested",
+                eventTypeVersion: 1,
+                aggregateType: "Client",
+                aggregateId: client._id,
+                data: {},
+                user: "SYSTEM"
+              })
+            );
+          }
+          
         case "getWalletBtn":
           this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId)
           return of({});

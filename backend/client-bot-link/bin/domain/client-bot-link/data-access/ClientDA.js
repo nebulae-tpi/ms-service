@@ -49,6 +49,24 @@ class ClientDA {
       )
     );
   }
+
+  static registerReferredCode$(id, referredCode) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    return defer(() =>
+      collection.updateOne(
+        { _id: id },
+        {
+          $set: {
+            referrerDriverCode: referredCode
+          }
+        },
+        {
+          writeConcern: { w: 1 }
+        }
+      )
+    );
+  }
   /**
  * Gets a client satellite by the client id
  */
@@ -70,6 +88,33 @@ class ClientDA {
       "_id": id
     };
     return defer(() => collection.findOne(query, projection));
+  }
+
+  static getClientByReferredCode$(clientCode, projection) {
+    const collection = mongoDB.db.collection(CollectionName);
+
+    const query = {
+      "clientCode": clientCode
+    };
+    return defer(() => collection.findOne(query, projection));
+  }
+  
+
+  static registerClientCode$(_id, clientCode) {
+    const update = {$set: {clientCode}};
+    const collection = mongoDB.db.collection(CollectionName);
+    return defer(
+      () => collection.findOneAndUpdate(
+        { _id },
+        update,
+        {
+          upsert: false,
+          returnOriginal: false
+        }
+      )
+    ).pipe(
+      map(result => result && result.value ? result.value : undefined)
+    );
   }
 
 

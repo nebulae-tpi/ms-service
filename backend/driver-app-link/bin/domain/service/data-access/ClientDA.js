@@ -32,6 +32,16 @@ class ClientDA {
     return defer(() => collection.findOne(query, projection));
   }
 
+  static getClientByDriverCode$(driverCode) {
+    const collection = mongoDB.db.collection(COLLECTION_NAME);
+
+    const query = {
+      driverCode
+    };
+
+    return defer(() => collection.findOne(query));
+  }
+
 
 
 }

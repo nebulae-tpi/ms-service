@@ -713,8 +713,11 @@ class ServiceES {
                 if ((request || {}).sourceChannel !== "APP_CLIENT") {
                     return of(undefined);
                 } else if (client.referrerDriverCode && client.referrerDriverCode !== null) {
-                    return DriverDA.getDriverByDriverCode$(parseInt(client.referrerDriverCode), businessId).pipe(
-                        map(referrerDriver => {
+                    return forkJoin([
+                        DriverDA.getDriverByDriverCode$(parseInt(client.referrerDriverCode), businessId),
+                        ClientDA.getClientByDriverCode$(client.referrerDriverCode)
+                    ]).pipe(
+                        map(([referrerDriver, referredClient]) => {
                             return {
                                 _id: Crosscutting.generateDateBasedUuid(),
                                 sourceEvent: { aid, av },
@@ -727,7 +730,7 @@ class ServiceES {
                                 fromId: driver.id,
                                 toId: businessId,
                                 //clientId: client.id,
-                                referrerDriverId: (referrerDriver || {})._id
+                                referrerDriverId: ((referrerDriver || {})._id || (referredClient || {})._id)
                             };
                         })
                     );

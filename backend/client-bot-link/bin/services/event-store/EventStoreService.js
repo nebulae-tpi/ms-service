@@ -129,6 +129,7 @@ class EventStoreService {
       ServiceCancelledByOperator: { fn: ServiceES.handleServiceCancelledByOperatorEvents$, obj: ServiceES },
       ServiceCancelledBySystem: { fn: ServiceES.handleServiceCancelledBySystemEvents$, obj: ServiceES },
       ServicePickUpETAReported: { fn: ServiceES.handleServicePickUpETAReported$, obj: ServiceES },
+      ClientCodeRegistered: { fn: ServiceES.handleClientCodeRegistered$, obj: ServiceES },
     };
   }
 
@@ -145,6 +146,7 @@ class EventStoreService {
       { aggregateType: "Service", eventType: "ServiceCancelledByOperator" },
       { aggregateType: "Service", eventType: "ServiceCancelledBySystem" },
       { aggregateType: "Service", eventType: "ServicePickUpETAReported" },
+      { aggregateType: "Client", eventType: "ClientCodeRegistered" },
     ]
   }
 }

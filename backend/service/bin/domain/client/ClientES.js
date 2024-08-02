@@ -37,6 +37,10 @@ class ClientES {
         return ClientDA.updateClientSatelliteId$(aid, data.satelliteId);
     }
 
+    handleClientCodeRegistered$({ aid, data}){
+        return ClientDA.addClientCode$(aid, data.clientCode);
+    }
+
     handleClientSatelliteInfoUpdated$({ aid, data}){
         return ClientDA.updateClientSatelliteInfo$(aid, data);
     }

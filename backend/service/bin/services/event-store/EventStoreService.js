@@ -224,7 +224,11 @@ class EventStoreService {
         fn: ClientES.handleClientGeneralInfoUpdated$,
         obj: ClientES
       },
-
+      ClientCodeRegistered: {
+        fn: ClientES.handleClientCodeRegistered$,
+        obj: ClientES
+      },
+      
       //SERVICE
       ServiceRequested: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
       ServiceAssigned: { fn: ServiceES.handleServiceEvents$, obj: ServiceES },
@@ -372,6 +376,11 @@ class EventStoreService {
         aggregateType: "Client",
         eventType: "ClientGeneralInfoUpdated"
       },
+      {
+        aggregateType: "Client",
+        eventType: "ClientCodeRegistered"
+      },
+      
 
       //SERVICE
       { aggregateType: "Service", eventType: "ServiceRequested" },
