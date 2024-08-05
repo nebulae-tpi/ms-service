@@ -623,7 +623,7 @@ class ClientBotLinkCQRS {
   }
 
   requestServiceWithoutSatellite$(client, currentRequestService, waId, message, businessId) {
-    if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+    if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a" || businessId == "ec600f7f-1b57-4c47-af77-c6750a8649bd"){
       const min = 1000;
       const max = 9999;
       const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -1662,7 +1662,7 @@ class ClientBotLinkCQRS {
                       }),
                       catchError(err =>{
                         console.log("err ==> ", err)
-                        of("Error proccesing conversation data")
+                        return of("Error proccesing conversation data")
                       }
                       )
                     )

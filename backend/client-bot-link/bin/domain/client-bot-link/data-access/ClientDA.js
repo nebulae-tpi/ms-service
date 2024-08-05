@@ -3,7 +3,6 @@
 let mongoDB = undefined;
 //const mongoDB = require('./MongoDB')();
 const CollectionName = "Client";
-const { CustomError } = require("../../../tools/customError");
 const { map, mergeMap, reduce } = require("rxjs/operators");
 const { of, Observable, defer, from } = require("rxjs");
 const Crosscutting = require("../../../tools/Crosscutting");
