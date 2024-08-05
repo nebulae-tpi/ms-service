@@ -965,7 +965,7 @@ class ClientBotLinkCQRS {
               return of({})
               
             })
-          )
+          );
           
           break;
         case "REQUEST_REFERENCE":
@@ -1303,6 +1303,22 @@ class ClientBotLinkCQRS {
         if (textResp == "?") {
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
         }
+        let referredCode = [...message.text.body].some(t => (["🔢"]).includes(t));
+        let walletEmoji = [...message.text.body].some(t => (["💵", "💴", "💶", "💷", "💸", "💰"]).includes(t));
+
+        if(walletEmoji > 0){
+          this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId);
+          return of({});
+        }
+
+        if(referredCode > 0) {
+          this.sendTextMessage(`Por favor ingresa el código de referido que le compartió el conductor o el cliente`, conversationContent.waId, businessId);
+          requestClientCache[client._id] = {
+            step: "REQUEST_REFERRED_CODE",
+            timestamp: Date.now()
+          };
+          return of({});
+        }
         let charCount = [...message.text.body].filter(c => businessIdVsD360APIKey[businessId].availableRqstEmojis.includes(c)).length;
         if (charCount > 0) {
           currentRequestService = {
@@ -1315,6 +1331,55 @@ class ClientBotLinkCQRS {
         }
       }
       switch ((currentRequestService || {}).step) {
+        case "REQUEST_REFERRED_CODE":
+          requestClientCache[client._id] = undefined;
+          // return eventSourcing.eventStore.emitEvent$(
+          //   new Event({
+          //     eventType: "ClientCodeRequested",
+          //     eventTypeVersion: 1,
+          //     aggregateType: "Client",
+          //     aggregateId: client._id,
+          //     data: {},
+          //     user: "SYSTEM"
+          //   })
+          // );
+          if(textResp == null || textResp == ""){
+            this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
+            return of({});
+          }
+          return forkJoin([
+            ClientDA.getClientByReferredCode$(textResp.toUpperCase()),
+            DriverDA.getDriverByReferredCode$(parseInt(textResp))
+          ]).pipe(
+            mergeMap(([referredClient, referredDriver]) => {
+              if(referredClient?.clientCode == client.clientCode && client.clientCode != null){
+                this.sendTextMessage(`El código de referido no puede ser tu código`, conversationContent.waId, businessId);
+              }
+              else if(referredClient?._id || referredDriver?._id){
+                this.sendTextMessage(`Se ha registrado exitosamente el código de referido`, conversationContent.waId, businessId)
+                return ClientDA.registerReferredCode$(client._id, referredClient?.clientCode || referredDriver?.driverCode).pipe(
+                  mergeMap(() => {
+                    return eventSourcing.eventStore.emitEvent$(
+                      new Event({
+                        eventType: "DriverAssociatedToClient",
+                        eventTypeVersion: 1,
+                        aggregateType: "Client",
+                        aggregateId: client._id,
+                        data: {
+                          referrerDriverCode: referredClient?.clientCode || referredDriver?.driverCode
+                        },
+                        user: "SYSTEM"
+                      }))
+                  })
+                );
+                
+              }else {
+                this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
+              }
+              return of({})
+              
+            })
+          );
         case "REQUEST_REFERENCE":
           this.sendInteractiveButtonMessage(null, `Por favor escribe el barrio`, buttonsCancel, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_LOCATION";
