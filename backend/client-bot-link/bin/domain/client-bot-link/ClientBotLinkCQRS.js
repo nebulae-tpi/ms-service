@@ -935,7 +935,7 @@ class ClientBotLinkCQRS {
           }
           return forkJoin([
             ClientDA.getClientByReferredCode$(textResp.toUpperCase()),
-            DriverDA.getDriverByReferredCode$(parseInt(textResp))
+            DriverDA.getDriverByReferredCode$(parseInt(textResp), businessId)
           ]).pipe(
             mergeMap(([referredClient, referredDriver]) => {
               if(referredClient?.clientCode == client.clientCode && client.clientCode != null){

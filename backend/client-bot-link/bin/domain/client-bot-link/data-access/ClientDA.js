@@ -89,7 +89,7 @@ class ClientDA {
     return defer(() => collection.findOne(query, projection));
   }
 
-  static getClientByReferredCode$(clientCode, projection) {
+  static getClientByReferredCode$(clientCode, businessId, projection) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {

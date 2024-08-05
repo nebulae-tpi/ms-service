@@ -22,11 +22,12 @@ class DriverDA {
     });
   }
 
-  static getDriverByReferredCode$(clientCode, projection) {
+  static getDriverByReferredCode$(driverCode, businessId, projection) {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
-      "clientCode": clientCode
+      "driverCode": driverCode,
+      businessId
     };
     return defer(() => collection.findOne(query, projection));
   }
