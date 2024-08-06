@@ -29,6 +29,8 @@ class DriverDA {
       "driverCode": driverCode,
       businessId
     };
+
+    console.log("QUERY CONDUCTOR === ", query);
     return defer(() => collection.findOne(query, projection));
   }
 
