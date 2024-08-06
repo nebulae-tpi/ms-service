@@ -933,7 +933,6 @@ class ClientBotLinkCQRS {
             this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
             return of({});
           }
-          console.log("COD DE ASOCIACION === ", textResp)
           return forkJoin([
             ClientDA.getClientByReferredCode$(textResp.toUpperCase()),
             DriverDA.getDriverByReferredCode$(parseInt(textResp), businessId)
@@ -1350,7 +1349,7 @@ class ClientBotLinkCQRS {
           }
           return forkJoin([
             ClientDA.getClientByReferredCode$(textResp.toUpperCase()),
-            DriverDA.getDriverByReferredCode$(parseInt(textResp))
+            DriverDA.getDriverByReferredCode$(parseInt(textResp), businessId)
           ]).pipe(
             mergeMap(([referredClient, referredDriver]) => {
               if(referredClient?.clientCode == client.clientCode && client.clientCode != null){
