@@ -1352,6 +1352,7 @@ class ClientBotLinkCQRS {
             DriverDA.getDriverByReferredCode$(parseInt(textResp), businessId)
           ]).pipe(
             mergeMap(([referredClient, referredDriver]) => {
+              console.log("Referred driver == ", referredDriver)
               if(referredClient?.clientCode == client.clientCode && client.clientCode != null){
                 this.sendTextMessage(`El código de referido no puede ser tu código`, conversationContent.waId, businessId);
               }
