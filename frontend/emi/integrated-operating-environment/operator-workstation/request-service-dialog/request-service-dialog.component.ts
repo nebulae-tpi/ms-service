@@ -183,10 +183,11 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
           if (attrs.length === 2){
             const lat =  attrs.find(e => e.key === 'latitude').value;
             const lng =  attrs.find(e => e.key === 'longitude').value;
+            const radio = (attrs.find(e => e.key === 'radio').value);
 
             const circle = new google.maps.Circle({
               center: new google.maps.LatLng(parseFloat(lat), parseFloat(lng)),
-              radius: parseInt((attrs.find(e => e.key === 'radio').value) || "20000") // meters
+              radius: parseInt(radio || "20000") // meters
             });
             this.placesAutocomplete.setOptions({ bounds: circle.getBounds(), strictBounds: true });
           }
