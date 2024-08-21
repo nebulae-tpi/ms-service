@@ -167,6 +167,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
 
 
   buildPlacesAutoComplete() {
+    console.log("CREA AUTOCOMPLETE ==> ", this.data.business.attributes)
     if (this.addressAutocomplete) {
       this.mapsAPILoader.load().then(() => {
         this.placesAutocomplete = new google.maps.places.Autocomplete(
@@ -179,12 +180,10 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         if (this.data.business && this.data.business.attributes && this.data.business.attributes.length > 0 ){
           const buAttributes = this.data.business.attributes;
           const attrs = buAttributes.filter(e => e.key === 'latitude' || e.key === 'longitude');
-
           if (attrs.length === 2){
             const lat =  attrs.find(e => e.key === 'latitude').value;
             const lng =  attrs.find(e => e.key === 'longitude').value;
-            const radio = (attrs.find(e => e.key === 'radio').value);
-
+            const radio = (buAttributes.find(e => e.key === 'radio') || {}).value;
             const circle = new google.maps.Circle({
               center: new google.maps.LatLng(parseFloat(lat), parseFloat(lng)),
               radius: parseInt(radio || "20000") // meters
