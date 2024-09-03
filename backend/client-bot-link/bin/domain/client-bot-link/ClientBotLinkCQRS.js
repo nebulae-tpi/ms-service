@@ -79,6 +79,19 @@ const businessIdVsD360APIKey = {
     availableRqstFilterEmojis: "🧐",
     hostname: "waba-v2.360dialog.io",
     path: "/messages"
+  },
+  "b19c067e-57b4-468f-b970-d0101a31cacb": {
+    D360_KEY: process.env.DIALOG_API_KEY_ZONA_CAFETERA,
+    registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
+    clientMenu: `- Para solicitar un servicio puedes utilizar el siguiente emoji: 🚖.\n- Para listar los servicios actualmente activos y cancelarlos puedes enviar el caracter "?" o presionar el boton "Cancelar servicio"\n- Para enviar una peticion queja, reclamo o solicitar un servicio especial por favor presionar el boton "Ayuda"\n- Para registrar o cambiar el código de referido utiliza el siguiente emoji: 🔢`,
+    menu: "Este es el menu y la forma de uso\n- Enviar el numero de servicios a pedir, ej 2\n- Enviar uno o varios Emojis de vehiculos segun los servicos a pedir, ej: 🚖. Para solicitar un servicio con aire acondicionado utilizar el emoji 🥶. Para un servicio VIP utilizar el emoji 👑, para solicitar un servicio para el aeropuerto utilizar el emoji ✈️ o para solicitar un servicio con filtros  utilizar el emoji 🧐\n- enviar un signo de pregunta para saber la informacion de tus servicos.  Ej ? o ❓\n- seleccionar una de las siguientes opciones\n- Para ver el saldo actual en billetera utiliza el siguiente emoji: 💵",
+    availableRqstEmojis: "🚗🚌🚎🏎🚓🚑🚒🚐🛻🚚🚛🚔🚍🚕🚖🚜🚙🚘",
+    availableRqstSpecialEmojis: "(?:❄️|🥶|⛄|🧊)",
+    availableRqstVipEmojis: "(?:👑)",
+    availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
+    availableRqstFilterEmojis: "🧐",
+    hostname: "waba-v2.360dialog.io",
+    path: "/messages"
   }
 }
 const {
@@ -187,6 +200,26 @@ class ClientBotLinkCQRS {
             timestamp: message.timestamp,
             client: {},
           }, message, "ec600f7f-1b57-4c47-af77-c6750a8649bd")
+        }),
+        tap(message => {
+          //this.markMessageAsRead(message, businessId);
+        })
+      )
+    } else {
+      return of("IGNORED")
+    }
+
+  }
+
+  processTxPlusZonaCafeteraMessageReceived$({ args }, authToken) {
+    if (args.messages) {
+      return from(args.messages).pipe(
+        mergeMap(message => {
+          return this.initConversation$(message.from, {
+            waId: message.from,
+            timestamp: message.timestamp,
+            client: {},
+          }, message, "b19c067e-57b4-468f-b970-d0101a31cacb")
         }),
         tap(message => {
           //this.markMessageAsRead(message, businessId);
