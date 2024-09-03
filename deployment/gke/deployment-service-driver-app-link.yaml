@@ -91,9 +91,9 @@ spec:
              key: DRIVER_APP_MQTT_SERVER_PASSWORD
         # SERVICE OFFER SPANS CONFIG
         - name: SERVICE_OFFER_MAX_DISTANCE_MIN
-          value: "2000"
+          value: "3000"
         - name: SERVICE_SATELLITE_OFFER_MAX_DISTANCE
-          value: "1500"  
+          value: "3000"  
         - name: SERVICE_OFFER_MAX_DISTANCE
           value: "800"
         - name: SERVICE_OFFER_MIN_DISTANCE
@@ -109,7 +109,7 @@ spec:
         - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
           value: "0_1_2_3_4_5_11_15_20_21_22_23"
         - name: SERVICE_OFFER_EXTENDED_DISTANCE
-          value: "1500"
+          value: "3000"
         - name: APP_DRIVER_AGREEMENT
           value: "1000"
         # - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
