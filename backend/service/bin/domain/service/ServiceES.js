@@ -51,7 +51,7 @@ class ServiceES {
           map(service => Crosscutting.formatServiceToGraphQLSchema(service)),          
           mergeMap(service => {
             if(service){
-              broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)
+              return broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)
             }
             else {
               console.log("ERRROR: Error procesando evento sendServiceUpdatedEvent ==> ", serviceId);
