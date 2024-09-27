@@ -43,7 +43,7 @@ class DriverDA {
     const query = { active: true };
 
     if(filter.licensePlate && filter.licensePlate.length >= 3 ){
-      query.assignedVehicles = { $regex: filter.licensePlate, $options: "i" };
+      query.assignedVehicles = filter.licensePlate.toUpperCase();
     }
 
     if (filter.businessId) {
@@ -59,11 +59,11 @@ class DriverDA {
       query["lastname"] = { $regex: filter.lastname, $options: "i" };
     }
     if (filter.documentId) {
-      query["documentId"] = { $regex: filter.documentId, $options: "i" };
+      query["documentId"] = filter.documentId;
     }
 
   
-
+    console.log("QUERY ASSIGNED VEHICLE ===>", query);
     const cursor = collection
       .find(query)
       .skip(pagination.count * pagination.page)
