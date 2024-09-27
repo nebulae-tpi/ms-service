@@ -67,8 +67,7 @@ class DriverDA {
     const cursor = collection
       .find(query)
       .skip(pagination.count * pagination.page)
-      .limit(pagination.count)
-      .sort({ creationTimestamp: pagination.sort });
+      .limit(pagination.count);
 
     return mongoDB.extractAllFromMongoCursor$(cursor);
   }
