@@ -49,10 +49,18 @@ class ServiceES {
         .pipe(
           filter(service => service),
           map(service => Crosscutting.formatServiceToGraphQLSchema(service)),          
-          mergeMap(service => broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)),
+          mergeMap(service => {
+            if(service){
+              broker.send$(MATERIALIZED_VIEW_TOPIC, 'ServiceServiceUpdatedSubscription', service)
+            }
+            else {
+              console.log("ERRROR: Error procesando evento sendServiceUpdatedEvent ==> ", serviceId);
+              return of({});
+          }
+          }),
           catchError(error => {
             console.log('An error ocurred while a service updated event was being processed: ', error);
-            return of('Error: ', error)
+            return of('Error: ', error);
           }),
         )
       )

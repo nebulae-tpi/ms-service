@@ -41,7 +41,16 @@ class DriverES {
                 assignedVehicles: []
             })),
             mergeMap( driver => DriverDA.createDriver$(driver) ),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result.ops[0]))
+            mergeMap(result => {
+                if(result.ops[0]){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result.ops[0])
+                }
+                else{
+                    console.log("ERRROR: Error procesando evento handleDriverCreated ==> ", driverCreatedEvent);
+                    return of({});
+                }
+                
+            })
         );
     }
 
@@ -62,7 +71,15 @@ class DriverES {
                 phone: newGeneralInfo.phone
             })),
             mergeMap(newInfo => DriverDA.updateDriverGeneralInfo$(driverGeneralInfoUpdatedEvent.aid, newInfo)),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result))
+            mergeMap(result => {
+                if(result){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result);
+                }else {
+                    console.log("ERRROR: Error procesando evento handleDriverGeneralInfoUpdated ==> ", driverGeneralInfoUpdatedEvent);
+                    return of({});
+                }
+                
+            })
         );
     }
 
@@ -73,7 +90,15 @@ class DriverES {
     handleDriverStateUpdated$(DriverStateUpdatedEvent) {          
         return DriverDA.updateDriverState$(DriverStateUpdatedEvent.aid, DriverStateUpdatedEvent.data.state)
         .pipe(
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result))
+            mergeMap(result => {
+                if(result){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverUpdatedSubscription`, result);
+                }else {
+                    console.log("ERRROR: Error procesando evento handleDriverStateUpdated ==> ", DriverStateUpdatedEvent);
+                    return of({});
+                }
+                
+            })
         );
     }
 
@@ -94,8 +119,16 @@ class DriverES {
         .pipe(
             mergeMap(newVehicle => DriverDA.assignVehicle$(VehicleAssignedEvent.aid, newVehicle) ),
             mergeMap(() => VehicleDA.getVehicleByPlate$(VehicleAssignedEvent.data.vehicleLicensePlate)),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverVehicleAssigned`,
-                { ...result, driverId: VehicleAssignedEvent.aid })
+            mergeMap(result => {
+                if(result){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceDriverVehicleAssigned`,
+                    { ...result, driverId: VehicleAssignedEvent.aid });
+                }else {
+                    console.log("ERRROR: Error procesando evento handleVehicleAssigned ==> ", VehicleAssignedEvent);
+                    return of({});
+                }
+                
+            }
             )
         )
     }

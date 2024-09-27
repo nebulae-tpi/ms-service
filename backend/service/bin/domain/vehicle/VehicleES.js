@@ -43,7 +43,15 @@ class VehicleES {
 
             })),
             mergeMap(vehicle => VehicleDA.createVehicle$(vehicle)),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result.ops[0]))
+            mergeMap(result => {
+                if(result.ops[0]){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result.ops[0])
+                }else {
+                    console.log("ERRROR: Error procesando evento handleVehicleCreated ==> ", vehicleCreatedEvent);
+                    return of({});
+                }
+                
+            })
         );
     }
 
@@ -66,7 +74,15 @@ class VehicleES {
                 : of({result: "PLATE NOT CHANGED"})
             ),
             //tap(r => console.log(r.result)),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result))
+            mergeMap(result => {
+                if(result){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result)
+                }else {
+                    console.log("ERRROR: Error procesando evento handleVehicleGeneralInfoUpdated ==> ", vehicleGeneralInfoUpdated);
+                    return of({});
+                }
+                
+            })
         );
     }
 
@@ -79,7 +95,15 @@ class VehicleES {
         .pipe(
             map(newState => ({ active: newState })),
             mergeMap(update => VehicleDA.updateVehicleInfo$( VehicleStateUpdatedEvent.aid, update)),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result))
+            mergeMap(result => {
+                if(result){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `ServiceVehicleUpdatedSubscription`, result)
+                }else {
+                    console.log("ERRROR: Error procesando evento handleVehicleStateUpdated ==> ", VehicleStateUpdatedEvent);
+                    return of({});
+                }
+                
+            })
         );
     }
 
@@ -92,7 +116,15 @@ class VehicleES {
                 features:  (!newFeatures ||!newFeatures.others ) ? [] :  newFeatures.others.filter(f => f.active).map(e => e.name)
             })),
             mergeMap(update => VehicleDA.updateVehicleInfo$(VehicleVehicleFeaturesUpdatedEvent.aid, update) ),
-            mergeMap(result => broker.send$(MATERIALIZED_VIEW_TOPIC, `VehicleVehicleUpdatedSubscription`, result))
+            mergeMap(result => {
+                if(result){
+                    return broker.send$(MATERIALIZED_VIEW_TOPIC, `VehicleVehicleUpdatedSubscription`, result)
+                }else {
+                    console.log("ERRROR: Error procesando evento handleVehicleFeaturesUpdated ==> ", VehicleVehicleFeaturesUpdatedEvent);
+                    return of({});
+                }
+                
+            })
         )
 
     }
