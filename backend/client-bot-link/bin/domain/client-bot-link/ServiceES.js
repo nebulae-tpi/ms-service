@@ -221,7 +221,6 @@ class ServiceES {
                 text: "Cancelar Busqueda"
               }
             ];
-            console.log("BUTTONS CANCEL ===> ", buttons)
             this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttons, `57${client.generalInfo.phone}`, service.businessId);
           }
           

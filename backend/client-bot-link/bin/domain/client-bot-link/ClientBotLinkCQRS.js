@@ -1731,7 +1731,9 @@ class ClientBotLinkCQRS {
             );
           }
           else if(interactiveResp.includes("RB_")){
+            
            const serviceToClone = interactiveResp.replace("RB_", "");
+           console.log("Llega cancelacion ===> ", serviceToClone);
            return ServiceDA.getService$(serviceToClone).pipe(
             mergeMap(service => {
               const customCurrentRequestService = {
@@ -1743,6 +1745,7 @@ class ClientBotLinkCQRS {
                 destinationLocation: {lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0]},
                 destinationAddress: service.dropOff.addressLine1
               }
+              console.log("Data crear servicio ===> ", customCurrentRequestService);
               return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
             })
            )
