@@ -1730,8 +1730,8 @@ class ClientBotLinkCQRS {
               })
             );
           }
-          else if(interactiveResp.includes("rqstServiceBtn_")){
-           const serviceToClone = interactiveResp.replace("rqstServiceBtn_", "");
+          else if(interactiveResp.includes("RB_")){
+           const serviceToClone = interactiveResp.replace("RB_", "");
            return ServiceDA.getService$(serviceToClone).pipe(
             mergeMap(service => {
               const customCurrentRequestService = {

@@ -215,7 +215,7 @@ class ServiceES {
           else {
             const buttons = [
               {
-                id: service.client.tipClientId == null ? `rqstServiceBtn_${serviceEvent.aid}` :"rqstServiceBtn",
+                id: service.client.tipClientId == null ? `RB_${serviceEvent.aid}` :"rqstServiceBtn",
                 text: "Continuar Busqueda"
               },
               {
