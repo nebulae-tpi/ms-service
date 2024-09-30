@@ -1729,7 +1729,25 @@ class ClientBotLinkCQRS {
 
               })
             );
-          } else {
+          }
+          else if(interactiveResp.includes("rqstServiceBtn_")){
+           const serviceToClone = interactiveResp.replace("rqstServiceBtn_", "");
+           return ServiceDA.getService$(serviceToClone).pipe(
+            mergeMap(service => {
+              const customCurrentRequestService = {
+                timestamp: Date.now(),
+                address: service.pickUp.addressLine1,
+                reference: service.pickUp.addressLine2,
+                location: {lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0]},
+                paymentType: service.paymentType,
+                destinationLocation: {lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0]},
+                destinationAddress: service.dropOff.addressLine1
+              }
+              return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
+            })
+           )
+          }
+          else {
             return of({});
           }
       }

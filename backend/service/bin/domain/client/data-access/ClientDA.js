@@ -52,7 +52,6 @@ class ClientDA {
     if(clientId){
       query.clientId = clientId;
     }
-    console.log("QUERY SATELITE ==> ", query);
     const cursor = collection
     .find(query)
     .limit(limit);
