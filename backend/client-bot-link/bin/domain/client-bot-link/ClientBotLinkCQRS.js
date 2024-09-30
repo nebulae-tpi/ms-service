@@ -1701,6 +1701,7 @@ class ClientBotLinkCQRS {
         case "RequestServiceWithFilters":
           this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId, businessId);
         default:
+          console.log("interactiveResp ===> ", interactiveResp)
           if (interactiveResp.includes("CANCEL_")) {
             return ServiceDA.markedAsCancelledAndReturnService$(interactiveResp.replace("CANCEL_", "")).pipe(
               tap(service => {
