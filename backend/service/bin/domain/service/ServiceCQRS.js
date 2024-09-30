@@ -51,7 +51,6 @@ class ServiceCQRS {
       }),
       mergeMap(service => {
         if(service.client){
-          console.log("Consulta client ===> ", service.client.tipClientId || service.client.id)
           return ClientDA.getClient$(service.client.tipClientId || service.client.id).pipe(
             map(client => {
               return {...service, client: {...service.client, phoneNumber: (client.generalInfo || {}).phone}}

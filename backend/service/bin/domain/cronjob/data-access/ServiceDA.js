@@ -32,7 +32,6 @@ class ShiftDA {
    * Find services to complete
    */
   static findServicesOnboardToComplete$(businessId, serviceCompletedThreshold){
-    console.log("Threshold =====> ",serviceCompletedThreshold)
     const projection = { _id: 1, businessId: 1, state: 1, "vehicle.licensePlate": 1, "driver.documentId": 1, "client.id": 1 };
     const query = {
       businessId,

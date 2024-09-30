@@ -200,7 +200,6 @@ class ServiceDA {
     
     const initDate = new Date(filter.initTimestamp);
     const endDate = new Date(filter.endTimestamp);
-    console.log("QUERY COUNT ====> ", query);
     return of(initDate)
     .pipe(
       map(date => mongoDB.getHistoricalDb(date)),

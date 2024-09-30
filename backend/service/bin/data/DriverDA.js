@@ -63,7 +63,6 @@ class DriverDA {
     }
 
   
-    console.log("QUERY ASSIGNED VEHICLE ===>", query);
     const cursor = collection
       .find(query)
       .skip(pagination.count * pagination.page)
