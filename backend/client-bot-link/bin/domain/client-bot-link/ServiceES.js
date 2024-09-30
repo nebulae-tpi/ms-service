@@ -210,8 +210,6 @@ class ServiceES {
             
             this.sendInteractiveButtonMessage(`Aún no hemos podido encontrar un vehículo cerca para ti`, `¿deseas continuar?`, buttonsVip, `57${client.generalInfo.phone}`, service.businessId);
           }
-          else if(service.client.tipClientId == null){
-          }
           else {
             const buttons = [
               {
