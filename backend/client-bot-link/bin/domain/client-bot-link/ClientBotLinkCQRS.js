@@ -1206,8 +1206,8 @@ class ClientBotLinkCQRS {
                     reference: service.pickUp.addressLine2,
                     location: { lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0] },
                     paymentType: service.paymentType,
-                    destinationLocation: { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] },
-                    destinationAddress: service.dropOff.addressLine1
+                    destinationLocation: service.dropOff ? { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] } : undefined,
+                    destinationAddress: service.dropOff ? service.dropOff.addressLine1 : undefined
                   }
                   return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
                 }else {
@@ -1768,8 +1768,8 @@ class ClientBotLinkCQRS {
                     reference: service.pickUp.addressLine2,
                     location: { lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0] },
                     paymentType: service.paymentType,
-                    destinationLocation: { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] },
-                    destinationAddress: service.dropOff.addressLine1
+                    destinationLocation: service.dropOff ? { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] } : undefined,
+                    destinationAddress: service.dropOff ? service.dropOff.addressLine1 : undefined
                   }
                   return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
                 }else {
