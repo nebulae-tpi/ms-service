@@ -66,7 +66,7 @@ const businessIdVsD360APIKey = {
     availableRqstVipEmojis: "(?:👑)",
     availableRqstAirportEmojis: "(?:✈️|🛫|🛬)",
     availableRqstFilterEmojis: "🧐"
-  }, 
+  },
   "ec600f7f-1b57-4c47-af77-c6750a8649bd": {
     D360_KEY: process.env.DIALOG_API_KEY_VILLAVICENCIO,
     registerTxt: `Bienvenido al TX BOT\n¿Cual es tu nombre?`,
@@ -93,7 +93,7 @@ const businessIdVsD360APIKey = {
     hostname: "waba-v2.360dialog.io",
     path: "/messages"
   }
-} 
+}
 const {
   ERROR_23224
 } = require("../../tools/customError");
@@ -190,7 +190,7 @@ class ClientBotLinkCQRS {
     }
 
   }
-  
+
   processTxPlusVillavicencioMessageReceived$({ args }, authToken) {
     if (args.messages) {
       return from(args.messages).pipe(
@@ -656,13 +656,13 @@ class ClientBotLinkCQRS {
   }
 
   requestServiceWithoutSatellite$(client, currentRequestService, waId, message, businessId) {
-    if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a" || businessId == "ec600f7f-1b57-4c47-af77-c6750a8649bd"){
+    if (businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a" || businessId == "ec600f7f-1b57-4c47-af77-c6750a8649bd") {
       const min = 1000;
       const max = 9999;
       const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
       currentRequestService.verificationCode = Math.abs(randomNumber) + "";
     }
-    
+
     try {
       if (this.messageIdCache == null) this.messageIdCache = [];
       if (this.messageIdCache.includes(message.id)) {
@@ -867,8 +867,8 @@ class ClientBotLinkCQRS {
   }
 
   formatToCurrency(value, locale = 'en-US', currency = 'COP', symbol = "$") {
-    return (new Intl.NumberFormat(locale, { 
-      style: 'currency', 
+    return (new Intl.NumberFormat(locale, {
+      style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
@@ -935,12 +935,12 @@ class ClientBotLinkCQRS {
           return of({});
         }
 
-        if(walletEmoji > 0){
+        if (walletEmoji > 0) {
           this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId);
           return of({});
         }
 
-        if(referredCode > 0) {
+        if (referredCode > 0) {
           this.sendTextMessage(`Por favor ingresa el código de referido que le compartió el conductor o el cliente`, conversationContent.waId, businessId);
           requestClientCache[client._id] = {
             step: "REQUEST_REFERRED_CODE",
@@ -962,7 +962,7 @@ class ClientBotLinkCQRS {
           //     user: "SYSTEM"
           //   })
           // );
-          if(textResp == null || textResp == ""){
+          if (textResp == null || textResp == "") {
             this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
             return of({});
           }
@@ -971,10 +971,10 @@ class ClientBotLinkCQRS {
             DriverDA.getDriverByReferredCode$(parseInt(textResp), businessId)
           ]).pipe(
             mergeMap(([referredClient, referredDriver]) => {
-              if(referredClient?.clientCode == client.clientCode && client.clientCode != null){
+              if (referredClient?.clientCode == client.clientCode && client.clientCode != null) {
                 this.sendTextMessage(`El código de referido no puede ser tu código`, conversationContent.waId, businessId);
               }
-              else if(referredClient?._id || referredDriver?._id){
+              else if (referredClient?._id || referredDriver?._id) {
                 this.sendTextMessage(`Se ha registrado exitosamente el código de referido`, conversationContent.waId, businessId)
                 return ClientDA.registerReferredCode$(client._id, referredClient?.clientCode || referredDriver?.driverCode).pipe(
                   mergeMap(() => {
@@ -991,15 +991,15 @@ class ClientBotLinkCQRS {
                       }))
                   })
                 );
-                
-              }else {
+
+              } else {
                 this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
               }
               return of({})
-              
+
             })
           );
-          
+
           break;
         case "REQUEST_REFERENCE":
           this.sendInteractiveButtonMessage(null, `Por favor escribe el barrio`, buttonsCancel, conversationContent.waId, businessId, false);
@@ -1066,8 +1066,8 @@ class ClientBotLinkCQRS {
               requestClientCache[client._id] = undefined;
             })
           );
-        case "payWithWalletBtn": 
-          
+        case "payWithWalletBtn":
+
           return ServiceDA.getService$(interactiveResp.split("_")[1]).pipe(
             mergeMap(service => {
               const movement = {
@@ -1092,18 +1092,18 @@ class ClientBotLinkCQRS {
                 })
               ).pipe(
                 tap(() => {
-                  this.sendTextMessage("Pago realizado exitosamente", conversationContent.waId, businessId)    
+                  this.sendTextMessage("Pago realizado exitosamente", conversationContent.waId, businessId)
                 }),
-                catchError(() =>{
+                catchError(() => {
                   const buttons = [
-                    { 
+                    {
                       id: `payWithWalletBtn-${service.id}`,
                       text: "Pagar con billetera"
                     }
                   ];
                   this.sendInteractiveButtonMessage(`Error`, `Hubo un error al momento de procesar el pago, por favor intentalo nuevamente`, buttons, conversationContent.waId, businessId);
                   return of({});
-                  })
+                })
               );
             })
           )
@@ -1113,10 +1113,10 @@ class ClientBotLinkCQRS {
           this.sendHelpContact(conversationContent.waId, businessId)
           break;
         case "getClientCodeBtn":
-          if(client.clientCode){
+          if (client.clientCode) {
             this.sendTextMessage(`Su código de asociación es ${client.clientCode}`, conversationContent.waId, businessId);
             break;
-          }else {
+          } else {
             return eventSourcing.eventStore.emitEvent$(
               new Event({
                 eventType: "ClientCodeRequested",
@@ -1128,7 +1128,7 @@ class ClientBotLinkCQRS {
               })
             );
           }
-          
+
         case "getWalletBtn":
           this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId)
           return of({});
@@ -1193,6 +1193,30 @@ class ClientBotLinkCQRS {
                 requestClientCache[client._id] = undefined;
               })
             );
+          }
+          else if (interactiveResp.includes("RB_")) {
+
+            const serviceToClone = interactiveResp.replace("RB_", "");
+            return ServiceDA.getService$(serviceToClone).pipe(
+              mergeMap(service => {
+                if(service != null || (service  || {})._id != null){
+                  const customCurrentRequestService = {
+                    timestamp: Date.now(),
+                    address: service.pickUp.addressLine1,
+                    reference: service.pickUp.addressLine2,
+                    location: { lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0] },
+                    paymentType: service.paymentType,
+                    destinationLocation: { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] },
+                    destinationAddress: service.dropOff.addressLine1
+                  }
+                  return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
+                }else {
+                  this.sendTextMessage("No se pudo continuar con la solicitud, por favor crea una nueva solicitud de servicio para continuar la busqueda de un móvil", conversationContent.waId, businessId)
+                  return of({})
+                }
+                
+              })
+            )
           }
           else if (interactiveResp.includes("PAYMENT_")) {
 
@@ -1339,12 +1363,12 @@ class ClientBotLinkCQRS {
         let referredCode = [...message.text.body].some(t => (["🔢"]).includes(t));
         let walletEmoji = [...message.text.body].some(t => (["💵", "💴", "💶", "💷", "💸", "💰"]).includes(t));
 
-        if(walletEmoji > 0){
+        if (walletEmoji > 0) {
           this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId);
           return of({});
         }
 
-        if(referredCode > 0) {
+        if (referredCode > 0) {
           this.sendTextMessage(`Por favor ingresa el código de referido que le compartió el conductor o el cliente`, conversationContent.waId, businessId);
           requestClientCache[client._id] = {
             step: "REQUEST_REFERRED_CODE",
@@ -1376,7 +1400,7 @@ class ClientBotLinkCQRS {
           //     user: "SYSTEM"
           //   })
           // );
-          if(textResp == null || textResp == ""){
+          if (textResp == null || textResp == "") {
             this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
             return of({});
           }
@@ -1385,10 +1409,10 @@ class ClientBotLinkCQRS {
             DriverDA.getDriverByReferredCode$(parseInt(textResp), businessId)
           ]).pipe(
             mergeMap(([referredClient, referredDriver]) => {
-              if(referredClient?.clientCode == client.clientCode && client.clientCode != null){
+              if (referredClient?.clientCode == client.clientCode && client.clientCode != null) {
                 this.sendTextMessage(`El código de referido no puede ser tu código`, conversationContent.waId, businessId);
               }
-              else if(referredClient?._id || referredDriver?._id){
+              else if (referredClient?._id || referredDriver?._id) {
                 this.sendTextMessage(`Se ha registrado exitosamente el código de referido`, conversationContent.waId, businessId)
                 return ClientDA.registerReferredCode$(client._id, referredClient?.clientCode || referredDriver?.driverCode).pipe(
                   mergeMap(() => {
@@ -1405,12 +1429,12 @@ class ClientBotLinkCQRS {
                       }))
                   })
                 );
-                
-              }else {
+
+              } else {
                 this.sendTextMessage(`No se encontró ningun cliente o conductor con el código de referido indicado, por favor verifica el código que te compartieron e intentalo nuevamente escribiendo el emoji 🔢`, conversationContent.waId, businessId);
               }
               return of({})
-              
+
             })
           );
         case "REQUEST_REFERENCE":
@@ -1448,7 +1472,7 @@ class ClientBotLinkCQRS {
           break;
         case "listCurrentServices":
           return this.infoServiceWithoutFilter$(client._id, conversationContent.waId, businessId)
-        case "listLastServiceBtn": 
+        case "listLastServiceBtn":
           if (((client || {}).lastServices)) {
             const listElements = (client || {}).lastServices.map(val => {
               const address = val.address.length > 24 ? val.address.substring(0, 21) + "..." : val.address;
@@ -1545,7 +1569,7 @@ class ClientBotLinkCQRS {
         return of({})
       }
       let walletEmoji = [...message.text.body].some(t => (["💵", "💴", "💶", "💷", "💸", "💰"]).includes(t));
-      if(walletEmoji > 0){
+      if (walletEmoji > 0) {
         this.sendTextMessage(`El saldo en billetera es: ${this.formatToCurrency(client?.wallet?.pockets?.main || 0)}`, conversationContent.waId, businessId);
         return of({});
       }
@@ -1596,13 +1620,13 @@ class ClientBotLinkCQRS {
                 text: "Servicio con filtros"
               }
             ]
-            if(businessId == "ec600f7f-1b57-4c47-af77-c6750a8649bd" || businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+            if (businessId == "ec600f7f-1b57-4c47-af77-c6750a8649bd" || businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a") {
               buttons.push({
                 id: "getClientCodeBtn",
                 text: "Código asociación"
               });
             }
-            
+
             this.sendInteractiveButtonMessage("Lo sentimos, no entendimos tu solicitud.", businessIdVsD360APIKey[businessId].menu, buttons, conversationContent.waId, businessId)
           })
         )
@@ -1631,10 +1655,10 @@ class ClientBotLinkCQRS {
       }
       switch (interactiveResp) {
         case "getClientCodeBtn":
-          if(client.clientCode){
+          if (client.clientCode) {
             this.sendTextMessage(`Su código de asociación es ${client.clientCode}`, conversationContent.waId, businessId);
             break;
-          }else {
+          } else {
             return eventSourcing.eventStore.emitEvent$(
               new Event({
                 eventType: "ClientCodeRequested",
@@ -1731,25 +1755,29 @@ class ClientBotLinkCQRS {
               })
             );
           }
-          else if(interactiveResp.includes("RB_")){
-            
-           const serviceToClone = interactiveResp.replace("RB_", "");
-           console.log("Llega cancelacion ===> ", serviceToClone);
-           return ServiceDA.getService$(serviceToClone).pipe(
-            mergeMap(service => {
-              const customCurrentRequestService = {
-                timestamp: Date.now(),
-                address: service.pickUp.addressLine1,
-                reference: service.pickUp.addressLine2,
-                location: {lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0]},
-                paymentType: service.paymentType,
-                destinationLocation: {lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0]},
-                destinationAddress: service.dropOff.addressLine1
-              }
-              console.log("Data crear servicio ===> ", customCurrentRequestService);
-              return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
-            })
-           )
+          else if (interactiveResp.includes("RB_")) {
+
+            const serviceToClone = interactiveResp.replace("RB_", "");
+            console.log("Llega cancelacion ===> ", serviceToClone);
+            return ServiceDA.getService$(serviceToClone).pipe(
+              mergeMap(service => {
+                if(service == null || service._id == null){
+                  const customCurrentRequestService = {
+                    timestamp: Date.now(),
+                    address: service.pickUp.addressLine1,
+                    reference: service.pickUp.addressLine2,
+                    location: { lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0] },
+                    paymentType: service.paymentType,
+                    destinationLocation: { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] },
+                    destinationAddress: service.dropOff.addressLine1
+                  }
+                  return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
+                }else {
+                  this.sendTextMessage("No se pudo continuar con la solicitud, por favor crea una nueva solicitud de servicio para continuar la busqueda de un móvil", conversationContent.waId, businessId)
+                  return of({})
+                }
+              })
+            )
           }
           else {
             return of({});
@@ -1780,7 +1808,7 @@ class ClientBotLinkCQRS {
                       mergeMap(serviceCount => {
                         return this.continueConversation$(message, conversationContent, c, serviceCount, businessId);
                       }),
-                      catchError(err =>{
+                      catchError(err => {
                         console.log("err ==> ", err)
                         return of("Error proccesing conversation data")
                       }
@@ -1900,8 +1928,8 @@ class ClientBotLinkCQRS {
                 ]
                 this.sendInteractiveButtonMessage(`${message?.text?.body} Confirma tu nombre`, `Presiona el boton de "Confirmar" para finalizar el proceso de registro o "Cambiar" para corregir el nombre ingresado`, buttons, conversationContent.waId, businessId)
               }
- 
-            } else if(interactiveResp) {
+
+            } else if (interactiveResp) {
               switch (interactiveResp) {
                 case "registerBtn":
                   const buttons = [
