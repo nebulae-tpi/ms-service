@@ -129,7 +129,8 @@ class VehicleES {
 
     }
 
-    handleVehicleBlockRemoved$(vehicleBlockRemovedEvt){        
+    handleVehicleBlockRemoved$(vehicleBlockRemovedEvt){      
+        console.log("handleVehicleBlockRemoved ==> ", (vehicleBlockRemovedEvt || {}).aid);
         return of({vehicleId: vehicleBlockRemovedEvt.aid, ...vehicleBlockRemovedEvt.data })
         .pipe(
             //tap( obj => console.log("handleVehicleBlockRemoved$", obj )),

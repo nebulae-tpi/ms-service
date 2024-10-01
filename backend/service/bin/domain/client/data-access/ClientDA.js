@@ -119,7 +119,6 @@ class ClientDA {
    * @param {*} ClientSatelliteInfo  New general information of the Client
    */
    static updateClientSatelliteId$(id, satelliteId) {
-    console.log("CAMBIA SATELITE ID ===> ", {id, satelliteId});
     const collection = mongoDB.db.collection(CollectionName);
 
     return defer(()=>
