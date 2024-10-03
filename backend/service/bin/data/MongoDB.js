@@ -139,6 +139,15 @@ class MongoDB {
       await historicalDB.collection('Shift').createIndex({ "vehicle.licensePlate": 1 })
         .catch((err) => console.log(`Failed to create index: ${err}`));
 
+      observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({online: 1,state: 1,lastReceivedComm: 1})`);
+      await historicalDB.collection('Shift').createIndex({online: 1,state: 1,lastReceivedComm: 1})
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
+
+      observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ state: 1, "vehicle.id": 1 })`);
+      await historicalDB.collection('Shift').createIndex({ state: 1, "vehicle.id": 1 })
+        .catch((err) => console.log(`Failed to create index: ${err}`));
+
       observer.next(`Creating index for ${historicalDB.databaseName}.Shift => ({ location: "2dsphere" })`);
       await historicalDB.collection('Shift').createIndex({ location: "2dsphere" })
         .catch((err) => console.log(`Failed to create index: ${err}`));

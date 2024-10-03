@@ -472,10 +472,10 @@ class ServiceES {
         ).toPromise();
 
         let currentClient = await ClientDA.getClient$(service.client.id).toPromise();
-    
+        shifts.sort((a,b) => (a.dist || {}).calculated - (b.dist || {}).calculated)
         // filter shifts who its drivers have't required money to get the service offer.
         // tip for client and PayPerService are evaluated 
-        shifts = shifts.filter(shift => {
+        shifts = shifts.slice(0,20).filter(shift => {
 
             const tipType = service.client.tipType; // === "VIRTUAL_WALLET"
             const driverMainPocketAmount = ((shift.driver.wallet || {}).pockets || {}).main || 0;
