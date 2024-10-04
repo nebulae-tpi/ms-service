@@ -65,7 +65,7 @@ class MongoDB {
    * @param {Date} date 
    * @param {Int} monthsToAdd 
    */
-  getHistoricalDb(date = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })), monthsToAdd = 0) {
+  getHistoricalDb(date = new Date(new Date().toLocaleString('en', { timeZone: 'America/Bogota' })), monthsToAdd = 0) {
     if (monthsToAdd != 0) {
       date.add(-1).month();
     }

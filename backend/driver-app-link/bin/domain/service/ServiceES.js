@@ -350,6 +350,7 @@ class ServiceES {
                     let simultaneousSendCount = 0;
                     for (let i = 0, len = shifts.length; needToOffer && Date.now() < offerSearchThreshold && i < len; i++) {
                         //selected shift
+                        console.log("INDICE ==> ", i)
                         const shift = shifts[i];
                         // console.log('INICIA OFERTA =======> ', JSON.stringify(shift));
                         await this.offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts, obs);
@@ -472,6 +473,7 @@ class ServiceES {
         ).toPromise();
 
         let currentClient = await ClientDA.getClient$(service.client.id).toPromise();
+        
         shifts.sort((a,b) => (a.dist || {}).calculated - (b.dist || {}).calculated)
         // filter shifts who its drivers have't required money to get the service offer.
         // tip for client and PayPerService are evaluated 
@@ -497,6 +499,7 @@ class ServiceES {
 
 
         });
+        console.log("shifts after filter===> ", shifts[18].dist.calculated)
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
@@ -559,6 +562,7 @@ class ServiceES {
      */
     async offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts = [], obs, resendToAll = true) {
         const businessId = shift.businessId;
+        console.log("OFERTANDO SERVICIO")
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();

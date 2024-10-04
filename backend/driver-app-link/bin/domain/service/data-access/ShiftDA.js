@@ -25,7 +25,7 @@ class ShiftDA {
 
 
   static findServiceOfferCandidates$(businessId, location, requestedFeatures = [], ignoredShiftsIds = [], maxDistance = 3000, minDistance = 0, projection = undefined, limit= 20) {
-    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const today = new Date(new Date().toLocaleString('en', { timeZone: 'America/Bogota' }));
     const explorePastMonth = today.getDate() <= 1;
 
     const query = {
@@ -35,8 +35,8 @@ class ShiftDA {
       location: {
         $near: {
           $geometry: location,
-          maxDistance: maxDistance,
-          minDistance: minDistance,
+          $maxDistance: maxDistance,
+          $minDistance: minDistance,
         }
       }
 
@@ -44,14 +44,13 @@ class ShiftDA {
     if (requestedFeatures && requestedFeatures.length > 0) {
       query['vehicle.features'] = { $all: requestedFeatures };
     }
-    const ignoredIds = ignoredShiftsIds.map(id=> ({_id: {"$ne": id}}));
+    const ignoredIds = ignoredShiftsIds;
     if(ignoredIds && ignoredIds.length> 0){
       query[`_id`] = {$nin: ignoredIds};
     }
     if(businessId === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
       console.log("QUERY ===> ", query)
     }
-    //console.log("QUERY ==> ", JSON.stringify(aggregateQuery));
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
@@ -59,16 +58,18 @@ class ShiftDA {
       mergeMap(collection =>
         {
           const cursor = collection.find(query);
-          return mongoDB.extractAllFromMongoCursor$(cursor);
+          return mongoDB.extractAllFromMongoCursor$(cursor).pipe(
+            map(shift => {
+              return {...shift, dist: {calculated: getDistance(
+                { longitude: shift.location.coordinates[0], latitude: shift.location.coordinates[1] },
+                { longitude: location.coordinates[0], latitude: location.coordinates[1] },
+                0.01 //centimeter accuracy
+              )} }
+            }),
+            toArray()
+          );
         }
       ),
-      map(shift => {
-        return {...shift, dist: {calculated: getDistance(
-          { longitude: shift.location.coordinates[0], latitude: shift.location.coordinates[1] },
-          { longitude: location.coordinates[0], latitude: location.coordinates[1] },
-          0.01 //centimeter accuracy
-        )} }
-      }),
       toArray(),
       //tap( x => console.log('QUERY RESULT: ',JSON.stringify(x))),
       map(([r1, r2]) => explorePastMonth ? r1.concat(r2) : r1)
