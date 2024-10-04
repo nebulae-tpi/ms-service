@@ -499,7 +499,7 @@ class ServiceES {
 
 
         });
-        console.log("shifts after filter===> ", shifts[18].dist.calculated)
+        //console.log("shifts after filter===> ", shifts[18].dist.calculated)
         obs.next(`raw shift candidates: ${JSON.stringify(shifts.map(s => ({ driver: s.driver.username, distance: s.dist.calculated, documentId: s.driver.documentId })))} `);
 
         // if the service has a referred driver and that driver is within the candidates, then that shift must be the first (high priority) 
