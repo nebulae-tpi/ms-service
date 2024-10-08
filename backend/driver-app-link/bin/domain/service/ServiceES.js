@@ -562,7 +562,6 @@ class ServiceES {
      */
     async offerServiceToShift(service, shift, offerTotalThreshold, previouslySelectedShifts = [], obs, resendToAll = true) {
         const businessId = shift.businessId;
-        console.log("OFERTANDO SERVICIO")
         obs.next(`offering to shift: ${JSON.stringify({ driver: shift.driver.username, distance: shift.dist.calculated, documentId: shift.driver.documentId })}`);
         //appends the shift into the service 
         await ServiceDA.addShiftToActiveOffers$(service._id, shift._id, shift.dist.calculated, shift.referred === true, shift.driver.id, shift.driver.username, shift.vehicle.licensePlate).toPromise();
