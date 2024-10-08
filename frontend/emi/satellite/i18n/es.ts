@@ -52,7 +52,10 @@ export const locale = {
         },
         'PAYMENT_TYPES': {
           'CASH': 'Efectivo',
-          'CREDIT_CARD': 'Tarjeta de crédito'
+          'CREDIT_CARD': 'Tarjeta de crédito',
+          NEQUI: 'NEQUI',
+          DAVIPLATA: 'DAVIPLATA',
+          BANCOLOMBIA: 'Bancolombia'
         },
         'FEATURES': {
           'AC': 'Aire acondicionado',

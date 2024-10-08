@@ -48,7 +48,10 @@ export const locale = {
       },
       SERVICE_PAYMENT_TYPE: {
         'CASH': 'Cash',
-        'CREDIT_CARD': 'Credit Card'
+        'CREDIT_CARD': 'Credit Card',
+        NEQUI: 'NEQUI',
+          DAVIPLATA: 'DAVIPLATA',
+          BANCOLOMBIA: 'Bancolombia'
       },
       DETAILS: {
         'GENERAL_INFO': 'General Info',

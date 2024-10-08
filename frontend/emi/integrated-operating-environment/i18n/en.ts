@@ -122,7 +122,10 @@ export const locale = {
       MAP:{
         SERVICE:{
           VIRTUAL_WALLET: 'Wallet',
-          CASH: 'Cash'
+          CASH: 'Cash',
+          NEQUI: 'NEQUI',
+          DAVIPLATA: 'DAVIPLATA',
+          BANCOLOMBIA: 'Bancolombia'
         },
         SHIFT : {
           WALLET: 'Wallet',

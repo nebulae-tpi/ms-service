@@ -999,30 +999,18 @@ class ClientBotLinkCQRS {
 
             })
           );
-
-          break;
         case "REQUEST_REFERENCE":
           this.sendInteractiveButtonMessage(null, `Por favor escribe el barrio`, buttonsCancel, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_PAYMENT_TYPE";
           currentRequestService.address = textResp;
           break;
         case "REQUEST_PAYMENT_TYPE":
-          //const listElements = [{ id: `CASH`, title: `Efectivo`, description: `` }, { id: `CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` }];
-          const buttonsPaymentType = [
-            {
-              id: "PAYMENT_CASH",
-              text: "Efectivo"
-            },
-            {
-              id: "PAYMENT_CREDIT_CARD",
-              text: "Tarjeta de crédito"
-            },
-            {
-              id: "cancelLastRequestedBtn",
-              text: "Cancelar solicitud"
-            }
-          ]
-          this.sendInteractiveButtonMessage(null, `Por favor selecciona el método de pago`, buttonsPaymentType, conversationContent.waId, businessId, false);
+          const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
+          { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` }, { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, 
+          { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
+          ];
+          this.sendInteractiveListMessage("Por favor selecciona el método de pago", ``, "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId)
+          //this.sendInteractiveButtonMessage(null, `Por favor selecciona el método de pago`, buttonsPaymentType, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_LOCATION";
           currentRequestService.reference = textResp;
           break;
@@ -1758,10 +1746,9 @@ class ClientBotLinkCQRS {
           else if (interactiveResp.includes("RB_")) {
 
             const serviceToClone = interactiveResp.replace("RB_", "");
-            console.log("Llega cancelacion ===> ", serviceToClone);
             return ServiceDA.getService$(serviceToClone).pipe(
               mergeMap(service => {
-                if(service == null || service._id == null){
+                if(service != null || (service  || {})._id != null){
                   const customCurrentRequestService = {
                     timestamp: Date.now(),
                     address: service.pickUp.addressLine1,
