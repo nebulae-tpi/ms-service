@@ -1008,7 +1008,7 @@ class ClientBotLinkCQRS {
           const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
           { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` }, { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, 
           { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
-          ];
+          ]; 
           this.sendInteractiveListMessage("Por favor selecciona el método de pago", ``, "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId)
           //this.sendInteractiveButtonMessage(null, `Por favor selecciona el método de pago`, buttonsPaymentType, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_LOCATION";
