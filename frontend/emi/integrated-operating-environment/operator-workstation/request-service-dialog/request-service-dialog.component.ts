@@ -255,6 +255,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
       clientName: new FormControl(null),
       quantity: new FormControl(1, [Validators.min(1), Validators.max(5)]),
       featureOptionsGroup: new FormControl([]),
+      paymentOptionsGroup: new FormControl("CASH"),
       destinationOptionsGroup: new FormControl('DEFAULT'),
       clientTip: new FormControl(0)
     },
@@ -336,11 +337,12 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
             lng: this.selectedGooglePlace.coords.longitude
           }
         },
+        paymentType: rawRequest.paymentOptionsGroup || "CASH",
         fareDiscount: undefined,
         tip: rawRequest.clientTip
       };
     }
-    this.requestService(rawRequest);
+    this.requestService({...rawRequest, paymentType: this.form.getRawValue().paymentOptionsGroup});
     this.form.patchValue({ client: null });
     this.selectedGooglePlace = null;
     this.dialogRef.close();
@@ -360,7 +362,7 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
         filter(okButton => okButton),
       );
   }
-  generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount, forced = false){
+  generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType, tip, fare, fareDiscount, forced = false){
     return {
       client: {
         id: client._id,
@@ -412,11 +414,12 @@ export class RequestServiceDialogComponent implements OnInit, OnDestroy, AfterVi
   /**
    * Send the request service command to the server
    */
-  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount }) {
+  requestService({ client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType, tip, fare, fareDiscount }) {
+    console.log("PAYMENT TYPE ===> ", paymentType)
     return range(1, quantity || 1)
       .pipe(
         filter(() => (this.data.type === 0 && client != null) || ( this.data.type === 1 && this.selectedGooglePlace)),
-        map(requestNumber => (this.generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType = 'CASH', tip, fare, fareDiscount))),
+        map(requestNumber => (this.generateRequesData(client, destinationOptionsGroup, featureOptionsGroup, quantity, paymentType, tip, fare, fareDiscount))),
         tap(rqst => console.log('Enviando REQUEST ==> ', JSON.stringify(rqst))),
       )
       .subscribe(
