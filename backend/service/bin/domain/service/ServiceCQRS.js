@@ -156,7 +156,7 @@ class ServiceCQRS {
         const filterInput = args.filterInput;
         filterInput.businessId = businessId;
         filterInput.clientId = clientId;
-
+ 
         return ServiceDA.getServiceSize$(filterInput);
       }),
       mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
