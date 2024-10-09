@@ -1008,7 +1008,7 @@ class ClientBotLinkCQRS {
           const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
           { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
           { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
-          ]; 
+          ];
           this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId)
           //this.sendInteractiveButtonMessage(null, `Por favor selecciona el método de pago`, buttonsPaymentType, conversationContent.waId, businessId, false);
           currentRequestService.step = "REQUEST_LOCATION";
@@ -1187,7 +1187,7 @@ class ClientBotLinkCQRS {
             const serviceToClone = interactiveResp.replace("RB_", "");
             return ServiceDA.getService$(serviceToClone).pipe(
               mergeMap(service => {
-                if(service != null || (service  || {})._id != null){
+                if (service != null || (service || {})._id != null) {
                   const customCurrentRequestService = {
                     timestamp: Date.now(),
                     address: service.pickUp.addressLine1,
@@ -1198,11 +1198,11 @@ class ClientBotLinkCQRS {
                     destinationAddress: service.dropOff ? service.dropOff.addressLine1 : undefined
                   }
                   return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
-                }else {
+                } else {
                   this.sendTextMessage("No se pudo continuar con la solicitud, por favor crea una nueva solicitud de servicio para continuar la busqueda de un móvil", conversationContent.waId, businessId)
                   return of({})
                 }
-                
+
               })
             )
           }
@@ -1520,6 +1520,29 @@ class ClientBotLinkCQRS {
               })
             );
           }
+          else if (interactiveResp.includes("RB_")) {
+
+            const serviceToClone = interactiveResp.replace("RB_", "");
+            return ServiceDA.getService$(serviceToClone).pipe(
+              mergeMap(service => {
+                if (service != null || (service || {})._id != null) {
+                  const customCurrentRequestService = {
+                    timestamp: Date.now(),
+                    address: service.pickUp.addressLine1,
+                    reference: service.pickUp.neighborhood,
+                    location: { lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0] },
+                    paymentType: service.paymentType,
+                    destinationLocation: service.dropOff ? { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] } : undefined,
+                    destinationAddress: service.dropOff ? service.dropOff.addressLine1 : undefined
+                  }
+                  return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
+                } else {
+                  this.sendTextMessage("No se pudo continuar con la solicitud, por favor crea una nueva solicitud de servicio para continuar la busqueda de un móvil", conversationContent.waId, businessId)
+                  return of({})
+                }
+              })
+            )
+          }
           else {
             return of({});
           }
@@ -1551,6 +1574,7 @@ class ClientBotLinkCQRS {
   }
 
   continueConversation$(message, conversationContent, client, serviceCount, businessId) {
+    let currentRequestService = requestClientCache[client._id] || {};
     if (((message || {}).text || {}).body) {
       if (message.text.body === businessIdVsD360APIKey[businessId].availableRqstFilterEmojis) {
         this.sendInteractiveCatalogMessage(`Solicitar servicio con filtros`, `para solicitar un servicio con filtros por favor presionar el boton "Ver artículos"`, conversationContent.waId, businessId);
@@ -1584,13 +1608,49 @@ class ClientBotLinkCQRS {
         if ((client.satelliteInfo || {}).offerOnlyVip && vipCharCount < 1) {
           ++vipCharCount;
         }
-        return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
+        
+
+        if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+          currentRequestService = currentRequestService != null ? currentRequestService : {};
+          currentRequestService.serviceCount = serviceCount;
+          currentRequestService.serviceToRqstCount = charCount;
+          currentRequestService.specialServiceToRqstCount = specialCharCount;
+          currentRequestService.airportCharCount = airportCharCount;
+          currentRequestService.message = message;
+          currentRequestService.vipCharCount = vipCharCount;
+          currentRequestService.filters = undefined;
+          const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
+          { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
+          { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
+          ];
+          this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
+          return of({});
+        }else {
+          return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
+        }
       }
       else if (!isNaN(message.text.body)) {
         if ((client.satelliteInfo || {}).offerOnlyVip && vipCharCount < 1) {
           ++vipCharCount;
         }
-        return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
+        if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+          currentRequestService = currentRequestService != null ? currentRequestService : {};
+          currentRequestService.serviceCount = serviceCount;
+          currentRequestService.serviceToRqstCount = parseInt(message.text.body);
+          currentRequestService.specialServiceToRqstCount = 0;
+          currentRequestService.airportCharCount = airportCharCount;
+          currentRequestService.message = message;
+          currentRequestService.vipCharCount = vipCharCount;
+          currentRequestService.filters = undefined;
+          const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
+          { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
+          { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
+          ];
+          this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
+          return of({});
+        }else {
+          return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
+        }
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId, businessId)
@@ -1748,7 +1808,7 @@ class ClientBotLinkCQRS {
             const serviceToClone = interactiveResp.replace("RB_", "");
             return ServiceDA.getService$(serviceToClone).pipe(
               mergeMap(service => {
-                if(service != null || (service  || {})._id != null){
+                if (service != null || (service || {})._id != null) {
                   const customCurrentRequestService = {
                     timestamp: Date.now(),
                     address: service.pickUp.addressLine1,
@@ -1759,12 +1819,19 @@ class ClientBotLinkCQRS {
                     destinationAddress: service.dropOff ? service.dropOff.addressLine1 : undefined
                   }
                   return this.requestServiceWithoutSatellite$(client, customCurrentRequestService, conversationContent.waId, message, businessId)
-                }else {
+                } else {
                   this.sendTextMessage("No se pudo continuar con la solicitud, por favor crea una nueva solicitud de servicio para continuar la busqueda de un móvil", conversationContent.waId, businessId)
                   return of({})
                 }
               })
             )
+          }
+          else if (interactiveResp.includes("PAYMENT_")) {
+            return this.requestService$(currentRequestService.serviceCount, currentRequestService.serviceToRqstCount, currentRequestService.specialServiceToRqstCount, client, conversationContent.waId, currentRequestService.airportCharCount, currentRequestService.message, currentRequestService.vipCharCount, currentRequestService.filters, businessId).pipe(
+              tap(()=> {
+                requestClientCache[client._id] = undefined;
+              })
+            );
           }
           else {
             return of({});
