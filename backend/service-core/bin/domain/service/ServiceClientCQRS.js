@@ -92,7 +92,7 @@ class ServiceClientCQRS {
         mergeMap(rawResponse => GraphqlResponseTools.buildSuccessResponse$(rawResponse)),
         catchError(err => GraphqlResponseTools.handleError$(err, true))
       );
-  }
+  } 
 
   queryHistoricalDeliveryServices$({ root, args, jwt }, authToken) {
     const { clientId } = authToken;

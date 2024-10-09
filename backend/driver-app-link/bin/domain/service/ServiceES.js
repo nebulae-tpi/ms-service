@@ -12,7 +12,7 @@ const DriverDA = require('../../data/DriverDA');
 const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLinkBroker")();
-
+ 
 const BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS = (process.env.BUSINESS_UNIT_IDS_WITH_SIMULTANEOUS_OFFERS || "").split(',');
 
 const { ServiceDA, ShiftDA, ClientDA, BusinessDA } = require('./data-access')
@@ -917,74 +917,74 @@ class ServiceES {
                 }else {
                     return of(service)
                 }
-            }),
-            mergeMap(service => {
-                if(service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
-                    const amount = Math.min((service.taximeterFare*0.1), 2000);
-                    if (service.client.referrerDriverCode && service.client.referrerDriverCode !== null) {
-                        return DriverDA.getDriverByDriverCode$(parseInt(service.client.referrerDriverCode), service.businessId).pipe(
-                            mergeMap(referrerDriver => {
-                                return eventSourcing.eventStore.emitEvent$(
-                                    new Event({
-                                        eventType: "WalletTransactionCommited",
-                                        eventTypeVersion: 1,
-                                        aggregateType: "Wallet",
-                                        aggregateId: service.driver.id,
-                                        data: {
-                                            _id: Crosscutting.generateDateBasedUuid(),
-                                            businessId: service.businessId,
-                                            type: "MOVEMENT",
-                                            // notes: mba.notes,
-                                            concept: "APP_DRIVER_AGREEMENT_PAYMENT",
-                                            timestamp: timestamp || Date.now(),
-                                            amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
-                                            fromId: service.driver.id,
-                                            toId: service.businessId,
-                                            //clientId: service.client.id,
-                                            referrerDriverId: (referrerDriver || {})._id
-                                        },
-                                        user: "SYSTEM"
-                                    })
-                                )
-                            }),
-                            mergeMap(()=> {
-                                return driverAppLinkBroker.sendServiceEventToDrivers$(
-                                    service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
-                            })
-                        );
-                    } else {
-                        return eventSourcing.eventStore.emitEvent$(
-                            new Event({
-                                eventType: "WalletTransactionCommited",
-                                eventTypeVersion: 1,
-                                aggregateType: "Wallet",
-                                aggregateId: service.driver.id,
-                                data: {
-                                    _id: Crosscutting.generateDateBasedUuid(),
-                                    businessId: service.businessId,
-                                    type: "MOVEMENT",
-                                    // notes: mba.notes,
-                                    concept: "APP_DRIVER_AGREEMENT_PAYMENT",
-                                    timestamp: timestamp || Date.now(),
-                                    amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
-                                    fromId: service.driver.id,
-                                    toId: service.businessId,
-                                    //clientId: service.client.id
-                                },
-                                user: "SYSTEM"
-                            })
-                        ).pipe(
+            }), 
+            mergeMap(service => { 
+                // if(service.businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+                //     const amount = Math.min((service.taximeterFare*0.1), 2000);
+                //     if (service.client.referrerDriverCode && service.client.referrerDriverCode !== null) {
+                //         return DriverDA.getDriverByDriverCode$(parseInt(service.client.referrerDriverCode), service.businessId).pipe(
+                //             mergeMap(referrerDriver => {
+                //                 return eventSourcing.eventStore.emitEvent$(
+                //                     new Event({
+                //                         eventType: "WalletTransactionCommited",
+                //                         eventTypeVersion: 1,
+                //                         aggregateType: "Wallet",
+                //                         aggregateId: service.driver.id,
+                //                         data: {
+                //                             _id: Crosscutting.generateDateBasedUuid(),
+                //                             businessId: service.businessId,
+                //                             type: "MOVEMENT",
+                //                             // notes: mba.notes,
+                //                             concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                //                             timestamp: timestamp || Date.now(),
+                //                             amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
+                //                             fromId: service.driver.id,
+                //                             toId: service.businessId,
+                //                             //clientId: service.client.id,
+                //                             referrerDriverId: (referrerDriver || {})._id
+                //                         },
+                //                         user: "SYSTEM"
+                //                     })
+                //                 )
+                //             }),
+                //             mergeMap(()=> {
+                //                 return driverAppLinkBroker.sendServiceEventToDrivers$(
+                //                     service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
+                //             })
+                //         );
+                //     } else {
+                //         return eventSourcing.eventStore.emitEvent$(
+                //             new Event({
+                //                 eventType: "WalletTransactionCommited",
+                //                 eventTypeVersion: 1,
+                //                 aggregateType: "Wallet",
+                //                 aggregateId: service.driver.id,
+                //                 data: {
+                //                     _id: Crosscutting.generateDateBasedUuid(),
+                //                     businessId: service.businessId,
+                //                     type: "MOVEMENT",
+                //                     // notes: mba.notes,
+                //                     concept: "APP_DRIVER_AGREEMENT_PAYMENT",
+                //                     timestamp: timestamp || Date.now(),
+                //                     amount: service.driver.referredCode != null ? amount - (amount*0.004) : amount,
+                //                     fromId: service.driver.id,
+                //                     toId: service.businessId,
+                //                     //clientId: service.client.id
+                //                 },
+                //                 user: "SYSTEM"
+                //             })
+                //         ).pipe(
                             
-                            mergeMap(()=> {
-                                return driverAppLinkBroker.sendServiceEventToDrivers$(
-                                    service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
-                            })
-                        );
-                    }
-                }else {
+                //             mergeMap(()=> {
+                //                 return driverAppLinkBroker.sendServiceEventToDrivers$(
+                //                     service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
+                //             })
+                //         );
+                //     }
+                // }else {
                     return driverAppLinkBroker.sendServiceEventToDrivers$(
                         service.businessId, service.driver.username, 'ServiceStateChanged', { _id: service._id, state: 'DONE' })
-                }
+                // }
             }),
         );
     }

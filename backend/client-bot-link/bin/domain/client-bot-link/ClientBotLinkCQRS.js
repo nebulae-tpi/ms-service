@@ -1191,7 +1191,7 @@ class ClientBotLinkCQRS {
                   const customCurrentRequestService = {
                     timestamp: Date.now(),
                     address: service.pickUp.addressLine1,
-                    reference: service.pickUp.addressLine2,
+                    reference: service.pickUp.neighborhood,
                     location: { lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0] },
                     paymentType: service.paymentType,
                     destinationLocation: service.dropOff ? { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] } : undefined,
@@ -1752,7 +1752,7 @@ class ClientBotLinkCQRS {
                   const customCurrentRequestService = {
                     timestamp: Date.now(),
                     address: service.pickUp.addressLine1,
-                    reference: service.pickUp.addressLine2,
+                    reference: service.pickUp.neighborhood,
                     location: { lat: service.pickUp.marker.coordinates[1], lng: service.pickUp.marker.coordinates[0] },
                     paymentType: service.paymentType,
                     destinationLocation: service.dropOff ? { lat: service.dropOff.marker.coordinates[1], lng: service.dropOff.marker.coordinates[0] } : undefined,
