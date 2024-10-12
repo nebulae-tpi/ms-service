@@ -1530,6 +1530,13 @@ class ClientBotLinkCQRS {
               })
             );
           }
+          else if (interactiveResp.includes("PAYMENT_")) {
+
+            this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
+            currentRequestService.paymentType = interactiveResp.replace("PAYMENT_", "")
+            currentRequestService.step = "LOCATION_SHARED";
+            //currentRequestService.reference = textResp;
+          }
           else if (interactiveResp.includes("RB_")) {
 
             const serviceToClone = interactiveResp.replace("RB_", "");
