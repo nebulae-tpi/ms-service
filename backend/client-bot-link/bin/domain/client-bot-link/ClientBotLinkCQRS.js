@@ -1634,6 +1634,7 @@ class ClientBotLinkCQRS {
           { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
           ];
           this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
+          requestClientCache[client._id] = currentRequestService;
           return of({});
         // }else {
         //   return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
@@ -1656,6 +1657,7 @@ class ClientBotLinkCQRS {
           { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
           { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
           ];
+          requestClientCache[client._id] = currentRequestService;
           this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
           return of({});
         // }else {
