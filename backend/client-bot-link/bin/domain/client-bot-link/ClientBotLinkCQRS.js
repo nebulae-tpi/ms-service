@@ -1427,9 +1427,19 @@ class ClientBotLinkCQRS {
           );
         case "REQUEST_REFERENCE":
           this.sendInteractiveButtonMessage(null, `Por favor escribe el barrio`, buttonsCancel, conversationContent.waId, businessId, false);
-          currentRequestService.step = "REQUEST_LOCATION";
+          currentRequestService.step = "REQUEST_PAYMENT_TYPE";
           currentRequestService.address = textResp;
           break;
+        case "REQUEST_PAYMENT_TYPE":
+          const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
+          { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
+          { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
+          ];
+          this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId)
+          //this.sendInteractiveButtonMessage(null, `Por favor selecciona el método de pago`, buttonsPaymentType, conversationContent.waId, businessId, false);
+          currentRequestService.step = "REQUEST_LOCATION";
+          currentRequestService.reference = textResp;
+        break;
         case "REQUEST_LOCATION":
           this.sendInteractiveButtonMessage(`Por favor envia la ubicación`, `Presiona "📎 o +", selecciona la opción "ubicación" y envía tu ubicación actual.`, buttonsCancel, conversationContent.waId, businessId);
           currentRequestService.step = "LOCATION_SHARED";
@@ -1610,7 +1620,7 @@ class ClientBotLinkCQRS {
         }
         
 
-        if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+        // if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
           currentRequestService = currentRequestService != null ? currentRequestService : {};
           currentRequestService.serviceCount = serviceCount;
           currentRequestService.serviceToRqstCount = charCount;
@@ -1625,15 +1635,15 @@ class ClientBotLinkCQRS {
           ];
           this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
           return of({});
-        }else {
-          return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
-        }
+        // }else {
+        //   return this.requestService$(serviceCount, charCount, specialCharCount, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
+        // }
       }
       else if (!isNaN(message.text.body)) {
         if ((client.satelliteInfo || {}).offerOnlyVip && vipCharCount < 1) {
           ++vipCharCount;
         }
-        if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+        // if(businessId == "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
           currentRequestService = currentRequestService != null ? currentRequestService : {};
           currentRequestService.serviceCount = serviceCount;
           currentRequestService.serviceToRqstCount = parseInt(message.text.body);
@@ -1648,9 +1658,9 @@ class ClientBotLinkCQRS {
           ];
           this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
           return of({});
-        }else {
-          return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
-        }
+        // }else {
+        //   return this.requestService$(serviceCount, parseInt(message.text.body), 0, client, conversationContent.waId, airportCharCount, message, vipCharCount, undefined, businessId);
+        // }
       }
       else if (message.text.body === "?" || message.text.body === "❓") {
         return this.infoService$(client._id, conversationContent.waId, businessId)
