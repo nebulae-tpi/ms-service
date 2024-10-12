@@ -1694,8 +1694,21 @@ class ClientBotLinkCQRS {
     }
     else if (message.order) {
       const filters = message.order.product_items ? message.order.product_items.map(pi => pi.product_retailer_id) : undefined;
-      console.log("FILTER ===> ", filters)
-      return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 0, filters, businessId);
+      currentRequestService = currentRequestService != null ? currentRequestService : {};
+      currentRequestService.serviceCount = serviceCount;
+      currentRequestService.serviceToRqstCount = 1;
+      currentRequestService.specialServiceToRqstCount = 0;
+      currentRequestService.airportCharCount = 0;
+      currentRequestService.message = message;
+      currentRequestService.vipCharCount = 0;
+      currentRequestService.filters = filters;
+      const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
+      { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
+      { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
+      ];
+      requestClientCache[client._id] = currentRequestService;
+      this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
+      return of({});
     }
     else {
       const interactiveResp = (((message.interactive || {}).button_reply || {}).id) || ((message.interactive || {}).list_reply || {}).id;
@@ -1732,6 +1745,22 @@ class ClientBotLinkCQRS {
           }
         case "rqstServiceBtn":
           if (((client || {}).location || {}).lng) {
+            currentRequestService = currentRequestService != null ? currentRequestService : {};
+            currentRequestService.serviceCount = serviceCount;
+            currentRequestService.serviceToRqstCount = 1;
+            currentRequestService.specialServiceToRqstCount = 0;
+            currentRequestService.airportCharCount = 0;
+            currentRequestService.message = message;
+            currentRequestService.vipCharCount = undefined;
+            currentRequestService.filters = undefined;
+            const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
+            { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
+            { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
+            ];
+            requestClientCache[client._id] = currentRequestService;
+            this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
+            return of({});
+            requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount, filters, businessId)
             return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, undefined, undefined, businessId)
           } else {
             return of({}).pipe(
@@ -1742,7 +1771,21 @@ class ClientBotLinkCQRS {
           }
         case "rqstServiceVipBtn":
           if (((client || {}).location || {}).lng) {
-            return this.requestService$(serviceCount, 1, 0, client, conversationContent.waId, 0, message, 1, undefined, businessId)
+            currentRequestService = currentRequestService != null ? currentRequestService : {};
+            currentRequestService.serviceCount = serviceCount;
+            currentRequestService.serviceToRqstCount = 1;
+            currentRequestService.specialServiceToRqstCount = 0;
+            currentRequestService.airportCharCount = 0;
+            currentRequestService.message = message;
+            currentRequestService.vipCharCount = 1;
+            currentRequestService.filters = undefined;
+            const listElements = [{ id: `PAYMENT_CASH`, title: `Efectivo`, description: `` }, { id: `PAYMENT_CREDIT_CARD`, title: `Tarjeta de Crédito`, description: `` },
+            { id: `PAYMENT_BANCOLOMBIA`, title: `Bancolombia`, description: `` }, { id: `PAYMENT_NEQUI`, title: `NEQUI`, description: `` },
+            { id: `PAYMENT_DAVIPLATA`, title: `DAVIPLATA`, description: `` }, { id: `cancelLastRequestedBtn`, title: `Cancelar`, description: `` }
+            ];
+            requestClientCache[client._id] = currentRequestService;
+            this.sendInteractiveListMessage("", "Por favor selecciona el método de pago", "Opciones de pago", "Opciones de pago", listElements, conversationContent.waId, businessId);
+            return of({});
           } else {
             return of({}).pipe(
               tap(() => {
