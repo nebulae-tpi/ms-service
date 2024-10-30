@@ -72,7 +72,7 @@ module.exports = {
                                 "Client",
                                 "emigateway.graphql.query.ServiceClientSatellites",
                                 { root, args, jwt: context.encodedToken },
-                                2000
+                                6000
                             )
                     ),
                     catchError(err => handleError$(err, "ServiceClientSatellites")),

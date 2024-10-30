@@ -41,13 +41,15 @@ class ClientDA {
     const collection = mongoDB.db.collection(CollectionName);
 
     const query = {};
-    if(clientText){
-      query['generalInfo.name'] = {$regex: '^'+clientText, $options: 'i'};
-    }
 
     if(businessId){
       query.businessId = businessId;
     }
+
+    if(clientText){
+      query['generalInfo.name'] = {$regex: '^'+clientText, $options: 'i'};
+    }
+
 
     if(clientId){
       query.clientId = clientId;
