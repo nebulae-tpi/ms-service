@@ -700,7 +700,7 @@ class ServiceES {
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
                     aggregateType: "Wallet",
-                    aggregateId: driver.id,
+                    aggregateId: uuidv4(),
                     data: tx,
                     user: "SYSTEM"
                 })
@@ -785,7 +785,7 @@ class ServiceES {
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
                     aggregateType: "Wallet",
-                    aggregateId: driver.id,
+                    aggregateId: uuidv4(),
                     data: tx,
                     user: "SYSTEM"
                 })
@@ -824,7 +824,7 @@ class ServiceES {
                     eventType: "WalletTransactionCommited",
                     eventTypeVersion: 1,
                     aggregateType: "Wallet",
-                    aggregateId: driver.id,
+                    aggregateId: uuidv4(),
                     data: tx,
                     user: "SYSTEM"
                 })
@@ -902,7 +902,7 @@ class ServiceES {
                                     eventType: "WalletTransactionCommited",
                                     eventTypeVersion: 1,
                                     aggregateType: "Wallet",
-                                    aggregateId: service.driver.id,
+                                    aggregateId: uuidv4(),
                                     data: tx,
                                     user: "SYSTEM"
                                 })
@@ -1018,7 +1018,7 @@ class ServiceES {
                                             eventType: "WalletTransactionCommited",
                                             eventTypeVersion: 1,
                                             aggregateType: "Wallet",
-                                            aggregateId: service.driver.id,
+                                            aggregateId: uuidv4(),
                                             data: { 
                                                 _id: Crosscutting.generateDateBasedUuid(),
                                                 businessId: service.businessId,
@@ -1057,7 +1057,7 @@ class ServiceES {
                                         eventType: "WalletTransactionCommited",
                                         eventTypeVersion: 1,
                                         aggregateType: "Wallet",
-                                        aggregateId: service.client.tipClientId,
+                                        aggregateId: uuidv4(),
                                         data: { 
                                             _id: Crosscutting.generateDateBasedUuid(),
                                             businessId: service.businessId,
@@ -1110,7 +1110,7 @@ class ServiceES {
                                         eventType: "WalletTransactionCommited",
                                         eventTypeVersion: 1,
                                         aggregateType: "Wallet",
-                                        aggregateId: service.client.tipClientId,
+                                        aggregateId: uuidv4(),
                                         data: { 
                                             _id: Crosscutting.generateDateBasedUuid(),
                                             businessId: service.businessId,

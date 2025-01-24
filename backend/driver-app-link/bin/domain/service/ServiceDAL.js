@@ -12,6 +12,8 @@ const driverAppLinkBroker = require("../../services/driver-app-link/DriverAppLin
 const jsonwebtoken = require("jsonwebtoken");
 const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
 const { ERROR_23003, ERROR_23223, ERROR_23230 } = require('../../tools/customError');
+const uuidv4 = require("uuid/v4");
+
 
 const { ServiceDA, BusinessDA } = require('./data-access');
 
@@ -196,7 +198,7 @@ class ServiceDAL {
                             }
                             return eventSourcing.eventStore.emitEvent$(ServiceDAL.buildEventSourcingEvent(
                                 'Wallet',
-                                authToken.driverId,
+                                uuidv4(),
                                 'WalletTransactionCommited',
                                 {
                                     _id: Crosscutting.generateDateBasedUuid(),

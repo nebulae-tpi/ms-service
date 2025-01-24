@@ -11,6 +11,7 @@ const eventSourcing = require("../../tools/EventSourcing")();
 
 const { ServiceDA, ShiftDA, ClientDA, DriverDA } = require('./data-access');
 const CLIENT_GATEWAY_MATERIALIZED_VIEW_TOPIC = "client-gateway-materialized-view-updates";
+const uuidv4 = require("uuid/v4");
 
 /**
  * Singleton instance
@@ -349,7 +350,7 @@ class ServiceES {
                             eventType: "WalletTransactionCommited",
                             eventTypeVersion: 1,
                             aggregateType: "Wallet",
-                            aggregateId: service.client.tipClientId,
+                            aggregateId: uuidv4(),
                             data: { 
                                 _id: Crosscutting.generateDateBasedUuid(),
                                 businessId: service.businessId,
