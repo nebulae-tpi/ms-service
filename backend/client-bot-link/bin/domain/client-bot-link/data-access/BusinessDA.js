@@ -9,18 +9,18 @@ const { map, mergeMap, tap, filter, toArray } = require("rxjs/operators");
 class BusinessDA {
 
   static start$(mongoDbInstance) {
-    return Observable.create(observer => {
-      console.log("INICIA DB!!!!!!!!")
-      if (mongoDbInstance) {
-        mongoDB = mongoDbInstance;
-        observer.next("using given mongo instance");
-      } else {
-        mongoDB = require("../../../data/MongoDB").singleton();
-        observer.next("using singleton system-wide mongo instance");
-      }
-      observer.complete();
-    });
-  }
+      return Observable.create(observer => {
+        console.log("llama create observer == ", mongoDbInstance);
+        if (mongoDbInstance) {
+          mongoDB = mongoDbInstance;
+          observer.next("using given mongo instance");
+        } else {
+          mongoDB = require("../../../data/MongoDB").singleton();
+          observer.next("using singleton system-wide mongo instance");
+        }
+        observer.complete();
+      });
+    }
 
   static getById$(businessId, projection = {}) {
     const collection = mongoDB.db.collection(CollectionName);
