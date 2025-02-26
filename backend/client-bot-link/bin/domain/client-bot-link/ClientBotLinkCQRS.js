@@ -754,6 +754,7 @@ class ClientBotLinkCQRS {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
           const airportTipEnabled = (airportCharCountVal--) > 0;
           const vipEnabled = (vipCharCountVal--) > 0;
+          
           return BusinessDA.getBusiness$(businessId).pipe(
             mergeMap(business => {
               return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, business));
