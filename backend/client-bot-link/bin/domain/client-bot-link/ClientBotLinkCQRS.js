@@ -697,7 +697,7 @@ class ClientBotLinkCQRS {
       polygon: undefined,
     };
 
-    return BusinessDA.getBusiness$(businessId).pipe(
+    return BusinessDA.getById$(businessId).pipe(
       mergeMap(business => {
         return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, business, "CHAT_CLIENT", dropOff, currentRequestService)).pipe(
           mergeMap(() => {
@@ -755,7 +755,7 @@ class ClientBotLinkCQRS {
           const airportTipEnabled = (airportCharCountVal--) > 0;
           const vipEnabled = (vipCharCountVal--) > 0;
           
-          return BusinessDA.getBusiness$(businessId).pipe(
+          return BusinessDA.getById$(businessId).pipe(
             mergeMap(business => {
               return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, business));
             })
