@@ -252,7 +252,7 @@ class ClientBotLinkCQRS {
 
   }
 
-  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId, sourceChannel = "CHAT_SATELITE", dropOff, currentRequestService) {
+  buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, business, sourceChannel = "CHAT_SATELITE", dropOff, currentRequestService) {
     const pickUp = {
       marker: { type: "Point", coordinates: [client.location.lng, client.location.lat] },
       addressLine1: client.generalInfo.addressLine1,
@@ -275,7 +275,7 @@ class ClientBotLinkCQRS {
         pickUp,
         client: {
           id: client._id,
-          businessId: businessId,
+          businessId: business._id,
           username: "N/A",
           fullname: client.generalInfo.name,
           tipClientId: client.associatedClientId,
@@ -287,8 +287,9 @@ class ClientBotLinkCQRS {
           offerMinDistance: (client.satelliteInfo || {}).offerMinDistance,
           offerMaxDistance: (client.satelliteInfo || {}).offerMaxDistance
         },
+        offer: {},
         _id,
-        businessId: businessId,
+        businessId: business._id,
         timestamp: Date.now(),
         requestedFeatures: filters ? filters : (acEnabled) ? ["AC"] : vipEnabled ? ["VIP"] : airportTipEnabled ? ["VIP", "AC"] : undefined,
 
@@ -312,6 +313,19 @@ class ClientBotLinkCQRS {
 
       }
     };
+    if (business.attributes && business.attributes.length > 0) { 
+      requestObj.data.offer = business.attributes
+        .filter(attr => {
+          return attr && attr.key.substr(0, 5).toUpperCase() === "OFFER"
+        })
+        .map(attr => {
+        const obj = {};
+        obj[attr.key]=attr.value;
+        return obj;
+      }).reduce((acc, val) => {
+        return {...acc, ...val}
+      },{});
+    }
     return new Event(requestObj);
   }
 
@@ -683,25 +697,29 @@ class ClientBotLinkCQRS {
       polygon: undefined,
     };
 
-    return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, businessId, "CHAT_CLIENT", dropOff, currentRequestService)).pipe(
-      mergeMap(() => {
-        if (!((client.lastServices) || []).some(l => l.address == currentRequestService.address)) {
-          return ClientDA.appendLastRequestedService$(client._id, { ...currentRequestService, id: uuidv4() });
-        }
-        else {
-          return of({})
-        }
-      }),
-      tap(() => {
-
-        if (currentRequestService.verificationCode) {
-          this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado. Tu código de verificación de servicio es: ${currentRequestService.verificationCode}`, waId, businessId);
-        } else {
-          this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId);
-        }
-        currentRequestService = undefined;
-      })
-    )
+    return BusinessDA.getBusiness$(businessId).pipe(
+      mergeMap(business => {
+        return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, business, "CHAT_CLIENT", dropOff, currentRequestService)).pipe(
+          mergeMap(() => {
+            if (!((client.lastServices) || []).some(l => l.address == currentRequestService.address)) {
+              return ClientDA.appendLastRequestedService$(client._id, { ...currentRequestService, id: uuidv4() });
+            }
+            else {
+              return of({})
+            }
+          }),
+          tap(() => {
+    
+            if (currentRequestService.verificationCode) {
+              this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado. Tu código de verificación de servicio es: ${currentRequestService.verificationCode}`, waId, businessId);
+            } else {
+              this.sendTextMessage(`Se ha creado la solicitud exitosamente, en un momento se te enviará la información del taxi asignado`, waId, businessId);
+            }
+            currentRequestService = undefined;
+          })
+        )
+      }))
+    
   }
 
   requestService$(serviceCount, serviceToRqstCount, specialServiceToRqstCount, client, waId, airportCharCount, message, vipCharCount, filters, businessId) {
@@ -736,7 +754,12 @@ class ClientBotLinkCQRS {
           const acEnabled = (specialServiceToRqstCountVal--) > 0;
           const airportTipEnabled = (airportCharCountVal--) > 0;
           const vipEnabled = (vipCharCountVal--) > 0;
-          return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, businessId));
+          return BusinessDA.getBusiness$(businessId).pipe(
+            mergeMap(business => {
+              return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, airportTipEnabled, vipEnabled, filters, business));
+            })
+          )
+           
         }),
         toArray(),
         tap(() => {
