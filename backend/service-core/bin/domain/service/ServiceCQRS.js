@@ -190,6 +190,7 @@ class ServiceCQRS {
           fullname: shift.driver.fullname,
           username: shift.driver.username,
           documentId: shift.driver.documentId,
+          phone: shift.driver.phone,
           id: shift.driver.id
         },
       })),
