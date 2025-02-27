@@ -46,8 +46,8 @@ class ServiceES {
     return ServiceDA.getService$(serviceEvent.aid).pipe(
       tap(service => {
         if (service.client.phone) {
-          console.log("service ASSIGNED ===> ",serviceEvent.aid);
-          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate}`, `57${service.client.phone}`, service.businessId)
+          const driverPhoneMessage = service.driver.phone && service.request.sourceChannel == "CHAT_CLIENT" ? `\n\n📱Teléfono: 57${service.driver.phone}\n💬WhatsApp: https://wa.me/57${service.driver.phone}` : "";
+          this.sendTextMessage(`${service.driver.fullname} se dirige para la  dirección ${service.pickUp.addressLine1} en el vehículo de placas ${service.vehicle.licensePlate} ${driverPhoneMessage}`, `57${service.client.phone}`, service.businessId)
         }
       })
     );
