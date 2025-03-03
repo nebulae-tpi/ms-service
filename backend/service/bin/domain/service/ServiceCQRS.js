@@ -53,7 +53,7 @@ class ServiceCQRS {
         if(service.client){
           return ClientDA.getClient$(service.client.tipClientId || service.client.id).pipe(
             map(client => {
-              return {...service, client: {...service.client, phoneNumber: (client.generalInfo || {}).phone}}
+              return {...service, client: {...service.client, phoneNumber: ((client || {}).generalInfo || {}).phone}}
             })
           )
         }else {
