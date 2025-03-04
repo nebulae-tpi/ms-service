@@ -659,7 +659,7 @@ class ServiceES {
                         }
                     }
                 )
-                ),
+                ), 
                 mergeMap(({ dbService, formattedService }) => {
                     return forkJoin(
                         //Send ServiceAssigned to the winner
