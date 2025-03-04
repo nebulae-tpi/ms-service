@@ -640,6 +640,7 @@ class ServiceES {
                         "driver": 1, "businessId": 1, "shiftId": 1, "paymentType":1, "request": 1
                     })
                 ),
+                tap(service => console.log(`ServiceES: handleServiceAssigned: ${service.paymentType} `)),
                 mergeMap(dbService => forkJoin(
                     of(dbService),
                     this.payClientAgreement$(dbService, timestamp, aid, av),
