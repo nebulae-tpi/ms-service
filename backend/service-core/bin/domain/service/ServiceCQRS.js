@@ -11,7 +11,7 @@ const { Event } = require("@nebulae/event-store");
 const eventSourcing = require("../../tools/EventSourcing")();
 const broker = require("../../tools/broker/BrokerFactory")();
 const GraphqlResponseTools = require('../../tools/GraphqlResponseTools');
-const Crosscutting = require('../../tools/Crosscutting');
+const Crosscutting = require('../../tools/Crosscutting'); 
 const {
   CustomError,
   DefaultError,

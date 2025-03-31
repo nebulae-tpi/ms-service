@@ -120,14 +120,19 @@ class ClientDA {
    * @param {*} id  Client ID
    * @param {*} ClientSatelliteInfo  New general information of the Client
    */
-   static updateClientSatelliteId$(id, satelliteId) {
+   static updateClientSatelliteId$(id, satelliteId, businessId) {
     const collection = mongoDB.db.collection(CollectionName);
-
+    const update = {
+      satelliteId: satelliteId,
+    };
+    if(businessId){
+      update.businessId = businessId;
+    }
     return defer(()=>
         collection.findOneAndUpdate(
           { _id: id },
           {
-            $set: { satelliteId: satelliteId }
+            $set: update
           },{
             returnOriginal: false
           }
