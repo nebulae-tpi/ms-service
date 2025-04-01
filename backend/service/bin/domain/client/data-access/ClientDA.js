@@ -128,6 +128,8 @@ class ClientDA {
     if(businessId){
       update.businessId = businessId;
     }
+    console.log("CliendId updated ===>", id);
+    console.log("Update client ==>", update);
     return defer(()=>
         collection.findOneAndUpdate(
           { _id: id },
