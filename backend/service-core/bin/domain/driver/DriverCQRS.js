@@ -53,7 +53,7 @@ class DriverCQRS {
     const { driverId } = authToken;
 
     console.log(`DriverCQRS.queryDriverAssignedVehicles RQST: ${JSON.stringify({driverId})}`); //DEBUG: DELETE LINE
-
+ 
     return RoleValidator.checkPermissions$(authToken.realm_access.roles, "service-core.DriverCQRS", "queryDriverAssignedVehicles", PERMISSION_DENIED, ["DRIVER"]).pipe(
       mergeMapTo(DriverDA.findById$(driverId, { assignedVehicles: 1 })),
       first( v => v, [] ),
