@@ -48,9 +48,9 @@ class ShiftDA {
     if(ignoredIds && ignoredIds.length> 0){
       query[`_id`] = {$nin: ignoredIds};
     }
-    if(businessId === "2af56175-227e-40e7-97ab-84e8fa9e12ce"){
-      console.log("QUERY ===> ", query)
-    }
+    if(businessId === "7d95f8ef-4c54-466a-8af9-6dd197dd920a"){
+      console.log("Consultando turnos: ", query);
+  } 
 
     return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
       map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),

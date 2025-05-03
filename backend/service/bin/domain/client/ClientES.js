@@ -34,7 +34,6 @@ class ClientES {
     }
 
     handleClientSatelliteIdUpdated$({ aid, data}){
-        console.log("ClientES.handleClientSatelliteIdUpdated$", data);
         return ClientDA.updateClientSatelliteId$(aid, data.satelliteId, data.businessId);
     }
 
