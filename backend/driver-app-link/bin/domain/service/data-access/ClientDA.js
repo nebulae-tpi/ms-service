@@ -33,7 +33,7 @@ class ClientDA {
   }
 
   static getClientByDriverCode$(driverCode) {
-    const collection = mongoDB.db.collection(COLLECTION_NAME);
+    const collection = mongoDB.db.collection(CollectionName);
 
     const query = {
       driverCode
