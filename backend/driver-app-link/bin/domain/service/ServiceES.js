@@ -642,10 +642,28 @@ class ServiceES {
                 ),
                 mergeMap(dbService => forkJoin(
                     of(dbService),
-                    this.payClientAgreement$(dbService, timestamp, aid, av),
+                    this.payClientAgreement$(dbService, timestamp, aid, av).pipe(
+                        tap(() => {
+                            if(dbService.driver.id == "5ab3a7c5-1153-4c15-8dca-4dfb3bf1b64b"){
+                                console.log("PASA payClientAgreement IVAN");
+                            }
+                        })
+                    ),
                     //this.payPlatformClientAgreement$(dbService, timestamp),
-                    this.payAppClientAgreement$(dbService, timestamp, aid, av),
-                    this.generatePayPerServiceTransaction$(dbService, timestamp, aid, av)
+                    this.payAppClientAgreement$(dbService, timestamp, aid, av).pipe(
+                        tap(() => {
+                            if(dbService.driver.id == "5ab3a7c5-1153-4c15-8dca-4dfb3bf1b64b"){
+                                console.log("PASA payAppClientAgreement IVAN");
+                            }
+                        })
+                    ),
+                    this.generatePayPerServiceTransaction$(dbService, timestamp, aid, av).pipe(
+                        tap(() => {
+                            if(dbService.driver.id == "5ab3a7c5-1153-4c15-8dca-4dfb3bf1b64b"){
+                                console.log("PASA generatePayPerServiceTransaction IVAN");
+                            }
+                        })
+                    )
                 )),
                 map(([dbService, a]) =>
                 (
@@ -661,6 +679,9 @@ class ServiceES {
                 )
                 ), 
                 mergeMap(({ dbService, formattedService }) => {
+                    if(dbService.driver.id == "5ab3a7c5-1153-4c15-8dca-4dfb3bf1b64b"){
+                        console.log("Envia notificacion IVAN ===> "+ `${dbService.businessId}/driver-app/service/${dbService.driver.username}`)
+                    }
                     return forkJoin(
                         //Send ServiceAssigned to the winner
                         driverAppLinkBroker.sendServiceEventToDrivers$(
