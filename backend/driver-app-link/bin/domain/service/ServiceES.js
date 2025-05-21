@@ -494,6 +494,9 @@ class ServiceES {
 
                 return driverMainPocketAmount >= (clientTip + parseInt(process.env.APP_DRIVER_AGREEMENT) + payPerServicePrice);
             } else {
+                if(((service || {}).request || {}).sourceChannel === "APP_CLIENT" && service.businessId === "ec600f7f-1b57-4c47-af77-c6750a8649bd"){
+                    console.log("SUMA ===> ", (clientTip + payPerServicePrice), " Validacion: ", ((clientTip + payPerServicePrice) > 0 ? driverMainPocketAmount >= (clientTip + payPerServicePrice) : true))
+                }
                 return (clientTip + payPerServicePrice) > 0 ? driverMainPocketAmount >= (clientTip + payPerServicePrice) : true;
             }
 
