@@ -76,6 +76,8 @@ type ServiceServiceState {
   location: ServiceCoordinate
   "Notes"
   notes: String
+  "User who made the state change"
+  user: String
 }
 
 type ServiceClientSatellite {

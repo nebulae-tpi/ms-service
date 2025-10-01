@@ -63,6 +63,7 @@ export const ServiceServiceFieldsFragment = gql`
           timestamp
         }
         notes
+        user
       }
       location {
         lat
@@ -159,6 +160,7 @@ export const ServiceService = gql`
           timestamp
         }
         notes
+        user
       }
       location {
         lat
@@ -252,6 +254,7 @@ export const ServiceServices = gql`
           timestamp
         }
         notes
+        user
       }
       location {
         lat
@@ -352,6 +355,7 @@ export const ServiceServiceUpdatedSubscription = gql`
           timestamp
         }
         notes
+        user
       }
       location {
         lat

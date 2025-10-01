@@ -66,6 +66,7 @@ export const locale = {
         'DATE': 'Date',
         'STATE': 'State',
         'STATES': 'Service State',
+        'CANCELLED_BY': 'Cancelled by',
         'CLIENT_FULLNAME': 'Client Name',
         'CLIENT_USERNAME': 'Client Username',
         'CLIENT_TIP': 'Client Aggremeent Amount',
