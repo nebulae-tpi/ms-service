@@ -699,7 +699,15 @@ class ClientBotLinkCQRS {
 
     return BusinessDA.getById$(businessId).pipe(
       mergeMap(business => {
-        return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, (currentRequestService.filters || {}).AC == true, false, false, undefined, business, "CHAT_CLIENT", dropOff, currentRequestService)).pipe(
+        // Determinar si AC está habilitado basado en el tipo de filtros
+        const acEnabled = Array.isArray(currentRequestService.filters) 
+          ? currentRequestService.filters.includes("AC") 
+          : (currentRequestService.filters || {}).AC == true;
+        // Si filters es un array, usarlo directamente; si es objeto con AC, convertir a array
+        const filtersToSend = Array.isArray(currentRequestService.filters) 
+          ? currentRequestService.filters 
+          : acEnabled ? ["AC"] : undefined;
+        return eventSourcing.eventStore.emitEvent$(this.buildServiceRequestedEsEvent(client, acEnabled, false, false, filtersToSend, business, "CHAT_CLIENT", dropOff, currentRequestService)).pipe(
           mergeMap(() => {
             if (!((client.lastServices) || []).some(l => l.address == currentRequestService.address)) {
               return ClientDA.appendLastRequestedService$(client._id, { ...currentRequestService, id: uuidv4() });
@@ -1057,6 +1065,15 @@ class ClientBotLinkCQRS {
           break;
       }
 
+    } else if (message.order) {
+      const filters = message.order.product_items ? message.order.product_items.map(pi => pi.product_retailer_id) : undefined;
+      currentRequestService = currentRequestService != null ? currentRequestService : {};
+      currentRequestService.step = "REQUEST_REFERENCE";
+      currentRequestService.timestamp = Date.now();
+      currentRequestService.filters = filters;
+      this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
+      requestClientCache[client._id] = currentRequestService;
+      return of({});
     } else if (interactiveResp) {
       if (currentRequestService != null && (interactiveResp != "cancelLastRequestedBtn" || interactiveResp != "requestWithoutDestinationBtn")) {
 
@@ -1474,6 +1491,15 @@ class ClientBotLinkCQRS {
           break;
       }
 
+    } else if (message.order) {
+      const filters = message.order.product_items ? message.order.product_items.map(pi => pi.product_retailer_id) : undefined;
+      currentRequestService = currentRequestService != null ? currentRequestService : {};
+      currentRequestService.step = "REQUEST_REFERENCE";
+      currentRequestService.timestamp = Date.now();
+      currentRequestService.filters = filters;
+      this.sendInteractiveButtonMessage(null, `Por favor escribe la dirección o selecciona la opcion "Últimos solicitados" para seleccionar una ubicación de los últimos tres servicios solicitados`, buttonsRequest, conversationContent.waId, businessId, false);
+      requestClientCache[client._id] = currentRequestService;
+      return of({});
     } else if (interactiveResp) {
       if (currentRequestService != null && interactiveResp != "cancelLastRequestedBtn") {
 
