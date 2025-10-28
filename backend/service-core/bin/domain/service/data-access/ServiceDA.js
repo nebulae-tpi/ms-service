@@ -4,7 +4,7 @@ require('datejs');
 let mongoDB = undefined;
 const CollectionName = "Service";
 const { ERROR_23104 } = require("../../../tools/customError");
-const { map, mergeMap, first, filter, catchError, tap } = require("rxjs/operators");
+const { map, mergeMap, first, filter, catchError, tap, toArray } = require("rxjs/operators");
 const { of, Observable, defer, throwError, range } = require("rxjs");
 
 class ServiceDA {
@@ -362,6 +362,22 @@ class ServiceDA {
       mergeMap(collection => defer(() => collection.findOne(query, { projection }))),
       filter(s => s),
       first(service => service, undefined)
+    );
+  }
+
+  /**
+   * Finds open services assigned to a vehicle (to prevent assignment conflicts)
+   */
+  static findOpenAssignedServicesByVehicle$(vehicleLicensePlate, projection = undefined) {
+    const today = new Date(new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    const explorePastMonth = today.getDate() <= 1;
+    const query = { "state": { "$in": ["ASSIGNED", "ARRIVED", "ON_BOARD"] }, "vehicle.licensePlate": vehicleLicensePlate };
+    return range(explorePastMonth ? -1 : 0, explorePastMonth ? 2 : 1).pipe(
+      map(monthsToAdd => mongoDB.getHistoricalDb(undefined, monthsToAdd)),
+      map(db => db.collection(CollectionName)),
+      mergeMap(collection => defer(() => mongoDB.extractAllFromMongoCursor$(collection.find(query, { projection })))),
+      toArray(),
+      first(services => services, [])
     );
   }
 

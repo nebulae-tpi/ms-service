@@ -99,6 +99,7 @@ module.exports = {
   ERROR_23227: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23227, 'nombre de conductor invalido'),
   ERROR_23228: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23228, 'turno no encontrado'),
   ERROR_23229: new CustomError('ModifyServiceStateError', `ModifyServicesState`, 23229, 'turno se encuentra cerrado'),
+  ERROR_23230: new CustomError('ModifyServiceStateError', `AssignService`, 23230, 'No se puede asignar el servicio: el vehículo ya tiene un servicio activo'),
 
 
 
