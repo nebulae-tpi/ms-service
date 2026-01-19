@@ -8,6 +8,9 @@
                   <mat-icon mat-list-icon>arrow_right</mat-icon>
                   <h4 mat-line>{{'SERVICE.DETAILS.STATE' | translate}}: {{'SERVICE.SERVICE_STATES.' +stateChange.state | translate}}</h4>
                   <p mat-line> {{stateChange.timestamp | date: "dd/MM/y HH:mm:ss"}} </p>
+                  <p mat-line *ngIf="stateChange?.user && (stateChange.state === 'CANCELLED_CLIENT' || stateChange.state === 'CANCELLED_OPERATOR' || stateChange.state === 'CANCELLED_DRIVER')"> 
+                    {{'SERVICE.DETAILS.CANCELLED_BY' | translate}}: {{stateChange?.user}} 
+                  </p>
                   <p mat-line> {{stateChange.notes}} </p>
                   <mat-divider></mat-divider>
               </mat-list-item>

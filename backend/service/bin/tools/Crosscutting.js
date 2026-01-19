@@ -147,6 +147,7 @@ class Crosscutting{
             timestamp: stateChange.timestamp,
             location: this.buildCoordinate(stateChange.location),
             notes: stateChange.notes,
+            user: stateChange.user,
           });
         });
         return stateChangesArray;

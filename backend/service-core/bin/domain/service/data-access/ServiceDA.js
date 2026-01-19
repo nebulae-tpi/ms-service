@@ -234,7 +234,7 @@ class ServiceDA {
     const update = {
       $set: { state, lastModificationTimestamp: timestamp, lastStateChangeTimestamp: Date.now(), cancelUsername: user },
       $push: {
-        "stateChanges": { state, timestamp, location, reason, notes },
+        "stateChanges": { state, timestamp, location, reason, notes, user },
       }
     };
     if (location && location.coordinates) {

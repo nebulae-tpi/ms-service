@@ -65,6 +65,7 @@ export const locale = {
         'STATE': 'Estado',
         'CLIENT_PHONE_NUMBER': "Número de Teléfono",
         'STATES': 'Estados del Servicio',
+        'CANCELLED_BY': 'Cancelado por',
         'CLIENT_FULLNAME': 'Nombre Cliente',
         'CLIENT_USERNAME': 'Nombre de Usuario',
         'CLIENT_TIP': 'Valor Acuerdo Empresarial',
