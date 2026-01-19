@@ -19,7 +19,7 @@ const {
   PERMISSION_DENIED,
   ERROR_23100, ERROR_23101, ERROR_23102, ERROR_23103, ERROR_23104, ERROR_23105,
   ERROR_23200, ERROR_23201, ERROR_23202, ERROR_23203, ERROR_23204, ERROR_23205, ERROR_23206, ERROR_23207, ERROR_23208, ERROR_23209, ERROR_23210, ERROR_23211,
-  ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229,
+  ERROR_23220, ERROR_23221, ERROR_23222, ERROR_23223, ERROR_23224, ERROR_23225, ERROR_23226, ERROR_23227, ERROR_23228, ERROR_23229, ERROR_23230,
 } = require("../../tools/customError");
 
 const { ShiftDA, ServiceDA } = require('./data-access')
@@ -349,8 +349,21 @@ class ServiceCQRS {
       mapTo(args),
       tap(request => this.validateServiceAssignRequestInput(request)),
       mergeMap(request => ServiceDA.findById$(request.id, { _id: 1 }).pipe(first(v => v, undefined), map(service => ({ service, request })))),
-      tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// shift does not exists
-      tap(({ service, request }) => { if (!service.open) throw ERROR_23224; }),// shift is already closed
+      tap(({ service, request }) => { if (!service) throw ERROR_23223; }),// service does not exists
+      tap(({ service, request }) => { if (!service.open) throw ERROR_23224; }),// service is already closed
+
+      // Validate that the vehicle doesn't have another active service
+      mergeMap(({ service, request }) => 
+        ServiceDA.findOpenAssignedServicesByVehicle$(request.vehicle.licensePlate, { _id: 1, state: 1, timestamp: 1 }).pipe(
+          map(openServices => ({ service, request, openServices }))
+        )
+      ),
+      tap(({ openServices, request }) => { 
+        if (openServices && openServices.length > 0) {
+          ServiceCQRS.log(`Vehicle ${request.vehicle.licensePlate} already has ${openServices.length} active service(s): ${JSON.stringify(openServices.map(s => ({ id: s._id, state: s.state })))}`);
+          throw ERROR_23230; 
+        }
+      }),
 
       // mergeMap(({ service }) => forkJoin(
       //   iif( () =>  args.shiftId )
