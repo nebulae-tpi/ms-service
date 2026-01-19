@@ -5,7 +5,7 @@ type IOECommandAck{
     accepted: Boolean
 }
 
-
+ 
 "Service info"
 type IOEService{
     "Service Identifier"

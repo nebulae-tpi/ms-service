@@ -21,7 +21,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import { MapRef } from './map-entities/agmMapRef';
 import { MarkerRef, VehiclePoint, MARKER_REF_ORIGINAL_INFO_WINDOW_CONTENT } from './map-entities/markerRef';
-
+ 
 ////////// RXJS ///////////
 import {
   map,

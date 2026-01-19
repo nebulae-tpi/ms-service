@@ -4,7 +4,7 @@ type CommandResponse {
   "Response message"
   message: String
 }
-
+ 
 "Coordinates"
 type ServiceCoordinate {
    "Latitude"

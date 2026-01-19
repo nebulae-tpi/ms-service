@@ -104,7 +104,7 @@ const DriverDA = require("./data-access/DriverDA");
  * Singleton instance
  */
 let instance;
-
+ 
 class ClientBotLinkCQRS {
 
   constructor() {

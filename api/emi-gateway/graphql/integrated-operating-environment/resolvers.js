@@ -7,7 +7,7 @@ const { of, Observable, bindNodeCallback } = require('rxjs');
 const { map, tap, mergeMap, switchMapTo } = require('rxjs/operators');
 const { ApolloError } = require("apollo-server");
 
-
+ 
 const broker = require("../../broker/BrokerFactory")();
 const RoleValidator = require('../../tools/RoleValidator');
 

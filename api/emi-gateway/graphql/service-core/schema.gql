@@ -5,7 +5,7 @@ type ServiceCoreCommandAck{
     accepted: Boolean
 }
 
-
+ 
 "Service info"
 type ServiceCoreService{
     "Service Identifier"

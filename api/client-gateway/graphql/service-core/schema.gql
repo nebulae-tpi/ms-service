@@ -8,7 +8,7 @@ type ChatMessage {
    predefinedMessageId: Int
    textMessage: String
 }
-
+ 
 "Vehicle info"
 type Vehicle {
    "License plate"
