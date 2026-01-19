@@ -14,7 +14,7 @@ type ServiceCoordinate {
    "Timestamp of the coordinate"
    timestamp: BigInt
 }
-
+ 
 "Service Location info"
 type ServiceServiceLocation {
   "Accurate location, Exact marker point: Lat,Lng"

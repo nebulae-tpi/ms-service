@@ -44,5 +44,5 @@ const routes: Routes = [
   entryComponents: [DialogComponent],
   providers: [ ServiceService, ServiceListService, ServiceDetailService, DatePipe]
 })
-
+ 
 export class ServiceModule {}
