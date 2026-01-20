@@ -55,15 +55,6 @@ spec:
               cpu: 50m
               memory: 100Mi
   volumeClaimTemplates:
-  #- metadata:
-  #    name: mongo-persistent-storage
-  #    annotations:
-  #      volume.beta.kubernetes.io/storage-class: "fast"
-  #  spec:
-  #    accessModes: [ "ReadWriteOnce" ]
-  #    resources:
-  #      requests:
-  #        storage: 32Gi
   - metadata:
       name: mongo-persistent-storage2
     spec:

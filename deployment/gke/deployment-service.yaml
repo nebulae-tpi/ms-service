@@ -1,4 +1,4 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: service
@@ -13,7 +13,7 @@ spec:
         app: service
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.service:1.0.69
+      - image: IMAGE_NAMESPACE/IMAGE_NAME:IMAGE_TAG
         name: service
         volumeMounts:
         - name: google-application-credentials

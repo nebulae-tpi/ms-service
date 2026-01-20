@@ -1,4 +1,4 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: driver-app-link
@@ -13,7 +13,7 @@ spec:
         app: driver-app-link
     spec:      
       containers:
-      - image: DOCKERHUB/service.backend.driverapplink:2.10.139 # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK # DRIVER-LINK 
+      - image: IMAGE_NAMESPACE/IMAGE_NAME:IMAGE_TAG
         name: driver-app-link
         volumeMounts:
         - name: google-application-credentials
@@ -49,7 +49,6 @@ spec:
             configMapKeyRef:
               name: keycloak-jwt-public-key
               key: jwt_public_key
-          # value: -----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyGMYfhPX7A5kAaBh9smoyDhj7Ilv0YfsPygnkEUDu44teqPzZhNjoLnAyDED3J7AhGJpOHlSzfC+7jrXXbUVczTP7vhH1pa1RXX4TIhzqo5R9NNKhREK39s6gezsP6SbCfu1XvaT1TVPEPBHho8q3qyICWFtoWTtx1tkk99jFz6zFFeIU2sTVAuf9+q1bawuHY42yU66/iaBP3zEtqLjtl7OO9z8wnIlaHW8zo20taFPeQy5xbmUaVUfEwQ6zoJCcSU2W79r2gFPWSfsXCJ07nfZIl0aWnOV7tRJLkJWsOL6EgFIh3P2v9d/SmLEVpje7kiibVUFqMg7ipRrruMzdwIDAQAB\n-----END PUBLIC KEY-----
         # API - EMI-GATEWAY CONFIG
         - name: EMI-GATEWAY_REPLIES_TOPIC_SUBSCRIPTION
           value: emi-gateway-replies-topic-mbe-driver-app-link
@@ -112,15 +111,9 @@ spec:
           value: "3000"
         - name: APP_DRIVER_AGREEMENT
           value: "1000"
-        # - name: SERVICE_OFFER_EXTENDED_DISTANCE_HOURS
-        #   value: "0_1_2_3_4_21_22_23"
-        # - name: SERVICE_OFFER_EXTENDED_DISTANCE
-        #   value: "2000"
         - name: INCOMING_SHIFT_MSG_TOPIC
-          # value: "4ab03a09-9e34-40fe-9102-25cc6b5b2176/driver-app/shift/server"
           value: "$share/server-dal/+/driver-app/shift/server"
         - name: INCOMING_SERVICE_MSG_TOPIC
-          # value: "4ab03a09-9e34-40fe-9102-25cc6b5b2176/driver-app/service/server"
           value: "$share/server-dal/+/driver-app/service/server"
         
       volumes:
